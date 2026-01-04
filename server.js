@@ -1,27 +1,27 @@
 import express from "express";
 import crypto from "crypto";
-import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BOT_TOKEN = process.env.BOT_TOKEN;
+const MAIN_ADMIN_ID = String(process.env.MAIN_ADMIN_ID);
+
+// ES modules fix
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(express.static("public"));
 
-const DB_PATH = "./db/users.json";
-
-/* ===== helpers ===== */
-
-function loadDB() {
-  return JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
-}
-
-function saveDB(data) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
-}
-
+// 🔐 Проверка Telegram initData
 function checkTelegramAuth(initData) {
+  const secret = crypto
+    .createHash("sha256")
+    .update(BOT_TOKEN)
+    .digest();
+
   const params = new URLSearchParams(initData);
   const hash = params.get("hash");
   params.delete("hash");
@@ -31,11 +31,6 @@ function checkTelegramAuth(initData) {
     .map(([k, v]) => `${k}=${v}`)
     .join("\n");
 
-  const secret = crypto
-    .createHash("sha256")
-    .update(BOT_TOKEN)
-    .digest();
-
   const hmac = crypto
     .createHmac("sha256", secret)
     .update(dataCheckString)
@@ -44,40 +39,38 @@ function checkTelegramAuth(initData) {
   return hmac === hash;
 }
 
-/* ===== API ===== */
-
-app.post("/api/profile", (req, res) => {
+// 🔐 AUTH
+app.post("/api/auth", (req, res) => {
   const { initData } = req.body;
-  if (!initData) return res.json({ ok: false });
+  if (!initData) return res.status(400).json({ ok: false });
 
-  if (!checkTelegramAuth(initData)) {
-    return res.json({ ok: false });
-  }
+  const valid = checkTelegramAuth(initData);
+  if (!valid) return res.status(403).json({ ok: false });
 
   const params = new URLSearchParams(initData);
   const user = JSON.parse(params.get("user"));
 
-  const db = loadDB();
-
-  if (!db[user.id]) {
-    db[user.id] = {
-      id: user.id,
-      username: user.username || null,
-      role: "user",
-      shards: 50,
-      subscription: {
-        type: "free",
-        until: null
-      }
-    };
-    saveDB(db);
-  }
-
-  res.json({ ok: true, profile: db[user.id] });
+  res.json({ ok: true, user });
 });
 
-app.get("/health", (_, res) => res.send("OK"));
+// 👤 ПРОСТО ВОЗВРАТ ЮЗЕРА (БЕЗ БД)
+app.post("/api/me", (req, res) => {
+  const { user } = req.body;
 
-app.listen(PORT, () =>
-  console.log("Server running on", PORT)
-);
+  res.json({
+    id: user.id,
+    username: user.username,
+    balance: 50,
+    sub: "free",
+    isMainAdmin: String(user.id) === MAIN_ADMIN_ID
+  });
+});
+
+// fallback
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.listen(PORT, () => {
+  console.log("✅ Server running on port", PORT);
+});
