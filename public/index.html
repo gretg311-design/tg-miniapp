@@ -2,27 +2,68 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Mini App</title>
+  <title>Anime AI RP</title>
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      background: #0b0b0b;
+      color: #00ff99;
+      font-family: monospace;
+      padding: 20px;
+    }
+    pre {
+      background: #111;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Mini App OK</h1>
+<h3>🔐 Проверка Telegram…</h3>
 
-  <button id="btn">Init</button>
+<script>
+  if (!window.Telegram || !window.Telegram.WebApp) {
+    document.body.innerHTML = "<h3>❌ Откройте мини-приложение в Telegram</h3>";
+    throw new Error("Not in Telegram");
+  }
 
-  <pre id="out"></pre>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
 
-  <script>
-    document.getElementById("btn").onclick = async () => {
-      const r = await fetch("/api/init", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ test: true })
-      });
+  const initData = tg.initData;
 
-      const data = await r.json();
-      document.getElementById("out").textContent =
-        JSON.stringify(data, null, 2);
-    };
-  </script>
+  fetch("/api/init", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ initData })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.ok) {
+        document.body.innerHTML += "<pre>❌ Ошибка проверки Telegram</pre>";
+        return;
+      }
+
+      document.body.innerHTML += `
+<pre>
+✅ Проверка пройдена
+
+Telegram ID: ${data.user.id}
+Имя: ${data.user.first_name}
+Username: @${data.user.username || "—"}
+Premium: ${data.user.is_premium ? "YES" : "NO"}
+</pre>
+`;
+    })
+    .catch(err => {
+      document.body.innerHTML += "<pre>❌ " + err + "</pre>";
+    });
+</script>
+
 </body>
 </html>
