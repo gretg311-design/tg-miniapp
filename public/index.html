@@ -3,42 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <title>Anime AI 18+</title>
-
-  <!-- 🔥 ВОТ ЭТОГО НЕ ХВАТАЛО -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      background: black;
+      color: #00ff88;
+      font-family: monospace;
+      padding: 20px;
+    }
+  </style>
 </head>
 
-<body style="background:black;color:#00ff88;font-family:monospace">
+<body>
 
 <h3>🔐 Проверка пользователя...</h3>
+<pre id="out">Загрузка...</pre>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.ready();
 
+const out = document.getElementById("out");
+
+if (!tg.initData || tg.initData.length === 0) {
+  out.textContent = "❌ Нет initData. Открой мини-апп из Telegram.";
+  throw new Error("NO_INIT_DATA");
+}
+
 fetch("/api/auth", {
   method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ initData: tg.initData })
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    initData: tg.initData
+  })
 })
-.then(r => r.json())
+.then(res => res.json())
 .then(data => {
-  if (!data.ok) {
-    document.body.innerHTML += "<pre>❌ Ошибка проверки</pre>";
+  if (data.error) {
+    out.textContent = "❌ Ошибка: " + data.error;
     return;
   }
 
-  document.body.innerHTML += `
-<pre>
-✅ Пользователь подтверждён
-
-ID: ${data.user.id}
-Username: @${data.user.username || "—"}
-Premium: ${data.user.is_premium ? "YES" : "NO"}
-</pre>`;
+  out.textContent =
+    "✅ Пользователь подтверждён\n\n" +
+    "ID: " + data.user.id + "\n" +
+    "Username: @" + (data.user.username || "—") + "\n" +
+    "Premium: " + (data.user.is_premium ? "YES" : "NO");
 })
-.catch(e => {
-  document.body.innerHTML += "<pre>❌ " + e + "</pre>";
+.catch(err => {
+  out.textContent = "❌ JS ошибка: " + err.message;
 });
 </script>
 
