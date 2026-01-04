@@ -38,22 +38,22 @@ function checkTelegramAuth(initData) {
 
 app.post("/api/auth", (req, res) => {
   const { initData } = req.body;
-  if (!initData) return res.status(400).json({ ok: false });
+  if (!initData) return res.json({ ok:false });
 
-  if (!checkTelegramAuth(initData)) {
-    return res.status(403).json({ ok: false });
-  }
+  const valid = checkTelegramAuth(initData);
+  if (!valid) return res.json({ ok:false });
 
-  const params = new URLSearchParams(initData);
-  const user = JSON.parse(params.get("user"));
+  const user = JSON.parse(
+    new URLSearchParams(initData).get("user")
+  );
 
-  res.json({ ok: true, user });
+  res.json({ ok:true, user });
 });
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/index.html"));
-});
+app.get("*", (_, res) =>
+  res.sendFile(path.join(__dirname, "public/index.html"))
+);
 
-app.listen(PORT, () => {
-  console.log("✅ Server running on port", PORT);
-});
+app.listen(PORT, () =>
+  console.log("🚀 Server running on", PORT)
+);
