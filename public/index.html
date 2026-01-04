@@ -2,86 +2,32 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Anime RP AI</title>
+  <title>TG Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      background: #0b0b0f;
-      color: #eaeaff;
-      font-family: system-ui, sans-serif;
-      padding: 20px;
-    }
-    .box {
-      border: 1px solid #6b5cff;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    .btn {
-      background: #6b5cff;
-      color: white;
-      padding: 12px;
-      border-radius: 10px;
-      text-align: center;
-      margin-top: 10px;
-    }
-  </style>
 </head>
-
 <body>
+  <h2 id="status">Проверка Telegram...</h2>
 
-<h2>🌙 Anime RP AI</h2>
-<div id="status" class="box">🔐 Проверка Telegram…</div>
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
 
-<script>
-const tg = window.Telegram.WebApp;
-tg.ready();
-
-if (!tg.initData || tg.initData.length < 10) {
-  document.getElementById("status").innerText =
-    "❌ Открой мини-апп ИЗ Telegram";
-  throw new Error("NO INIT DATA");
-}
-
-fetch("/api/auth", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ initData: tg.initData })
-})
-.then(r => r.json())
-.then(data => {
-  if (!data.ok) {
-    document.getElementById("status").innerText =
-      "❌ Ошибка Telegram проверки";
-    return;
-  }
-
-  document.body.innerHTML = `
-    <h2>🌙 Главное меню</h2>
-
-    <div class="box">
-      👤 <b>${data.user.username || "Без username"}</b><br>
-      🆔 ${data.user.telegram_id}<br>
-      ⭐ Подписка: ${data.user.subscription}<br>
-      💎 Осколки: ${data.user.moon_shards}<br>
-      🛡️ Роль: ${data.user.role}
-    </div>
-
-    <div class="box btn">🧑‍🎭 Персонажи</div>
-    <div class="box btn">💬 Чаты</div>
-    <div class="box btn">💎 Магазин</div>
-
-    ${data.user.role === "owner" ? `
-      <div class="box btn">🛠 Админ-консоль</div>
-    ` : ""}
-  `;
-})
-.catch(err => {
-  document.getElementById("status").innerText =
-    "❌ Серверная ошибка";
-  console.error(err);
-});
-</script>
-
+    fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData: tg.initData })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        document.getElementById('status').innerText = 'Готово ✅';
+      } else {
+        document.getElementById('status').innerText = 'Ошибка Telegram';
+      }
+    })
+    .catch(() => {
+      document.getElementById('status').innerText = 'Ошибка сервера';
+    });
+  </script>
 </body>
 </html>
