@@ -2,47 +2,46 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Telegram Mini App</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      font-family: monospace;
-      background: #0f0f0f;
-      color: #00ff88;
-      padding: 16px;
-    }
-    pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-  </style>
+  <title>Anime AI 18+</title>
 </head>
-<body>
-  <h2>🔐 Проверка пользователя...</h2>
-  <pre id="output">Загрузка...</pre>
+<body style="background:black;color:#00ff88;font-family:monospace">
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
+<h3>🔐 Проверка пользователя...</h3>
 
-    const initData = tg.initData;
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
 
-    fetch("/auth", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ initData })
-    })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("output").textContent =
-        JSON.stringify(data, null, 2);
-    })
-    .catch(err => {
-      document.getElementById("output").textContent =
-        "Ошибка: " + err.message;
-    });
-  </script>
+fetch("/api/auth", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    initData: tg.initData
+  })
+})
+.then(res => res.json())
+.then(data => {
+  if (!data.ok) {
+    document.body.innerHTML += "<pre>❌ Ошибка проверки</pre>";
+    return;
+  }
+
+  document.body.innerHTML += `
+    <pre>
+✅ Пользователь подтверждён
+
+ID: ${data.user.id}
+Username: @${data.user.username || "—"}
+Premium: ${data.user.is_premium ? "YES" : "NO"}
+    </pre>
+  `;
+})
+.catch(err => {
+  document.body.innerHTML += "<pre>❌ " + err + "</pre>";
+});
+</script>
+
 </body>
 </html>
