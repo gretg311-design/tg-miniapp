@@ -3,37 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <title>Anime RP AI</title>
-  <script>"https://tg-miniapp-hr0a.onrender.com"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
-<body style="background:#0b0b0b;color:#00ffcc;font-family:monospace">
-<h3>⏳ Проверка Telegram...</h3>
+<body style="background:black;color:#00ff88;font-family:monospace">
+
+<h3>🔐 Проверка Telegram...</h3>
 
 <script>
-const tg = window.Telegram.WebApp;
+const tg = window.Telegram?.WebApp;
+
+if (!tg) {
+  document.body.innerHTML = "<h3>❌ Открой это приложение ИЗ TELEGRAM</h3>";
+  throw new Error("Not Telegram");
+}
+
 tg.ready();
 
-fetch("https://ТВОЙ_RENDER_URL/api/auth", {
+if (!tg.initData) {
+  document.body.innerHTML = "<h3>❌ Нет данных Telegram</h3>";
+  throw new Error("No initData");
+}
+
+fetch("/api/auth", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ initData: tg.initData })
 })
 .then(r => r.json())
-.then(d => {
-  if (!d.ok) {
-    document.body.innerHTML = "❌ Ошибка Telegram";
+.then(data => {
+  if (!data.ok) {
+    document.body.innerHTML = "<h3>❌ Ошибка проверки Telegram</h3>";
     return;
   }
 
   document.body.innerHTML = `
-    <h2>✅ Добро пожаловать</h2>
+    <h3>✅ Успешный вход</h3>
     <pre>
-ID: ${d.user.id}
-Username: @${d.user.username || "—"}
-Premium: ${d.user.is_premium ? "YES" : "NO"}
+ID: ${data.user.id}
+Username: @${data.user.username || "—"}
     </pre>
   `;
 });
 </script>
+
 </body>
 </html>
