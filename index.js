@@ -1,23 +1,24 @@
-const express = require("express");
-const path = require("path");
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
 
-app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "frame-ancestors https://web.telegram.org https://*.telegram.org"
-  );
-  next();
-});
-
-app.use(express.static(path.join(__dirname, "public")));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+  fetch("/api/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      initData: tg.initData
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.body.innerHTML =
+      "✅ Проверка пользователя<br><pre>" +
+      JSON.stringify(data, null, 2) +
+      "</pre>";
+  })
+  .catch(err => {
+    document.body.innerText = "❌ Ошибка: " + err;
+  });
+</script>
