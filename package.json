@@ -1,5 +1,6 @@
 {
-  "name": "anime-ai-18",
+  "name": "tg-miniapp",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "start": "node server.js"
