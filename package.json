@@ -1,12 +1,10 @@
 {
-  "name": "tg-miniapp-anime-ai",
-  "version": "1.0.0",
+  "name": "anime-ai-18",
   "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "sqlite3": "^5.1.7"
+    "express": "^4.19.2"
   }
 }
