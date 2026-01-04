@@ -2,23 +2,65 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Debug TG</title>
+  <title>Anime RP AI</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      background:#0b0b0f;
+      color:#fff;
+      font-family:system-ui, sans-serif;
+      margin:0;
+      padding:16px;
+    }
+    button {
+      padding:12px;
+      margin:6px 0;
+      width:100%;
+      border-radius:10px;
+      border:none;
+      background:#7c4dff;
+      color:white;
+      font-size:16px;
+    }
+  </style>
 </head>
-<body style="background:black;color:#00ff88;font-family:monospace">
 
-<h3>DEBUG</h3>
+<body>
+<h2>🌙 Anime RP AI</h2>
+<p id="status">Проверка Telegram…</p>
 
-<pre id="out"></pre>
+<button id="enter" style="display:none">Войти</button>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.ready();
 
-document.getElementById("out").innerText =
-  "initData:\n" + tg.initData + "\n\n" +
-  "initData length: " + tg.initData.length;
-</script>
+fetch("/api/auth", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ initData: tg.initData })
+})
+.then(r => r.json())
+.then(data => {
+  if (!data.ok) {
+    document.getElementById("status").innerText = "❌ Ошибка Telegram";
+    return;
+  }
 
+  window.USER = data.user;
+
+  document.getElementById("status").innerText =
+    `👤 ${data.user.first_name} (ID: ${data.user.id})`;
+
+  document.getElementById("enter").style.display = "block";
+})
+.catch(() => {
+  document.getElementById("status").innerText = "❌ Сервер недоступен";
+});
+
+document.getElementById("enter").onclick = () => {
+  alert("Дальше будет меню персонажей и чаты");
+};
+</script>
 </body>
 </html>
