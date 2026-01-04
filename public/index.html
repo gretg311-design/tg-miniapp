@@ -2,32 +2,27 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>TG Mini App</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <title>Mini App</title>
 </head>
 <body>
-  <h2 id="status">Проверка Telegram...</h2>
+  <h1>Mini App OK</h1>
+
+  <button id="btn">Init</button>
+
+  <pre id="out"></pre>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
+    document.getElementById("btn").onclick = async () => {
+      const r = await fetch("/api/init", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ test: true })
+      });
 
-    fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ initData: tg.initData })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.ok) {
-        document.getElementById('status').innerText = 'Готово ✅';
-      } else {
-        document.getElementById('status').innerText = 'Ошибка Telegram';
-      }
-    })
-    .catch(() => {
-      document.getElementById('status').innerText = 'Ошибка сервера';
-    });
+      const data = await r.json();
+      document.getElementById("out").textContent =
+        JSON.stringify(data, null, 2);
+    };
   </script>
 </body>
 </html>
