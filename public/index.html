@@ -3,51 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <title>Telegram Mini App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <style>
     body {
-      background: #0f0f0f;
-      color: #fff;
       font-family: monospace;
+      background: #0f0f0f;
+      color: #00ff88;
       padding: 16px;
     }
     pre {
-      background: #1e1e1e;
-      padding: 12px;
-      border-radius: 8px;
-      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
   </style>
 </head>
 <body>
+  <h2>🔐 Проверка пользователя...</h2>
+  <pre id="output">Загрузка...</pre>
 
-<h2>Telegram Mini App</h2>
-<p id="status">⏳ Инициализация...</p>
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
 
-<script>
-  const tg = window.Telegram.WebApp;
+    const initData = tg.initData;
 
-  tg.ready();
-  tg.expand();
-
-  const status = document.getElementById("status");
-
-  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-    status.innerText = "❌ НЕ Telegram Mini App (открыто не из бота)";
-  } else {
-    status.innerText = "✅ Mini App работает. Пользователь:";
-
-    const user = tg.initDataUnsafe.user;
-
-    const pre = document.createElement("pre");
-    pre.textContent = JSON.stringify(user, null, 2);
-    document.body.appendChild(pre);
-  }
-</script>
-
+    fetch("/auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ initData })
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("output").textContent =
+        JSON.stringify(data, null, 2);
+    })
+    .catch(err => {
+      document.getElementById("output").textContent =
+        "Ошибка: " + err.message;
+    });
+  </script>
 </body>
 </html>
