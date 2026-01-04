@@ -39,21 +39,19 @@ function checkTelegramAuth(initData) {
 
 // 🔐 API — ВАЖНО: ВЫШЕ ЛЮБЫХ *
 app.post("/api/auth", (req, res) => {
-  const { initData } = req.body;
+  console.log("INIT DATA RAW:", req.body.initData);
 
-  if (!initData) {
-    return res.status(400).json({ error: "NO_INIT_DATA" });
+  if (!req.body.initData) {
+    return res.json({ ok: false, reason: "NO_INIT_DATA" });
   }
 
-  const valid = checkTelegramAuth(initData);
-  if (!valid) {
-    return res.status(403).json({ error: "INVALID_AUTH" });
-  }
+  const params = new URLSearchParams(req.body.initData);
+  const userRaw = params.get("user");
 
-  const params = new URLSearchParams(initData);
-  const user = JSON.parse(params.get("user"));
-
-  return res.json({ ok: true, user });
+  return res.json({
+    ok: true,
+    user: userRaw ? JSON.parse(userRaw) : null
+  });
 });
 
 // ❗ ТОЛЬКО ДЛЯ СТРАНИЦЫ
