@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>Anime AI 18+</title>
+
+  <!-- 🔥 ВОТ ЭТОГО НЕ ХВАТАЛО -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
+
 <body style="background:black;color:#00ff88;font-family:monospace">
 
 <h3>🔐 Проверка пользователя...</h3>
@@ -14,14 +18,10 @@ tg.ready();
 
 fetch("/api/auth", {
   method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    initData: tg.initData
-  })
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ initData: tg.initData })
 })
-.then(res => res.json())
+.then(r => r.json())
 .then(data => {
   if (!data.ok) {
     document.body.innerHTML += "<pre>❌ Ошибка проверки</pre>";
@@ -29,17 +29,16 @@ fetch("/api/auth", {
   }
 
   document.body.innerHTML += `
-    <pre>
+<pre>
 ✅ Пользователь подтверждён
 
 ID: ${data.user.id}
 Username: @${data.user.username || "—"}
 Premium: ${data.user.is_premium ? "YES" : "NO"}
-    </pre>
-  `;
+</pre>`;
 })
-.catch(err => {
-  document.body.innerHTML += "<pre>❌ " + err + "</pre>";
+.catch(e => {
+  document.body.innerHTML += "<pre>❌ " + e + "</pre>";
 });
 </script>
 
