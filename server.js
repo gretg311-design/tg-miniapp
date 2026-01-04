@@ -14,11 +14,6 @@ app.use(express.json());
 app.use(express.static("public"));
 
 function checkTelegramAuth(initData) {
-  const secret = crypto
-    .createHash("sha256")
-    .update(BOT_TOKEN)
-    .digest();
-
   const params = new URLSearchParams(initData);
   const hash = params.get("hash");
   params.delete("hash");
@@ -28,32 +23,43 @@ function checkTelegramAuth(initData) {
     .map(([k, v]) => `${k}=${v}`)
     .join("\n");
 
-  const hmac = crypto
-    .createHmac("sha256", secret)
+  // 🔥 ВАЖНО: правильный секрет
+  const secretKey = crypto
+    .createHmac("sha256", "WebAppData")
+    .update(BOT_TOKEN)
+    .digest();
+
+  const calculatedHash = crypto
+    .createHmac("sha256", secretKey)
     .update(dataCheckString)
     .digest("hex");
 
-  return hmac === hash;
+  return calculatedHash === hash;
 }
 
 app.post("/api/auth", (req, res) => {
   const { initData } = req.body;
-  if (!initData) return res.json({ ok:false });
+
+  if (!initData) {
+    return res.json({ ok: false, error: "NO_INIT_DATA" });
+  }
 
   const valid = checkTelegramAuth(initData);
-  if (!valid) return res.json({ ok:false });
+  if (!valid) {
+    return res.json({ ok: false, error: "INVALID_HASH" });
+  }
 
   const user = JSON.parse(
     new URLSearchParams(initData).get("user")
   );
 
-  res.json({ ok:true, user });
+  res.json({ ok: true, user });
 });
 
-app.get("*", (_, res) =>
-  res.sendFile(path.join(__dirname, "public/index.html"))
-);
+app.get("*", (_, res) => {
+  res.sendFile(path.join(__dirname, "public/index.html"));
+});
 
-app.listen(PORT, () =>
-  console.log("🚀 Server running on", PORT)
-);
+app.listen(PORT, () => {
+  console.log("🚀 Server started on port", PORT);
+});
