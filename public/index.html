@@ -6,34 +6,42 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      background:#0b0b0f;
-      color:#fff;
-      font-family:system-ui, sans-serif;
-      margin:0;
-      padding:16px;
+      background: #0b0b0f;
+      color: #eaeaff;
+      font-family: system-ui, sans-serif;
+      padding: 20px;
     }
-    button {
-      padding:12px;
-      margin:6px 0;
-      width:100%;
-      border-radius:10px;
-      border:none;
-      background:#7c4dff;
-      color:white;
-      font-size:16px;
+    .box {
+      border: 1px solid #6b5cff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .btn {
+      background: #6b5cff;
+      color: white;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
-<h2>🌙 Anime RP AI</h2>
-<p id="status">Проверка Telegram…</p>
 
-<button id="enter" style="display:none">Войти</button>
+<h2>🌙 Anime RP AI</h2>
+<div id="status" class="box">🔐 Проверка Telegram…</div>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.ready();
+
+if (!tg.initData || tg.initData.length < 10) {
+  document.getElementById("status").innerText =
+    "❌ Открой мини-апп ИЗ Telegram";
+  throw new Error("NO INIT DATA");
+}
 
 fetch("/api/auth", {
   method: "POST",
@@ -43,24 +51,37 @@ fetch("/api/auth", {
 .then(r => r.json())
 .then(data => {
   if (!data.ok) {
-    document.getElementById("status").innerText = "❌ Ошибка Telegram";
+    document.getElementById("status").innerText =
+      "❌ Ошибка Telegram проверки";
     return;
   }
 
-  window.USER = data.user;
+  document.body.innerHTML = `
+    <h2>🌙 Главное меню</h2>
 
-  document.getElementById("status").innerText =
-    `👤 ${data.user.first_name} (ID: ${data.user.id})`;
+    <div class="box">
+      👤 <b>${data.user.username || "Без username"}</b><br>
+      🆔 ${data.user.telegram_id}<br>
+      ⭐ Подписка: ${data.user.subscription}<br>
+      💎 Осколки: ${data.user.moon_shards}<br>
+      🛡️ Роль: ${data.user.role}
+    </div>
 
-  document.getElementById("enter").style.display = "block";
+    <div class="box btn">🧑‍🎭 Персонажи</div>
+    <div class="box btn">💬 Чаты</div>
+    <div class="box btn">💎 Магазин</div>
+
+    ${data.user.role === "owner" ? `
+      <div class="box btn">🛠 Админ-консоль</div>
+    ` : ""}
+  `;
 })
-.catch(() => {
-  document.getElementById("status").innerText = "❌ Сервер недоступен";
+.catch(err => {
+  document.getElementById("status").innerText =
+    "❌ Серверная ошибка";
+  console.error(err);
 });
-
-document.getElementById("enter").onclick = () => {
-  alert("Дальше будет меню персонажей и чаты");
-};
 </script>
+
 </body>
 </html>
