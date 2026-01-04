@@ -1,19 +1,13 @@
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
 import crypto from "crypto";
 import pool, { initDB } from "./db/init.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
 
 await initDB();
 
-/* ================= TELEGRAM CHECK ================= */
+/* ===== TELEGRAM VERIFY ===== */
 
 function verifyTelegram(initData) {
   const secret = crypto
@@ -38,7 +32,7 @@ function verifyTelegram(initData) {
   return hmac === hash;
 }
 
-/* ================= API ================= */
+/* ===== API ===== */
 
 app.post("/api/init", async (req, res) => {
   try {
@@ -46,7 +40,7 @@ app.post("/api/init", async (req, res) => {
     if (!initData) return res.status(400).json({ error: "NO_INIT_DATA" });
 
     if (!verifyTelegram(initData)) {
-      return res.status(403).json({ error: "BAD_TELEGRAM_AUTH" });
+      return res.status(403).json({ error: "BAD_AUTH" });
     }
 
     const params = new URLSearchParams(initData);
@@ -59,12 +53,14 @@ app.post("/api/init", async (req, res) => {
       [user.id, user.username]
     );
 
-    res.json({ ok: true, user });
-  } catch (e) {
-    console.error("API ERROR:", e);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("❌ API ERROR:", err);
     res.status(500).json({ error: "SERVER_ERROR" });
   }
 });
+
+/* ===== HEALTH ===== */
 
 app.get("/health", (_, res) => {
   res.json({ status: "ok" });
