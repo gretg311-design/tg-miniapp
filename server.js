@@ -7,13 +7,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
-// нужно для ES-модулей
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
+// 🔐 Проверка Telegram initData
 function checkTelegramAuth(initData) {
   const secret = crypto
     .createHash("sha256")
@@ -37,7 +37,7 @@ function checkTelegramAuth(initData) {
   return hmac === hash;
 }
 
-// 🔐 API для проверки пользователя
+// 🔐 API — ВАЖНО: ВЫШЕ ЛЮБЫХ *
 app.post("/api/auth", (req, res) => {
   const { initData } = req.body;
 
@@ -46,23 +46,18 @@ app.post("/api/auth", (req, res) => {
   }
 
   const valid = checkTelegramAuth(initData);
-
   if (!valid) {
-    return res.status(403).json({ error: "INVALID_TELEGRAM_AUTH" });
+    return res.status(403).json({ error: "INVALID_AUTH" });
   }
 
   const params = new URLSearchParams(initData);
   const user = JSON.parse(params.get("user"));
 
-  // 👉 здесь потом можно добавить проверку возраста
-  return res.json({
-    ok: true,
-    user
-  });
+  return res.json({ ok: true, user });
 });
 
-// fallback — всегда index.html
-app.get("*", (req, res) => {
+// ❗ ТОЛЬКО ДЛЯ СТРАНИЦЫ
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
