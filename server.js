@@ -11,9 +11,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
-function verifyTelegram(initData) {
+function checkTelegramAuth(initData) {
+  const secret = crypto
+    .createHash("sha256")
+    .update(BOT_TOKEN)
+    .digest();
+
   const params = new URLSearchParams(initData);
   const hash = params.get("hash");
   params.delete("hash");
@@ -23,13 +28,8 @@ function verifyTelegram(initData) {
     .map(([k, v]) => `${k}=${v}`)
     .join("\n");
 
-  const secretKey = crypto
-    .createHash("sha256")
-    .update(BOT_TOKEN)
-    .digest();
-
   const hmac = crypto
-    .createHmac("sha256", secretKey)
+    .createHmac("sha256", secret)
     .update(dataCheckString)
     .digest("hex");
 
@@ -38,10 +38,13 @@ function verifyTelegram(initData) {
 
 app.post("/api/auth", (req, res) => {
   const { initData } = req.body;
-  if (!initData) return res.json({ ok: false });
 
-  if (!verifyTelegram(initData)) {
-    return res.json({ ok: false });
+  if (!initData) {
+    return res.json({ ok: false, error: "NO_INIT_DATA" });
+  }
+
+  if (!checkTelegramAuth(initData)) {
+    return res.json({ ok: false, error: "INVALID_AUTH" });
   }
 
   const params = new URLSearchParams(initData);
