@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Anime AI Mini App</title>
+
+  <!-- ОБЯЗАТЕЛЬНО -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body style="background:#000;color:#00ff88;font-family:monospace;padding:16px">
+
+<h2 id="status">⏳ Проверка Telegram...</h2>
+<pre id="output"></pre>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+
+// 1️⃣ Проверка Telegram
+fetch("/api/auth", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ initData: tg.initData })
+})
+.then(res => res.json())
+.then(auth => {
+  if (!auth.ok) {
+    document.getElementById("status").textContent = "❌ Ошибка проверки Telegram";
+    return;
+  }
+
+  // 2️⃣ Получение / создание пользователя
+  return fetch("/api/me", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user: auth.user })
+  });
+})
+.then(res => res.json())
+.then(me => {
+  if (!me || !me.id) {
+    document.getElementById("status").textContent = "❌ Пользователь не найден";
+    return;
+  }
+
+  document.getElementById("status").textContent = "✅ Mini App работает";
+
+  document.getElementById("output").textContent =
+`Telegram ID: ${me.id}
+Username: @${me.username || "—"}
+
+Баланс: ${me.balance} 🌙
+Подписка: ${me.sub}
+
+Главный админ: ${me.isMainAdmin ? "ДА" : "НЕТ"}
+`;
+})
+.catch(err => {
+  document.getElementById("status").textContent = "❌ Ошибка";
+  document.getElementById("output").textContent = err;
+});
+</script>
+
+</body>
+</html>
