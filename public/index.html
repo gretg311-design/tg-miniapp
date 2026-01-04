@@ -1,58 +1,39 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Mini App</title>
-
-  <!-- ОБЯЗАТЕЛЬНО -->
+  <meta charset="UTF-8">
+  <title>Anime RP AI</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
-<body style="background:black;color:#00ff88;font-family:monospace">
-
-<h3>⏳ Проверка пользователя...</h3>
+<body style="background:#0b0b0b;color:#00ffcc;font-family:monospace">
+<h3>⏳ Проверка Telegram...</h3>
 
 <script>
-(function () {
-  if (!window.Telegram || !window.Telegram.WebApp) {
-    document.body.innerHTML += "<pre>❌ Telegram WebApp не найден</pre>";
+const tg = window.Telegram.WebApp;
+tg.ready();
+
+fetch("https://ТВОЙ_RENDER_URL/api/auth", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ initData: tg.initData })
+})
+.then(r => r.json())
+.then(d => {
+  if (!d.ok) {
+    document.body.innerHTML = "❌ Ошибка Telegram";
     return;
   }
 
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-
-  if (!tg.initData) {
-    document.body.innerHTML += "<pre>❌ Нет initData (не Mini App)</pre>";
-    return;
-  }
-
-  fetch("/api/auth", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ initData: tg.initData })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (!data.ok) {
-      document.body.innerHTML += "<pre>❌ Ошибка проверки</pre>";
-      return;
-    }
-
-    document.body.innerHTML = `
-<pre>
-✅ Пользователь подтверждён
-
-Telegram ID: ${data.user.id}
-Username: @${data.user.username || "—"}
-Premium: ${data.user.is_premium ? "YES" : "NO"}
-</pre>`;
-  })
-  .catch(err => {
-    document.body.innerHTML += "<pre>❌ " + err + "</pre>";
-  });
-})();
+  document.body.innerHTML = `
+    <h2>✅ Добро пожаловать</h2>
+    <pre>
+ID: ${d.user.id}
+Username: @${d.user.username || "—"}
+Premium: ${d.user.is_premium ? "YES" : "NO"}
+    </pre>
+  `;
+});
 </script>
-
 </body>
 </html>
