@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Telegram Mini App</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <h1>Mini App работает ✅</h1>
-  <button onclick="Telegram.WebApp.close()">Закрыть</button>
 
-  <script>
-    Telegram.WebApp.ready();
-    Telegram.WebApp.expand();
-  </script>
+<h2>Mini App работает</h2>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+
+  const user = tg.initDataUnsafe?.user;
+
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `<pre>${JSON.stringify(user, null, 2)}</pre>`
+  );
+</script>
+
 </body>
 </html>
