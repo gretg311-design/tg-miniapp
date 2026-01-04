@@ -1,59 +1,56 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Anime AI 18+</title>
+
+  <!-- ОБЯЗАТЕЛЬНО -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      background: black;
-      color: #00ff88;
-      font-family: monospace;
-      padding: 20px;
-    }
-  </style>
 </head>
 
-<body>
+<body style="background:black;color:#00ff88;font-family:monospace">
 
 <h3>🔐 Проверка пользователя...</h3>
-<pre id="out">Загрузка...</pre>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.ready();
-
-const out = document.getElementById("out");
-
-if (!tg.initData || tg.initData.length === 0) {
-  out.textContent = "❌ Нет initData. Открой мини-апп из Telegram.";
+if (!window.Telegram || !Telegram.WebApp || !Telegram.WebApp.initData) {
+  document.body.innerHTML += "<pre>❌ Нет initData. Открой мини-апп из Telegram.</pre>";
   throw new Error("NO_INIT_DATA");
 }
 
+const tg = Telegram.WebApp;
+tg.ready();
+
 fetch("/api/auth", {
   method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    initData: tg.initData
-  })
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ initData: tg.initData })
 })
-.then(res => res.json())
+.then(async r => {
+  const text = await r.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error("SERVER RETURNED NOT JSON:\n" + text);
+  }
+})
 .then(data => {
-  if (data.error) {
-    out.textContent = "❌ Ошибка: " + data.error;
+  if (!data.ok) {
+    document.body.innerHTML += "<pre>❌ Ошибка проверки</pre>";
     return;
   }
 
-  out.textContent =
-    "✅ Пользователь подтверждён\n\n" +
-    "ID: " + data.user.id + "\n" +
-    "Username: @" + (data.user.username || "—") + "\n" +
-    "Premium: " + (data.user.is_premium ? "YES" : "NO");
+  document.body.innerHTML = `
+<pre>
+✅ ДОСТУП РАЗРЕШЁН
+
+ID: ${data.user.id}
+Username: @${data.user.username || "—"}
+Premium: ${data.user.is_premium ? "YES" : "NO"}
+</pre>`;
 })
-.catch(err => {
-  out.textContent = "❌ JS ошибка: " + err.message;
+.catch(e => {
+  document.body.innerHTML += "<pre>❌ " + e.message + "</pre>";
 });
 </script>
 
