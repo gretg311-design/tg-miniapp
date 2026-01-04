@@ -3,33 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <title>Telegram Mini App</title>
-</head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
 
-  const user = tg.initDataUnsafe?.user;
-
-  document.body.insertAdjacentHTML(
-    "beforeend",
-    "<pre>" + JSON.stringify(user, null, 2) + "</pre>"
-  );
-</script>
+  <style>
+    body {
+      background: #0f0f0f;
+      color: #fff;
+      font-family: monospace;
+      padding: 16px;
+    }
+    pre {
+      background: #1e1e1e;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
 <body>
 
-<h2>Mini App работает</h2>
+<h2>Telegram Mini App</h2>
+<p id="status">⏳ Инициализация...</p>
 
 <script>
   const tg = window.Telegram.WebApp;
+
   tg.ready();
+  tg.expand();
 
-  const user = tg.initDataUnsafe?.user;
+  const status = document.getElementById("status");
 
-  document.body.insertAdjacentHTML(
-    "beforeend",
-    `<pre>${JSON.stringify(user, null, 2)}</pre>`
-  );
+  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+    status.innerText = "❌ НЕ Telegram Mini App (открыто не из бота)";
+  } else {
+    status.innerText = "✅ Mini App работает. Пользователь:";
+
+    const user = tg.initDataUnsafe.user;
+
+    const pre = document.createElement("pre");
+    pre.textContent = JSON.stringify(user, null, 2);
+    document.body.appendChild(pre);
+  }
 </script>
 
 </body>
