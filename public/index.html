@@ -1,45 +1,24 @@
-<pre id="debug"></pre>
-<script>
-document.getElementById("debug").innerText =
-  "initData length: " + (window.Telegram?.WebApp?.initData?.length || 0);
-</script>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Debug TG</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body style="background:black;color:#00ff88;font-family:monospace">
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<h3>DEBUG</h3>
+
+<pre id="out"></pre>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.ready();
 
-if (!tg.initData) {
-  document.body.innerHTML = "❌ Нет initData. Открой через Telegram.";
-  throw new Error("NO_INIT_DATA");
-}
-
-fetch("/api/auth", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    initData: tg.initData   // ⬅️ ТОЛЬКО ЭТО
-  })
-})
-.then(r => r.json())
-.then(data => {
-  if (!data.ok) {
-    document.body.innerHTML = "❌ Ошибка проверки Telegram";
-    return;
-  }
-
-  document.body.innerHTML = `
-    <pre>
-✅ Проверка пройдена
-
-Telegram ID: ${data.user.id}
-Username: @${data.user.username || "—"}
-Premium: ${data.user.is_premium ? "YES" : "NO"}
-    </pre>
-  `;
-})
-.catch(err => {
-  document.body.innerHTML = "❌ Серверная ошибка";
-});
+document.getElementById("out").innerText =
+  "initData:\n" + tg.initData + "\n\n" +
+  "initData length: " + tg.initData.length;
 </script>
+
+</body>
+</html>
