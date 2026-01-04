@@ -1,10 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>DEBUG</title>
+  <meta charset="UTF-8" />
+  <title>Anime AI</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body style="background:black;color:red;font-size:30px">
-🔥🔥🔥 DEBUG VERSION 777 🔥🔥🔥
+
+<body style="background:#0b0b0b;color:#00ff88;font-family:monospace">
+
+<h3 id="status">🔐 Проверка Telegram...</h3>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+
+if (!tg.initData) {
+  document.getElementById("status").innerText =
+    "❌ Открой через Telegram";
+  throw new Error("NO INIT DATA");
+}
+
+fetch("/api/auth", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ initData: tg.initData })
+})
+.then(r => r.json())
+.then(data => {
+  if (!data.ok) {
+    document.getElementById("status").innerText =
+      "❌ Ошибка проверки Telegram";
+    return;
+  }
+
+  document.getElementById("status").innerHTML = `
+✅ Успешно!
+
+ID: ${data.user.id}
+Username: @${data.user.username || "—"}
+Premium: ${data.user.is_premium ? "YES" : "NO"}
+`;
+})
+.catch(() => {
+  document.getElementById("status").innerText =
+    "❌ Серверная ошибка";
+});
+</script>
+
 </body>
 </html>
