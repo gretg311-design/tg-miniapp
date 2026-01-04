@@ -1,57 +1,123 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Anime AI 18+</title>
+<meta charset="UTF-8" />
+<title>Anime RP AI</title>
 
-  <!-- ОБЯЗАТЕЛЬНО -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+body {
+  background:black;
+  color:#00ff88;
+  font-family:monospace;
+  text-align:center;
+}
+.hidden { display:none; }
+button {
+  margin:6px;
+  padding:10px 14px;
+  background:#111;
+  border:1px solid #00ff88;
+  color:#00ff88;
+  cursor:pointer;
+}
+.card {
+  border:1px solid #00ff88;
+  padding:16px;
+  margin:12px;
+}
+</style>
 </head>
 
-<body style="background:black;color:#00ff88;font-family:monospace">
+<body>
 
-<h3>🔐 Проверка пользователя...</h3>
+<div id="auth" class="card">
+  <h3>🔐 Проверка пользователя…</h3>
+</div>
+
+<div id="menu" class="card hidden">
+  <h2>🌙 Главное меню</h2>
+
+  <button onclick="openProfile()">👤 Профиль</button>
+  <button onclick="openCharacters()">🎭 Персонажи</button>
+  <button onclick="openShop()">💎 Магазин</button>
+
+  <div id="adminBtn" class="hidden">
+    <button onclick="openAdmin()">🛠 Админ-консоль</button>
+  </div>
+</div>
+
+<div id="profile" class="card hidden">
+  <h3>👤 Профиль</h3>
+  <pre id="profileData"></pre>
+</div>
+
+<div id="admin" class="card hidden">
+  <h3>🛠 Админ-консоль</h3>
+  <p>Выдать / забрать премиум</p>
+  <p>Назначить админов</p>
+  <p>Управление RP</p>
+</div>
 
 <script>
-if (!window.Telegram || !Telegram.WebApp || !Telegram.WebApp.initData) {
-  document.body.innerHTML += "<pre>❌ Нет initData. Открой мини-апп из Telegram.</pre>";
-  throw new Error("NO_INIT_DATA");
-}
-
-const tg = Telegram.WebApp;
+const tg = window.Telegram.WebApp;
 tg.ready();
+
+tg.BackButton.show();
+tg.BackButton.onClick(showMenu);
 
 fetch("/api/auth", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ initData: tg.initData })
 })
-.then(async r => {
-  const text = await r.text();
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error("SERVER RETURNED NOT JSON:\n" + text);
-  }
-})
+.then(r => r.json())
 .then(data => {
   if (!data.ok) {
-    document.body.innerHTML += "<pre>❌ Ошибка проверки</pre>";
+    document.body.innerHTML = "❌ Ошибка проверки";
     return;
   }
 
-  document.body.innerHTML = `
-<pre>
-✅ ДОСТУП РАЗРЕШЁН
+  document.getElementById("auth").classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
 
-ID: ${data.user.id}
-Username: @${data.user.username || "—"}
-Premium: ${data.user.is_premium ? "YES" : "NO"}
-</pre>`;
-})
-.catch(e => {
-  document.body.innerHTML += "<pre>❌ " + e.message + "</pre>";
+  document.getElementById("profileData").textContent =
+    JSON.stringify(data.user, null, 2);
+
+  if (data.isAdmin) {
+    document.getElementById("adminBtn").classList.remove("hidden");
+  }
 });
+
+function showMenu() {
+  hideAll();
+  document.getElementById("menu").classList.remove("hidden");
+}
+
+function openProfile() {
+  hideAll();
+  document.getElementById("profile").classList.remove("hidden");
+}
+
+function openAdmin() {
+  hideAll();
+  document.getElementById("admin").classList.remove("hidden");
+}
+
+function openCharacters() {
+  tg.showAlert("Персонажи будут добавлены");
+}
+
+function openShop() {
+  tg.showAlert("Магазин будет добавлен");
+}
+
+function hideAll() {
+  ["menu","profile","admin"].forEach(id =>
+    document.getElementById(id).classList.add("hidden")
+  );
+}
 </script>
 
 </body>
