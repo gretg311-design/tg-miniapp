@@ -38,13 +38,10 @@ function checkTelegramAuth(initData) {
 
 app.post("/api/auth", (req, res) => {
   const { initData } = req.body;
-
-  if (!initData) {
-    return res.json({ ok: false, error: "NO_INIT_DATA" });
-  }
+  if (!initData) return res.status(400).json({ ok: false });
 
   if (!checkTelegramAuth(initData)) {
-    return res.json({ ok: false, error: "INVALID_AUTH" });
+    return res.status(403).json({ ok: false });
   }
 
   const params = new URLSearchParams(initData);
@@ -54,7 +51,7 @@ app.post("/api/auth", (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
 app.listen(PORT, () => {
