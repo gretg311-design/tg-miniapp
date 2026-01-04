@@ -1,3 +1,4 @@
+import db from "./db/database.js";
 import express from "express";
 import crypto from "crypto";
 import path from "path";
