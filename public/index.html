@@ -2,54 +2,43 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Anime RP AI</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Telegram Mini App -->
+  <title>Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
 
-<div id="app">
+<body style="background:#0b0b0b;color:#00ff88;font-family:monospace">
+  <h3 id="status">🔄 Проверка Telegram…</h3>
 
-  <!-- ЗАГРУЗКА -->
-  <div id="loading" class="screen">
-    <div class="loader"></div>
-    <p>Проверка пользователя…</p>
-  </div>
+  <script>
+    const status = document.getElementById("status");
 
-  <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
-  <div id="main" class="screen hidden">
+    if (!window.Telegram || !Telegram.WebApp) {
+      status.innerText = "❌ Не Telegram среда";
+    } else {
+      const tg = Telegram.WebApp;
+      tg.ready();
 
-    <header>
-      <div>
-        <div class="balance">🌙 <span id="balance">0</span></div>
-        <div class="sub" id="sub">Free</div>
-      </div>
-      <button id="adminBtn" class="admin hidden">⚙</button>
-    </header>
+      fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: tg.initData })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.ok) {
+          status.innerText = "❌ Ошибка проверки Telegram";
+          return;
+        }
 
-    <main>
-      <button class="menu-btn">👤 Профиль</button>
-      <button class="menu-btn">🧍 Персонажи</button>
-      <button class="menu-btn">💬 Чаты</button>
-      <button class="menu-btn">🎁 Ежедневка</button>
-      <button class="menu-btn">🛒 Магазин</button>
-      <button class="menu-btn">⭐ Подписка</button>
-    </main>
-
-  </div>
-
-  <!-- НЕ TELEGRAM -->
-  <div id="noTelegram" class="screen hidden">
-    <p>❌ Откройте это приложение через Telegram</p>
-  </div>
-
-</div>
-
-<script src="app.js"></script>
+        status.innerText =
+          "✅ Mini App работает\n" +
+          "Telegram ID: " + data.user_id;
+      })
+      .catch(err => {
+        status.innerText = "❌ Сервер недоступен";
+        console.error(err);
+      });
+    }
+  </script>
 </body>
 </html>
