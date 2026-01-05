@@ -1,55 +1,67 @@
-console.log("🚀 MiniApp script started");
+const app = document.getElementById("app");
 
-const status = document.getElementById("status");
-
-// Фейл-сейф: если Telegram не ответил за 3 сек
-const FAIL_TIMEOUT = 3000;
-
-function showError(msg) {
-  status.innerHTML = `<div class="error">❌ ${msg}</div>`;
+if (!window.Telegram || !Telegram.WebApp) {
+  app.innerHTML = "<h3>❌ Открой через Telegram</h3>";
+  throw new Error("Not Telegram");
 }
 
-// Проверка среды
-if (!window.Telegram || !window.Telegram.WebApp) {
-  showError("Открой приложение через Telegram");
-  throw new Error("Not in Telegram");
-}
-
-const tg = window.Telegram.WebApp;
+const tg = Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-let resolved = false;
+const user = tg.initDataUnsafe?.user;
 
-// Таймер — чтобы не висело ВЕЧНО
-const timer = setTimeout(() => {
-  if (!resolved) {
-    showError("Telegram не передал данные пользователя");
-    console.error("❌ initData timeout");
-  }
-}, FAIL_TIMEOUT);
+if (!user?.id) {
+  app.innerHTML = "<h3>❌ Ошибка авторизации</h3>";
+  throw new Error("No user");
+}
 
-// Пытаемся получить пользователя
-setTimeout(() => {
-  const user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+// 👇 временные данные (ПОКА БЕЗ БД)
+const state = {
+  id: user.id,
+  balance: 0,
+  shards: 0,
+  premium: false
+};
 
-  if (!user || !user.id) {
-    showError("Данные пользователя недоступны");
-    console.error("❌ user missing", tg.initDataUnsafe);
-    return;
-  }
+renderMain();
 
-  // ✅ ВСЁ ОК
-  resolved = true;
-  clearTimeout(timer);
+function renderMain() {
+  app.innerHTML = `
+    <div style="padding:20px; width:100%; max-width:420px">
 
-  console.log("✅ Telegram user:", user.id);
+      <h2 style="text-align:center;">🌙 Anime AI</h2>
 
-  status.innerHTML = `
-    <h2>🌙 Anime AI</h2>
-    <p>Доступ разрешён</p>
-    <p style="color:#7c7cff">ID: ${user.id}</p>
+      <div class="card">
+        <div>🆔 ID: ${state.id}</div>
+        <div>💎 Лунные осколки: ${state.shards}</div>
+        <div>💰 Баланс: ${state.balance}</div>
+        <div>⭐ Премиум: ${state.premium ? "Да" : "Нет"}</div>
+      </div>
+
+      <button onclick="daily()">🎁 Ежедневная награда</button>
+      <button onclick="characters()">👥 Персонажи</button>
+      <button onclick="chats()">💬 Чаты</button>
+      <button onclick="shop()">🛒 Магазин</button>
+      <button onclick="profile()">⚙️ Профиль</button>
+
+    </div>
   `;
+}
 
-  // 🔜 дальше тут будет интерфейс
-}, 100);
+// ====== заглушки ======
+function daily() {
+  alert("🎁 Ежедневка (скоро)");
+}
+function characters() {
+  alert("👥 Персонажи (скоро)");
+}
+function chats() {
+  alert("💬 Чаты (скоро)");
+}
+function shop() {
+  alert("🛒 Магазин осколков (скоро)");
+}
+function profile() {
+  alert("⚙️ Профиль (скоро)");
+}
