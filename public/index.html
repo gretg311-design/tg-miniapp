@@ -1,31 +1,52 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Anime RP AI</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Telegram Mini App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div id="loader">⏳ Загрузка...</div>
+<div id="app">
 
-<div id="app" class="hidden">
+  <!-- ЗАГРУЗКА -->
+  <div id="loading" class="screen">
+    <div class="loader"></div>
+    <p>Проверка пользователя…</p>
+  </div>
 
-  <header>
-    <h2>🌙 Anime RP AI</h2>
-    <div id="balance">Осколки: 0</div>
-  </header>
+  <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+  <div id="main" class="screen hidden">
 
-  <nav>
-    <button id="btn-characters">Персонажи</button>
-    <button id="btn-chats">Чаты</button>
-    <button id="btn-profile">Профиль</button>
-  </nav>
+    <header>
+      <div>
+        <div class="balance">🌙 <span id="balance">0</span></div>
+        <div class="sub" id="sub">Free</div>
+      </div>
+      <button id="adminBtn" class="admin hidden">⚙</button>
+    </header>
 
-  <main id="content"></main>
+    <main>
+      <button class="menu-btn">👤 Профиль</button>
+      <button class="menu-btn">🧍 Персонажи</button>
+      <button class="menu-btn">💬 Чаты</button>
+      <button class="menu-btn">🎁 Ежедневка</button>
+      <button class="menu-btn">🛒 Магазин</button>
+      <button class="menu-btn">⭐ Подписка</button>
+    </main>
+
+  </div>
+
+  <!-- НЕ TELEGRAM -->
+  <div id="noTelegram" class="screen hidden">
+    <p>❌ Откройте это приложение через Telegram</p>
+  </div>
 
 </div>
 
