@@ -1,24 +1,12 @@
-const tg = window.Telegram.WebApp;
-tg.ready();
+const status = document.getElementById("status");
 
-fetch("/api/verify", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    initData: tg.initData
-  })
-})
-.then(r => r.json())
-.then(data => {
-  if (!data.ok) {
-    document.body.innerHTML = "❌ Ошибка проверки Telegram";
-    return;
-  }
+if (!window.Telegram || !Telegram.WebApp) {
+  status.innerText = "❌ Не Telegram среда";
+} else {
+  const tg = Telegram.WebApp;
+  tg.ready();
 
-  document.body.innerHTML = `
-    <h3>✅ Доступ разрешён</h3>
-    <p>ID: ${data.user.id}</p>
-    <p>Username: ${data.user.username}</p>
-    <p>Premium: ${data.user.premium ? "YES" : "NO"}</p>
-  `;
-});
+  status.innerText =
+    "✅ Telegram OK\n" +
+    "User ID: " + (tg.initDataUnsafe?.user?.id || "нет");
+}
