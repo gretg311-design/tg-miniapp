@@ -1,191 +1,227 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anime AI 18+</title>
+  <meta charset="UTF-8" />
+  <title>Anime RP AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<style>
-:root{
-  --bg:#0b0616;
-  --card:#17112f;
-  --accent:#8b5cf6;
-  --text:#fff;
-  --muted:#b5b0d4;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui;
-  background:radial-gradient(circle at top,#1b1140,var(--bg));
-  color:var(--text);
-}
-.hidden{display:none}
+  <!-- Telegram Mini App -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-/* LOADER */
-#loader{
-  position:fixed;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  background:var(--bg);z-index:10;
-}
-.loader{
-  width:48px;height:48px;border-radius:50%;
-  border:4px solid #2a2250;border-top:4px solid var(--accent);
-  animation:spin 1s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(1200px 600px at top, #1b1f3b, #090b14);
+      color: #fff;
+    }
+    .hidden { display: none; }
 
-/* COMMON */
-.screen{padding:16px 14px 90px}
-.header{font-size:20px;font-weight:700;margin-bottom:16px}
-.card{
-  background:linear-gradient(180deg,#1c1450,var(--card));
-  border-radius:18px;padding:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.35);
-}
-.btn{
-  width:100%;padding:12px;border-radius:14px;
-  border:none;
-  background:linear-gradient(135deg,var(--accent),#6d4cff);
-  color:#fff;font-weight:600;
-}
+    /* Header */
+    header {
+      padding: 16px;
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(6px);
+    }
 
-/* GRID */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    /* Main */
+    main {
+      padding: 16px;
+    }
 
-/* CHARACTERS */
-.char-img{
-  width:100%;height:160px;
-  border-radius:14px;
-  object-fit:cover;
-  margin-bottom:8px;
-}
-.char-name{font-weight:700}
-.char-desc{font-size:13px;color:var(--muted);margin:6px 0}
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg,#6b7cff,#9f7cff);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .btn.secondary {
+      background: linear-gradient(135deg,#ff6b9f,#ff8fb1);
+    }
 
-/* NAV */
-.nav{
-  position:fixed;bottom:0;left:0;right:0;
-  background:#120c2a;
-  border-top:1px solid #241d52;
-  display:flex;justify-content:space-around;
-  padding:10px 0;
-}
-.nav button{
-  background:none;border:none;
-  color:var(--muted);font-size:12px;
-}
-.nav .active{color:var(--accent)}
-</style>
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .card .info {
+      padding: 10px;
+    }
+    .card .name {
+      font-weight: 600;
+    }
+    .card .meta {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    /* Character view */
+    .char-img {
+      width: 100%;
+      border-radius: 18px;
+      margin-bottom: 14px;
+    }
+    .char-desc {
+      opacity: 0.9;
+      line-height: 1.45;
+    }
+
+    footer {
+      height: 24px;
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- LOADER -->
-<div id="loader"><div class="loader"></div></div>
+<header id="header">Anime RP</header>
 
-<!-- MAIN MENU -->
-<div id="main" class="screen hidden">
-  <div class="header">Anime AI 18+</div>
+<main>
 
-  <div class="grid">
-    <div class="card">
-      <h3>👤 Профиль</h3>
-      <p class="char-desc">Баланс, настройки</p>
-    </div>
-    <div class="card" onclick="openCharacters()">
-      <h3>🧍 Персонажи</h3>
-      <p class="char-desc">Выбор персонажа</p>
-    </div>
-    <div class="card">
-      <h3>💬 Чаты</h3>
-      <p class="char-desc">История диалогов</p>
-    </div>
-    <div class="card">
-      <h3>⭐ Premium</h3>
-      <p class="char-desc">Подписка</p>
-    </div>
-  </div>
-</div>
+  <!-- MAIN MENU -->
+  <section id="screen-home">
+    <button class="btn" onclick="openCharacters()">🎭 Персонажи</button>
+    <button class="btn secondary">💬 Чаты (скоро)</button>
+    <button class="btn">👤 Профиль</button>
+    <button class="btn">🛒 Магазин</button>
+  </section>
 
-<!-- CHARACTERS LIST -->
-<div id="characters" class="screen hidden">
-  <div class="header">Персонажи</div>
+  <!-- CHARACTERS -->
+  <section id="screen-characters" class="hidden">
+    <div class="grid" id="charactersGrid"></div>
+    <br>
+    <button class="btn" onclick="goHome()">← Назад</button>
+  </section>
 
-  <div class="card" onclick="openCharacter(0)">
-    <img class="char-img" src="https://i.imgur.com/8Km9tLL.jpg">
-    <div class="char-name">Акира</div>
-    <div class="char-desc">Холодная, доминирующая. Любит контроль.</div>
-  </div>
+  <!-- CHARACTER VIEW -->
+  <section id="screen-character" class="hidden">
+    <img id="charImg" class="char-img" />
+    <h2 id="charName"></h2>
+    <div id="charMeta" class="meta"></div>
+    <p id="charDesc" class="char-desc"></p>
+    <br>
+    <button class="btn secondary">💬 Начать чат</button>
+    <button class="btn" onclick="openCharacters()">← К персонажам</button>
+  </section>
 
-  <div style="height:12px"></div>
+</main>
 
-  <div class="card" onclick="openCharacter(1)">
-    <img class="char-img" src="https://i.imgur.com/4AiXzf8.jpeg">
-    <div class="char-name">Мию</div>
-    <div class="char-desc">Милая, застенчивая, быстро привязывается.</div>
-  </div>
-
-  <div style="margin-top:16px">
-    <button class="btn" onclick="goHome()">⬅ Назад</button>
-  </div>
-</div>
-
-<!-- CHARACTER VIEW -->
-<div id="character" class="screen hidden">
-  <div class="header" id="charTitle"></div>
-  <div class="card">
-    <img id="charImg" class="char-img">
-    <p id="charStory" class="char-desc"></p>
-    <button class="btn">💬 Начать чат</button>
-  </div>
-
-  <div style="margin-top:16px">
-    <button class="btn" onclick="openCharacters()">⬅ К персонажам</button>
-  </div>
-</div>
-
-<!-- NAV -->
-<div class="nav">
-  <button class="active" onclick="goHome()">🏠 Главная</button>
-  <button onclick="openCharacters()">🧍 Персонажи</button>
-  <button>👤 Профиль</button>
-</div>
+<footer></footer>
 
 <script>
-const chars=[
+/* ================= TELEGRAM ================= */
+const tg = window.Telegram?.WebApp;
+if (tg) tg.ready();
+
+/* ================= DATA ================= */
+const characters = [
   {
-    name:"Акира",
-    img:"https://i.imgur.com/8Km9tLL.jpg",
-    story:"Акира выросла в мире власти и манипуляций. Она видит слабости людей и играет ими."
+    id:1,
+    name:"Акира Хошино",
+    age:23,
+    gender:"Жен",
+    img:"https://images.unsplash.com/photo-1546967191-fdfb13ed6b1e?auto=format&fit=crop&w=900&q=90",
+    desc:"Холодная на первый взгляд, но любит тонкий флирт и напряжённые паузы. Может приблизиться слишком близко, будто проверяя твою реакцию."
   },
   {
-    name:"Мию",
-    img:"https://i.imgur.com/4AiXzf8.jpeg",
-    story:"Мию ищет тепло и заботу. Она легко привязывается и боится быть брошенной."
+    id:2,
+    name:"Мию Танака",
+    age:19,
+    gender:"Жен",
+    img:"https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=900&q=90",
+    desc:"Застенчивая и нежная, краснеет от комплиментов. Любит, когда с ней говорят тихо и чуть дразняще."
+  },
+  {
+    id:3,
+    name:"Рэн Такахаси",
+    age:28,
+    gender:"Муж",
+    img:"https://images.unsplash.com/photo-1544725176-7c40e5a2c9f9?auto=format&fit=crop&w=900&q=90",
+    desc:"Спокойный и уверенный. Его слова медленные и низкие, будто он знает, какое впечатление производит."
+  },
+  {
+    id:4,
+    name:"Кай Рюдзи",
+    age:24,
+    gender:"Муж",
+    img:"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=90",
+    desc:"Харизматичный и дерзкий. Любит поддразнить, оставить двусмысленную фразу и посмотреть, как ты отреагируешь."
   }
 ];
 
-function show(id){
-  ["main","characters","character"].forEach(x=>{
-    document.getElementById(x).classList.add("hidden");
-  });
-  document.getElementById(id).classList.remove("hidden");
+/* ================= UI LOGIC ================= */
+const screens = {
+  home: document.getElementById("screen-home"),
+  characters: document.getElementById("screen-characters"),
+  character: document.getElementById("screen-character")
+};
+
+function show(screen) {
+  Object.values(screens).forEach(s => s.classList.add("hidden"));
+  screens[screen].classList.remove("hidden");
 }
 
-function goHome(){show("main")}
-function openCharacters(){show("characters")}
-function openCharacter(i){
-  document.getElementById("charTitle").innerText=chars[i].name;
-  document.getElementById("charImg").src=chars[i].img;
-  document.getElementById("charStory").innerText=chars[i].story;
+function goHome() {
+  document.getElementById("header").innerText = "Anime RP";
+  show("home");
+}
+
+function openCharacters() {
+  document.getElementById("header").innerText = "Персонажи";
+  show("characters");
+}
+
+function openCharacter(id) {
+  const c = characters.find(x => x.id === id);
+  if (!c) return;
+
+  document.getElementById("header").innerText = c.name;
+  document.getElementById("charImg").src = c.img;
+  document.getElementById("charName").innerText = c.name;
+  document.getElementById("charMeta").innerText = `${c.gender}, ${c.age} лет`;
+  document.getElementById("charDesc").innerText = c.desc;
+
   show("character");
 }
 
-setTimeout(()=>{
-  document.getElementById("loader").style.display="none";
-  show("main");
-},600);
+/* ================= RENDER CHARACTERS ================= */
+const grid = document.getElementById("charactersGrid");
+characters.forEach(c => {
+  const el = document.createElement("div");
+  el.className = "card";
+  el.innerHTML = `
+    <img src="${c.img}">
+    <div class="info">
+      <div class="name">${c.name}</div>
+      <div class="meta">${c.gender}, ${c.age}</div>
+    </div>
+  `;
+  el.onclick = () => openCharacter(c.id);
+  grid.appendChild(el);
+});
 </script>
 
 </body>
