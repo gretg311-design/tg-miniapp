@@ -4,45 +4,51 @@ import pkg from "pg";
 const { Pool } = pkg;
 
 const app = express();
-app.use(express.json());
+const PORT = process.env.PORT || 10000;
 
+/* ---------- DATABASE ---------- */
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false }
 });
 
-// Проверка БД
-pool.query("SELECT 1")
+pool
+  .query(`
+    CREATE TABLE IF NOT EXISTS users (
+      telegram_id BIGINT PRIMARY KEY
+    );
+  `)
   .then(() => console.log("✅ Database ready"))
   .catch(err => console.error("❌ DB error", err));
 
-// Главная
-app.get("/", (req, res) => {
-  res.send("Mini App API работает");
-});
+/* ---------- MIDDLEWARE ---------- */
+app.use(express.json());
+app.use(express.static("public"));
 
-// Сохранение пользователя (ТОЛЬКО ID)
+/* ---------- API ---------- */
 app.post("/user", async (req, res) => {
   try {
     const { telegram_id } = req.body;
 
     if (!telegram_id) {
-      return res.status(400).json({ error: "telegram_id required" });
+      return res.status(400).json({ error: "No telegram_id" });
     }
 
     await pool.query(
-      "INSERT INTO users (telegram_id) VALUES ($1) ON CONFLICT DO NOTHING",
+      `INSERT INTO users (telegram_id)
+       VALUES ($1)
+       ON CONFLICT (telegram_id) DO NOTHING`,
       [telegram_id]
     );
 
-    res.json({ ok: true });
-  } catch (e) {
-    console.error("DB ERROR:", e);
-    res.status(500).json({ error: "db error" });
+    res.json({ ok: true, telegram_id });
+  } catch (err) {
+    console.error("❌ Insert error", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-const PORT = process.env.PORT || 10000;
+/* ---------- START ---------- */
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
