@@ -1,170 +1,218 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 <title>Anime AI 18+</title>
 
 <style>
 :root {
-  --bg:#0b0616;
-  --panel:#1a1033;
-  --card:#24134d;
-  --accent:#8b5cf6;
-  --text:#f4f1ff;
-  --muted:#b9b2e6;
+  --bg: #0b0616;
+  --card: #15102a;
+  --accent: #8b5cf6;
+  --accent-soft: #6d4cff;
+  --text: #ffffff;
+  --muted: #b5b0d4;
 }
 
-*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-body{
-  background:radial-gradient(circle at top,#1a1033,#0b0616 70%);
-  color:var(--text);
-  min-height:100vh;
+body {
+  background: radial-gradient(circle at top, #1a1038, var(--bg));
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-#loader{
-  position:fixed;inset:0;
-  display:flex;flex-direction:column;
-  justify-content:center;align-items:center;
-  background:radial-gradient(circle at top,#1f1340,#0b0616 70%);
-  z-index:10;
+/* ===== LOADER ===== */
+#loader {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  z-index: 999;
 }
 
-.moon{
-  width:90px;height:90px;border-radius:50%;
-  background:linear-gradient(135deg,#b794ff,#6d3bff);
-  box-shadow:0 0 40px #8b5cf6aa;
-  animation:pulse 2s infinite;
+.loader-box {
+  text-align: center;
 }
 
-@keyframes pulse{50%{transform:scale(1.1)}}
-
-#app{display:none;padding:18px}
-
-.header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:16px;
+.loader-circle {
+  width: 54px;
+  height: 54px;
+  border: 4px solid #2a2250;
+  border-top: 4px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
 }
 
-.title{font-size:24px;font-weight:700}
-.sub{color:var(--muted);font-size:13px}
-
-.stats{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-bottom:16px;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.stat{
-  background:linear-gradient(180deg,#24134d,#1a1033);
-  border-radius:16px;
-  padding:14px;
-  text-align:center;
+/* ===== APP ===== */
+#app {
+  display: none;
+  padding: 16px 14px 90px;
 }
 
-.stat b{font-size:18px}
-
-.daily{
-  background:linear-gradient(135deg,#8b5cf6,#6d3bff);
-  border-radius:18px;
-  padding:16px;
-  text-align:center;
-  margin-bottom:18px;
-  box-shadow:0 10px 30px #00000055;
+.header {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 18px;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
-.card{
-  background:linear-gradient(180deg,#24134d,#1a1033);
-  border-radius:18px;
-  padding:18px;
-  text-align:center;
-  box-shadow:0 8px 25px #00000055;
+.card {
+  background: linear-gradient(180deg, #1b1440, var(--card));
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
 
-.card span{display:block;margin-top:6px;color:var(--muted);font-size:13px}
+.card h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
 
-.admin{
-  margin-top:20px;
-  background:linear-gradient(135deg,#ff4d6d,#c9184a);
-  border-radius:18px;
-  padding:16px;
-  text-align:center;
-  display:none;
+.btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ===== PROFILE ===== */
+.profile {
+  margin-top: 18px;
+}
+
+.profile .btn {
+  background: #221b44;
+}
+
+/* ===== ADMIN ===== */
+#adminPanel {
+  display: none;
+  margin-top: 18px;
+}
+
+/* ===== BOTTOM NAV ===== */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #120c2a;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #241d52;
+}
+
+.nav button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.nav button.active {
+  color: var(--accent);
 }
 </style>
 </head>
 
 <body>
 
+<!-- ===== LOADER ===== -->
 <div id="loader">
-  <div class="moon"></div>
-  <div style="margin-top:18px;color:#b9b2e6">Проверка доступа…</div>
+  <div class="loader-box">
+    <div class="loader-circle"></div>
+    <div>Проверка пользователя…</div>
+  </div>
 </div>
 
+<!-- ===== APP ===== -->
 <div id="app">
-  <div class="header">
-    <div>
-      <div class="title">Anime AI 18+</div>
-      <div class="sub" id="userIdText">ID: ...</div>
-    </div>
-  </div>
 
-  <div class="stats">
-    <div class="stat">
-      <div>💎 Осколки</div>
-      <b>0</b>
-    </div>
-    <div class="stat">
-      <div>⭐ Premium</div>
-      <b>Нет</b>
-    </div>
-  </div>
-
-  <div class="daily">
-    🎁 Ежедневная награда<br>
-    <small>Нажмите, чтобы получить</small>
-  </div>
+  <div class="header">Anime AI 18+</div>
 
   <div class="grid">
-    <div class="card">🧍<span>Персонажи</span></div>
-    <div class="card">💬<span>Чаты</span></div>
-    <div class="card">🛒<span>Магазин осколков</span></div>
-    <div class="card">👤<span>Профиль</span></div>
-    <div class="card">⚙️<span>Настройки</span></div>
-    <div class="card">⭐<span>Premium</span></div>
+    <div class="card">
+      <h3>💬 Чаты</h3>
+      <button class="btn">Открыть</button>
+    </div>
+
+    <div class="card">
+      <h3>🧍 Персонажи</h3>
+      <button class="btn">Выбрать</button>
+    </div>
+
+    <div class="card">
+      <h3>🛒 Магазин</h3>
+      <button class="btn">Осколки</button>
+    </div>
+
+    <div class="card">
+      <h3>⭐ Premium</h3>
+      <button class="btn">Купить / Продлить</button>
+    </div>
   </div>
 
-  <div class="admin" id="adminPanel">
-    🔐 Админ-панель
+  <div class="profile card">
+    <h3>👤 Профиль</h3>
+    <div id="userIdText" style="margin:10px 0;color:#b5b0d4">ID: —</div>
+    <button class="btn">Пол / Настройки</button>
   </div>
+
+  <div id="adminPanel" class="card">
+    <h3>🛠 Админ-панель</h3>
+    <button class="btn">Открыть</button>
+  </div>
+
+</div>
+
+<!-- ===== NAV ===== -->
+<div class="nav">
+  <button class="active">🏠 Главная</button>
+  <button>💬 Чаты</button>
+  <button>👤 Профиль</button>
 </div>
 
 <script>
-setTimeout(() => {
-  const tg = window.Telegram?.WebApp;
-  if (!tg) {
-    alert("Не Telegram среда");
-    return;
-  }
+function startApp(userId) {
+  document.getElementById("userIdText").innerText = "ID: " + userId;
 
-  tg.ready();
-  const uid = tg.initDataUnsafe?.user?.id;
-  document.getElementById("userIdText").innerText = "ID: " + uid;
-
-  if (uid === 8287041036) {
+  if (Number(userId) === 8287041036) {
     document.getElementById("adminPanel").style.display = "block";
   }
 
   document.getElementById("loader").style.display = "none";
   document.getElementById("app").style.display = "block";
+}
+
+// мягкая инициализация (НЕ ЛОМАЕТСЯ)
+setTimeout(() => {
+  if (window.Telegram && Telegram.WebApp) {
+    const tg = Telegram.WebApp;
+    tg.ready();
+    const uid = tg.initDataUnsafe?.user?.id ?? "unknown";
+    startApp(uid);
+  } else {
+    startApp("preview");
+  }
 }, 1200);
 </script>
 
