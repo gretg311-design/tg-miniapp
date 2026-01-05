@@ -2,123 +2,169 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Anime AI 18+</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anime AI</title>
 
-  <!-- Telegram WebApp -->
+  <!-- Telegram Mini App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
     body {
       margin: 0;
-      padding: 0;
-      background: linear-gradient(180deg, #12001f, #1b0033);
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0b0b0f;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    /* ===== ЗАГРУЗКА ===== */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #1a1a2e, #07070b);
       display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .loader {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255,255,255,.15);
+      border-top: 3px solid #8b5cf6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 18px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 15px;
+      opacity: .9;
+    }
+
+    .fiction-note {
+      position: fixed;
+      right: 10px;
+      bottom: 8px;
+      font-size: 11px;
+      opacity: 0.45;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* ===== ОСНОВНОЕ МЕНЮ ===== */
+    #app {
+      display: none;
       height: 100vh;
+      padding: 18px;
+      box-sizing: border-box;
     }
 
-    .box {
-      background: rgba(255,255,255,0.05);
-      border-radius: 20px;
-      padding: 24px;
-      width: 90%;
-      max-width: 400px;
+    h1 {
+      margin-top: 0;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      border: none;
+      border-radius: 14px;
+      padding: 18px;
+      color: white;
+      font-size: 15px;
+      font-weight: 500;
       text-align: center;
-      box-shadow: 0 0 40px rgba(140,0,255,0.3);
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,.35);
     }
 
-    .ok {
-      color: #4cff8f;
-      font-size: 18px;
-      margin-bottom: 10px;
+    .btn.secondary {
+      background: #1f1f2e;
     }
 
-    .id {
-      font-size: 14px;
-      opacity: 0.8;
+    .admin {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
     }
   </style>
 </head>
 
 <body>
 
-<div class="box">
-  <div id="status">Проверка Telegram…</div>
+<!-- ===== ЭКРАН ЗАГРУЗКИ ===== -->
+<div id="loading-screen">
+  <div class="loader"></div>
+  <div class="loading-text">Проверка пользователя…</div>
+  <div class="fiction-note">Все персонажи являются вымышленными</div>
+</div>
+
+<!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
+<div id="app">
+  <h1>Главное меню</h1>
+
+  <div id="user-info"></div>
+
+  <div class="menu">
+    <div class="btn">Профиль</div>
+    <div class="btn">Персонажи</div>
+    <div class="btn">Чаты</div>
+    <div class="btn">Магазин</div>
+    <div class="btn secondary">Подписка</div>
+    <div class="btn secondary">Настройки</div>
+    <div id="admin-btn" class="btn admin" style="display:none">Админ</div>
+  </div>
 </div>
 
 <script>
-  const statusEl = document.getElementById("status");
+  const tg = window.Telegram.WebApp;
+  tg.ready();
 
-  if (!window.Telegram || !Telegram.WebApp) {
-    statusEl.innerHTML = "❌ Не Telegram среда";
-  } else {
-    const tg = Telegram.WebApp;
-    tg.ready();
+  fetch("/api/auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ initData: tg.initData })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.ok) {
+      document.querySelector(".loading-text").innerText = "Ошибка проверки Telegram";
+      return;
+    }
 
-    const userId = tg.initDataUnsafe?.user?.id || "неизвестно";
+    // скрываем загрузку
+    document.getElementById("loading-screen").remove();
 
-    statusEl.innerHTML = `
-      <div class="ok">✅ Доступ разрешён</div>
-      <div class="id">ID: ${userId}</div>
+    // показываем приложение
+    const app = document.getElementById("app");
+    app.style.display = "block";
+
+    const user = data.user;
+
+    document.getElementById("user-info").innerHTML = `
+      <p>ID: <b>${user.id}</b></p>
+      <p>Premium: ${user.is_premium ? "Да" : "Нет"}</p>
     `;
-  }
-</script>
 
-<!-- ========================= -->
-<!-- ПЕРСОНАЖИ (ШАГ 1) -->
-<!-- НИЧЕГО НЕ ЛОМАЕТ -->
-<!-- ========================= -->
-<script>
-window.CHARACTERS = [
-
-  /* ====== 50 ДЕВУШЕК ====== */
-  {
-    id: 1,
-    name: "Акира",
-    gender: "female",
-    age: 23,
-    description: "Холодная, доминирующая, любит контроль и психологические игры.",
-    story: "Акира привыкла управлять людьми, но иногда сама хочет быть раскрытой.",
-    image: "https://i.imgur.com/4AiXzf8.jpg"
-  },
-  {
-    id: 2,
-    name: "Мию",
-    gender: "female",
-    age: 19,
-    description: "Милая, застенчивая, легко привязывается.",
-    story: "Она ищет тепло и защиту, даже если боится это признать.",
-    image: "https://i.imgur.com/1Xq9BiY.jpg"
-  },
-
-  /* … (данные сокращены в интерфейсе, но логика та же) */
-
-  /* ====== 50 ПАРНЕЙ ====== */
-  {
-    id: 51,
-    name: "Рэн",
-    gender: "male",
-    age: 25,
-    description: "Спокойный, уверенный, говорит мало, действует точно.",
-    story: "Рэн всегда держит дистанцию, пока кто-то не станет для него особенным.",
-    image: "https://i.imgur.com/Qr71crq.jpg"
-  },
-  {
-    id: 52,
-    name: "Кай",
-    gender: "male",
-    age: 21,
-    description: "Дерзкий, игривый, любит провоцировать.",
-    story: "Он скрывает серьёзность за улыбкой и флиртом.",
-    image: "https://i.imgur.com/Z7AzH2c.jpg"
-  }
-
-  // Остальные персонажи будут добавлены следующим шагом
-];
+    // 👑 админка только админам
+    if (user.id === 8287041036 || data.isAdmin) {
+      document.getElementById("admin-btn").style.display = "block";
+    }
+  })
+  .catch(() => {
+    document.querySelector(".loading-text").innerText = "Ошибка соединения";
+  });
 </script>
 
 </body>
