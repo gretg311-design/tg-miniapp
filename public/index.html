@@ -1,219 +1,191 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anime AI 18+</title>
 
 <style>
-:root {
-  --bg: #0b0616;
-  --card: #15102a;
-  --accent: #8b5cf6;
-  --accent-soft: #6d4cff;
-  --text: #ffffff;
-  --muted: #b5b0d4;
+:root{
+  --bg:#0b0616;
+  --card:#17112f;
+  --accent:#8b5cf6;
+  --text:#fff;
+  --muted:#b5b0d4;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui;
+  background:radial-gradient(circle at top,#1b1140,var(--bg));
+  color:var(--text);
+}
+.hidden{display:none}
+
+/* LOADER */
+#loader{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);z-index:10;
+}
+.loader{
+  width:48px;height:48px;border-radius:50%;
+  border:4px solid #2a2250;border-top:4px solid var(--accent);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* COMMON */
+.screen{padding:16px 14px 90px}
+.header{font-size:20px;font-weight:700;margin-bottom:16px}
+.card{
+  background:linear-gradient(180deg,#1c1450,var(--card));
+  border-radius:18px;padding:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+.btn{
+  width:100%;padding:12px;border-radius:14px;
+  border:none;
+  background:linear-gradient(135deg,var(--accent),#6d4cff);
+  color:#fff;font-weight:600;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* GRID */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 
-body {
-  background: radial-gradient(circle at top, #1a1038, var(--bg));
-  color: var(--text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+/* CHARACTERS */
+.char-img{
+  width:100%;height:160px;
+  border-radius:14px;
+  object-fit:cover;
+  margin-bottom:8px;
 }
+.char-name{font-weight:700}
+.char-desc{font-size:13px;color:var(--muted);margin:6px 0}
 
-/* ===== LOADER ===== */
-#loader {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg);
-  z-index: 999;
+/* NAV */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#120c2a;
+  border-top:1px solid #241d52;
+  display:flex;justify-content:space-around;
+  padding:10px 0;
 }
-
-.loader-box {
-  text-align: center;
+.nav button{
+  background:none;border:none;
+  color:var(--muted);font-size:12px;
 }
-
-.loader-circle {
-  width: 54px;
-  height: 54px;
-  border: 4px solid #2a2250;
-  border-top: 4px solid var(--accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ===== APP ===== */
-#app {
-  display: none;
-  padding: 16px 14px 90px;
-}
-
-.header {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 18px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.card {
-  background: linear-gradient(180deg, #1b1440, var(--card));
-  border-radius: 18px;
-  padding: 18px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
-}
-
-.card h3 {
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.btn {
-  width: 100%;
-  padding: 12px;
-  border-radius: 14px;
-  border: none;
-  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-/* ===== PROFILE ===== */
-.profile {
-  margin-top: 18px;
-}
-
-.profile .btn {
-  background: #221b44;
-}
-
-/* ===== ADMIN ===== */
-#adminPanel {
-  display: none;
-  margin-top: 18px;
-}
-
-/* ===== BOTTOM NAV ===== */
-.nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #120c2a;
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  border-top: 1px solid #241d52;
-}
-
-.nav button {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.nav button.active {
-  color: var(--accent);
-}
+.nav .active{color:var(--accent)}
 </style>
 </head>
 
 <body>
 
-<!-- ===== LOADER ===== -->
-<div id="loader">
-  <div class="loader-box">
-    <div class="loader-circle"></div>
-    <div>Проверка пользователя…</div>
-  </div>
-</div>
+<!-- LOADER -->
+<div id="loader"><div class="loader"></div></div>
 
-<!-- ===== APP ===== -->
-<div id="app">
-
+<!-- MAIN MENU -->
+<div id="main" class="screen hidden">
   <div class="header">Anime AI 18+</div>
 
   <div class="grid">
     <div class="card">
-      <h3>💬 Чаты</h3>
-      <button class="btn">Открыть</button>
+      <h3>👤 Профиль</h3>
+      <p class="char-desc">Баланс, настройки</p>
     </div>
-
-    <div class="card">
+    <div class="card" onclick="openCharacters()">
       <h3>🧍 Персонажи</h3>
-      <button class="btn">Выбрать</button>
+      <p class="char-desc">Выбор персонажа</p>
     </div>
-
     <div class="card">
-      <h3>🛒 Магазин</h3>
-      <button class="btn">Осколки</button>
+      <h3>💬 Чаты</h3>
+      <p class="char-desc">История диалогов</p>
     </div>
-
     <div class="card">
       <h3>⭐ Premium</h3>
-      <button class="btn">Купить / Продлить</button>
+      <p class="char-desc">Подписка</p>
     </div>
   </div>
-
-  <div class="profile card">
-    <h3>👤 Профиль</h3>
-    <div id="userIdText" style="margin:10px 0;color:#b5b0d4">ID: —</div>
-    <button class="btn">Пол / Настройки</button>
-  </div>
-
-  <div id="adminPanel" class="card">
-    <h3>🛠 Админ-панель</h3>
-    <button class="btn">Открыть</button>
-  </div>
-
 </div>
 
-<!-- ===== NAV ===== -->
+<!-- CHARACTERS LIST -->
+<div id="characters" class="screen hidden">
+  <div class="header">Персонажи</div>
+
+  <div class="card" onclick="openCharacter(0)">
+    <img class="char-img" src="https://i.imgur.com/8Km9tLL.jpg">
+    <div class="char-name">Акира</div>
+    <div class="char-desc">Холодная, доминирующая. Любит контроль.</div>
+  </div>
+
+  <div style="height:12px"></div>
+
+  <div class="card" onclick="openCharacter(1)">
+    <img class="char-img" src="https://i.imgur.com/4AiXzf8.jpeg">
+    <div class="char-name">Мию</div>
+    <div class="char-desc">Милая, застенчивая, быстро привязывается.</div>
+  </div>
+
+  <div style="margin-top:16px">
+    <button class="btn" onclick="goHome()">⬅ Назад</button>
+  </div>
+</div>
+
+<!-- CHARACTER VIEW -->
+<div id="character" class="screen hidden">
+  <div class="header" id="charTitle"></div>
+  <div class="card">
+    <img id="charImg" class="char-img">
+    <p id="charStory" class="char-desc"></p>
+    <button class="btn">💬 Начать чат</button>
+  </div>
+
+  <div style="margin-top:16px">
+    <button class="btn" onclick="openCharacters()">⬅ К персонажам</button>
+  </div>
+</div>
+
+<!-- NAV -->
 <div class="nav">
-  <button class="active">🏠 Главная</button>
-  <button>💬 Чаты</button>
+  <button class="active" onclick="goHome()">🏠 Главная</button>
+  <button onclick="openCharacters()">🧍 Персонажи</button>
   <button>👤 Профиль</button>
 </div>
 
 <script>
-function startApp(userId) {
-  document.getElementById("userIdText").innerText = "ID: " + userId;
-
-  if (Number(userId) === 8287041036) {
-    document.getElementById("adminPanel").style.display = "block";
+const chars=[
+  {
+    name:"Акира",
+    img:"https://i.imgur.com/8Km9tLL.jpg",
+    story:"Акира выросла в мире власти и манипуляций. Она видит слабости людей и играет ими."
+  },
+  {
+    name:"Мию",
+    img:"https://i.imgur.com/4AiXzf8.jpeg",
+    story:"Мию ищет тепло и заботу. Она легко привязывается и боится быть брошенной."
   }
+];
 
-  document.getElementById("loader").style.display = "none";
-  document.getElementById("app").style.display = "block";
+function show(id){
+  ["main","characters","character"].forEach(x=>{
+    document.getElementById(x).classList.add("hidden");
+  });
+  document.getElementById(id).classList.remove("hidden");
 }
 
-// мягкая инициализация (НЕ ЛОМАЕТСЯ)
-setTimeout(() => {
-  if (window.Telegram && Telegram.WebApp) {
-    const tg = Telegram.WebApp;
-    tg.ready();
-    const uid = tg.initDataUnsafe?.user?.id ?? "unknown";
-    startApp(uid);
-  } else {
-    startApp("preview");
-  }
-}, 1200);
+function goHome(){show("main")}
+function openCharacters(){show("characters")}
+function openCharacter(i){
+  document.getElementById("charTitle").innerText=chars[i].name;
+  document.getElementById("charImg").src=chars[i].img;
+  document.getElementById("charStory").innerText=chars[i].story;
+  show("character");
+}
+
+setTimeout(()=>{
+  document.getElementById("loader").style.display="none";
+  show("main");
+},600);
 </script>
 
 </body>
