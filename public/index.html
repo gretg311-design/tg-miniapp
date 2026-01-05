@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Anime AI 18+</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #1a1a2e, #07070b);
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    /* ЗАГРУЗКА */
+    #loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(255,255,255,.2);
+      border-top: 3px solid #8b5cf6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .note {
+      position: fixed;
+      right: 10px;
+      bottom: 8px;
+      font-size: 11px;
+      opacity: .45;
+      user-select: none;
+    }
+
+    /* ПРИЛОЖЕНИЕ */
+    #app {
+      display: none;
+      padding: 18px;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .btn.dark {
+      background: #1f1f2e;
+    }
+
+    .btn.admin {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div>Загрузка…</div>
+  <div class="note">Все персонажи являются вымышленными</div>
+</div>
+
+<div id="app">
+  <h1>Anime AI 18+</h1>
+
+  <div id="user"></div>
+
+  <div class="menu">
+    <div class="btn">Профиль</div>
+    <div class="btn">Персонажи</div>
+    <div class="btn dark">Чаты</div>
+    <div class="btn dark">Premium</div>
+    <div id="adminBtn" class="btn admin">Админ</div>
+  </div>
+</div>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+
+  const user = tg.initDataUnsafe?.user;
+
+  if (!user) {
+    document.querySelector("#loading div:last-child").innerText =
+      "Откройте через Telegram";
+  } else {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("app").style.display = "block";
+
+    document.getElementById("user").innerHTML = `
+      <p>ID: <b>${user.id}</b></p>
+      <p>${user.first_name ?? ""}</p>
+    `;
+
+    // 👑 ТЫ — ОВНЕР
+    if (user.id === 8287041036) {
+      document.getElementById("adminBtn").style.display = "block";
+    }
+  }
+</script>
+
+</body>
+</html>
