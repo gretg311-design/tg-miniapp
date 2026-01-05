@@ -1,89 +1,74 @@
 import express from "express";
-import pkg from "pg";
-
-const { Pool } = pkg;
+import crypto from "crypto";
+import { pool } from "./db.js";
 
 const app = express();
-const PORT = process.env.PORT || 10000;
-
-/* ---------- DATABASE ---------- */
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
-(async () => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        telegram_id BIGINT PRIMARY KEY
-      );
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS blocked_users (
-        telegram_id BIGINT PRIMARY KEY
-      );
-    `);
-
-    console.log("✅ Database ready");
-  } catch (e) {
-    console.error("❌ DB error", e);
-  }
-})();
-
-/* ---------- MIDDLEWARE ---------- */
 app.use(express.json());
 app.use(express.static("public"));
 
-/* ---------- CHECK ACCESS ---------- */
-app.get("/access/:id", async (req, res) => {
+const BOT_TOKEN = process.env.BOT_TOKEN;
+
+// проверка Telegram initData
+function checkTelegramAuth(initData) {
+  const urlParams = new URLSearchParams(initData);
+  const hash = urlParams.get("hash");
+  urlParams.delete("hash");
+
+  const dataCheckString = [...urlParams.entries()]
+    .sort()
+    .map(([k, v]) => `${k}=${v}`)
+    .join("\n");
+
+  const secretKey = crypto
+    .createHash("sha256")
+    .update(BOT_TOKEN)
+    .digest();
+
+  const hmac = crypto
+    .createHmac("sha256", secretKey)
+    .update(dataCheckString)
+    .digest("hex");
+
+  return hmac === hash;
+}
+
+// 🔥 ГЛАВНОЕ API
+app.post("/api/init", async (req, res) => {
   try {
-    const id = req.params.id;
+    const { initData, userId } = req.body;
 
-    const blocked = await pool.query(
-      "SELECT telegram_id FROM blocked_users WHERE telegram_id = $1",
-      [id]
-    );
-
-    if (blocked.rows.length > 0) {
-      return res.json({ access: false });
+    if (!checkTelegramAuth(initData)) {
+      return res.status(401).json({ error: "Telegram auth failed" });
     }
 
-    await pool.query(
+    // создаём игрока, если нет
+    const result = await pool.query(
       `INSERT INTO users (telegram_id)
        VALUES ($1)
-       ON CONFLICT (telegram_id) DO NOTHING`,
-      [id]
+       ON CONFLICT (telegram_id) DO NOTHING
+       RETURNING *`,
+      [userId]
     );
 
-    res.json({ access: true });
-  } catch (err) {
-    console.error("❌ Access error", err);
-    res.status(500).json({ error: "Server error" });
+    // если уже был
+    const user =
+      result.rows[0] ||
+      (await pool.query(
+        "SELECT * FROM users WHERE telegram_id = $1",
+        [userId]
+      )).rows[0];
+
+    res.json({
+      ok: true,
+      shards: user.shards,
+      subscription: user.subscription
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server error" });
   }
 });
 
-/* ---------- ADMIN BLOCK USER ---------- */
-/* временно, для теста */
-app.post("/block", async (req, res) => {
-  const { telegram_id } = req.body;
-
-  if (!telegram_id) {
-    return res.status(400).json({ error: "No telegram_id" });
-  }
-
-  await pool.query(
-    `INSERT INTO blocked_users (telegram_id)
-     VALUES ($1)
-     ON CONFLICT DO NOTHING`,
-    [telegram_id]
-  );
-
-  res.json({ blocked: true });
-});
-
-/* ---------- START ---------- */
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(3000, () =>
+  console.log("🚀 Server running on 3000")
+);
