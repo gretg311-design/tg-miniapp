@@ -1,89 +1,103 @@
 import express from "express";
+import pkg from "pg";
+import bodyParser from "body-parser";
 import crypto from "crypto";
-import { pool } from "./db.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const { Pool } = pkg;
 const app = express();
-app.use(express.json());
-app.use(express.static("public"));
 
-const BOT_TOKEN = process.env.BOT_TOKEN;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// проверка Telegram initData
-function checkTelegramAuth(initData) {
-  const urlParams = new URLSearchParams(initData);
-  const hash = urlParams.get("hash");
-  urlParams.delete("hash");
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-  const dataCheckString = [...urlParams.entries()]
-    .sort()
-    .map(([k, v]) => `${k}=${v}`)
-    .join("\n");
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
-  const secretKey = crypto
-    .createHash("sha256")
-    .update(BOT_TOKEN)
+// ─────────────────────────────────────
+// Telegram init validation
+function checkTelegram(initData, botToken) {
+  const secret = crypto
+    .createHmac("sha256", "WebAppData")
+    .update(botToken)
     .digest();
 
-  const hmac = crypto
-    .createHmac("sha256", secretKey)
-    .update(dataCheckString)
+  const params = new URLSearchParams(initData);
+  const hash = params.get("hash");
+  params.delete("hash");
+
+  const data = [...params.entries()]
+    .map(([k, v]) => `${k}=${v}`)
+    .sort()
+    .join("\n");
+
+  const checkHash = crypto
+    .createHmac("sha256", secret)
+    .update(data)
     .digest("hex");
 
-  return hmac === hash;
+  return checkHash === hash;
 }
 
-// 🔥 ГЛАВНОЕ API
+// ─────────────────────────────────────
+// INIT USER
 app.post("/api/init", async (req, res) => {
+  const { initData, userId } = req.body;
+
+  if (!checkTelegram(initData, process.env.BOT_TOKEN)) {
+    return res.status(403).json({ error: "Bad Telegram auth" });
+  }
+
   try {
-    const { initData, userId } = req.body;
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        telegram_id BIGINT PRIMARY KEY,
+        shards INT DEFAULT 50,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
 
-    if (!checkTelegramAuth(initData)) {
-      return res.status(401).json({ error: "Telegram auth failed" });
-    }
-
-    // создаём игрока, если нет
     const result = await pool.query(
-      `INSERT INTO users (telegram_id)
-       VALUES ($1)
-       ON CONFLICT (telegram_id) DO NOTHING
-       RETURNING *`,
+      "SELECT shards FROM users WHERE telegram_id=$1",
       [userId]
     );
 
-    // если уже был
-    const user =
-      result.rows[0] ||
-      (await pool.query(
-        "SELECT * FROM users WHERE telegram_id = $1",
+    if (result.rows.length === 0) {
+      await pool.query(
+        "INSERT INTO users (telegram_id) VALUES ($1)",
         [userId]
-      )).rows[0];
+      );
+      return res.json({ shards: 50 });
+    }
 
-    res.json({
-      ok: true,
-      shards: user.shards,
-      subscription: user.subscription
-    });
+    res.json({ shards: result.rows[0].shards });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "server error" });
+    res.status(500).json({ error: "DB error" });
   }
 });
-app.post("/api/message", async (req, res) => {
-  try {
-    const { userId } = req.body;
 
-    const userRes = await pool.query(
-      "SELECT shards FROM users WHERE telegram_id = $1",
+// ─────────────────────────────────────
+// MESSAGE → MINUS SHARD
+app.post("/api/message", async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const q = await pool.query(
+      "SELECT shards FROM users WHERE telegram_id=$1",
       [userId]
     );
 
-    if (userRes.rows.length === 0) {
-      return res.status(404).json({ error: "User not found" });
+    if (q.rows.length === 0) {
+      return res.json({ ok: false, message: "User not found" });
     }
 
-    const shards = userRes.rows[0].shards;
-
-    if (shards <= 0) {
+    if (q.rows[0].shards <= 0) {
       return res.json({
         ok: false,
         message: "❌ Лунные осколки закончились"
@@ -91,14 +105,13 @@ app.post("/api/message", async (req, res) => {
     }
 
     await pool.query(
-      "UPDATE users SET shards = shards - 1 WHERE telegram_id = $1",
+      "UPDATE users SET shards = shards - 1 WHERE telegram_id=$1",
       [userId]
     );
 
     res.json({
       ok: true,
-      message: "✨ ИИ ответил",
-      shardsLeft: shards - 1
+      shardsLeft: q.rows[0].shards - 1
     });
   } catch (e) {
     console.error(e);
@@ -106,6 +119,12 @@ app.post("/api/message", async (req, res) => {
   }
 });
 
-app.listen(3000, () =>
-  console.log("🚀 Server running on 3000")
+// ─────────────────────────────────────
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () =>
+  console.log("🚀 Server running on port", PORT)
 );
