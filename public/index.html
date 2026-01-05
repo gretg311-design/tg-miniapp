@@ -1,137 +1,192 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Anime AI 18+</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Anime AI 18+</title>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#0b0716;
+  --bg2:#120b25;
+  --card:#1a1230;
+  --card2:#24194a;
+  --accent:#8b5cf6;
+  --text:#ffffff;
+  --muted:#b8b1d6;
+}
 
-  <style>
-    body {
-      margin: 0;
-      background: radial-gradient(circle at top, #1a1a2e, #07070b);
-      color: #fff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      overflow: hidden;
-    }
+*{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+body{
+  margin:0;
+  background:linear-gradient(180deg,var(--bg2),var(--bg));
+  color:var(--text);
+}
 
-    /* ЗАГРУЗКА */
-    #loading {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-    }
+/* ---------- LOADER ---------- */
+#loader{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(180deg,var(--bg2),var(--bg));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:9999;
+}
+.spinner{
+  width:42px;height:42px;
+  border:4px solid #ffffff22;
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-note{
+  position:absolute;
+  bottom:14px;
+  right:16px;
+  font-size:12px;
+  color:var(--muted);
+  opacity:.8;
+}
 
-    .spinner {
-      width: 42px;
-      height: 42px;
-      border: 3px solid rgba(255,255,255,.2);
-      border-top: 3px solid #8b5cf6;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 16px;
-    }
+/* ---------- HEADER ---------- */
+.header{
+  padding:18px 18px 8px;
+  font-size:22px;
+  font-weight:700;
+}
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+/* ---------- MAIN GRID ---------- */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  padding:16px;
+}
+.card{
+  background:linear-gradient(180deg,var(--card2),var(--card));
+  border-radius:18px;
+  padding:18px;
+  min-height:110px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.card-title{
+  font-size:17px;
+  font-weight:600;
+}
+.card-sub{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:6px;
+}
 
-    .note {
-      position: fixed;
-      right: 10px;
-      bottom: 8px;
-      font-size: 11px;
-      opacity: .45;
-      user-select: none;
-    }
+/* ---------- SCREENS ---------- */
+.screen{display:none}
+.screen.active{display:block}
 
-    /* ПРИЛОЖЕНИЕ */
-    #app {
-      display: none;
-      padding: 18px;
-    }
+/* ---------- BACK BUTTON ---------- */
+.back{
+  padding:10px 16px;
+  color:var(--accent);
+  font-weight:600;
+}
 
-    h1 {
-      margin-top: 0;
-      font-size: 22px;
-    }
-
-    .menu {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      margin-top: 20px;
-    }
-
-    .btn {
-      background: linear-gradient(135deg, #8b5cf6, #6366f1);
-      border-radius: 14px;
-      padding: 18px;
-      text-align: center;
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    .btn.dark {
-      background: #1f1f2e;
-    }
-
-    .btn.admin {
-      background: linear-gradient(135deg, #ef4444, #b91c1c);
-      display: none;
-    }
-  </style>
+/* ---------- BOTTOM NAV ---------- */
+.nav{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  background:#0f0a1f;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0 12px;
+}
+.nav-btn{
+  font-size:13px;
+  color:var(--muted);
+}
+.nav-btn.active{color:var(--accent)}
+</style>
 </head>
 
 <body>
 
-<div id="loading">
+<!-- LOADER -->
+<div id="loader">
   <div class="spinner"></div>
-  <div>Загрузка…</div>
-  <div class="note">Все персонажи являются вымышленными</div>
+  <div class="loader-note">Все персонажи являются вымышленными</div>
 </div>
 
-<div id="app">
-  <h1>Anime AI 18+</h1>
+<!-- MAIN -->
+<div id="app" style="display:none">
 
-  <div id="user"></div>
+  <!-- HOME -->
+  <div class="screen active" id="home">
+    <div class="header">Anime AI 18+</div>
 
-  <div class="menu">
-    <div class="btn">Профиль</div>
-    <div class="btn">Персонажи</div>
-    <div class="btn dark">Чаты</div>
-    <div class="btn dark">Premium</div>
-    <div id="adminBtn" class="btn admin">Админ</div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">👤 Профиль</div>
+        <div class="card-sub">Баланс, настройки</div>
+      </div>
+
+      <div class="card" onclick="openScreen('characters')">
+        <div class="card-title">🧍 Персонажи</div>
+        <div class="card-sub">Выбор персонажа</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💬 Чаты</div>
+        <div class="card-sub">История диалогов</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⭐ Premium</div>
+        <div class="card-sub">Подписка</div>
+      </div>
+    </div>
   </div>
+
+  <!-- CHARACTERS -->
+  <div class="screen" id="characters">
+    <div class="back" onclick="openScreen('home')">← Назад</div>
+    <div class="header">Персонажи</div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">Акира</div>
+        <div class="card-sub">Холодная, доминирующая</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Мию</div>
+        <div class="card-sub">Милая, застенчивая</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="nav">
+  <div class="nav-btn active" onclick="openScreen('home')">🏠 Главная</div>
+  <div class="nav-btn" onclick="openScreen('characters')">🧍 Персонажи</div>
+  <div class="nav-btn">👤 Профиль</div>
 </div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
+function openScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(n=>n.classList.remove('active'));
+}
 
-  const user = tg.initDataUnsafe?.user;
-
-  if (!user) {
-    document.querySelector("#loading div:last-child").innerText =
-      "Откройте через Telegram";
-  } else {
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("app").style.display = "block";
-
-    document.getElementById("user").innerHTML = `
-      <p>ID: <b>${user.id}</b></p>
-      <p>${user.first_name ?? ""}</p>
-    `;
-
-    // 👑 ТЫ — ОВНЕР
-    if (user.id === 8287041036) {
-      document.getElementById("adminBtn").style.display = "block";
-    }
-  }
+setTimeout(()=>{
+  document.getElementById('loader').style.display='none';
+  document.getElementById('app').style.display='block';
+},900);
 </script>
 
 </body>
