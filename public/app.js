@@ -1,67 +1,119 @@
+console.log("🔥 app.js loaded");
+
 const app = document.getElementById("app");
 
+/* ===== Проверка Telegram ===== */
 if (!window.Telegram || !Telegram.WebApp) {
-  app.innerHTML = "<h3>❌ Открой через Telegram</h3>";
-  throw new Error("Not Telegram");
+  app.innerHTML = `
+    <div class="card">
+      ❌ Ошибка проверки Telegram
+    </div>
+  `;
+  throw new Error("Not Telegram WebApp");
 }
 
 const tg = Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-const user = tg.initDataUnsafe?.user;
+/* ===== Пользователь ===== */
+const userId = tg.initDataUnsafe?.user?.id;
 
-if (!user?.id) {
-  app.innerHTML = "<h3>❌ Ошибка авторизации</h3>";
-  throw new Error("No user");
+if (!userId) {
+  app.innerHTML = `
+    <div class="card">
+      ❌ Пользователь не определён
+    </div>
+  `;
+  throw new Error("No user ID");
 }
 
-// 👇 временные данные (ПОКА БЕЗ БД)
-const state = {
-  id: user.id,
-  balance: 0,
-  shards: 0,
-  premium: false
+/* ===== ВРЕМЕННЫЕ ДАННЫЕ (заглушка) ===== */
+const userData = {
+  id: userId,
+  balance: 120,
+  shards: 3,
 };
 
-renderMain();
+/* ===== ПЕРСОНАЖИ (заглушка) ===== */
+const characters = [
+  {
+    id: 1,
+    name: "Акира",
+    desc: "Холодная, умная, доминирующая. Любит контроль и психологические игры.",
+    img: "https://i.imgur.com/7QZ6F6R.jpg",
+  },
+  {
+    id: 2,
+    name: "Мию",
+    desc: "Милая, застенчивая, быстро привязывается. Склонна к зависимости.",
+    img: "https://i.imgur.com/1bX5QH6.jpg",
+  },
+  {
+    id: 3,
+    name: "Рейна",
+    desc: "Провокационная, дерзкая, любит дразнить и проверять границы.",
+    img: "https://i.imgur.com/9Yq4YpJ.jpg",
+  },
+];
 
-function renderMain() {
+/* ===== РЕНДЕР ===== */
+renderCharacters();
+
+/* ===== ФУНКЦИИ ===== */
+
+function renderCharacters() {
   app.innerHTML = `
-    <div style="padding:20px; width:100%; max-width:420px">
+    <h2>🌙 Персонажи</h2>
 
-      <h2 style="text-align:center;">🌙 Anime AI</h2>
-
-      <div class="card">
-        <div>🆔 ID: ${state.id}</div>
-        <div>💎 Лунные осколки: ${state.shards}</div>
-        <div>💰 Баланс: ${state.balance}</div>
-        <div>⭐ Премиум: ${state.premium ? "Да" : "Нет"}</div>
-      </div>
-
-      <button onclick="daily()">🎁 Ежедневная награда</button>
-      <button onclick="characters()">👥 Персонажи</button>
-      <button onclick="chats()">💬 Чаты</button>
-      <button onclick="shop()">🛒 Магазин</button>
-      <button onclick="profile()">⚙️ Профиль</button>
-
+    <div class="card">
+      <div>🆔 ID: ${userData.id}</div>
+      <div>💰 Баланс: ${userData.balance}</div>
+      <div>✨ Осколки: ${userData.shards}</div>
     </div>
+
+    ${characters
+      .map(
+        (c) => `
+      <div class="card">
+        <img src="${c.img}" 
+             style="width:100%; border-radius:12px; margin-bottom:10px;" />
+        <strong>${c.name}</strong>
+        <div style="font-size:13px; opacity:.85; margin-top:6px;">
+          ${c.desc}
+        </div>
+        <button onclick="openChat(${c.id})">
+          💬 Начать чат
+        </button>
+      </div>
+    `
+      )
+      .join("")}
+
+    <button onclick="alert('Магазин скоро')">🛒 Магазин осколков</button>
+    <button onclick="alert('Премиум скоро')">⭐ Купить / Продлить подписку</button>
   `;
 }
 
-// ====== заглушки ======
-function daily() {
-  alert("🎁 Ежедневка (скоро)");
-}
-function characters() {
-  alert("👥 Персонажи (скоро)");
-}
-function chats() {
-  alert("💬 Чаты (скоро)");
-}
-function shop() {
-  alert("🛒 Магазин осколков (скоро)");
-}
-function profile() {
-  alert("⚙️ Профиль (скоро)");
+function openChat(characterId) {
+  const character = characters.find((c) => c.id === characterId);
+  if (!character) return;
+
+  app.innerHTML = `
+    <h2>💬 ${character.name}</h2>
+
+    <div class="card" style="min-height:120px;">
+      <div style="opacity:.7; font-size:14px;">
+        ${character.name} смотрит на тебя и ждёт твоего сообщения…
+      </div>
+    </div>
+
+    <button onclick="alert('RP-чат будет на следующем шаге')">
+      ✍️ Написать
+    </button>
+
+    <button onclick="renderCharacters()">
+      ⬅️ Назад к персонажам
+    </button>
+  `;
 }
