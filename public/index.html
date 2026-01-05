@@ -1,34 +1,62 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>RP AI Bot</title>
+  <meta charset="UTF-8" />
+  <title>Anime AI 18+</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      background: black;
+      color: #00ff88;
+      font-family: monospace;
+      padding: 20px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 16px;
+    }
+  </style>
 </head>
 <body>
-  <h2 id="status">Загрузка...</h2>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
+<h3 id="status">Загрузка...</h3>
+<button id="send">💬 Написать ИИ</button>
 
-    fetch("/api/init", {
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+
+  const userId = tg.initDataUnsafe.user.id;
+  const status = document.getElementById("status");
+
+  fetch("/api/init", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      initData: tg.initData,
+      userId
+    })
+  })
+  .then(r => r.json())
+  .then(d => {
+    status.innerText = "🌙 Осколки: " + d.shards;
+  });
+
+  document.getElementById("send").onclick = () => {
+    fetch("/api/message", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        initData: tg.initData,
-        userId: tg.initDataUnsafe.user.id
-      })
+      body: JSON.stringify({ userId })
     })
     .then(r => r.json())
     .then(d => {
-      document.getElementById("status").innerText =
-        "🌙 Осколки: " + d.shards +
-        "\n📦 Подписка: " + d.subscription;
-    })
-    .catch(() => {
-      document.getElementById("status").innerText = "❌ Ошибка";
+      status.innerText = d.ok
+        ? "🌙 Осталось: " + d.shardsLeft
+        : d.message;
     });
-  </script>
+  };
+</script>
+
 </body>
 </html>
