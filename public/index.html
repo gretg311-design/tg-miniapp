@@ -1,1 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Anime AI 18+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+    }
+
+    #app {
+      padding: 16px;
+      padding-bottom: 90px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      background: linear-gradient(90deg, #8e2de2, #4a00e0);
+      color: white;
+    }
+
+    button.secondary {
+      background: rgba(255,255,255,0.15);
+    }
+
+    button.admin {
+      background: linear-gradient(90deg, #ff512f, #dd2476);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+
+    .bottom-nav button {
+      width: auto;
+      background: none;
+      font-size: 14px;
+    }
+
+    img.char {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">Загрузка…</div>
+
+  <div class="bottom-nav">
+    <button onclick="renderHome()">🏠 Главная</button>
+    <button onclick="renderChats()">💬 Чаты</button>
+    <button onclick="renderProfile()">👤 Профиль</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
