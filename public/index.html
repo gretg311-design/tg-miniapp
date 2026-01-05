@@ -2,43 +2,52 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Mini App</title>
+  <title>Anime AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
 
-<body style="background:#0b0b0b;color:#00ff88;font-family:monospace">
-  <h3 id="status">🔄 Проверка Telegram…</h3>
-
-  <script>
-    const status = document.getElementById("status");
-
-    if (!window.Telegram || !Telegram.WebApp) {
-      status.innerText = "❌ Не Telegram среда";
-    } else {
-      const tg = Telegram.WebApp;
-      tg.ready();
-
-      fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: tg.initData })
-      })
-      .then(r => r.json())
-      .then(data => {
-        if (!data.ok) {
-          status.innerText = "❌ Ошибка проверки Telegram";
-          return;
-        }
-
-        status.innerText =
-          "✅ Mini App работает\n" +
-          "Telegram ID: " + data.user_id;
-      })
-      .catch(err => {
-        status.innerText = "❌ Сервер недоступен";
-        console.error(err);
-      });
+  <style>
+    body {
+      margin: 0;
+      background: #0b0b0f;
+      color: #fff;
+      font-family: Arial, sans-serif;
     }
-  </script>
+    #screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #333;
+      border-top: 4px solid #7c7cff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .error {
+      color: #ff4d4d;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="screen">
+  <div class="loader"></div>
+  <div id="text">Загрузка…</div>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
