@@ -25,7 +25,26 @@ pool
 app.use(express.json());
 app.use(express.static("public"));
 
-/* ---------- API ---------- */
+/* ---------- CHECK USER ---------- */
+app.get("/user/:id", async (req, res) => {
+  try {
+    const telegramId = req.params.id;
+
+    const result = await pool.query(
+      "SELECT telegram_id FROM users WHERE telegram_id = $1",
+      [telegramId]
+    );
+
+    res.json({
+      exists: result.rows.length > 0
+    });
+  } catch (err) {
+    console.error("❌ Check error", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ---------- SAVE USER ---------- */
 app.post("/user", async (req, res) => {
   try {
     const { telegram_id } = req.body;
@@ -41,7 +60,7 @@ app.post("/user", async (req, res) => {
       [telegram_id]
     );
 
-    res.json({ ok: true, telegram_id });
+    res.json({ saved: true });
   } catch (err) {
     console.error("❌ Insert error", err);
     res.status(500).json({ error: "Server error" });
