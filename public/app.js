@@ -8,27 +8,16 @@ const userId = tg.initDataUnsafe?.user?.id;
 if (!userId) {
   status.innerText = "❌ Нет Telegram ID";
 } else {
-  status.innerText = "🔍 Проверяем пользователя...";
+  status.innerText = "🔍 Проверка доступа...";
 
-  fetch(`/user/${userId}`)
+  fetch(`/access/${userId}`)
     .then(res => res.json())
     .then(data => {
-      if (data.exists) {
-        status.innerText = "✅ Пользователь уже есть\nID: " + userId;
+      if (!data.access) {
+        status.innerText = "⛔ Доступ запрещён";
+        tg.close();
       } else {
-        status.innerText = "➕ Новый пользователь, сохраняем...";
-
-        fetch("/user", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ telegram_id: userId })
-        })
-          .then(() => {
-            status.innerText = "🎉 Пользователь добавлен\nID: " + userId;
-          })
-          .catch(() => {
-            status.innerText = "❌ Ошибка сохранения";
-          });
+        status.innerText = "✅ Доступ разрешён\nID: " + userId;
       }
     })
     .catch(() => {
