@@ -2,73 +2,47 @@ import express from "express";
 import pkg from "pg";
 
 const { Pool } = pkg;
-const app = express();
-const PORT = process.env.PORT || 3000;
 
-/* =======================
-   DATABASE
-======================= */
+const app = express();
+app.use(express.json());
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 });
 
-async function initDB() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      telegram_id BIGINT UNIQUE NOT NULL,
-      first_name TEXT,
-      username TEXT,
-      created_at TIMESTAMP DEFAULT NOW()
-    );
-  `);
+// Проверка БД
+pool.query("SELECT 1")
+  .then(() => console.log("✅ Database ready"))
+  .catch(err => console.error("❌ DB error", err));
 
-  console.log("✅ Database ready");
-}
-
-initDB().catch(console.error);
-
-/* =======================
-   MIDDLEWARE
-======================= */
-
-app.use(express.json());
-app.use(express.static("public"));
-
-/* =======================
-   ROUTES
-======================= */
-
-app.get("/health", (req, res) => {
-  res.send("OK");
+// Главная
+app.get("/", (req, res) => {
+  res.send("Mini App API работает");
 });
 
+// Сохранение пользователя (ТОЛЬКО ID)
 app.post("/user", async (req, res) => {
-  const { telegram_id, first_name, username } = req.body;
-
   try {
+    const { telegram_id } = req.body;
+
+    if (!telegram_id) {
+      return res.status(400).json({ error: "telegram_id required" });
+    }
+
     await pool.query(
-      `
-      INSERT INTO users (telegram_id, first_name, username)
-      VALUES ($1, $2, $3)
-      ON CONFLICT (telegram_id) DO NOTHING
-      `,
-      [telegram_id, first_name, username]
+      "INSERT INTO users (telegram_id) VALUES ($1) ON CONFLICT DO NOTHING",
+      [telegram_id]
     );
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error("DB ERROR:", e);
     res.status(500).json({ error: "db error" });
   }
 });
 
-/* =======================
-   START
-======================= */
-
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log("🚀 Server running on port", PORT);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
