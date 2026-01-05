@@ -1,23 +1,35 @@
 const status = document.getElementById("status");
 
-if (!window.Telegram || !Telegram.WebApp) {
-  status.innerText = "❌ Не Telegram среда";
+const tg = Telegram.WebApp;
+tg.ready();
+
+const userId = tg.initDataUnsafe?.user?.id;
+
+if (!userId) {
+  status.innerText = "❌ Нет Telegram ID";
 } else {
-  const tg = Telegram.WebApp;
-  tg.ready();
+  status.innerText = "🔍 Проверяем пользователя...";
 
-  const userId = tg.initDataUnsafe?.user?.id;
-
-  status.innerText = "⏳ Сохраняем пользователя...";
-
-  fetch("/user", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ telegram_id: userId }),
-  })
+  fetch(`/user/${userId}`)
     .then(res => res.json())
-    .then(() => {
-      status.innerText = "✅ Пользователь сохранён\nID: " + userId;
+    .then(data => {
+      if (data.exists) {
+        status.innerText = "✅ Пользователь уже есть\nID: " + userId;
+      } else {
+        status.innerText = "➕ Новый пользователь, сохраняем...";
+
+        fetch("/user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ telegram_id: userId })
+        })
+          .then(() => {
+            status.innerText = "🎉 Пользователь добавлен\nID: " + userId;
+          })
+          .catch(() => {
+            status.innerText = "❌ Ошибка сохранения";
+          });
+      }
     })
     .catch(() => {
       status.innerText = "❌ Ошибка сервера";
