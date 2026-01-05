@@ -1,26 +1,74 @@
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
+import pkg from "pg";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+const { Pool } = pkg;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/* === ВАЖНО: static ДОЛЖЕН БЫТЬ ВЫШЕ ВСЕГО === */
-app.use(express.static(path.join(__dirname, "public")));
+/* =======================
+   DATABASE
+======================= */
 
-/* === health check === */
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
+async function initDB() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      telegram_id BIGINT UNIQUE NOT NULL,
+      first_name TEXT,
+      username TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
+
+  console.log("✅ Database ready");
+}
+
+initDB().catch(console.error);
+
+/* =======================
+   MIDDLEWARE
+======================= */
+
+app.use(express.json());
+app.use(express.static("public"));
+
+/* =======================
+   ROUTES
+======================= */
+
 app.get("/health", (req, res) => {
   res.send("OK");
 });
 
-/* === fallback ТОЛЬКО для главной === */
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+app.post("/user", async (req, res) => {
+  const { telegram_id, first_name, username } = req.body;
+
+  try {
+    await pool.query(
+      `
+      INSERT INTO users (telegram_id, first_name, username)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (telegram_id) DO NOTHING
+      `,
+      [telegram_id, first_name, username]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "db error" });
+  }
 });
 
+/* =======================
+   START
+======================= */
+
 app.listen(PORT, () => {
-  console.log("🚀 Server started on port", PORT);
+  console.log("🚀 Server running on port", PORT);
 });
