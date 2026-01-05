@@ -1,154 +1,172 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Anime AI 18+</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime AI 18+</title>
 
-  <style>
-    :root {
-      --bg: #0b0616;
-      --card: #1a1033;
-      --accent: #8b5cf6;
-      --text: #f4f1ff;
-      --muted: #b9b2e6;
-    }
+<style>
+:root {
+  --bg:#0b0616;
+  --panel:#1a1033;
+  --card:#24134d;
+  --accent:#8b5cf6;
+  --text:#f4f1ff;
+  --muted:#b9b2e6;
+}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 
-    body {
-      background: radial-gradient(circle at top, #1a1033, #0b0616 70%);
-      color: var(--text);
-      height: 100vh;
-      overflow: hidden;
-    }
+body{
+  background:radial-gradient(circle at top,#1a1033,#0b0616 70%);
+  color:var(--text);
+  min-height:100vh;
+}
 
-    /* ===== LOADER ===== */
-    #loader {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      background: radial-gradient(circle at top, #1f1340, #0b0616 70%);
-      z-index: 10;
-      animation: fadeIn 0.6s ease;
-    }
+#loader{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  background:radial-gradient(circle at top,#1f1340,#0b0616 70%);
+  z-index:10;
+}
 
-    .moon {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #b794ff, #6d3bff);
-      box-shadow: 0 0 40px #8b5cf6aa;
-      animation: pulse 2s infinite ease-in-out;
-    }
+.moon{
+  width:90px;height:90px;border-radius:50%;
+  background:linear-gradient(135deg,#b794ff,#6d3bff);
+  box-shadow:0 0 40px #8b5cf6aa;
+  animation:pulse 2s infinite;
+}
 
-    .loader-text {
-      text-align: center;
-      color: var(--muted);
-      font-size: 15px;
-      letter-spacing: 0.5px;
-    }
+@keyframes pulse{50%{transform:scale(1.1)}}
 
-    /* ===== MAIN APP ===== */
-    #app {
-      display: none;
-      height: 100%;
-      padding: 20px;
-      animation: fadeIn 0.5s ease;
-    }
+#app{display:none;padding:18px}
 
-    .title {
-      font-size: 26px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:16px;
+}
 
-    .subtitle {
-      color: var(--muted);
-      margin-bottom: 24px;
-    }
+.title{font-size:24px;font-weight:700}
+.sub{color:var(--muted);font-size:13px}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
 
-    .card {
-      background: linear-gradient(180deg, #24134d, #1a1033);
-      border-radius: 18px;
-      padding: 18px;
-      text-align: center;
-      box-shadow: 0 10px 30px #00000055;
-      transition: transform 0.15s ease;
-    }
+.stat{
+  background:linear-gradient(180deg,#24134d,#1a1033);
+  border-radius:16px;
+  padding:14px;
+  text-align:center;
+}
 
-    .card:active {
-      transform: scale(0.97);
-    }
+.stat b{font-size:18px}
 
-    .card span {
-      display: block;
-      margin-top: 8px;
-      font-size: 14px;
-      color: var(--muted);
-    }
+.daily{
+  background:linear-gradient(135deg,#8b5cf6,#6d3bff);
+  border-radius:18px;
+  padding:16px;
+  text-align:center;
+  margin-bottom:18px;
+  box-shadow:0 10px 30px #00000055;
+}
 
-    /* ===== ANIMATIONS ===== */
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-  </style>
+.card{
+  background:linear-gradient(180deg,#24134d,#1a1033);
+  border-radius:18px;
+  padding:18px;
+  text-align:center;
+  box-shadow:0 8px 25px #00000055;
+}
+
+.card span{display:block;margin-top:6px;color:var(--muted);font-size:13px}
+
+.admin{
+  margin-top:20px;
+  background:linear-gradient(135deg,#ff4d6d,#c9184a);
+  border-radius:18px;
+  padding:16px;
+  text-align:center;
+  display:none;
+}
+</style>
 </head>
 
 <body>
 
-  <!-- LOADING SCREEN -->
-  <div id="loader">
-    <div class="moon"></div>
-    <div class="loader-text">
-      Проверка доступа…<br>
-      Подключение к миру персонажей
+<div id="loader">
+  <div class="moon"></div>
+  <div style="margin-top:18px;color:#b9b2e6">Проверка доступа…</div>
+</div>
+
+<div id="app">
+  <div class="header">
+    <div>
+      <div class="title">Anime AI 18+</div>
+      <div class="sub" id="userIdText">ID: ...</div>
     </div>
   </div>
 
-  <!-- MAIN APP -->
-  <div id="app">
-    <div class="title">Anime AI 18+</div>
-    <div class="subtitle">Добро пожаловать</div>
-
-    <div class="grid">
-      <div class="card">💬<span>Чаты</span></div>
-      <div class="card">🧍<span>Персонажи</span></div>
-      <div class="card">🛒<span>Магазин</span></div>
-      <div class="card">⭐<span>Premium</span></div>
-      <div class="card">👤<span>Профиль</span></div>
-      <div class="card">⚙️<span>Настройки</span></div>
+  <div class="stats">
+    <div class="stat">
+      <div>💎 Осколки</div>
+      <b>0</b>
+    </div>
+    <div class="stat">
+      <div>⭐ Premium</div>
+      <b>Нет</b>
     </div>
   </div>
 
-  <!-- SAFE LOADER SWITCH -->
-  <script>
-    setTimeout(() => {
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("app").style.display = "block";
-    }, 1800);
-  </script>
+  <div class="daily">
+    🎁 Ежедневная награда<br>
+    <small>Нажмите, чтобы получить</small>
+  </div>
+
+  <div class="grid">
+    <div class="card">🧍<span>Персонажи</span></div>
+    <div class="card">💬<span>Чаты</span></div>
+    <div class="card">🛒<span>Магазин осколков</span></div>
+    <div class="card">👤<span>Профиль</span></div>
+    <div class="card">⚙️<span>Настройки</span></div>
+    <div class="card">⭐<span>Premium</span></div>
+  </div>
+
+  <div class="admin" id="adminPanel">
+    🔐 Админ-панель
+  </div>
+</div>
+
+<script>
+setTimeout(() => {
+  const tg = window.Telegram?.WebApp;
+  if (!tg) {
+    alert("Не Telegram среда");
+    return;
+  }
+
+  tg.ready();
+  const uid = tg.initDataUnsafe?.user?.id;
+  document.getElementById("userIdText").innerText = "ID: " + uid;
+
+  if (uid === 8287041036) {
+    document.getElementById("adminPanel").style.display = "block";
+  }
+
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}, 1200);
+</script>
 
 </body>
 </html>
