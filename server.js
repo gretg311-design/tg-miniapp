@@ -68,6 +68,43 @@ app.post("/api/init", async (req, res) => {
     res.status(500).json({ error: "server error" });
   }
 });
+app.post("/api/message", async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const userRes = await pool.query(
+      "SELECT shards FROM users WHERE telegram_id = $1",
+      [userId]
+    );
+
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const shards = userRes.rows[0].shards;
+
+    if (shards <= 0) {
+      return res.json({
+        ok: false,
+        message: "❌ Лунные осколки закончились"
+      });
+    }
+
+    await pool.query(
+      "UPDATE users SET shards = shards - 1 WHERE telegram_id = $1",
+      [userId]
+    );
+
+    res.json({
+      ok: true,
+      message: "✨ ИИ ответил",
+      shardsLeft: shards - 1
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server error" });
+  }
+});
 
 app.listen(3000, () =>
   console.log("🚀 Server running on 3000")
