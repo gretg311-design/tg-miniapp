@@ -1,5 +1,3 @@
-console.log("🔥 app.js loaded");
-
 const status = document.getElementById("status");
 
 if (!window.Telegram || !Telegram.WebApp) {
@@ -8,30 +6,20 @@ if (!window.Telegram || !Telegram.WebApp) {
   const tg = Telegram.WebApp;
   tg.ready();
 
-  const user = tg.initDataUnsafe.user;
+  const userId = tg.initDataUnsafe?.user?.id;
 
-  status.innerText =
-    "✅ Telegram OK\n" +
-    "User ID: " + (user?.id || "нет");
+  status.innerText = "⏳ Сохраняем пользователя...";
 
-  if (user) {
-    fetch("/user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        telegram_id: user.id,
-        first_name: user.first_name,
-        username: user.username,
-      }),
+  fetch("/user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegram_id: userId }),
+  })
+    .then(res => res.json())
+    .then(() => {
+      status.innerText = "✅ Пользователь сохранён\nID: " + userId;
     })
-      .then((r) => r.json())
-      .then(() => {
-        console.log("✅ User saved");
-      })
-      .catch((e) => {
-        console.error("❌ Save error", e);
-      });
-  }
+    .catch(() => {
+      status.innerText = "❌ Ошибка сервера";
+    });
 }
