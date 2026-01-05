@@ -6,88 +6,41 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { margin:0; padding:0; box-sizing:border-box }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0b0614;
-  color: white;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  background:#0b0614;
+  color:white;
 }
-
-/* HEADER */
 header {
-  padding: 16px;
-  background: #120a24;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding:16px;
+  background:#120a24;
+  display:flex;
+  justify-content:space-between;
 }
-
-.balance {
-  color: #e0c8ff;
-  font-size: 16px;
-}
-
-/* MAIN */
-main {
-  padding: 16px;
-  padding-bottom: 100px;
-}
-
+.balance { color:#e0c8ff }
+main { padding:16px; padding-bottom:100px }
 .card {
-  background: linear-gradient(145deg,#1b0f33,#0e071b);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
+  background:linear-gradient(145deg,#1b0f33,#0e071b);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:16px;
 }
-
-.card h2 {
-  font-size: 18px;
-  margin-bottom: 12px;
-}
-
-/* BUTTONS */
 .btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: 14px;
-  border: none;
-  font-size: 16px;
-  margin-top: 10px;
-  cursor: pointer;
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  font-size:16px;
+  margin-top:10px;
 }
-
 .btn-primary {
-  background: linear-gradient(90deg,#7b3fe4,#a56bff);
-  color: white;
+  background:linear-gradient(90deg,#7b3fe4,#a56bff);
+  color:white;
 }
-
-.btn-secondary {
-  background: #24173f;
-  color: #cdb7ff;
-}
-
-/* GRID */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-/* NAV */
-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #120a24;
-  display: flex;
-  justify-content: space-around;
-  padding: 12px 0;
-}
-
-nav div {
-  font-size: 13px;
-  color: #bfa8ff;
-  text-align: center;
+.btn-disabled {
+  background:#2b1c4d;
+  color:#777;
 }
 </style>
 </head>
@@ -101,69 +54,83 @@ nav div {
 
 <main>
 
-  <div class="card">
-    <h2>🎁 Ежедневная награда</h2>
-    <button class="btn btn-primary">Получить осколки</button>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <h2>💬 Чаты</h2>
-      <button class="btn btn-secondary">Открыть</button>
-    </div>
-    <div class="card">
-      <h2>🧍 Персонажи</h2>
-      <button class="btn btn-secondary">Выбрать</button>
-    </div>
-    <div class="card">
-      <h2>🛒 Магазин</h2>
-      <button class="btn btn-secondary">Осколки</button>
-    </div>
-    <div class="card">
-      <h2>⭐ Premium</h2>
-      <button class="btn btn-secondary">Купить</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>👤 Профиль</h2>
-    <button class="btn btn-secondary">Пол / Настройки</button>
-  </div>
-
-  <!-- АДМИН КАРТОЧКА (СКРЫТА ПО УМОЛЧАНИЮ) -->
-  <div class="card" id="adminPanel" style="display:none;">
-    <h2>🛠 Админ-панель</h2>
-    <button class="btn btn-primary">Открыть</button>
-  </div>
+<div class="card">
+  <h2>🎁 Ежедневная награда</h2>
+  <p id="dailyText">Загрузка...</p>
+  <button id="dailyBtn" class="btn btn-primary">Получить</button>
+</div>
 
 </main>
-
-<nav>
-  <div>🏠 Главная</div>
-  <div>💬 Чаты</div>
-  <div>👤 Профиль</div>
-  <div>⚙️</div>
-</nav>
 
 <script>
 const tg = Telegram.WebApp;
 tg.ready();
 
-const user = tg.initDataUnsafe?.user;
-const userId = user?.id || 0;
+// ---------- НАСТРОЙКИ ----------
+const DAILY_REWARD = 15;
+const DAY = 24 * 60 * 60 * 1000;
 
-// 👑 НАСТРОЙ РОЛЕЙ
-const OWNER_IDS = [8287041036];   // ← ТВОЙ ID
-const ADMIN_IDS = [];             // сюда админов
+// ---------- ДАННЫЕ ----------
+let balance = Number(localStorage.getItem("balance")) || 50;
+let lastDaily = Number(localStorage.getItem("lastDaily")) || 0;
+let streak = Number(localStorage.getItem("streak")) || 0;
 
-// баланс заглушка
-document.getElementById("balance").innerText = 0;
+// ---------- UI ----------
+const balanceEl = document.getElementById("balance");
+const dailyText = document.getElementById("dailyText");
+const dailyBtn = document.getElementById("dailyBtn");
 
-// проверка роли
-if (OWNER_IDS.includes(userId) || ADMIN_IDS.includes(userId)) {
-  document.getElementById("adminPanel").style.display = "block";
+balanceEl.innerText = balance;
+
+// ---------- ЛОГИКА ----------
+function updateDaily() {
+  const now = Date.now();
+  const diff = now - lastDaily;
+
+  if (diff >= DAY) {
+    dailyText.innerText = `Доступно! 🔥 Стрик: ${streak} дней`;
+    dailyBtn.disabled = false;
+    dailyBtn.className = "btn btn-primary";
+  } else {
+    const hours = Math.ceil((DAY - diff) / (1000 * 60 * 60));
+    dailyText.innerText = `Доступно через ${hours} ч`;
+    dailyBtn.disabled = true;
+    dailyBtn.className = "btn btn-disabled";
+  }
 }
 
+dailyBtn.onclick = () => {
+  const now = Date.now();
+
+  if (now - lastDaily < DAY) return;
+
+  // проверка стрика
+  if (now - lastDaily < DAY * 2) {
+    streak++;
+  } else {
+    streak = 1;
+  }
+
+  let reward = DAILY_REWARD;
+
+  if (streak >= 7) {
+    reward *= 2;
+  }
+
+  balance += reward;
+  lastDaily = now;
+
+  localStorage.setItem("balance", balance);
+  localStorage.setItem("lastDaily", lastDaily);
+  localStorage.setItem("streak", streak);
+
+  balanceEl.innerText = balance;
+  updateDaily();
+
+  alert(`🎉 +${reward} осколков!\nСтрик: ${streak}`);
+};
+
+updateDaily();
 </script>
 
 </body>
