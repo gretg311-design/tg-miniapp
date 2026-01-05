@@ -1,167 +1,169 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Anime AI 18+</title>
+<meta charset="UTF-8">
+<title>Anime AI 18+</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0b0614;
+  color: white;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+/* HEADER */
+header {
+  padding: 16px;
+  background: #120a24;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-    body {
-      width: 100vw;
-      height: 100vh;
-      background: radial-gradient(circle at top, #1b0033, #000);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: white;
-      overflow: hidden;
-    }
+.balance {
+  color: #e0c8ff;
+  font-size: 16px;
+}
 
-    /* ───────── LOADING SCREEN ───────── */
-    #loading {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 25px;
-      background: radial-gradient(circle at top, #2a004d, #000);
-      z-index: 10;
-    }
+/* MAIN */
+main {
+  padding: 16px;
+  padding-bottom: 100px;
+}
 
-    .moon {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #fff, #bbaaff 40%, #4b2a88 70%);
-      box-shadow: 0 0 40px rgba(180, 120, 255, 0.6);
-      animation: float 3s ease-in-out infinite;
-    }
+.card {
+  background: linear-gradient(145deg,#1b0f33,#0e071b);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
 
-    @keyframes float {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
-      100% { transform: translateY(0); }
-    }
+.card h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
 
-    .loading-text {
-      font-size: 18px;
-      letter-spacing: 1px;
-      opacity: 0.85;
-    }
+/* BUTTONS */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 16px;
+  margin-top: 10px;
+  cursor: pointer;
+}
 
-    .dots::after {
-      content: "";
-      animation: dots 1.5s infinite;
-    }
+.btn-primary {
+  background: linear-gradient(90deg,#7b3fe4,#a56bff);
+  color: white;
+}
 
-    @keyframes dots {
-      0% { content: ""; }
-      33% { content: "."; }
-      66% { content: ".."; }
-      100% { content: "..."; }
-    }
+.btn-secondary {
+  background: #24173f;
+  color: #cdb7ff;
+}
 
-    /* ───────── APP SCREEN ───────── */
-    #app {
-      display: none;
-      height: 100%;
-      padding: 20px;
-      text-align: center;
-    }
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
 
-    h1 {
-      font-size: 26px;
-      margin-bottom: 10px;
-    }
+/* NAV */
+nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #120a24;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+}
 
-    #shards {
-      margin-top: 10px;
-      font-size: 18px;
-      color: #d6b3ff;
-    }
-
-    button {
-      margin-top: 30px;
-      padding: 14px 22px;
-      font-size: 16px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, #8a4bff, #c77dff);
-      color: black;
-      font-weight: bold;
-      box-shadow: 0 0 20px rgba(160, 90, 255, 0.5);
-    }
-
-    button:active {
-      transform: scale(0.97);
-    }
-  </style>
+nav div {
+  font-size: 13px;
+  color: #bfa8ff;
+  text-align: center;
+}
+</style>
 </head>
+
 <body>
 
-<!-- LOADING -->
-<div id="loading">
-  <div class="moon"></div>
-  <div class="loading-text">
-    Connecting to the Moon<span class="dots"></span>
-  </div>
-</div>
+<header>
+  <div>🌙 Anime AI 18+</div>
+  <div class="balance">Осколки: <span id="balance">0</span></div>
+</header>
 
-<!-- APP -->
-<div id="app">
-  <h1>Anime AI 18+</h1>
-  <div id="shards">🌙</div>
-  <button id="send">💬 Talk to AI</button>
-</div>
+<main>
+
+  <div class="card">
+    <h2>🎁 Ежедневная награда</h2>
+    <button class="btn btn-primary">Получить осколки</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>💬 Чаты</h2>
+      <button class="btn btn-secondary">Открыть</button>
+    </div>
+    <div class="card">
+      <h2>🧍 Персонажи</h2>
+      <button class="btn btn-secondary">Выбрать</button>
+    </div>
+    <div class="card">
+      <h2>🛒 Магазин</h2>
+      <button class="btn btn-secondary">Осколки</button>
+    </div>
+    <div class="card">
+      <h2>⭐ Premium</h2>
+      <button class="btn btn-secondary">Купить</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>👤 Профиль</h2>
+    <button class="btn btn-secondary">Пол / Настройки</button>
+  </div>
+
+  <!-- АДМИН КАРТОЧКА (СКРЫТА ПО УМОЛЧАНИЮ) -->
+  <div class="card" id="adminPanel" style="display:none;">
+    <h2>🛠 Админ-панель</h2>
+    <button class="btn btn-primary">Открыть</button>
+  </div>
+
+</main>
+
+<nav>
+  <div>🏠 Главная</div>
+  <div>💬 Чаты</div>
+  <div>👤 Профиль</div>
+  <div>⚙️</div>
+</nav>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
+const tg = Telegram.WebApp;
+tg.ready();
 
-  const userId = tg.initDataUnsafe.user.id;
+const user = tg.initDataUnsafe?.user;
+const userId = user?.id || 0;
 
-  fetch("/api/init", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      initData: tg.initData,
-      userId
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById("shards").innerText =
-      "🌙 Лунные осколки: " + data.shards;
+// 👑 НАСТРОЙ РОЛЕЙ
+const OWNER_IDS = [8287041036];   // ← ТВОЙ ID
+const ADMIN_IDS = [];             // сюда админов
 
-    setTimeout(() => {
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("app").style.display = "block";
-    }, 1200);
-  });
+// баланс заглушка
+document.getElementById("balance").innerText = 0;
 
-  document.getElementById("send").onclick = () => {
-    fetch("/api/message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId })
-    })
-    .then(res => res.json())
-    .then(d => {
-      if (d.ok) {
-        document.getElementById("shards").innerText =
-          "🌙 Лунные осколки: " + d.shardsLeft;
-      } else {
-        alert(d.message);
-      }
-    });
-  };
+// проверка роли
+if (OWNER_IDS.includes(userId) || ADMIN_IDS.includes(userId)) {
+  document.getElementById("adminPanel").style.display = "block";
+}
+
 </script>
 
 </body>
