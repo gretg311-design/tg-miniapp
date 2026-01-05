@@ -1,119 +1,137 @@
-console.log("🔥 app.js loaded");
-
 const app = document.getElementById("app");
 
-/* ===== Проверка Telegram ===== */
+/* ===== РОЛИ ===== */
+const OWNER_ID = 8287041036; // 👑 ТЫ
+let ADMIN_IDS = []; // будут добавляться через кнопку
+
+/* ===== TELEGRAM ===== */
 if (!window.Telegram || !Telegram.WebApp) {
-  app.innerHTML = `
-    <div class="card">
-      ❌ Ошибка проверки Telegram
-    </div>
-  `;
-  throw new Error("Not Telegram WebApp");
+  app.innerHTML = "<h2>❌ Не Telegram среда</h2>";
+  throw new Error("Not Telegram");
 }
 
 const tg = Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-/* ===== Пользователь ===== */
-const userId = tg.initDataUnsafe?.user?.id;
-
-if (!userId) {
-  app.innerHTML = `
-    <div class="card">
-      ❌ Пользователь не определён
-    </div>
-  `;
-  throw new Error("No user ID");
+const user = tg.initDataUnsafe?.user;
+if (!user) {
+  app.innerHTML = "<h2>❌ Нет пользователя</h2>";
+  throw new Error("No user");
 }
 
-/* ===== ВРЕМЕННЫЕ ДАННЫЕ (заглушка) ===== */
-const userData = {
-  id: userId,
-  balance: 120,
-  shards: 3,
+const userId = user.id;
+const isOwner = userId === OWNER_ID;
+const isAdmin = isOwner || ADMIN_IDS.includes(userId);
+
+/* ===== ДАННЫЕ (заглушка) ===== */
+const state = {
+  shards: 50,
 };
 
-/* ===== ПЕРСОНАЖИ (заглушка) ===== */
+/* ===== ПЕРСОНАЖИ ===== */
 const characters = [
   {
     id: 1,
     name: "Акира",
-    desc: "Холодная, умная, доминирующая. Любит контроль и психологические игры.",
+    desc: "Холодная, доминирующая, умная. Говорит мало, но метко.",
     img: "https://i.imgur.com/7QZ6F6R.jpg",
   },
   {
     id: 2,
     name: "Мию",
-    desc: "Милая, застенчивая, быстро привязывается. Склонна к зависимости.",
+    desc: "Милая, застенчивая, эмоциональная. Быстро привязывается.",
     img: "https://i.imgur.com/1bX5QH6.jpg",
-  },
-  {
-    id: 3,
-    name: "Рейна",
-    desc: "Провокационная, дерзкая, любит дразнить и проверять границы.",
-    img: "https://i.imgur.com/9Yq4YpJ.jpg",
-  },
+  }
 ];
 
 /* ===== РЕНДЕР ===== */
 renderCharacters();
-
-/* ===== ФУНКЦИИ ===== */
 
 function renderCharacters() {
   app.innerHTML = `
     <h2>🌙 Персонажи</h2>
 
     <div class="card">
-      <div>🆔 ID: ${userData.id}</div>
-      <div>💰 Баланс: ${userData.balance}</div>
-      <div>✨ Осколки: ${userData.shards}</div>
+      🆔 ID: ${userId}<br>
+      💎 Осколки: ${state.shards}<br>
+      🎭 Роль: ${isOwner ? "Овнер" : isAdmin ? "Админ" : "Игрок"}
     </div>
 
-    ${characters
-      .map(
-        (c) => `
+    ${characters.map(c => `
       <div class="card">
-        <img src="${c.img}" 
-             style="width:100%; border-radius:12px; margin-bottom:10px;" />
-        <strong>${c.name}</strong>
-        <div style="font-size:13px; opacity:.85; margin-top:6px;">
-          ${c.desc}
-        </div>
-        <button onclick="openChat(${c.id})">
-          💬 Начать чат
-        </button>
+        <img src="${c.img}">
+        <h3>${c.name}</h3>
+        <div>${c.desc}</div>
+        <button onclick="openChat(${c.id})">💬 Начать чат</button>
       </div>
-    `
-      )
-      .join("")}
+    `).join("")}
 
-    <button onclick="alert('Магазин скоро')">🛒 Магазин осколков</button>
-    <button onclick="alert('Премиум скоро')">⭐ Купить / Продлить подписку</button>
+    <button class="secondary" onclick="alert('Магазин скоро')">🛒 Магазин</button>
+    <button class="secondary" onclick="alert('Подписки скоро')">⭐ Купить / Продлить</button>
+
+    ${isAdmin ? `<button class="admin" onclick="openAdmin()">🛠 Админ</button>` : ""}
   `;
 }
 
-function openChat(characterId) {
-  const character = characters.find((c) => c.id === characterId);
-  if (!character) return;
-
+function openChat(id) {
+  const c = characters.find(x => x.id === id);
   app.innerHTML = `
-    <h2>💬 ${character.name}</h2>
+    <h2>💬 ${c.name}</h2>
 
-    <div class="card" style="min-height:120px;">
-      <div style="opacity:.7; font-size:14px;">
-        ${character.name} смотрит на тебя и ждёт твоего сообщения…
-      </div>
+    <div class="card">
+      ${c.name} ждёт твоего сообщения…
     </div>
 
-    <button onclick="alert('RP-чат будет на следующем шаге')">
-      ✍️ Написать
-    </button>
-
-    <button onclick="renderCharacters()">
-      ⬅️ Назад к персонажам
-    </button>
+    <button onclick="alert('RP-движок будет дальше')">✍️ Написать</button>
+    <button class="secondary" onclick="renderCharacters()">⬅️ Назад</button>
   `;
+}
+
+/* ===== АДМИНКА ===== */
+function openAdmin() {
+  app.innerHTML = `
+    <h2>🛠 Админ-панель</h2>
+
+    ${isOwner ? `
+      <div class="card">
+        <b>👑 Овнер</b><br><br>
+
+        <button onclick="addAdmin()">➕ Назначить админа</button>
+        <button onclick="removeAdmin()">➖ Снять админа</button>
+      </div>
+    ` : ""}
+
+    <div class="card">
+      <b>🔧 Админ</b><br>
+      • Добавлять персонажей<br>
+      • Выдавать осколки<br>
+      • Выдавать премиум
+    </div>
+
+    <button class="secondary" onclick="renderCharacters()">⬅️ Назад</button>
+  `;
+}
+
+function addAdmin() {
+  const id = prompt("Введите Telegram ID для назначения админом:");
+  if (!id) return;
+
+  const num = Number(id);
+  if (ADMIN_IDS.includes(num)) {
+    alert("Этот пользователь уже админ");
+    return;
+  }
+
+  ADMIN_IDS.push(num);
+  alert("✅ Админ добавлен");
+}
+
+function removeAdmin() {
+  const id = prompt("Введите Telegram ID для снятия админа:");
+  if (!id) return;
+
+  const num = Number(id);
+  ADMIN_IDS = ADMIN_IDS.filter(x => x !== num);
+  alert("❌ Админ снят");
 }
