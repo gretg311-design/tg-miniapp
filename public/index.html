@@ -6,27 +6,27 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-* { margin:0; padding:0; box-sizing:border-box }
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:system-ui;
   background:#0b0614;
-  color:white;
+  color:#fff;
 }
-header {
+header{
   padding:16px;
   background:#120a24;
   display:flex;
   justify-content:space-between;
 }
-.balance { color:#e0c8ff }
-main { padding:16px; padding-bottom:100px }
-.card {
+.balance{color:#e0c8ff}
+main{padding:16px;padding-bottom:120px}
+.card{
   background:linear-gradient(145deg,#1b0f33,#0e071b);
   border-radius:16px;
   padding:16px;
   margin-bottom:16px;
 }
-.btn {
+.btn{
   width:100%;
   padding:14px;
   border-radius:14px;
@@ -34,13 +34,21 @@ main { padding:16px; padding-bottom:100px }
   font-size:16px;
   margin-top:10px;
 }
-.btn-primary {
+.primary{
   background:linear-gradient(90deg,#7b3fe4,#a56bff);
   color:white;
 }
-.btn-disabled {
+.disabled{
   background:#2b1c4d;
   color:#777;
+}
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:8px;
+  background:#311c5e;
+  font-size:12px;
+  margin-top:6px;
 }
 </style>
 </head>
@@ -49,15 +57,26 @@ main { padding:16px; padding-bottom:100px }
 
 <header>
   <div>🌙 Anime AI 18+</div>
-  <div class="balance">Осколки: <span id="balance">0</span></div>
+  <div class="balance">
+    <span id="subName">Free</span> ·
+    🌙 <span id="balance">0</span>
+  </div>
 </header>
 
 <main>
 
+<!-- DAILY -->
 <div class="card">
   <h2>🎁 Ежедневная награда</h2>
   <p id="dailyText">Загрузка...</p>
-  <button id="dailyBtn" class="btn btn-primary">Получить</button>
+  <button id="dailyBtn" class="btn primary">Получить</button>
+</div>
+
+<!-- SUBS -->
+<div class="card">
+  <h2>👑 Подписка</h2>
+  <p id="subInfo"></p>
+  <button class="btn primary" onclick="buySub()">Купить / Продлить</button>
 </div>
 
 </main>
@@ -66,71 +85,97 @@ main { padding:16px; padding-bottom:100px }
 const tg = Telegram.WebApp;
 tg.ready();
 
-// ---------- НАСТРОЙКИ ----------
-const DAILY_REWARD = 15;
-const DAY = 24 * 60 * 60 * 1000;
+// ---------- КОНФИГ ----------
+const SUBS = {
+  free:   {name:"Free",    daily:15},
+  premium:{name:"Premium",daily:30},
+  pro:    {name:"Pro",     daily:50},
+  vip:    {name:"VIP",     daily:150},
+  ultra:  {name:"Ultra",  daily:200},
+};
+
+const DAY = 86400000;
 
 // ---------- ДАННЫЕ ----------
 let balance = Number(localStorage.getItem("balance")) || 50;
+let sub = localStorage.getItem("sub") || "free";
+let subUntil = Number(localStorage.getItem("subUntil")) || 0;
 let lastDaily = Number(localStorage.getItem("lastDaily")) || 0;
 let streak = Number(localStorage.getItem("streak")) || 0;
 
 // ---------- UI ----------
 const balanceEl = document.getElementById("balance");
+const subNameEl = document.getElementById("subName");
 const dailyText = document.getElementById("dailyText");
 const dailyBtn = document.getElementById("dailyBtn");
+const subInfo = document.getElementById("subInfo");
 
+// ---------- ПОДПИСКА ----------
+function checkSub(){
+  if(sub !== "free" && Date.now() > subUntil){
+    sub = "free";
+    localStorage.setItem("sub","free");
+  }
+}
+checkSub();
+
+subNameEl.innerText = SUBS[sub].name;
 balanceEl.innerText = balance;
 
-// ---------- ЛОГИКА ----------
-function updateDaily() {
-  const now = Date.now();
-  const diff = now - lastDaily;
+subInfo.innerHTML = `
+Текущая: <b>${SUBS[sub].name}</b><br>
+Ежедневка: <b>${SUBS[sub].daily}</b><br>
+${sub !== "free" ? "Действует до: "+new Date(subUntil).toLocaleDateString() : ""}
+`;
 
-  if (diff >= DAY) {
-    dailyText.innerText = `Доступно! 🔥 Стрик: ${streak} дней`;
+// ---------- DAILY ----------
+function updateDaily(){
+  const diff = Date.now() - lastDaily;
+  if(diff >= DAY){
+    dailyText.innerText = `Доступно · Стрик: ${streak}`;
     dailyBtn.disabled = false;
-    dailyBtn.className = "btn btn-primary";
+    dailyBtn.className = "btn primary";
   } else {
-    const hours = Math.ceil((DAY - diff) / (1000 * 60 * 60));
-    dailyText.innerText = `Доступно через ${hours} ч`;
+    const h = Math.ceil((DAY-diff)/3600000);
+    dailyText.innerText = `Через ${h} ч`;
     dailyBtn.disabled = true;
-    dailyBtn.className = "btn btn-disabled";
+    dailyBtn.className = "btn disabled";
   }
 }
 
-dailyBtn.onclick = () => {
+dailyBtn.onclick = ()=>{
   const now = Date.now();
+  if(now-lastDaily < DAY) return;
 
-  if (now - lastDaily < DAY) return;
+  streak = (now-lastDaily < DAY*2) ? streak+1 : 1;
 
-  // проверка стрика
-  if (now - lastDaily < DAY * 2) {
-    streak++;
-  } else {
-    streak = 1;
-  }
-
-  let reward = DAILY_REWARD;
-
-  if (streak >= 7) {
-    reward *= 2;
-  }
+  let reward = SUBS[sub].daily;
+  if(streak >= 7) reward *= 2;
 
   balance += reward;
   lastDaily = now;
 
-  localStorage.setItem("balance", balance);
-  localStorage.setItem("lastDaily", lastDaily);
-  localStorage.setItem("streak", streak);
+  localStorage.setItem("balance",balance);
+  localStorage.setItem("lastDaily",lastDaily);
+  localStorage.setItem("streak",streak);
 
   balanceEl.innerText = balance;
   updateDaily();
-
-  alert(`🎉 +${reward} осколков!\nСтрик: ${streak}`);
+  alert(`🎉 +${reward} осколков`);
 };
 
 updateDaily();
+
+// ---------- ПОКУПКА (ЗАГЛУШКА) ----------
+function buySub(){
+  alert(
+`💎 Подписки:
+Premium / Pro / VIP / Ultra
+
+Покупка за ⭐ или TON
+(подключим позже)`
+  );
+}
 </script>
 
 </body>
