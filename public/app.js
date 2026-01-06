@@ -1,33 +1,35 @@
-const tg = Telegram.WebApp;
-tg.ready();
+const OWNER_ID = 8287041036;
 
-fetch("/api/init", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ initData: tg.initData })
-})
-.then(r => r.json())
-.then(data => {
-  window.USER = data.user;
-  document.getElementById("loader").hidden = true;
-  document.getElementById("app").hidden = false;
-});
+// ЭМУЛЯЦИЯ ПОЛЬЗОВАТЕЛЯ (Telegram подключим позже)
+const user = {
+  id: 8287041036, // ← сейчас ты
+  isAdmin: true
+};
 
-function showProfile() {
-  alert(`ID: ${USER.id}\nБаланс: ${USER.balance}\nРоль: ${USER.role}`);
+function showApp() {
+  document.getElementById('loader').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  applyRoles();
 }
 
-function showTasks() {
-  if (confirm("Подписался на канал?")) {
-    fetch("/api/task/subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: USER.id })
-    })
-    .then(r => r.json())
-    .then(d => {
-      if (d.ok) alert("🌙 +" + d.reward);
-      else alert("Уже выполнено");
-    });
+setTimeout(showApp, 1500);
+
+// НАВИГАЦИЯ
+function openScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function back() {
+  openScreen('main-menu');
+}
+
+// РОЛИ
+function applyRoles() {
+  if (user.id === OWNER_ID) {
+    document.getElementById('console-btn').classList.remove('hidden');
+    document.getElementById('admin-btn').classList.remove('hidden');
+  } else if (user.isAdmin) {
+    document.getElementById('admin-btn').classList.remove('hidden');
   }
 }
