@@ -1,80 +1,72 @@
 * {
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: system-ui, sans-serif;
 }
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #2b1055, #000);
-  color: white;
+  background: #0b0f1a;
+  color: #eaeaff;
 }
 
-/* ЗАГРУЗКА */
+/* 🌙 LOADER */
 #loader {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle, #2b1055, #000);
+  background: radial-gradient(circle at center, #1a1f3c, #050713);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
 }
 
 .moon {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: #d9d9ff;
-  box-shadow: 0 0 40px #a78bfa;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: .8; }
-  50% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1); opacity: .8; }
-}
-
-.disclaimer {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-/* ОСНОВА */
-.hidden { display: none; }
-
-.screen {
-  display: none;
-  padding: 20px;
-}
-
-.screen.active {
-  display: block;
-}
-
-.title {
-  text-align: center;
+  background: linear-gradient(145deg, #f2f2f2, #cfcfcf);
+  box-shadow: 0 0 40px rgba(255,255,255,0.4);
   margin-bottom: 20px;
 }
 
-.menu-grid {
+.loader-text {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.loader-sub {
+  margin-top: 10px;
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.hidden {
+  display: none;
+}
+
+/* APP */
+header {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #1f2340;
+}
+
+.menu {
+  padding: 16px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-button {
-  padding: 14px;
-  border-radius: 12px;
+.menu button {
+  background: #151a33;
   border: none;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
-  color: white;
-  font-size: 16px;
+  border-radius: 14px;
+  padding: 16px;
+  color: #fff;
+  font-size: 15px;
 }
 
-button:active {
+.menu button:active {
   transform: scale(0.97);
 }
