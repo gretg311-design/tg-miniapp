@@ -1,60 +1,23 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <title>Anime RP MiniApp</title>
-
-  <!-- Telegram -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <link rel="stylesheet" href="./style.css" />
-</head>
-
 <body>
-
-<!-- 🌙 ЗАГРУЗОЧНЫЙ ЭКРАН -->
-<div id="loader">
-  <div class="moon"></div>
-  <div class="loader-text" id="loaderText">Подключаемся к миру…</div>
-  <div class="loader-sub" id="loaderSub">
-    Если загрузка дольше минуты — перезайди 💙
+  <div id="loader">
+    <div class="moon"></div>
+    <p id="loaderText">Подключаемся к миру…</p>
+    <small id="loaderSub">
+      Если загрузка дольше минуты — перезайди 💙
+    </small>
   </div>
-</div>
 
-<!-- 🌐 ПРИЛОЖЕНИЕ -->
-<div id="app" class="hidden">
+  <div id="app">
+    <!-- приложение -->
+  </div>
 
-  <!-- HEADER -->
-  <header>
-    <h1 id="appTitle">Главное меню</h1>
-  </header>
+  <script src="app.js"></script>
 
-  <!-- MAIN -->
-  <main id="screen">
-
-    <!-- Главное меню -->
-    <div class="menu">
-      <button data-screen="chats">💬 Чаты</button>
-      <button data-screen="characters">🧙 Персонажи</button>
-      <button data-screen="daily">🌙 Ежедневка</button>
-      <button data-screen="tasks">📜 Задания</button>
-      <button data-screen="shop">🛒 Магазин</button>
-      <button data-screen="promo">🎁 Промокоды</button>
-      <button data-screen="profile">👤 Профиль</button>
-      <button data-screen="settings">⚙️ Настройки</button>
-
-      <!-- Админ -->
-      <button id="adminBtn" class="hidden" data-screen="admin">🛠 Админ</button>
-      <button id="consoleBtn" class="hidden" data-screen="console">👑 Консоль</button>
-    </div>
-
-    <!-- Экраны -->
-    <div id="screen-content"></div>
-
-  </main>
-
-</div>
-
-<script src="./app.js"></script>
+  <script>
+    // ❗ ЖЁСТКОЕ ПРАВИЛО
+    setTimeout(() => {
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("app").style.display = "block";
+    }, 1200);
+  </script>
 </body>
-</html>
