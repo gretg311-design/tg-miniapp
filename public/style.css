@@ -1,11 +1,80 @@
-body {
-  background: #0b0f1a;
-  color: white;
-  font-family: sans-serif;
-  text-align: center;
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #2b1055, #000);
+  color: white;
+}
+
+/* ЗАГРУЗКА */
 #loader {
-  margin-top: 40vh;
-  opacity: 0.8;
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, #2b1055, #000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.moon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #d9d9ff;
+  box-shadow: 0 0 40px #a78bfa;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: .8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: .8; }
+}
+
+.disclaimer {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ОСНОВА */
+.hidden { display: none; }
+
+.screen {
+  display: none;
+  padding: 20px;
+}
+
+.screen.active {
+  display: block;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+button {
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: white;
+  font-size: 16px;
+}
+
+button:active {
+  transform: scale(0.97);
 }
