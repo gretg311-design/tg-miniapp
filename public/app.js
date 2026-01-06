@@ -1,35 +1,27 @@
-const OWNER_ID = 8287041036;
+let appStarted = false;
 
-// ЭМУЛЯЦИЯ ПОЛЬЗОВАТЕЛЯ (Telegram подключим позже)
-const user = {
-  id: 8287041036, // ← сейчас ты
-  isAdmin: true
-};
+function showAppSafe() {
+  if (appStarted) return;
+  appStarted = true;
 
-function showApp() {
-  document.getElementById('loader').classList.add('hidden');
-  document.getElementById('app').classList.remove('hidden');
+  const loader = document.getElementById('loader');
+  const app = document.getElementById('app');
+
+  if (loader) loader.style.display = 'none';
+  if (app) app.classList.remove('hidden');
+
   applyRoles();
 }
 
-setTimeout(showApp, 1500);
+/* 1️⃣ После загрузки DOM */
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(showAppSafe, 800);
+});
 
-// НАВИГАЦИЯ
-function openScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+/* 2️⃣ После полной загрузки */
+window.addEventListener('load', () => {
+  showAppSafe();
+});
 
-function back() {
-  openScreen('main-menu');
-}
-
-// РОЛИ
-function applyRoles() {
-  if (user.id === OWNER_ID) {
-    document.getElementById('console-btn').classList.remove('hidden');
-    document.getElementById('admin-btn').classList.remove('hidden');
-  } else if (user.isAdmin) {
-    document.getElementById('admin-btn').classList.remove('hidden');
-  }
-}
+/* 3️⃣ Аварийный таймер (если Telegram тупит) */
+setTimeout(showAppSafe, 3000);
