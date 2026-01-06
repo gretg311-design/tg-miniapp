@@ -2,54 +2,59 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>tg-miniapp</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+  <title>Anime RP MiniApp</title>
+
+  <!-- Telegram -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="./style.css" />
 </head>
+
 <body>
 
-<!-- ЭКРАН ЗАГРУЗКИ -->
+<!-- 🌙 ЗАГРУЗОЧНЫЙ ЭКРАН -->
 <div id="loader">
   <div class="moon"></div>
-  <div class="disclaimer">Все персонажи являются вымышленными</div>
+  <div class="loader-text" id="loaderText">Подключаемся к миру…</div>
+  <div class="loader-sub" id="loaderSub">
+    Если загрузка дольше минуты — перезайди 💙
+  </div>
 </div>
 
-<!-- ПРИЛОЖЕНИЕ -->
+<!-- 🌐 ПРИЛОЖЕНИЕ -->
 <div id="app" class="hidden">
 
-  <!-- ГЛАВНОЕ МЕНЮ -->
-  <div id="main-menu" class="screen active">
-    <h1 class="title">Главное меню</h1>
+  <!-- HEADER -->
+  <header>
+    <h1 id="appTitle">Главное меню</h1>
+  </header>
 
-    <div class="menu-grid">
-      <button onclick="openScreen('chats')">💬 Чаты</button>
-      <button onclick="openScreen('characters')">🧍 Персонажи</button>
-      <button onclick="openScreen('daily')">🎁 Ежедневка</button>
-      <button onclick="openScreen('tasks')">📋 Задания</button>
-      <button onclick="openScreen('shop')">🛒 Магазин</button>
-      <button onclick="openScreen('promo')">🎟 Промокоды</button>
-      <button onclick="openScreen('profile')">👤 Профиль</button>
-      <button onclick="openScreen('settings')">⚙️ Настройки</button>
+  <!-- MAIN -->
+  <main id="screen">
 
-      <button id="admin-btn" onclick="openScreen('admin')" class="hidden">🛠 Админ</button>
-      <button id="console-btn" onclick="openScreen('console')" class="hidden">👑 Консоль</button>
+    <!-- Главное меню -->
+    <div class="menu">
+      <button data-screen="chats">💬 Чаты</button>
+      <button data-screen="characters">🧙 Персонажи</button>
+      <button data-screen="daily">🌙 Ежедневка</button>
+      <button data-screen="tasks">📜 Задания</button>
+      <button data-screen="shop">🛒 Магазин</button>
+      <button data-screen="promo">🎁 Промокоды</button>
+      <button data-screen="profile">👤 Профиль</button>
+      <button data-screen="settings">⚙️ Настройки</button>
+
+      <!-- Админ -->
+      <button id="adminBtn" class="hidden" data-screen="admin">🛠 Админ</button>
+      <button id="consoleBtn" class="hidden" data-screen="console">👑 Консоль</button>
     </div>
-  </div>
 
-  <!-- ЭКРАНЫ -->
-  <div id="chats" class="screen"><h2>Чаты</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
-  <div id="characters" class="screen"><h2>Персонажи</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
-  <div id="daily" class="screen"><h2>Ежедневка</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
-  <div id="tasks" class="screen"><h2>Задания</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
-  <div id="shop" class="screen"><h2>Магазин</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
-  <div id="promo" class="screen"><h2>Промокоды</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
-  <div id="profile" class="screen"><h2>Профиль</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
-  <div id="settings" class="screen"><h2>Настройки</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
-  <div id="admin" class="screen"><h2>Админ</h2><p>Экран администратора</p><button onclick="back()">⬅ Назад</button></div>
-  <div id="console" class="screen"><h2>Консоль</h2><p>Экран овнера</p><button onclick="back()">⬅ Назад</button></div>
+    <!-- Экраны -->
+    <div id="screen-content"></div>
+
+  </main>
 
 </div>
 
-<script src="app.js"></script>
+<script src="./app.js"></script>
 </body>
 </html>
