@@ -1,27 +1,56 @@
-let appStarted = false;
+console.log("✅ app.js loaded");
 
-function showAppSafe() {
-  if (appStarted) return;
-  appStarted = true;
+const OWNER_ID = 8287041036;
 
-  const loader = document.getElementById('loader');
-  const app = document.getElementById('app');
+const tg = window.Telegram?.WebApp;
+const loader = document.getElementById("loader");
+const app = document.getElementById("app");
+const screenContent = document.getElementById("screen-content");
 
-  if (loader) loader.style.display = 'none';
-  if (app) app.classList.remove('hidden');
+const adminBtn = document.getElementById("adminBtn");
+const consoleBtn = document.getElementById("consoleBtn");
 
-  applyRoles();
+function getLang() {
+  const lang = tg?.initDataUnsafe?.user?.language_code;
+  if (lang === "uk") return "ua";
+  if (lang === "ru") return "ru";
+  return "en";
 }
 
-/* 1️⃣ После загрузки DOM */
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(showAppSafe, 800);
-});
+function initApp() {
+  if (!tg) {
+    alert("Открой через Telegram");
+    return;
+  }
 
-/* 2️⃣ После полной загрузки */
-window.addEventListener('load', () => {
-  showAppSafe();
-});
+  tg.ready();
 
-/* 3️⃣ Аварийный таймер (если Telegram тупит) */
-setTimeout(showAppSafe, 3000);
+  const userId = tg.initDataUnsafe.user.id;
+  const lang = getLang();
+
+  // Owner / Admin visibility
+  if (userId === OWNER_ID) {
+    adminBtn.classList.remove("hidden");
+    consoleBtn.classList.remove("hidden");
+  }
+
+  // скрываем загрузку
+  setTimeout(() => {
+    loader.classList.add("hidden");
+    app.classList.remove("hidden");
+  }, 1200);
+
+  // кнопки
+  document.querySelectorAll("[data-screen]").forEach(btn => {
+    btn.onclick = () => openScreen(btn.dataset.screen);
+  });
+}
+
+function openScreen(name) {
+  screenContent.innerHTML = `<div style="padding:16px">
+    <h2>${name}</h2>
+    <p>Экран «${name}» (заглушка, логика будет добавлена)</p>
+  </div>`;
+}
+
+initApp();
