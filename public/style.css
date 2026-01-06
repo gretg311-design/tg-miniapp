@@ -1,72 +1,51 @@
-* {
-  box-sizing: border-box;
-  font-family: system-ui, sans-serif;
-}
-
 body {
   margin: 0;
-  background: #0b0f1a;
-  color: #eaeaff;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #1a0033, #050010);
+  color: white;
+  text-align: center;
 }
 
-/* 🌙 LOADER */
 #loader {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at center, #1a1f3c, #050713);
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .moon {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
+  background: #eee;
   border-radius: 50%;
-  background: linear-gradient(145deg, #f2f2f2, #cfcfcf);
-  box-shadow: 0 0 40px rgba(255,255,255,0.4);
+  box-shadow: 0 0 60px rgba(200,200,255,0.6);
   margin-bottom: 20px;
 }
 
 .loader-text {
-  font-size: 18px;
-  opacity: 0.9;
+  font-size: 20px;
 }
 
 .loader-sub {
-  margin-top: 10px;
-  font-size: 13px;
-  opacity: 0.6;
+  font-size: 14px;
+  opacity: 0.7;
+  margin-top: 5px;
 }
 
-.hidden {
-  display: none;
-}
-
-/* APP */
-header {
-  padding: 12px;
-  text-align: center;
-  border-bottom: 1px solid #1f2340;
-}
-
-.menu {
-  padding: 16px;
+.grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
+  padding: 20px;
 }
 
-.menu button {
-  background: #151a33;
+button {
+  padding: 15px;
+  font-size: 16px;
   border: none;
-  border-radius: 14px;
-  padding: 16px;
-  color: #fff;
-  font-size: 15px;
-}
-
-.menu button:active {
-  transform: scale(0.97);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7b2cff, #b266ff);
+  color: white;
 }
