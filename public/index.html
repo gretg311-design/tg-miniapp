@@ -2,21 +2,52 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Mini App</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <title>tg-miniapp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+<!-- ЭКРАН ЗАГРУЗКИ -->
 <div id="loader">
-  🌙 Загрузка…<br>
-  <small>Все персонажи вымышлены</small>
+  <div class="moon"></div>
+  <div class="disclaimer">Все персонажи являются вымышленными</div>
 </div>
 
-<div id="app" hidden>
-  <h2>Главное меню</h2>
-  <button onclick="showProfile()">Профиль</button>
-  <button onclick="showTasks()">Задания</button>
+<!-- ПРИЛОЖЕНИЕ -->
+<div id="app" class="hidden">
+
+  <!-- ГЛАВНОЕ МЕНЮ -->
+  <div id="main-menu" class="screen active">
+    <h1 class="title">Главное меню</h1>
+
+    <div class="menu-grid">
+      <button onclick="openScreen('chats')">💬 Чаты</button>
+      <button onclick="openScreen('characters')">🧍 Персонажи</button>
+      <button onclick="openScreen('daily')">🎁 Ежедневка</button>
+      <button onclick="openScreen('tasks')">📋 Задания</button>
+      <button onclick="openScreen('shop')">🛒 Магазин</button>
+      <button onclick="openScreen('promo')">🎟 Промокоды</button>
+      <button onclick="openScreen('profile')">👤 Профиль</button>
+      <button onclick="openScreen('settings')">⚙️ Настройки</button>
+
+      <button id="admin-btn" onclick="openScreen('admin')" class="hidden">🛠 Админ</button>
+      <button id="console-btn" onclick="openScreen('console')" class="hidden">👑 Консоль</button>
+    </div>
+  </div>
+
+  <!-- ЭКРАНЫ -->
+  <div id="chats" class="screen"><h2>Чаты</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
+  <div id="characters" class="screen"><h2>Персонажи</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
+  <div id="daily" class="screen"><h2>Ежедневка</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
+  <div id="tasks" class="screen"><h2>Задания</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
+  <div id="shop" class="screen"><h2>Магазин</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
+  <div id="promo" class="screen"><h2>Промокоды</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
+  <div id="profile" class="screen"><h2>Профиль</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
+  <div id="settings" class="screen"><h2>Настройки</h2><p>Экран в разработке</p><button onclick="back()">⬅ Назад</button></div>
+  <div id="admin" class="screen"><h2>Админ</h2><p>Экран администратора</p><button onclick="back()">⬅ Назад</button></div>
+  <div id="console" class="screen"><h2>Консоль</h2><p>Экран овнера</p><button onclick="back()">⬅ Назад</button></div>
+
 </div>
 
 <script src="app.js"></script>
