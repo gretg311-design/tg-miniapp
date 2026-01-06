@@ -1,193 +1,24 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Anime AI 18+</title>
-
-<style>
-:root{
-  --bg:#0b0716;
-  --bg2:#120b25;
-  --card:#1a1230;
-  --card2:#24194a;
-  --accent:#8b5cf6;
-  --text:#ffffff;
-  --muted:#b8b1d6;
-}
-
-*{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
-body{
-  margin:0;
-  background:linear-gradient(180deg,var(--bg2),var(--bg));
-  color:var(--text);
-}
-
-/* ---------- LOADER ---------- */
-#loader{
-  position:fixed;
-  inset:0;
-  background:linear-gradient(180deg,var(--bg2),var(--bg));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  z-index:9999;
-}
-.spinner{
-  width:42px;height:42px;
-  border:4px solid #ffffff22;
-  border-top-color:var(--accent);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loader-note{
-  position:absolute;
-  bottom:14px;
-  right:16px;
-  font-size:12px;
-  color:var(--muted);
-  opacity:.8;
-}
-
-/* ---------- HEADER ---------- */
-.header{
-  padding:18px 18px 8px;
-  font-size:22px;
-  font-weight:700;
-}
-
-/* ---------- MAIN GRID ---------- */
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-  padding:16px;
-}
-.card{
-  background:linear-gradient(180deg,var(--card2),var(--card));
-  border-radius:18px;
-  padding:18px;
-  min-height:110px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
-.card-title{
-  font-size:17px;
-  font-weight:600;
-}
-.card-sub{
-  font-size:13px;
-  color:var(--muted);
-  margin-top:6px;
-}
-
-/* ---------- SCREENS ---------- */
-.screen{display:none}
-.screen.active{display:block}
-
-/* ---------- BACK BUTTON ---------- */
-.back{
-  padding:10px 16px;
-  color:var(--accent);
-  font-weight:600;
-}
-
-/* ---------- BOTTOM NAV ---------- */
-.nav{
-  position:fixed;
-  bottom:0;left:0;right:0;
-  background:#0f0a1f;
-  display:flex;
-  justify-content:space-around;
-  padding:10px 0 12px;
-}
-.nav-btn{
-  font-size:13px;
-  color:var(--muted);
-}
-.nav-btn.active{color:var(--accent)}
-</style>
+  <meta charset="UTF-8" />
+  <title>Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- LOADER -->
 <div id="loader">
-  <div class="spinner"></div>
-  <div class="loader-note">Все персонажи являются вымышленными</div>
+  🌙 Загрузка…<br>
+  <small>Все персонажи вымышлены</small>
 </div>
 
-<!-- MAIN -->
-<div id="app" style="display:none">
-
-  <!-- HOME -->
-  <div class="screen active" id="home">
-    <div class="header">Anime AI 18+</div>
-
-    <div class="grid">
-      <div class="card">
-        <div class="card-title">👤 Профиль</div>
-        <div class="card-sub">Баланс, настройки</div>
-      </div>
-
-      <div class="card" onclick="openScreen('characters')">
-        <div class="card-title">🧍 Персонажи</div>
-        <div class="card-sub">Выбор персонажа</div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">💬 Чаты</div>
-        <div class="card-sub">История диалогов</div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">⭐ Premium</div>
-        <div class="card-sub">Подписка</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHARACTERS -->
-  <div class="screen" id="characters">
-    <div class="back" onclick="openScreen('home')">← Назад</div>
-    <div class="header">Персонажи</div>
-
-    <div class="grid">
-      <div class="card">
-        <div class="card-title">Акира</div>
-        <div class="card-sub">Холодная, доминирующая</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Мию</div>
-        <div class="card-sub">Милая, застенчивая</div>
-      </div>
-    </div>
-  </div>
-
+<div id="app" hidden>
+  <h2>Главное меню</h2>
+  <button onclick="showProfile()">Профиль</button>
+  <button onclick="showTasks()">Задания</button>
 </div>
 
-<!-- BOTTOM NAV -->
-<div class="nav">
-  <div class="nav-btn active" onclick="openScreen('home')">🏠 Главная</div>
-  <div class="nav-btn" onclick="openScreen('characters')">🧍 Персонажи</div>
-  <div class="nav-btn">👤 Профиль</div>
-</div>
-
-<script>
-function openScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(n=>n.classList.remove('active'));
-}
-
-setTimeout(()=>{
-  document.getElementById('loader').style.display='none';
-  document.getElementById('app').style.display='block';
-},900);
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
