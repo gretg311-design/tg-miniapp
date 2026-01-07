@@ -1,29 +1,28 @@
 const tg = window.Telegram.WebApp;
+tg.ready();
 tg.expand();
 
-const OWNER_ID = 8287041036;
-
-// ❗ НИКАКИХ await
-// ❗ НИКАКИХ fetch
-// ❗ НИКАКОГО сервера
-
-function showApp() {
-  document.getElementById("loader").remove();
-  document.getElementById("app").style.display = "block";
+/* 🔥 ГЛАВНОЕ — СООБЩАЕМ РЕАЛЬНУЮ ВЫСОТУ */
+function fixHeight() {
+  document.documentElement.style.height = tg.viewportHeight + "px";
+  document.body.style.height = tg.viewportHeight + "px";
 }
 
-// ⛑ ГАРАНТИЯ: интерфейс откроется ВСЕГДА
-setTimeout(showApp, 1200);
+fixHeight();
+tg.onEvent("viewportChanged", fixHeight);
 
-// Telegram user (может быть undefined — И ЭТО НОРМ)
-const user = tg.initDataUnsafe?.user;
+/* ===== ОВНЕР ===== */
+const OWNER_ID = 8287041036;
+const userId = tg.initDataUnsafe.user?.id;
 
-if (user) {
-  const userId = user.id;
+/* ===== ЭКРАН ===== */
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
-  // Овнер
-  if (userId === OWNER_ID) {
-    document.getElementById("adminBtn").style.display = "block";
-    document.getElementById("consoleBtn").style.display = "block";
-  }
+/* ===== КНОПКИ ОВНЕРА ===== */
+if (userId === OWNER_ID) {
+  document.getElementById("btn-console").style.display = "flex";
+  document.getElementById("btn-admin").style.display = "flex";
 }
