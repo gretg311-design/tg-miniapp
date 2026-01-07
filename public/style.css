@@ -1,51 +1,104 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #1a0033, #050010);
-  color: white;
-  text-align: center;
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
 }
 
-#loader {
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: #050a1a;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* ===== ЗАГРУЗКА ===== */
+#loading {
   position: fixed;
   inset: 0;
+  background: radial-gradient(circle at center, #0a1440, #02030d);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  z-index: 10;
 }
 
 .moon {
-  width: 140px;
-  height: 140px;
-  background: #eee;
+  width: 130px;
+  height: 130px;
+  background: #fff;
   border-radius: 50%;
-  box-shadow: 0 0 60px rgba(200,200,255,0.6);
-  margin-bottom: 20px;
+  animation: pulse 2s infinite;
 }
 
-.loader-text {
-  font-size: 20px;
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px #fff; }
+  50% { box-shadow: 0 0 45px #7aa2ff; }
+  100% { box-shadow: 0 0 10px #fff; }
 }
 
-.loader-sub {
-  font-size: 14px;
-  opacity: 0.7;
-  margin-top: 5px;
+.loading-text {
+  margin-top: 20px;
+  text-align: center;
+  opacity: .85;
+  font-size: 15px;
 }
 
+/* ===== ОСНОВА ===== */
+#app {
+  width: 100vw;
+  height: 100svh; /* ВАЖНО: именно svh */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== ЭКРАНЫ ===== */
+.screen {
+  flex: 1;
+  padding: 16px;
+  display: none;
+}
+
+.screen.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== ГЛАВНОЕ МЕНЮ ===== */
 .grid {
+  flex: 1;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  padding: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;        /* 👉 растягивает кнопки */
+  gap: 14px;
 }
 
+/* ===== КНОПКИ ===== */
 button {
-  padding: 15px;
-  font-size: 16px;
+  background: linear-gradient(180deg, #111c4d, #0b1335);
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #7b2cff, #b266ff);
-  color: white;
+  border-radius: 18px;
+  padding: 18px 10px;
+  color: #fff;
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 90px;          /* 👉 кнопки БОЛЬШИЕ */
+}
+
+button span {
+  font-size: 14px;
+  opacity: .9;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.owner {
+  border: 1px solid #3b5cff;
 }
