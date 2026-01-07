@@ -1,241 +1,42 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TG MiniApp</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anime AI 18+</title>
 
-<style>
-:root {
-  --bg: #0b0f1a;
-  --card: #151a2e;
-  --accent: #7c8cff;
-  --text: #ffffff;
-}
-
-* {
-  box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-body {
-  margin: 0;
-  background: radial-gradient(circle at top, #1a1f3c, var(--bg));
-  color: var(--text);
-  overflow-x: hidden;
-}
-
-/* ===== LOADING ===== */
-#loading {
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle, #1a1f3c, #050711);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  z-index: 100;
-}
-
-.moon {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #fff, #aaa);
-  box-shadow: 0 0 40px rgba(200,200,255,.6);
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-14px); }
-}
-
-.loading-text {
-  margin-top: 20px;
-  opacity: .8;
-  font-size: 14px;
-}
-
-/* ===== SCREENS ===== */
-.screen {
-  display: none;
-  padding: 16px;
-}
-
-.screen.active {
-  display: block;
-  animation: fade .25s ease;
-}
-
-@keyframes fade {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== MAIN MENU ===== */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-button {
-  background: linear-gradient(145deg, #1a2040, #0f1430);
-  border: none;
-  border-radius: 14px;
-  padding: 14px 10px;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 0 0 rgba(0,0,0,0);
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-
-button:active {
-  transform: scale(.96);
-}
-
-button:hover {
-  box-shadow: 0 0 18px rgba(124,140,255,.35);
-}
-
-.icon {
-  font-size: 20px;
-  display: block;
-  margin-bottom: 6px;
-}
-
-/* ===== CHARACTERS ===== */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.card {
-  background: var(--card);
-  border-radius: 14px;
-  padding: 10px;
-  cursor: pointer;
-  transition: transform .15s;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-}
-
-.card img {
-  width: 100%;
-  border-radius: 10px;
-}
-
-.card-name {
-  margin-top: 6px;
-  font-weight: 600;
-}
-
-/* ===== CHARACTER PAGE ===== */
-.back {
-  margin-bottom: 10px;
-  opacity: .7;
-  cursor: pointer;
-}
-
-.char-img {
-  width: 100%;
-  border-radius: 16px;
-}
-
-.char-text {
-  margin-top: 12px;
-  opacity: .9;
-}
-
-/* ===== CLICK SOUND ===== */
-audio { display:none; }
-</style>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-
 <body>
 
-<!-- LOADING -->
-<div id="loading">
-  <div class="moon"></div>
-  <div class="loading-text">Загрузка…</div>
+<!-- ЗАГРУЗКА -->
+<div id="loader">
+  <img src="./assets/moon.png" class="moon" />
+  <div class="loader-text">Подключаемся к миру…</div>
+  <div class="loader-sub">Если загрузка дольше минуты — перезайди 💙</div>
 </div>
 
-<!-- MAIN -->
-<div id="menu" class="screen active">
+<!-- ПРИЛОЖЕНИЕ -->
+<div id="app" style="display:none;">
   <div class="grid">
-    <button onclick="openScreen('chats')"><span class="icon">💬</span>Чаты</button>
-    <button onclick="openScreen('chars')"><span class="icon">🧍</span>Персонажи</button>
-    <button><span class="icon">🎁</span>Ежедневка</button>
-    <button><span class="icon">📋</span>Задания</button>
-    <button><span class="icon">🛒</span>Магазин</button>
-    <button><span class="icon">🏷️</span>Промокоды</button>
-    <button><span class="icon">👤</span>Профиль</button>
-    <button><span class="icon">⚙️</span>Настройки</button>
+
+    <button class="card">💬<span>Чаты</span></button>
+    <button class="card">🧍<span>Персонажи</span></button>
+    <button class="card">🎁<span>Ежедневка</span></button>
+    <button class="card">📋<span>Задания</span></button>
+    <button class="card">🛒<span>Магазин</span></button>
+    <button class="card">🏷<span>Промокоды</span></button>
+    <button class="card">👤<span>Профиль</span></button>
+    <button class="card">⚙️<span>Настройки</span></button>
+
+    <!-- ТОЛЬКО ДЛЯ ОВНЕРА -->
+    <button id="btn-admin" class="card admin">🛠<span>Админка</span></button>
+    <button id="btn-console" class="card admin">💻<span>Консоль</span></button>
+
   </div>
 </div>
 
-<!-- CHARACTERS LIST -->
-<div id="chars" class="screen">
-  <div class="back" onclick="openScreen('menu')">← Назад</div>
-  <div class="cards" id="charList"></div>
-</div>
-
-<!-- CHARACTER PAGE -->
-<div id="charPage" class="screen">
-  <div class="back" onclick="openScreen('chars')">← Назад</div>
-  <img id="charImg" class="char-img">
-  <div class="char-text" id="charText"></div>
-</div>
-
-<audio id="clickSound" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
-
-<script>
-const screens = document.querySelectorAll('.screen');
-const sound = document.getElementById('clickSound');
-
-function openScreen(id) {
-  sound.play();
-  screens.forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-// CHARACTERS DATA (пример)
-const chars = [
-  {
-    name: "Акира",
-    img: "https://i.imgur.com/JqEuJ6t.jpeg",
-    text: "18 лет. Цундере. С виду холодная, но привязывается очень сильно. Любит ночные разговоры и ревнует."
-  },
-  {
-    name: "Рэн",
-    img: "https://i.imgur.com/0XKzn6B.jpeg",
-    text: "24 года. Спокойный интроверт. Надежный, заботливый, всегда поддержит и выслушает."
-  }
-];
-
-const list = document.getElementById('charList');
-chars.forEach((c,i)=>{
-  const div = document.createElement('div');
-  div.className = 'card';
-  div.innerHTML = `<img src="${c.img}"><div class="card-name">${c.name}</div>`;
-  div.onclick = ()=>{
-    document.getElementById('charImg').src = c.img;
-    document.getElementById('charText').innerText = c.text;
-    openScreen('charPage');
-  };
-  list.appendChild(div);
-});
-
-// LOADING END
-setTimeout(()=>{
-  document.getElementById('loading').style.display = 'none';
-}, 1400);
-</script>
-
+<script src="./app.js"></script>
 </body>
-  </html>
+</html>
