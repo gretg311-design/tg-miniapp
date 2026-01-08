@@ -6,8 +6,6 @@ import { fileURLToPath } from "url";
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BOT_TOKEN = process.env.BOT_TOKEN;
-
-// OWNER
 const OWNER_ID = "8287041036";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,29 +15,38 @@ app.use(express.json());
 app.use(express.static("public"));
 
 function checkTelegramAuth(initData) {
-  const secret = crypto.createHash("sha256").update(BOT_TOKEN).digest();
-  const params = new URLSearchParams(initData);
-  const hash = params.get("hash");
-  params.delete("hash");
+  try {
+    const secret = crypto.createHash("sha256").update(BOT_TOKEN).digest();
+    const params = new URLSearchParams(initData);
+    const hash = params.get("hash");
+    params.delete("hash");
 
-  const dataCheckString = [...params.entries()]
-    .sort()
-    .map(([k, v]) => `${k}=${v}`)
-    .join("\n");
+    const dataCheckString = [...params.entries()]
+      .sort()
+      .map(([k, v]) => `${k}=${v}`)
+      .join("\n");
 
-  const hmac = crypto
-    .createHmac("sha256", secret)
-    .update(dataCheckString)
-    .digest("hex");
+    const hmac = crypto
+      .createHmac("sha256", secret)
+      .update(dataCheckString)
+      .digest("hex");
 
-  return hmac === hash;
+    return hmac === hash;
+  } catch {
+    return false;
+  }
 }
 
 app.post("/api/auth", (req, res) => {
   const { initData } = req.body;
-  if (!initData) return res.status(400).json({ error: "NO_INIT_DATA" });
-  if (!checkTelegramAuth(initData))
-    return res.status(403).json({ error: "INVALID_AUTH" });
+
+  if (!initData) {
+    return res.json({ ok: false, reason: "NO_INIT_DATA" });
+  }
+
+  if (!checkTelegramAuth(initData)) {
+    return res.json({ ok: false, reason: "INVALID_AUTH" });
+  }
 
   const params = new URLSearchParams(initData);
   const user = JSON.parse(params.get("user"));
@@ -52,9 +59,9 @@ app.post("/api/auth", (req, res) => {
 });
 
 app.get("*", (_, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
 app.listen(PORT, () => {
-  console.log("✅ Server running on", PORT);
+  console.log("✅ Server started");
 });
