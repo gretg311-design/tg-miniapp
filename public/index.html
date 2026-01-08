@@ -11,29 +11,25 @@
 
 <div id="loader">
   <div class="moon"></div>
-  <p>Загрузка мира...</p>
+  <p id="loaderText">Загрузка мира...</p>
   <small>Все персонажи вымышлены</small>
 </div>
 
 <div id="app" class="hidden">
-
-  <h2 id="title">Главное меню</h2>
+  <h2>Главное меню</h2>
 
   <div class="menu">
-    <button onclick="openScreen('chats')">💬 Чаты</button>
-    <button onclick="openScreen('characters')">🧑‍🎤 Персонажи</button>
-    <button onclick="openScreen('daily')">🌙 Ежедневка</button>
-    <button onclick="openScreen('tasks')">📜 Задания</button>
-    <button onclick="openScreen('shop')">🛒 Магазин</button>
-    <button onclick="openScreen('promo')">🎁 Промокоды</button>
-    <button onclick="openScreen('profile')">👤 Профиль</button>
-    <button onclick="openScreen('settings')">⚙️ Настройки</button>
-    <button id="adminBtn" class="hidden" onclick="openScreen('admin')">🛠 Админ</button>
-    <button id="consoleBtn" class="hidden" onclick="openScreen('console')">👑 Консоль</button>
+    <button>💬 Чаты</button>
+    <button>🧑‍🎤 Персонажи</button>
+    <button>🌙 Ежедневка</button>
+    <button>📜 Задания</button>
+    <button>🛒 Магазин</button>
+    <button>🎁 Промокоды</button>
+    <button>👤 Профиль</button>
+    <button>⚙️ Настройки</button>
+    <button id="adminBtn" class="hidden">🛠 Админ</button>
+    <button id="consoleBtn" class="hidden">👑 Консоль</button>
   </div>
-
-  <div id="screen"></div>
-
 </div>
 
 <script src="app.js"></script>
