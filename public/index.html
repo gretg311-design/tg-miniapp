@@ -1,42 +1,41 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anime AI 18+</title>
-
-  <link rel="stylesheet" href="./style.css" />
+  <meta charset="UTF-8">
+  <title>Anime RP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ЗАГРУЗКА -->
 <div id="loader">
-  <img src="./assets/moon.png" class="moon" />
-  <div class="loader-text">Подключаемся к миру…</div>
-  <div class="loader-sub">Если загрузка дольше минуты — перезайди 💙</div>
+  <div class="moon"></div>
+  <p>Загрузка мира...</p>
+  <small>Все персонажи вымышлены</small>
 </div>
 
-<!-- ПРИЛОЖЕНИЕ -->
-<div id="app" style="display:none;">
-  <div class="grid">
+<div id="app" class="hidden">
 
-    <button class="card">💬<span>Чаты</span></button>
-    <button class="card">🧍<span>Персонажи</span></button>
-    <button class="card">🎁<span>Ежедневка</span></button>
-    <button class="card">📋<span>Задания</span></button>
-    <button class="card">🛒<span>Магазин</span></button>
-    <button class="card">🏷<span>Промокоды</span></button>
-    <button class="card">👤<span>Профиль</span></button>
-    <button class="card">⚙️<span>Настройки</span></button>
+  <h2 id="title">Главное меню</h2>
 
-    <!-- ТОЛЬКО ДЛЯ ОВНЕРА -->
-    <button id="btn-admin" class="card admin">🛠<span>Админка</span></button>
-    <button id="btn-console" class="card admin">💻<span>Консоль</span></button>
-
+  <div class="menu">
+    <button onclick="openScreen('chats')">💬 Чаты</button>
+    <button onclick="openScreen('characters')">🧑‍🎤 Персонажи</button>
+    <button onclick="openScreen('daily')">🌙 Ежедневка</button>
+    <button onclick="openScreen('tasks')">📜 Задания</button>
+    <button onclick="openScreen('shop')">🛒 Магазин</button>
+    <button onclick="openScreen('promo')">🎁 Промокоды</button>
+    <button onclick="openScreen('profile')">👤 Профиль</button>
+    <button onclick="openScreen('settings')">⚙️ Настройки</button>
+    <button id="adminBtn" class="hidden" onclick="openScreen('admin')">🛠 Админ</button>
+    <button id="consoleBtn" class="hidden" onclick="openScreen('console')">👑 Консоль</button>
   </div>
+
+  <div id="screen"></div>
+
 </div>
 
-<script src="./app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
