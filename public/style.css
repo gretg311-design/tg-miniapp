@@ -1,20 +1,16 @@
-* {
-  box-sizing: border-box;
+body {
   margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  background: #050b18;
+  color: #e6f1ff;
+  font-family: system-ui;
 }
 
-html, body {
-  height: 100%;
-  background: radial-gradient(circle at center, #1d1b3a, #05040d);
-  color: #fff;
-}
+.hidden { display: none; }
 
-/* ЗАГРУЗКА */
 #loader {
   position: fixed;
   inset: 0;
+  background: radial-gradient(#0b1630, #02040a);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -22,59 +18,26 @@ html, body {
 }
 
 .moon {
-  width: 140px;
-  animation: pulse 2s infinite ease-in-out;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #cfd8ff;
+  box-shadow: 0 0 30px #8aa0ff;
+  margin-bottom: 20px;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.08); opacity: 1; }
-  100% { transform: scale(1); opacity: 0.7; }
-}
-
-.loader-text {
-  margin-top: 20px;
-  font-size: 18px;
-}
-
-.loader-sub {
-  margin-top: 6px;
-  font-size: 13px;
-  opacity: 0.6;
-}
-
-/* ПРИЛОЖЕНИЕ */
-#app {
-  height: 100%;
-}
-
-.grid {
-  height: 100%;
-  padding: 16px;
+.menu {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: 12px;
+  padding: 16px;
 }
 
-.card {
-  background: linear-gradient(145deg, #1e1c3f, #14122b);
-  border-radius: 18px;
+button {
+  padding: 14px;
+  border-radius: 12px;
   border: none;
-  color: #fff;
-  font-size: 20px;
-  padding: 22px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.card span {
-  margin-top: 8px;
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.admin {
-  display: none;
+  background: #12214a;
+  color: white;
+  font-size: 16px;
 }
