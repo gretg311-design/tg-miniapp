@@ -20,3 +20,24 @@ body {
 .moon {
   width: 120px;
   height: 120px;
+  border-radius: 50%;
+  background: #cfd8ff;
+  box-shadow: 0 0 30px #8aa0ff;
+  margin-bottom: 20px;
+}
+
+.menu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+button {
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: #12214a;
+  color: white;
+  font-size: 16px;
+}
