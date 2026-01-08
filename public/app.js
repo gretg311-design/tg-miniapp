@@ -2,8 +2,19 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 
 const loader = document.getElementById("loader");
+const loaderText = document.getElementById("loaderText");
 const app = document.getElementById("app");
-const screen = document.getElementById("screen");
+
+function showApp() {
+  loader.classList.add("hidden");
+  app.classList.remove("hidden");
+}
+
+// ⏱️ СТРАХОВКА — НИКОГДА НЕ ВИСИМ
+setTimeout(() => {
+  loaderText.innerText = "Сервер запускается...\nЗайдите снова через 1 минуту";
+  showApp();
+}, 6000);
 
 fetch("/api/auth", {
   method: "POST",
@@ -12,19 +23,15 @@ fetch("/api/auth", {
 })
 .then(r => r.json())
 .then(data => {
-  loader.classList.add("hidden");
-  app.classList.remove("hidden");
+  showApp();
 
-  if (data.isOwner) {
+  if (data.ok && data.isOwner) {
     document.getElementById("consoleBtn").classList.remove("hidden");
     document.getElementById("adminBtn").classList.remove("hidden");
   }
 })
 .catch(() => {
-  loader.querySelector("p").innerText =
-    "Сервер просыпается...\nПерезайдите через 1 минуту";
+  loaderText.innerText =
+    "Ошибка сервера.\nПерезайдите через 1 минуту";
+  showApp();
 });
-
-function openScreen(name) {
-  screen.innerHTML = `<h3>${name}</h3><p>Экран в разработке</p>`;
-}
