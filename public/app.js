@@ -1,26 +1,30 @@
 const tg = window.Telegram.WebApp;
 tg.ready();
-tg.expand();
 
-const OWNER_ID = 8287041036;
-const userId = tg.initDataUnsafe?.user?.id;
+const loader = document.getElementById("loader");
+const app = document.getElementById("app");
+const screen = document.getElementById("screen");
 
-/* УБИРАЕМ ЗАГРУЗКУ */
-setTimeout(() => {
-  document.getElementById("loader").style.display = "none";
-  document.getElementById("app").style.display = "block";
-}, 1200);
+fetch("/api/auth", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ initData: tg.initData })
+})
+.then(r => r.json())
+.then(data => {
+  loader.classList.add("hidden");
+  app.classList.remove("hidden");
 
-/* ПОКАЗ КНОПОК ОВНЕРА */
-if (userId === OWNER_ID) {
-  document.getElementById("btn-admin").style.display = "flex";
-  document.getElementById("btn-console").style.display = "flex";
+  if (data.isOwner) {
+    document.getElementById("consoleBtn").classList.remove("hidden");
+    document.getElementById("adminBtn").classList.remove("hidden");
+  }
+})
+.catch(() => {
+  loader.querySelector("p").innerText =
+    "Сервер просыпается...\nПерезайдите через 1 минуту";
+});
+
+function openScreen(name) {
+  screen.innerHTML = `<h3>${name}</h3><p>Экран в разработке</p>`;
 }
-
-/* ФИКС ВЫСОТЫ */
-function fixHeight() {
-  document.body.style.height = tg.viewportHeight + "px";
-  document.getElementById("app").style.height = tg.viewportHeight + "px";
-}
-fixHeight();
-tg.onEvent("viewportChanged", fixHeight);
