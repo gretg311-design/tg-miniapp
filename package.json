@@ -1,7 +1,8 @@
 {
   "name": "tg-miniapp",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Telegram Mini App stable base",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
