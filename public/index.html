@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tg-miniapp</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #0b0f1a;
+  color: white;
+}
+
+.screen {
+  display: none;
+  padding: 20px;
+}
+
+.screen.active {
+  display: block;
+}
+
+#loader {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #1b2340, #05070f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 999;
+}
+
+.moon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #9aa4ff, #3b3f7a);
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0); }
+}
+
+.menu button {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  border: none;
+  background: #1c2547;
+  color: white;
+  font-size: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="loader">
+  <div class="moon"></div>
+  <p style="opacity:.6;margin-top:15px">Загрузка…</p>
+</div>
+
+<div id="main" class="screen active">
+  <h2>Главное меню</h2>
+  <div class="menu" id="menu"></div>
+</div>
+
+<div id="screen" class="screen">
+  <button onclick="back()">← Назад</button>
+  <div id="content"></div>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+const OWNER_ID = 8287041036;
+const userId = tg.initDataUnsafe?.user?.id || 0;
+
+const menu = document.getElementById("menu");
+const screen = document.getElementById("screen");
+const content = document.getElementById("content");
+const main = document.getElementById("main");
+
+setTimeout(() => {
+  document.getElementById("loader").style.display = "none";
+}, 600);
+
+const buttons = [
+  ["Чаты", "Чаты пока не подключены"],
+  ["Персонажи", "Экран персонажей"],
+  ["Ежедневка", "Ежедневная награда"],
+  ["Задания", "Список заданий"],
+  ["Магазин", "Магазин"],
+  ["Промокоды", "Ввод промокодов"],
+  ["Профиль", "Профиль пользователя"],
+  ["Настройки", "Настройки"]
+];
+
+buttons.forEach(([title, text]) => {
+  const btn = document.createElement("button");
+  btn.innerText = title;
+  btn.onclick = () => open(text);
+  menu.appendChild(btn);
+});
+
+if (userId === OWNER_ID) {
+  const adminBtn = document.createElement("button");
+  adminBtn.innerText = "Админка";
+  adminBtn.onclick = () => open("Админ-панель");
+  menu.appendChild(adminBtn);
+
+  const consoleBtn = document.createElement("button");
+  consoleBtn.innerText = "Консоль";
+  consoleBtn.onclick = () => open("Консоль овнера");
+  menu.appendChild(consoleBtn);
+}
+
+function open(text) {
+  main.classList.remove("active");
+  screen.classList.add("active");
+  content.innerHTML = `<h3>${text}</h3>`;
+}
+
+function back() {
+  screen.classList.remove("active");
+  main.classList.add("active");
+}
+</script>
+
+</body>
+</html>
