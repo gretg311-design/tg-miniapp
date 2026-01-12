@@ -3,277 +3,211 @@
 <head>
 <meta charset="UTF-8">
 <title>AnimeAI 18+</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- Telegram Mini App -->
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <style>
-:root{
-  --bg:#0b0f1a;
-  --panel:#121a2f;
-  --accent:#6cf2c2;
-  --accent2:#8aa4ff;
-  --danger:#ff6c6c;
-  --text:#e8ecff;
-  --muted:#8b93b6;
-}
-*{box-sizing:border-box}
-html,body{
-  margin:0;
-  padding:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:system-ui,-apple-system,BlinkMacSystemFont;
-  height:100%;
-}
-button{
-  border:none;
-  background:none;
-  color:inherit;
-  font:inherit;
-}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial}
+body{background:#0b0f1a;color:#fff;overflow:hidden}
 .hidden{display:none}
 
-/* ===== LOADING ===== */
-#loading{
-  position:fixed;
-  inset:0;
-  background:radial-gradient(circle at center,#1a2550,#050814);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
+/* ЗАГРУЗКА */
+#loader{
+position:fixed;inset:0;
+background:radial-gradient(circle at center,#1c2340,#05070f);
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+z-index:9999
 }
 .moon{
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:radial-gradient(circle at 30% 30%,#fff,#cfd6ff 40%,#7d86c9);
-  box-shadow:0 0 40px #7d86c9;
-  animation:float 3s ease-in-out infinite;
+width:120px;height:120px;border-radius:50%;
+background:radial-gradient(circle at 30% 30%,#fff,#aaa,#666);
+animation:spin 4s linear infinite
 }
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-12px)}
-}
-#loading p{
-  margin-top:20px;
-  color:var(--muted);
-  font-size:14px;
-}
-#loading .note{
-  position:absolute;
-  bottom:12px;
-  right:14px;
-  font-size:11px;
-  opacity:.6;
-}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+#loader p{margin-top:20px;opacity:.8}
 
-/* ===== TOP BAR ===== */
+/* ВЕРХ */
 #topbar{
-  background:var(--panel);
-  padding:10px 14px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+height:64px;background:#111833;
+display:flex;align-items:center;justify-content:space-between;
+padding:0 12px;border-bottom:1px solid #222
 }
-#userInfo{
-  display:flex;
-  flex-direction:column;
-}
-#userName{font-weight:600;font-size:15px}
-#userId{font-size:11px;color:var(--muted)}
-#balance{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-#balance span{
-  font-weight:600;
-}
-.badge{
-  background:#1f2b5a;
-  padding:4px 8px;
-  border-radius:10px;
-  font-size:12px;
-}
-.plus{
-  background:var(--accent2);
-  color:#000;
-  border-radius:50%;
-  width:22px;
-  height:22px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-}
+#userinfo small{opacity:.6;font-size:11px}
+#balance span{margin-left:6px}
 
-/* ===== MAIN MENU ===== */
-#menu{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  padding:16px;
+/* ОСНОВА */
+#app{height:calc(100vh - 64px);overflow:hidden}
+.screen{height:100%;overflow-y:auto;padding:16px}
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:12px
 }
-.menu-btn{
-  background:linear-gradient(135deg,#1a2450,#101735);
-  border-radius:16px;
-  padding:14px;
-  min-height:90px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  text-align:center;
+.btn{
+background:#1b2347;
+border-radius:14px;
+padding:18px;
+text-align:center;
+font-size:14px;
+cursor:pointer;
+transition:.2s
 }
-.menu-btn span{
-  font-size:13px;
-  color:var(--muted);
-}
+.btn:hover{background:#26317a}
 
-/* ===== SCREENS ===== */
-.screen{
-  padding:16px;
-}
+/* КАРТОЧКИ ПЕРСОВ */
 .card{
-  background:var(--panel);
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:12px;
+background:#141b3a;
+border-radius:14px;
+padding:12px;
+text-align:center
 }
-.card h3{margin:0 0 6px 0}
-.card p{margin:0;color:var(--muted);font-size:14px}
-
-/* ===== BOTTOM ===== */
-#bottomNav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#0e1530;
-  display:flex;
-  justify-content:space-around;
-  padding:10px 0;
-}
-.nav-btn{
-  font-size:13px;
-  color:var(--muted);
+.card img{
+width:100%;border-radius:10px;margin-bottom:8px
 }
 
-/* ===== ADMIN ===== */
-.admin-btn{
-  background:#2a3a7a;
+/* ЧАТ */
+.chatbox{
+background:#0f142e;
+border-radius:14px;
+padding:12px;
+margin-bottom:10px
 }
-.console-btn{
-  background:#7a2a5a;
+
+/* НИЖНЕЕ МЕНЮ */
+#bottom{
+height:54px;
+display:flex;
+background:#0c122a;
+border-top:1px solid #222
+}
+#bottom div{
+flex:1;text-align:center;line-height:54px;cursor:pointer
 }
 </style>
 </head>
+
 <body>
 
-<!-- LOADING -->
-<div id="loading">
-  <div class="moon"></div>
-  <p id="loadText">Загрузка мини-приложения…</p>
-  <div class="note">Все персонажи вымышлены</div>
+<!-- ЗАГРУЗКА -->
+<div id="loader">
+<div class="moon"></div>
+<p id="loadText">Загрузка AnimeAI 18+</p>
 </div>
 
-<!-- TOP BAR -->
+<!-- ВЕРХ -->
 <div id="topbar" class="hidden">
-  <div id="userInfo">
-    <div id="userName">Гость</div>
-    <div id="userId">ID: —</div>
-  </div>
-  <div id="balance">
-    <span id="shards">50</span>
-    <span>🌙</span>
-    <div class="badge" id="subBadge">Free</div>
-    <div class="plus">+</div>
-  </div>
+<div id="userinfo">
+<b id="uname">Гость</b><br>
+<small>ID: <span id="uid">0</span></small>
+</div>
+<div id="balance">
+🌙 <span id="money">0</span> | ⭐ <span id="sub">Free</span>
+</div>
 </div>
 
-<!-- MAIN MENU -->
-<div id="menu" class="hidden">
-  <div class="menu-btn" onclick="openScreen('chats')">💬<span>Чаты</span></div>
-  <div class="menu-btn" onclick="openScreen('chars')">🧑‍🎤<span>Персонажи</span></div>
-  <div class="menu-btn" onclick="openScreen('daily')">🎁<span>Ежедневка</span></div>
-  <div class="menu-btn" onclick="openScreen('tasks')">📜<span>Задания</span></div>
-  <div class="menu-btn" onclick="openScreen('shop')">🛒<span>Магазин</span></div>
-  <div class="menu-btn" onclick="openScreen('promo')">🏷<span>Промокоды</span></div>
-  <div class="menu-btn" onclick="openScreen('profile')">👤<span>Профиль</span></div>
-  <div class="menu-btn" onclick="openScreen('settings')">⚙<span>Настройки</span></div>
-  <div id="adminBtn" class="menu-btn admin-btn hidden" onclick="openScreen('admin')">🛠<span>Админ</span></div>
-  <div id="consoleBtn" class="menu-btn console-btn hidden" onclick="openScreen('console')">🧠<span>Консоль</span></div>
+<!-- ПРИЛОЖЕНИЕ -->
+<div id="app" class="hidden">
+
+<!-- ГЛАВНОЕ МЕНЮ -->
+<div id="home" class="screen">
+<div class="grid">
+<div class="btn" onclick="openScreen('chats')">💬 Чаты</div>
+<div class="btn" onclick="openScreen('chars')">🧍 Персонажи</div>
+<div class="btn" onclick="daily()">🎁 Ежедневка</div>
+<div class="btn" onclick="openScreen('tasks')">📋 Задания</div>
+<div class="btn" onclick="openScreen('shop')">🛒 Магазин</div>
+<div class="btn" onclick="openScreen('promo')">🎟 Промокоды</div>
+<div class="btn" onclick="openScreen('profile')">👤 Профиль</div>
+<div class="btn" onclick="openScreen('settings')">⚙️ Настройки</div>
+<div class="btn hidden" id="adminBtn" onclick="openScreen('admin')">🛡 Админка</div>
+<div class="btn hidden" id="consoleBtn" onclick="openScreen('console')">🧠 Консоль</div>
+</div>
 </div>
 
-<!-- SCREENS -->
-<div id="screens">
-  <div id="chats" class="screen hidden"><div class="card"><h3>Чаты</h3><p>Здесь будут ваши диалоги с персонажами.</p></div></div>
-  <div id="chars" class="screen hidden"><div class="card"><h3>Персонажи</h3><p>100 аниме-персонажей. Все доступны.</p></div></div>
-  <div id="daily" class="screen hidden"><div class="card"><h3>Ежедневная награда</h3><p>Заберите осколки луны.</p></div></div>
-  <div id="tasks" class="screen hidden"><div class="card"><h3>Задания</h3><p>Задания от администрации.</p></div></div>
-  <div id="shop" class="screen hidden"><div class="card"><h3>Магазин</h3><p>Подписки и осколки луны.</p></div></div>
-  <div id="promo" class="screen hidden"><div class="card"><h3>Промокоды</h3><p>Введите код от овнера.</p></div></div>
-  <div id="profile" class="screen hidden"><div class="card"><h3>Профиль</h3><p>Имя, пол, дата рождения.</p></div></div>
-  <div id="settings" class="screen hidden"><div class="card"><h3>Настройки</h3><p>Язык, интерфейс.</p></div></div>
-  <div id="admin" class="screen hidden"><div class="card"><h3>Админ</h3><p>Выдача осколков и подписок.</p></div></div>
-  <div id="console" class="screen hidden"><div class="card"><h3>Консоль овнера</h3><p>Админы, логи, управление.</p></div></div>
+<!-- ЧАТЫ -->
+<div id="chats" class="screen hidden">
+<h3>Чаты</h3>
+<p>Пока чатов нет</p>
 </div>
 
-<div id="bottomNav" class="hidden">
-  <button class="nav-btn" onclick="goHome()">🏠 Главная</button>
-  <button class="nav-btn" onclick="goBack()">⬅ Назад</button>
+<!-- ПЕРСОНАЖИ -->
+<div id="chars" class="screen hidden">
+<h3>Персонажи</h3>
+<div class="grid" id="charList"></div>
+</div>
+
+<!-- ПРОЧИЕ ЭКРАНЫ -->
+<div id="tasks" class="screen hidden"><h3>Задания</h3></div>
+<div id="shop" class="screen hidden"><h3>Магазин</h3></div>
+<div id="promo" class="screen hidden"><h3>Промокоды</h3></div>
+<div id="profile" class="screen hidden"><h3>Профиль</h3></div>
+<div id="settings" class="screen hidden"><h3>Настройки</h3></div>
+<div id="admin" class="screen hidden"><h3>Админка</h3></div>
+<div id="console" class="screen hidden"><h3>Консоль овнера</h3></div>
+
+</div>
+
+<!-- НИЗ -->
+<div id="bottom" class="hidden">
+<div onclick="openScreen('home')">🏠</div>
+<div onclick="openScreen('chars')">🧍</div>
+<div onclick="openScreen('chats')">💬</div>
 </div>
 
 <script>
+/* ===== НАСТРОЙКИ ===== */
 const OWNER_ID = 8287041036;
-const tg = window.Telegram?.WebApp;
-let history = [];
+const user = {
+id: OWNER_ID,
+name: "Owner",
+money: 100,
+sub: "Ultra",
+admin: true
+};
 
-function openScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-  history.push(id);
-}
-
-function goHome(){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
-  history=[];
-}
-
-function goBack(){
-  history.pop();
-  const last = history.pop();
-  if(last) openScreen(last);
-}
-
+/* ===== ЗАГРУЗКА ===== */
 setTimeout(()=>{
-  if(!tg){
-    document.getElementById('loadText').innerText =
-      'Сервер запускается… перезайдите через 1–2 минуты';
-    return;
-  }
+document.getElementById("loader").style.display="none";
+document.getElementById("topbar").classList.remove("hidden");
+document.getElementById("app").classList.remove("hidden");
+document.getElementById("bottom").classList.remove("hidden");
+init();
+},1200);
 
-  tg.ready();
-  const user = tg.initDataUnsafe.user || {};
+/* ===== ИНИТ ===== */
+function init(){
+uid.textContent=user.id;
+uname.textContent=user.name;
+money.textContent=user.money;
+sub.textContent=user.sub;
+if(user.admin) adminBtn.classList.remove("hidden");
+if(user.id===OWNER_ID) consoleBtn.classList.remove("hidden");
+loadChars();
+}
 
-  document.getElementById('userName').innerText = user.first_name || 'Пользователь';
-  document.getElementById('userId').innerText = 'ID: ' + (user.id || '—');
+/* ===== НАВИГАЦИЯ ===== */
+function openScreen(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+}
 
-  if(user.id == OWNER_ID){
-    document.getElementById('adminBtn').classList.remove('hidden');
-    document.getElementById('consoleBtn').classList.remove('hidden');
-  }
+/* ===== ПЕРСЫ ===== */
+function loadChars(){
+const list=document.getElementById("charList");
+for(let i=1;i<=12;i++){
+list.innerHTML+=`
+<div class="card">
+<img src="https://api.dicebear.com/7.x/adventurer/svg?seed=${i}">
+<b>Персонаж ${i}</b>
+<p>Аниме характер</p>
+</div>`;
+}
+}
 
-  document.getElementById('loading').classList.add('hidden');
-  document.getElementById('topbar').classList.remove('hidden');
-  document.getElementById('menu').classList.remove('hidden');
-  document.getElementById('bottomNav').classList.remove('hidden');
-},1500);
+/* ===== ЕЖЕДНЕВКА ===== */
+function daily(){
+alert("Ежедневная награда: +5 🌙");
+user.money+=5;
+money.textContent=user.money;
+}
 </script>
 
 </body>
