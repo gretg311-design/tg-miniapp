@@ -55,10 +55,12 @@ body{
   display:flex;align-items:center;justify-content:center;
 }
 
-/* ===== HOME ===== */
-#app{display:none}
-#home{padding:18px}
+/* ===== SCREENS ===== */
+.screen{display:none;padding:18px}
+.screen.active{display:block}
 .header{font-size:26px;font-weight:800;margin-bottom:18px}
+
+/* ===== MENU ===== */
 .menu{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -71,6 +73,33 @@ body{
   text-align:center;
 }
 .menu-card .icon{font-size:30px;margin-bottom:10px}
+
+/* ===== CHARACTERS ===== */
+.char-card{
+  background:linear-gradient(145deg,#1e2a52,#121a36);
+  border-radius:20px;
+  padding:16px;
+  margin-bottom:14px;
+}
+.char-name{font-size:18px;font-weight:700}
+.char-meta{font-size:12px;opacity:.7;margin:4px 0}
+.char-desc{font-size:14px;line-height:1.5;margin-top:6px}
+.char-btn{
+  margin-top:10px;
+  padding:10px;
+  text-align:center;
+  border-radius:14px;
+  background:#3d4cff;
+}
+
+/* ===== BACK ===== */
+.back{
+  margin-top:18px;
+  padding:16px;
+  text-align:center;
+  border-radius:16px;
+  background:#141c38;
+}
 
 /* ===== CHAT ===== */
 #chatOverlay{
@@ -118,12 +147,6 @@ body{
   background:#3d4cff;
   color:#fff;
 }
-
-.back{
-  padding:16px;
-  text-align:center;
-  background:#141c38;
-}
 </style>
 </head>
 
@@ -148,11 +171,12 @@ body{
   </div>
 </div>
 
-<div id="home">
+<!-- HOME -->
+<div id="home" class="screen active">
   <div class="header">Главное меню</div>
   <div class="menu">
     <div class="menu-card" onclick="openChat()"><div class="icon">💬</div>Чаты</div>
-    <div class="menu-card"><div class="icon">🧍</div>Персонажи</div>
+    <div class="menu-card" onclick="openScreen('chars')"><div class="icon">🧍</div>Персонажи</div>
     <div class="menu-card"><div class="icon">🎁</div>Ежедневка</div>
     <div class="menu-card"><div class="icon">📋</div>Задания</div>
     <div class="menu-card"><div class="icon">🛒</div>Магазин</div>
@@ -164,10 +188,45 @@ body{
   </div>
 </div>
 
+<!-- CHARACTERS -->
+<div id="chars" class="screen">
+  <div class="header">Персонажи</div>
+
+  <div class="char-card">
+    <div class="char-name">Акира</div>
+    <div class="char-meta">21 год • Цундере</div>
+    <div class="char-desc">
+      Резкая на словах, но быстро привязывается. Скрывает чувства за сарказмом и холодным тоном.
+    </div>
+    <div class="char-btn" onclick="openChat()">Начать чат</div>
+  </div>
+
+  <div class="char-card">
+    <div class="char-name">Мия</div>
+    <div class="char-meta">23 года • Дандере</div>
+    <div class="char-desc">
+      Тихая и застенчивая, раскрывается только тем, кому действительно доверяет.
+    </div>
+    <div class="char-btn" onclick="openChat()">Начать чат</div>
+  </div>
+
+  <div class="char-card">
+    <div class="char-name">Рейна</div>
+    <div class="char-meta">26 лет • Яндере</div>
+    <div class="char-desc">
+      Слишком заботливая и опасно преданная. Может пугать своей привязанностью.
+    </div>
+    <div class="char-btn" onclick="openChat()">Начать чат</div>
+  </div>
+
+  <div class="back" onclick="openScreen('home')">← Назад</div>
 </div>
 
+</div>
+
+<!-- CHAT -->
 <div id="chatOverlay">
-  <div class="chat-top">Акира • Цундере • 21</div>
+  <div class="chat-top">Чат с персонажем</div>
   <div class="chat-box" id="chatBox"></div>
 
   <div class="chat-input">
@@ -191,23 +250,23 @@ setTimeout(()=>{
   app.style.display='block'
 },1300)
 
+function openScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+}
+
 const chat = document.getElementById('chatOverlay')
 const box = document.getElementById('chatBox')
 const input = document.getElementById('msgInput')
 
-function openChat(){
-  chat.style.display='flex'
-}
-
-function closeChat(){
-  chat.style.display='none'
-}
+function openChat(){ chat.style.display='flex' }
+function closeChat(){ chat.style.display='none' }
 
 function sendMsg(){
   if(!input.value.trim()) return
   addUser(input.value)
   input.value=''
-  setTimeout(addCharResponse,800)
+  setTimeout(addCharResponse,900)
 }
 
 function addUser(text){
@@ -219,11 +278,11 @@ function addUser(text){
 }
 
 function addCharResponse(){
-  const text = `Я не собираюсь начинать разговор первой, если ты вдруг этого ожидал. 
-  Но раз уж ты написал, значит тебе действительно интересно продолжить общение. 
-  Я отвечаю не короткими фразами, потому что мне важно, чтобы ты понял мои мысли, настроение и характер. 
-  Иногда я могу быть резкой, иногда язвительной, но это часть того, какая я есть, и если тебя это не пугает, 
-  то, возможно, мы сможем продолжить этот диалог дальше.`
+  const text=`Я не собираюсь начинать разговор первой, если ты этого ожидал.
+  Но раз ты написал, значит тебе действительно интересно продолжить диалог.
+  Я предпочитаю говорить развернуто, потому что короткие ответы ничего не значат.
+  У меня есть характер, настроение и собственные мысли, и если ты готов это принять,
+  то, возможно, наше общение станет чем-то большим, чем просто очередной разговор.`
 
   const d=document.createElement('div')
   d.className='msg char-msg'
