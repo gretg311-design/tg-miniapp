@@ -13,76 +13,77 @@ body{
   background:radial-gradient(circle at top,#1b2340,#060913 75%);
   color:#fff;
   min-height:100vh;
+  overflow:hidden;
 }
-
-/* LOADER */
-#loader{
-  position:fixed;inset:0;
-  background:#050814;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  z-index:999;
-}
-.moon{
-  width:90px;height:90px;border-radius:50%;
-  background:#eee;
-  box-shadow:0 0px 40px rgba(255,255,255,.4);
-  animation:pulse 2s infinite;
-}
-@keyframes pulse{
-  0%{transform:scale(1)}
-  50%{transform:scale(1.08)}
-  100%{transform:scale(1)}
-}
-#loader p{margin-top:14px;opacity:.6}
 
 /* TOP BAR */
 .topbar{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:12px 14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px;
   background:linear-gradient(180deg,#141c38,#0b1024);
 }
-.user .name{font-weight:600}
-.stats{display:flex;gap:10px}
+.balance{font-weight:600}
 
-/* SCREENS */
-.screen{display:none;padding:14px}
-.screen.active{display:block}
-
-/* MENU */
-.menu{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+/* HOME */
+#home{
+  padding:18px;
+}
+.menu{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
 .menu-card{
   background:linear-gradient(145deg,#1e2a52,#121a36);
-  border-radius:18px;
-  padding:22px;
+  border-radius:20px;
+  padding:26px;
   text-align:center;
   cursor:pointer;
 }
-.menu-card .icon{font-size:28px}
+.menu-card .icon{
+  font-size:30px;
+  margin-bottom:10px;
+}
 
-/* CHAT */
+/* CHAT OVERLAY */
+#chatOverlay{
+  position:fixed;
+  inset:0;
+  background:#060913;
+  display:none;
+  flex-direction:column;
+  z-index:100;
+}
+
+/* CHAT TOP */
 .chat-top{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:12px;
+  padding:14px;
   background:#0b1024;
 }
-.chat-top .char-name{font-weight:700;font-size:18px}
-.chat-top .menu-btn{font-size:22px;cursor:pointer}
+.chat-top .name{
+  font-size:18px;
+  font-weight:700;
+}
+.chat-top .menu{
+  font-size:22px;
+}
 
+/* CHAT BODY */
 .chat-box{
-  height:65vh;
+  flex:1;
+  padding:14px;
   overflow-y:auto;
-  padding:12px;
 }
 .msg{
   max-width:75%;
+  padding:12px 14px;
   margin-bottom:10px;
-  padding:10px 14px;
-  border-radius:14px;
+  border-radius:16px;
 }
 .user-msg{
   background:#3d4cff;
@@ -92,50 +93,31 @@ body{
   background:#1e2a52;
 }
 
+/* INPUT */
 .chat-input{
   display:flex;
-  gap:8px;
-  padding:12px;
+  gap:10px;
+  padding:14px;
 }
 .chat-input input{
   flex:1;
-  padding:12px;
-  border-radius:14px;
+  padding:14px;
+  border-radius:16px;
   border:none;
 }
 .chat-input button{
-  padding:12px 16px;
+  padding:14px 18px;
+  border-radius:16px;
   border:none;
-  border-radius:14px;
   background:#3d4cff;
   color:#fff;
 }
 
-/* CHAT MENU */
-#chatMenu{
-  position:fixed;
-  top:70px;
-  right:14px;
-  background:#141c38;
-  border-radius:14px;
-  padding:10px;
-  display:none;
-  z-index:50;
-}
-#chatMenu div{
-  padding:10px;
-  cursor:pointer;
-  border-bottom:1px solid rgba(255,255,255,.1);
-}
-#chatMenu div:last-child{border:none}
-
 /* BACK */
 .back{
-  margin-top:14px;
   padding:14px;
   text-align:center;
-  border-radius:14px;
-  background:#1e2a52;
+  background:#141c38;
   cursor:pointer;
 }
 </style>
@@ -143,22 +125,12 @@ body{
 
 <body>
 
-<div id="loader">
-  <div class="moon"></div>
-  <p>Загрузка мира AnimeAI…</p>
+<div class="topbar">
+  <div>Главное меню</div>
+  <div class="balance">🌙 1250</div>
 </div>
 
-<div id="app" style="display:none">
-
-<!-- HOME -->
-<div id="home" class="screen active">
-  <div class="topbar">
-    <div class="user">
-      <div class="name">Главное меню</div>
-    </div>
-    <div class="stats">🌙 1250</div>
-  </div>
-
+<div id="home">
   <div class="menu">
     <div class="menu-card" onclick="openChat()">
       <div class="icon">💬</div>
@@ -171,11 +143,11 @@ body{
   </div>
 </div>
 
-<!-- CHAT -->
-<div id="chat" class="screen">
+<!-- CHAT OVERLAY -->
+<div id="chatOverlay">
   <div class="chat-top">
-    <div class="char-name">Акира • Цундере • 21</div>
-    <div class="menu-btn" onclick="toggleChatMenu()">☰</div>
+    <div class="name">Акира • Цундере • 21</div>
+    <div class="menu">☰</div>
   </div>
 
   <div class="chat-box" id="chatBox"></div>
@@ -185,87 +157,48 @@ body{
     <button onclick="sendMsg()">➤</button>
   </div>
 
-  <div class="back" onclick="openHome()">← Назад</div>
-</div>
-
-<!-- CHAT MENU -->
-<div id="chatMenu">
-  <div onclick="favorite()">⭐ В избранное</div>
-  <div onclick="clearChat()">🗑 Очистить чат</div>
-  <div onclick="clearMemory()">🧠 Очистить память</div>
-</div>
-
+  <div class="back" onclick="closeChat()">← Назад</div>
 </div>
 
 <script>
-const tg = window.Telegram?.WebApp
-tg?.ready()
-
-setTimeout(()=>{
-  loader.style.display='none'
-  app.style.display='block'
-},1200)
-
-const chatBox = document.getElementById('chatBox')
+const chat = document.getElementById('chatOverlay')
+const box = document.getElementById('chatBox')
 const input = document.getElementById('msgInput')
-const menu = document.getElementById('chatMenu')
 
 function openChat(){
-  openScreen('chat')
-  addCharMsg('Хм… чего тебе надо?')
+  chat.style.display='flex'
+  if(box.children.length===0){
+    addChar('…Чего уставился?')
+  }
 }
 
-function openHome(){
-  openScreen('home')
-}
-
-function openScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
-  document.getElementById(id).classList.add('active')
+function closeChat(){
+  chat.style.display='none'
 }
 
 function sendMsg(){
   if(!input.value) return
-  addUserMsg(input.value)
-  setTimeout(()=>{
-    addCharMsg('…Дурак. Но можешь продолжать.')
-  },600)
+  addUser(input.value)
   input.value=''
+  setTimeout(()=>{
+    addChar('Дурак… но пиши ещё.')
+  },600)
 }
 
-function addUserMsg(text){
+function addUser(t){
   const d=document.createElement('div')
   d.className='msg user-msg'
-  d.innerText=text
-  chatBox.appendChild(d)
-  chatBox.scrollTop=9999
+  d.innerText=t
+  box.appendChild(d)
+  box.scrollTop=9999
 }
 
-function addCharMsg(text){
+function addChar(t){
   const d=document.createElement('div')
   d.className='msg char-msg'
-  d.innerText=text
-  chatBox.appendChild(d)
-  chatBox.scrollTop=9999
-}
-
-function toggleChatMenu(){
-  menu.style.display = menu.style.display==='block'?'none':'block'
-}
-
-function clearChat(){
-  chatBox.innerHTML=''
-  toggleChatMenu()
-}
-
-function clearMemory(){
-  addCharMsg('…Я всё забыла. И не смотри так.')
-  toggleChatMenu()
-}
-
-function favorite(){
-  alert('Персонаж добавлен в избранное')
-  toggleChatMenu()
+  d.innerText=t
+  box.appendChild(d)
+  box.scrollTop=9999
 }
 </script>
 
