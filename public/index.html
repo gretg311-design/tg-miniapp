@@ -4,214 +4,276 @@
 <meta charset="UTF-8">
 <title>AnimeAI 18+</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Telegram Mini App -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:system-ui;
-  background:radial-gradient(circle at top,#1b2340,#060913 75%);
-  color:#fff;
-  min-height:100vh;
-  overflow-x:hidden;
+:root{
+  --bg:#0b0f1a;
+  --panel:#121a2f;
+  --accent:#6cf2c2;
+  --accent2:#8aa4ff;
+  --danger:#ff6c6c;
+  --text:#e8ecff;
+  --muted:#8b93b6;
 }
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  padding:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont;
+  height:100%;
+}
+button{
+  border:none;
+  background:none;
+  color:inherit;
+  font:inherit;
+}
+.hidden{display:none}
 
-/* LOADER */
-#loader{
-  position:fixed;inset:0;
-  background:#050814;
+/* ===== LOADING ===== */
+#loading{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at center,#1a2550,#050814);
   display:flex;
   flex-direction:column;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
   z-index:999;
 }
 .moon{
-  width:90px;height:90px;border-radius:50%;
-  background:#eee;
-  box-shadow:0 0 40px rgba(255,255,255,.4);
-  animation:pulse 2s infinite;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#fff,#cfd6ff 40%,#7d86c9);
+  box-shadow:0 0 40px #7d86c9;
+  animation:float 3s ease-in-out infinite;
 }
-@keyframes pulse{
-  0%{transform:scale(1)}
-  50%{transform:scale(1.08)}
-  100%{transform:scale(1)}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
 }
-#loader p{margin-top:14px;opacity:.6}
+#loading p{
+  margin-top:20px;
+  color:var(--muted);
+  font-size:14px;
+}
+#loading .note{
+  position:absolute;
+  bottom:12px;
+  right:14px;
+  font-size:11px;
+  opacity:.6;
+}
 
-/* TOP BAR */
-.topbar{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:12px 14px;
-  background:linear-gradient(180deg,#141c38,#0b1024);
-  box-shadow:0 6px 20px rgba(0,0,0,.6);
+/* ===== TOP BAR ===== */
+#topbar{
+  background:var(--panel);
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
-.user .name{font-weight:600;font-size:15px}
-.user .id{font-size:11px;opacity:.6}
-.stats{display:flex;align-items:center;gap:10px}
-.sub{padding:4px 8px;border-radius:10px;background:#2a3569;font-size:12px}
+#userInfo{
+  display:flex;
+  flex-direction:column;
+}
+#userName{font-weight:600;font-size:15px}
+#userId{font-size:11px;color:var(--muted)}
+#balance{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+#balance span{
+  font-weight:600;
+}
+.badge{
+  background:#1f2b5a;
+  padding:4px 8px;
+  border-radius:10px;
+  font-size:12px;
+}
 .plus{
-  width:28px;height:28px;border-radius:50%;
-  background:#3d4cff;display:flex;
-  justify-content:center;align-items:center;
+  background:var(--accent2);
+  color:#000;
+  border-radius:50%;
+  width:22px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
 }
 
-/* SCREENS */
-.screen{display:none;padding:16px}
-.screen.active{display:block}
-.header{font-size:24px;font-weight:700;margin-bottom:14px}
-
-/* MENU */
-.menu{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.menu-card{
-  background:linear-gradient(145deg,#1e2a52,#121a36);
-  border-radius:18px;
-  padding:18px 12px;
+/* ===== MAIN MENU ===== */
+#menu{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  padding:16px;
+}
+.menu-btn{
+  background:linear-gradient(135deg,#1a2450,#101735);
+  border-radius:16px;
+  padding:14px;
+  min-height:90px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
   text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,.35);
 }
-.menu-card .icon{font-size:28px;margin-bottom:8px}
+.menu-btn span{
+  font-size:13px;
+  color:var(--muted);
+}
 
-/* CARD */
+/* ===== SCREENS ===== */
+.screen{
+  padding:16px;
+}
 .card{
-  background:#141c38;
+  background:var(--panel);
   border-radius:16px;
   padding:14px;
   margin-bottom:12px;
 }
+.card h3{margin:0 0 6px 0}
+.card p{margin:0;color:var(--muted);font-size:14px}
 
-/* BACK */
-.back{
-  margin-top:18px;
-  padding:14px;
-  text-align:center;
-  border-radius:14px;
-  background:#1e2a52;
+/* ===== BOTTOM ===== */
+#bottomNav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#0e1530;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+}
+.nav-btn{
+  font-size:13px;
+  color:var(--muted);
 }
 
-/* LOG BUTTON */
-#logButton{
-  position:fixed;
-  bottom:18px;
-  left:50%;
-  transform:translateX(-50%);
-  width:56px;height:56px;
-  border-radius:50%;
-  background:linear-gradient(145deg,#ff4d4d,#b80000);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  font-size:22px;
-  box-shadow:0 10px 30px rgba(255,0,0,.5);
-  z-index:50;
+/* ===== ADMIN ===== */
+.admin-btn{
+  background:#2a3a7a;
+}
+.console-btn{
+  background:#7a2a5a;
 }
 </style>
 </head>
-
 <body>
 
-<div id="loader">
+<!-- LOADING -->
+<div id="loading">
   <div class="moon"></div>
-  <p>Загрузка мира AnimeAI…</p>
+  <p id="loadText">Загрузка мини-приложения…</p>
+  <div class="note">Все персонажи вымышлены</div>
 </div>
 
-<div id="app" style="display:none">
-
-<div class="topbar">
-  <div class="user">
-    <div class="name" id="username">Игрок</div>
-    <div class="id" id="userid">ID: 0</div>
+<!-- TOP BAR -->
+<div id="topbar" class="hidden">
+  <div id="userInfo">
+    <div id="userName">Гость</div>
+    <div id="userId">ID: —</div>
   </div>
-  <div class="stats">
-    <div>💎 <span id="balance">1250</span></div>
-    <div class="sub" id="sub">VIP</div>
-    <div class="plus" onclick="openScreen('shop')">+</div>
-  </div>
-</div>
-
-<div id="home" class="screen active">
-  <div class="header">Главное меню</div>
-  <div class="menu">
-    <div class="menu-card" onclick="openScreen('chats')"><div class="icon">💬</div>Чаты</div>
-    <div class="menu-card" onclick="openScreen('chars')"><div class="icon">🧍</div>Персонажи</div>
-    <div class="menu-card" onclick="openScreen('daily')"><div class="icon">🎁</div>Ежедневка</div>
-    <div class="menu-card" onclick="openScreen('tasks')"><div class="icon">📋</div>Задания</div>
-    <div class="menu-card" onclick="openScreen('shop')"><div class="icon">🛒</div>Магазин</div>
-    <div class="menu-card" onclick="openScreen('promo')"><div class="icon">🎟</div>Промокоды</div>
-    <div class="menu-card" onclick="openScreen('profile')"><div class="icon">👤</div>Профиль</div>
-    <div class="menu-card" onclick="openScreen('settings')"><div class="icon">⚙️</div>Настройки</div>
-    <div class="menu-card" id="adminBtn" onclick="openScreen('admin')"><div class="icon">🛠</div>Админка</div>
-    <div class="menu-card" id="consoleBtn" onclick="openScreen('console')"><div class="icon">👑</div>Консоль</div>
+  <div id="balance">
+    <span id="shards">50</span>
+    <span>🌙</span>
+    <div class="badge" id="subBadge">Free</div>
+    <div class="plus">+</div>
   </div>
 </div>
 
-<div id="admin" class="screen">
-  <div class="header">Админка</div>
-  <div class="card">Выдать осколки / подписку пользователю</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
+<!-- MAIN MENU -->
+<div id="menu" class="hidden">
+  <div class="menu-btn" onclick="openScreen('chats')">💬<span>Чаты</span></div>
+  <div class="menu-btn" onclick="openScreen('chars')">🧑‍🎤<span>Персонажи</span></div>
+  <div class="menu-btn" onclick="openScreen('daily')">🎁<span>Ежедневка</span></div>
+  <div class="menu-btn" onclick="openScreen('tasks')">📜<span>Задания</span></div>
+  <div class="menu-btn" onclick="openScreen('shop')">🛒<span>Магазин</span></div>
+  <div class="menu-btn" onclick="openScreen('promo')">🏷<span>Промокоды</span></div>
+  <div class="menu-btn" onclick="openScreen('profile')">👤<span>Профиль</span></div>
+  <div class="menu-btn" onclick="openScreen('settings')">⚙<span>Настройки</span></div>
+  <div id="adminBtn" class="menu-btn admin-btn hidden" onclick="openScreen('admin')">🛠<span>Админ</span></div>
+  <div id="consoleBtn" class="menu-btn console-btn hidden" onclick="openScreen('console')">🧠<span>Консоль</span></div>
 </div>
 
-<div id="console" class="screen">
-  <div class="header">Консоль овнера</div>
-  <div class="card">Назначение админов</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
+<!-- SCREENS -->
+<div id="screens">
+  <div id="chats" class="screen hidden"><div class="card"><h3>Чаты</h3><p>Здесь будут ваши диалоги с персонажами.</p></div></div>
+  <div id="chars" class="screen hidden"><div class="card"><h3>Персонажи</h3><p>100 аниме-персонажей. Все доступны.</p></div></div>
+  <div id="daily" class="screen hidden"><div class="card"><h3>Ежедневная награда</h3><p>Заберите осколки луны.</p></div></div>
+  <div id="tasks" class="screen hidden"><div class="card"><h3>Задания</h3><p>Задания от администрации.</p></div></div>
+  <div id="shop" class="screen hidden"><div class="card"><h3>Магазин</h3><p>Подписки и осколки луны.</p></div></div>
+  <div id="promo" class="screen hidden"><div class="card"><h3>Промокоды</h3><p>Введите код от овнера.</p></div></div>
+  <div id="profile" class="screen hidden"><div class="card"><h3>Профиль</h3><p>Имя, пол, дата рождения.</p></div></div>
+  <div id="settings" class="screen hidden"><div class="card"><h3>Настройки</h3><p>Язык, интерфейс.</p></div></div>
+  <div id="admin" class="screen hidden"><div class="card"><h3>Админ</h3><p>Выдача осколков и подписок.</p></div></div>
+  <div id="console" class="screen hidden"><div class="card"><h3>Консоль овнера</h3><p>Админы, логи, управление.</p></div></div>
 </div>
 
-<div id="logs" class="screen">
-  <div class="header">Логи админов</div>
-  <div id="logList" class="card"></div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
+<div id="bottomNav" class="hidden">
+  <button class="nav-btn" onclick="goHome()">🏠 Главная</button>
+  <button class="nav-btn" onclick="goBack()">⬅ Назад</button>
 </div>
-
-<div id="chats" class="screen"><div class="header">Чаты</div><div class="card">Нет активных чатов</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="chars" class="screen"><div class="header">Персонажи</div><div class="card">Акира — Цундере</div><div class="card">Мия — Дандере</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="daily" class="screen"><div class="header">Ежедневка</div><div class="card">Награда доступна</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="tasks" class="screen"><div class="header">Задания</div><div class="card">Выполните задание</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="shop" class="screen"><div class="header">Магазин</div><div class="card">Подписки и наборы</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="promo" class="screen"><div class="header">Промокоды</div><div class="card">Введите код</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="profile" class="screen"><div class="header">Профиль</div><div class="card">Информация игрока</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="settings" class="screen"><div class="header">Настройки</div><div class="card">Язык, уведомления</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-
-</div>
-
-<div id="logButton" onclick="openScreen('logs')">📜</div>
 
 <script>
-const OWNER_ID = 8287041036
-const ADMINS = [111111111] // сюда айди админов
-
-const tg = window.Telegram?.WebApp
-tg?.ready()
-
-const user = tg?.initDataUnsafe?.user
-const uid = user?.id || 0
-
-document.getElementById('userid').innerText = 'ID: ' + uid
-document.getElementById('username').innerText = user?.first_name || 'Игрок'
-
-const isOwner = uid === OWNER_ID
-const isAdmin = ADMINS.includes(uid)
-
-document.getElementById('consoleBtn').style.display = isOwner ? 'block':'none'
-document.getElementById('adminBtn').style.display = (isAdmin || isOwner) ? 'block':'none'
-document.getElementById('logButton').style.display = isOwner ? 'flex':'none'
-
-const logs = [
-  'Админ 111111111 выдал VIP пользователю 222222222',
-  'Админ 111111111 выдал 500 осколков пользователю 333333333'
-]
-
-document.getElementById('logList').innerHTML = logs.map(l=>'• '+l).join('<br>')
-
-setTimeout(()=>{
-  loader.style.display='none'
-  app.style.display='block'
-},1300)
+const OWNER_ID = 8287041036;
+const tg = window.Telegram?.WebApp;
+let history = [];
 
 function openScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
-  document.getElementById(id).classList.add('active')
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  history.push(id);
 }
+
+function goHome(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  history=[];
+}
+
+function goBack(){
+  history.pop();
+  const last = history.pop();
+  if(last) openScreen(last);
+}
+
+setTimeout(()=>{
+  if(!tg){
+    document.getElementById('loadText').innerText =
+      'Сервер запускается… перезайдите через 1–2 минуты';
+    return;
+  }
+
+  tg.ready();
+  const user = tg.initDataUnsafe.user || {};
+
+  document.getElementById('userName').innerText = user.first_name || 'Пользователь';
+  document.getElementById('userId').innerText = 'ID: ' + (user.id || '—');
+
+  if(user.id == OWNER_ID){
+    document.getElementById('adminBtn').classList.remove('hidden');
+    document.getElementById('consoleBtn').classList.remove('hidden');
+  }
+
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('topbar').classList.remove('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+  document.getElementById('bottomNav').classList.remove('hidden');
+},1500);
 </script>
 
 </body>
