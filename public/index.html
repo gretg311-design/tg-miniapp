@@ -1,67 +1,109 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
+<title>AnimeAI 18+</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>tg-miniapp</title>
-
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-* {
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:system-ui;
+  background:radial-gradient(circle at top,#1b2340,#060913 75%);
+  color:#fff;
+  min-height:100vh;
+  overflow-x:hidden;
 }
 
-body {
-  margin: 0;
-  background: #0b0f1a;
-  color: white;
+/* LOADER */
+#loader{
+  position:fixed;inset:0;
+  background:#050814;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+.moon{
+  width:90px;height:90px;border-radius:50%;
+  background:#eee;
+  box-shadow:0 0 40px rgba(255,255,255,.4);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
+#loader p{margin-top:14px;opacity:.6}
+
+/* TOP BAR */
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 14px;
+  background:linear-gradient(180deg,#141c38,#0b1024);
+  box-shadow:0 6px 20px rgba(0,0,0,.6);
+}
+.user .name{font-weight:600;font-size:15px}
+.user .id{font-size:11px;opacity:.6}
+.stats{display:flex;align-items:center;gap:10px}
+.sub{padding:4px 8px;border-radius:10px;background:#2a3569;font-size:12px}
+.plus{
+  width:28px;height:28px;border-radius:50%;
+  background:#3d4cff;display:flex;
+  justify-content:center;align-items:center;
 }
 
-.screen {
-  display: none;
-  padding: 20px;
+/* SCREENS */
+.screen{display:none;padding:16px}
+.screen.active{display:block}
+.header{font-size:24px;font-weight:700;margin-bottom:14px}
+
+/* MENU */
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.menu-card{
+  background:linear-gradient(145deg,#1e2a52,#121a36);
+  border-radius:18px;
+  padding:18px 12px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,.35);
+}
+.menu-card .icon{font-size:28px;margin-bottom:8px}
+
+/* CARD */
+.card{
+  background:#141c38;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:12px;
 }
 
-.screen.active {
-  display: block;
+/* BACK */
+.back{
+  margin-top:18px;
+  padding:14px;
+  text-align:center;
+  border-radius:14px;
+  background:#1e2a52;
 }
 
-#loader {
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at center, #1b2340, #05070f);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  z-index: 999;
-}
-
-.moon {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #fff, #9aa4ff, #3b3f7a);
-  animation: float 2s ease-in-out infinite;
-}
-
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-  100% { transform: translateY(0); }
-}
-
-.menu button {
-  width: 100%;
-  padding: 14px;
-  margin-bottom: 10px;
-  border-radius: 12px;
-  border: none;
-  background: #1c2547;
-  color: white;
-  font-size: 16px;
+/* LOG BUTTON */
+#logButton{
+  position:fixed;
+  bottom:18px;
+  left:50%;
+  transform:translateX(-50%);
+  width:56px;height:56px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#ff4d4d,#b80000);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  font-size:22px;
+  box-shadow:0 10px 30px rgba(255,0,0,.5);
+  z-index:50;
 }
 </style>
 </head>
@@ -70,74 +112,105 @@ body {
 
 <div id="loader">
   <div class="moon"></div>
-  <p style="opacity:.6;margin-top:15px">Загрузка…</p>
+  <p>Загрузка мира AnimeAI…</p>
 </div>
 
-<div id="main" class="screen active">
-  <h2>Главное меню</h2>
-  <div class="menu" id="menu"></div>
+<div id="app" style="display:none">
+
+<div class="topbar">
+  <div class="user">
+    <div class="name" id="username">Игрок</div>
+    <div class="id" id="userid">ID: 0</div>
+  </div>
+  <div class="stats">
+    <div>💎 <span id="balance">1250</span></div>
+    <div class="sub" id="sub">VIP</div>
+    <div class="plus" onclick="openScreen('shop')">+</div>
+  </div>
 </div>
 
-<div id="screen" class="screen">
-  <button onclick="back()">← Назад</button>
-  <div id="content"></div>
+<div id="home" class="screen active">
+  <div class="header">Главное меню</div>
+  <div class="menu">
+    <div class="menu-card" onclick="openScreen('chats')"><div class="icon">💬</div>Чаты</div>
+    <div class="menu-card" onclick="openScreen('chars')"><div class="icon">🧍</div>Персонажи</div>
+    <div class="menu-card" onclick="openScreen('daily')"><div class="icon">🎁</div>Ежедневка</div>
+    <div class="menu-card" onclick="openScreen('tasks')"><div class="icon">📋</div>Задания</div>
+    <div class="menu-card" onclick="openScreen('shop')"><div class="icon">🛒</div>Магазин</div>
+    <div class="menu-card" onclick="openScreen('promo')"><div class="icon">🎟</div>Промокоды</div>
+    <div class="menu-card" onclick="openScreen('profile')"><div class="icon">👤</div>Профиль</div>
+    <div class="menu-card" onclick="openScreen('settings')"><div class="icon">⚙️</div>Настройки</div>
+    <div class="menu-card" id="adminBtn" onclick="openScreen('admin')"><div class="icon">🛠</div>Админка</div>
+    <div class="menu-card" id="consoleBtn" onclick="openScreen('console')"><div class="icon">👑</div>Консоль</div>
+  </div>
 </div>
+
+<div id="admin" class="screen">
+  <div class="header">Админка</div>
+  <div class="card">Выдать осколки / подписку пользователю</div>
+  <div class="back" onclick="openScreen('home')">← Назад</div>
+</div>
+
+<div id="console" class="screen">
+  <div class="header">Консоль овнера</div>
+  <div class="card">Назначение админов</div>
+  <div class="back" onclick="openScreen('home')">← Назад</div>
+</div>
+
+<div id="logs" class="screen">
+  <div class="header">Логи админов</div>
+  <div id="logList" class="card"></div>
+  <div class="back" onclick="openScreen('home')">← Назад</div>
+</div>
+
+<div id="chats" class="screen"><div class="header">Чаты</div><div class="card">Нет активных чатов</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="chars" class="screen"><div class="header">Персонажи</div><div class="card">Акира — Цундере</div><div class="card">Мия — Дандере</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="daily" class="screen"><div class="header">Ежедневка</div><div class="card">Награда доступна</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="tasks" class="screen"><div class="header">Задания</div><div class="card">Выполните задание</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="shop" class="screen"><div class="header">Магазин</div><div class="card">Подписки и наборы</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="promo" class="screen"><div class="header">Промокоды</div><div class="card">Введите код</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="profile" class="screen"><div class="header">Профиль</div><div class="card">Информация игрока</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="settings" class="screen"><div class="header">Настройки</div><div class="card">Язык, уведомления</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+
+</div>
+
+<div id="logButton" onclick="openScreen('logs')">📜</div>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.expand();
+const OWNER_ID = 8287041036
+const ADMINS = [111111111] // сюда айди админов
 
-const OWNER_ID = 8287041036;
-const userId = tg.initDataUnsafe?.user?.id || 0;
+const tg = window.Telegram?.WebApp
+tg?.ready()
 
-const menu = document.getElementById("menu");
-const screen = document.getElementById("screen");
-const content = document.getElementById("content");
-const main = document.getElementById("main");
+const user = tg?.initDataUnsafe?.user
+const uid = user?.id || 0
 
-setTimeout(() => {
-  document.getElementById("loader").style.display = "none";
-}, 600);
+document.getElementById('userid').innerText = 'ID: ' + uid
+document.getElementById('username').innerText = user?.first_name || 'Игрок'
 
-const buttons = [
-  ["Чаты", "Чаты пока не подключены"],
-  ["Персонажи", "Экран персонажей"],
-  ["Ежедневка", "Ежедневная награда"],
-  ["Задания", "Список заданий"],
-  ["Магазин", "Магазин"],
-  ["Промокоды", "Ввод промокодов"],
-  ["Профиль", "Профиль пользователя"],
-  ["Настройки", "Настройки"]
-];
+const isOwner = uid === OWNER_ID
+const isAdmin = ADMINS.includes(uid)
 
-buttons.forEach(([title, text]) => {
-  const btn = document.createElement("button");
-  btn.innerText = title;
-  btn.onclick = () => open(text);
-  menu.appendChild(btn);
-});
+document.getElementById('consoleBtn').style.display = isOwner ? 'block':'none'
+document.getElementById('adminBtn').style.display = (isAdmin || isOwner) ? 'block':'none'
+document.getElementById('logButton').style.display = isOwner ? 'flex':'none'
 
-if (userId === OWNER_ID) {
-  const adminBtn = document.createElement("button");
-  adminBtn.innerText = "Админка";
-  adminBtn.onclick = () => open("Админ-панель");
-  menu.appendChild(adminBtn);
+const logs = [
+  'Админ 111111111 выдал VIP пользователю 222222222',
+  'Админ 111111111 выдал 500 осколков пользователю 333333333'
+]
 
-  const consoleBtn = document.createElement("button");
-  consoleBtn.innerText = "Консоль";
-  consoleBtn.onclick = () => open("Консоль овнера");
-  menu.appendChild(consoleBtn);
-}
+document.getElementById('logList').innerHTML = logs.map(l=>'• '+l).join('<br>')
 
-function open(text) {
-  main.classList.remove("active");
-  screen.classList.add("active");
-  content.innerHTML = `<h3>${text}</h3>`;
-}
+setTimeout(()=>{
+  loader.style.display='none'
+  app.style.display='block'
+},1300)
 
-function back() {
-  screen.classList.remove("active");
-  main.classList.add("active");
+function openScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
 }
 </script>
 
