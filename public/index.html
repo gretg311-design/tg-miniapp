@@ -16,20 +16,49 @@ body{
   overflow:hidden;
 }
 
-/* TOP BAR */
-.topbar{
+/* ===== LOADER ===== */
+#loader{
+  position:fixed;inset:0;
+  background:#050814;
   display:flex;
-  justify-content:space-between;
+  flex-direction:column;
+  justify-content:center;
   align-items:center;
+  z-index:999;
+}
+.moon{
+  width:90px;height:90px;border-radius:50%;
+  background:#eee;
+  box-shadow:0 0 40px rgba(255,255,255,.4);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
+#loader p{margin-top:14px;opacity:.6}
+
+/* ===== TOP ===== */
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
   padding:14px;
   background:linear-gradient(180deg,#141c38,#0b1024);
 }
-.balance{font-weight:600}
-
-/* HOME */
-#home{
-  padding:18px;
+.user .name{font-weight:700}
+.user .id{font-size:11px;opacity:.6}
+.stats{display:flex;align-items:center;gap:10px}
+.sub{padding:4px 10px;border-radius:12px;background:#2a3569}
+.plus{
+  width:30px;height:30px;border-radius:50%;
+  background:#3d4cff;
+  display:flex;align-items:center;justify-content:center;
 }
+
+/* ===== HOME ===== */
+#app{display:none}
+#home{padding:18px}
+.header{font-size:26px;font-weight:800;margin-bottom:18px}
 .menu{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -37,63 +66,40 @@ body{
 }
 .menu-card{
   background:linear-gradient(145deg,#1e2a52,#121a36);
-  border-radius:20px;
-  padding:26px;
+  border-radius:22px;
+  padding:26px 12px;
   text-align:center;
-  cursor:pointer;
 }
-.menu-card .icon{
-  font-size:30px;
-  margin-bottom:10px;
-}
+.menu-card .icon{font-size:30px;margin-bottom:10px}
 
-/* CHAT OVERLAY */
+/* ===== CHAT ===== */
 #chatOverlay{
-  position:fixed;
-  inset:0;
+  position:fixed;inset:0;
   background:#060913;
   display:none;
   flex-direction:column;
-  z-index:100;
+  z-index:200;
 }
-
-/* CHAT TOP */
 .chat-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
   padding:14px;
   background:#0b1024;
-}
-.chat-top .name{
-  font-size:18px;
   font-weight:700;
 }
-.chat-top .menu{
-  font-size:22px;
-}
-
-/* CHAT BODY */
 .chat-box{
   flex:1;
   padding:14px;
   overflow-y:auto;
 }
 .msg{
-  max-width:75%;
-  padding:12px 14px;
-  margin-bottom:10px;
-  border-radius:16px;
+  max-width:80%;
+  padding:14px;
+  margin-bottom:12px;
+  border-radius:18px;
+  line-height:1.5;
 }
-.user-msg{
-  background:#3d4cff;
-  margin-left:auto;
-}
-.char-msg{
-  background:#1e2a52;
-}
+.user-msg{background:#3d4cff;margin-left:auto}
+.char-msg{background:#1e2a52}
 
-/* INPUT */
 .chat-input{
   display:flex;
   gap:10px;
@@ -102,54 +108,66 @@ body{
 .chat-input input{
   flex:1;
   padding:14px;
-  border-radius:16px;
+  border-radius:18px;
   border:none;
 }
 .chat-input button{
   padding:14px 18px;
-  border-radius:16px;
+  border-radius:18px;
   border:none;
   background:#3d4cff;
   color:#fff;
 }
 
-/* BACK */
 .back{
-  padding:14px;
+  padding:16px;
   text-align:center;
   background:#141c38;
-  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
+<div id="loader">
+  <div class="moon"></div>
+  <p>Загрузка мира AnimeAI…</p>
+</div>
+
+<div id="app">
+
 <div class="topbar">
-  <div>Главное меню</div>
-  <div class="balance">🌙 1250</div>
+  <div class="user">
+    <div class="name" id="username">Игрок</div>
+    <div class="id" id="userid">ID: 0</div>
+  </div>
+  <div class="stats">
+    <div>🌙 <span id="balance">1250</span></div>
+    <div class="sub">VIP</div>
+    <div class="plus">+</div>
+  </div>
 </div>
 
 <div id="home">
+  <div class="header">Главное меню</div>
   <div class="menu">
-    <div class="menu-card" onclick="openChat()">
-      <div class="icon">💬</div>
-      Чат с Акирой
-    </div>
-    <div class="menu-card">
-      <div class="icon">🧍</div>
-      Персонажи
-    </div>
+    <div class="menu-card" onclick="openChat()"><div class="icon">💬</div>Чаты</div>
+    <div class="menu-card"><div class="icon">🧍</div>Персонажи</div>
+    <div class="menu-card"><div class="icon">🎁</div>Ежедневка</div>
+    <div class="menu-card"><div class="icon">📋</div>Задания</div>
+    <div class="menu-card"><div class="icon">🛒</div>Магазин</div>
+    <div class="menu-card"><div class="icon">🎟</div>Промокоды</div>
+    <div class="menu-card"><div class="icon">👤</div>Профиль</div>
+    <div class="menu-card"><div class="icon">⚙️</div>Настройки</div>
+    <div class="menu-card"><div class="icon">🛠</div>Админка</div>
+    <div class="menu-card"><div class="icon">👑</div>Консоль</div>
   </div>
 </div>
 
-<!-- CHAT OVERLAY -->
-<div id="chatOverlay">
-  <div class="chat-top">
-    <div class="name">Акира • Цундере • 21</div>
-    <div class="menu">☰</div>
-  </div>
+</div>
 
+<div id="chatOverlay">
+  <div class="chat-top">Акира • Цундере • 21</div>
   <div class="chat-box" id="chatBox"></div>
 
   <div class="chat-input">
@@ -161,15 +179,24 @@ body{
 </div>
 
 <script>
+const tg = window.Telegram?.WebApp
+tg?.ready()
+
+const user = tg?.initDataUnsafe?.user
+username.innerText = user?.first_name || 'Игрок'
+userid.innerText = 'ID: ' + (user?.id || 0)
+
+setTimeout(()=>{
+  loader.style.display='none'
+  app.style.display='block'
+},1300)
+
 const chat = document.getElementById('chatOverlay')
 const box = document.getElementById('chatBox')
 const input = document.getElementById('msgInput')
 
 function openChat(){
   chat.style.display='flex'
-  if(box.children.length===0){
-    addChar('…Чего уставился?')
-  }
 }
 
 function closeChat(){
@@ -177,28 +204,32 @@ function closeChat(){
 }
 
 function sendMsg(){
-  if(!input.value) return
+  if(!input.value.trim()) return
   addUser(input.value)
   input.value=''
-  setTimeout(()=>{
-    addChar('Дурак… но пиши ещё.')
-  },600)
+  setTimeout(addCharResponse,800)
 }
 
-function addUser(t){
+function addUser(text){
   const d=document.createElement('div')
   d.className='msg user-msg'
-  d.innerText=t
+  d.innerText=text
   box.appendChild(d)
-  box.scrollTop=9999
+  box.scrollTop=99999
 }
 
-function addChar(t){
+function addCharResponse(){
+  const text = `Я не собираюсь начинать разговор первой, если ты вдруг этого ожидал. 
+  Но раз уж ты написал, значит тебе действительно интересно продолжить общение. 
+  Я отвечаю не короткими фразами, потому что мне важно, чтобы ты понял мои мысли, настроение и характер. 
+  Иногда я могу быть резкой, иногда язвительной, но это часть того, какая я есть, и если тебя это не пугает, 
+  то, возможно, мы сможем продолжить этот диалог дальше.`
+
   const d=document.createElement('div')
   d.className='msg char-msg'
-  d.innerText=t
+  d.innerText=text
   box.appendChild(d)
-  box.scrollTop=9999
+  box.scrollTop=99999
 }
 </script>
 
