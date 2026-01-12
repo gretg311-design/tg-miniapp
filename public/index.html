@@ -13,7 +13,6 @@ body{
   background:radial-gradient(circle at top,#1b2340,#060913 75%);
   color:#fff;
   min-height:100vh;
-  overflow-x:hidden;
 }
 
 /* LOADER */
@@ -29,7 +28,7 @@ body{
 .moon{
   width:90px;height:90px;border-radius:50%;
   background:#eee;
-  box-shadow:0 0 40px rgba(255,255,255,.4);
+  box-shadow:0 0px 40px rgba(255,255,255,.4);
   animation:pulse 2s infinite;
 }
 @keyframes pulse{
@@ -44,69 +43,99 @@ body{
   display:flex;justify-content:space-between;align-items:center;
   padding:12px 14px;
   background:linear-gradient(180deg,#141c38,#0b1024);
-  box-shadow:0 6px 20px rgba(0,0,0,.6);
 }
-.user .name{font-weight:600;font-size:15px}
-.user .id{font-size:11px;opacity:.6}
-.stats{display:flex;align-items:center;gap:10px}
-.sub{padding:4px 8px;border-radius:10px;background:#2a3569;font-size:12px}
-.plus{
-  width:28px;height:28px;border-radius:50%;
-  background:#3d4cff;display:flex;
-  justify-content:center;align-items:center;
-  cursor:pointer;
-}
+.user .name{font-weight:600}
+.stats{display:flex;gap:10px}
 
 /* SCREENS */
-.screen{display:none;padding:16px}
+.screen{display:none;padding:14px}
 .screen.active{display:block}
-.header{font-size:24px;font-weight:700;margin-bottom:14px}
 
 /* MENU */
 .menu{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .menu-card{
   background:linear-gradient(145deg,#1e2a52,#121a36);
   border-radius:18px;
-  padding:22px 12px;
+  padding:22px;
   text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,.35);
   cursor:pointer;
 }
-.menu-card .icon{font-size:30px;margin-bottom:8px}
+.menu-card .icon{font-size:28px}
 
-/* CARD */
-.card{
-  background:#141c38;
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:12px;
+/* CHAT */
+.chat-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:#0b1024;
 }
+.chat-top .char-name{font-weight:700;font-size:18px}
+.chat-top .menu-btn{font-size:22px;cursor:pointer}
+
+.chat-box{
+  height:65vh;
+  overflow-y:auto;
+  padding:12px;
+}
+.msg{
+  max-width:75%;
+  margin-bottom:10px;
+  padding:10px 14px;
+  border-radius:14px;
+}
+.user-msg{
+  background:#3d4cff;
+  margin-left:auto;
+}
+.char-msg{
+  background:#1e2a52;
+}
+
+.chat-input{
+  display:flex;
+  gap:8px;
+  padding:12px;
+}
+.chat-input input{
+  flex:1;
+  padding:12px;
+  border-radius:14px;
+  border:none;
+}
+.chat-input button{
+  padding:12px 16px;
+  border:none;
+  border-radius:14px;
+  background:#3d4cff;
+  color:#fff;
+}
+
+/* CHAT MENU */
+#chatMenu{
+  position:fixed;
+  top:70px;
+  right:14px;
+  background:#141c38;
+  border-radius:14px;
+  padding:10px;
+  display:none;
+  z-index:50;
+}
+#chatMenu div{
+  padding:10px;
+  cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+#chatMenu div:last-child{border:none}
 
 /* BACK */
 .back{
-  margin-top:18px;
+  margin-top:14px;
   padding:14px;
   text-align:center;
   border-radius:14px;
   background:#1e2a52;
-  cursor:pointer;
-}
-
-/* LOG BUTTON */
-#logButton{
-  position:fixed;
-  bottom:18px;
-  left:50%;
-  transform:translateX(-50%);
-  width:56px;height:56px;
-  border-radius:50%;
-  background:linear-gradient(145deg,#ff4d4d,#b80000);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  font-size:22px;
-  box-shadow:0 10px 30px rgba(255,0,0,.5);
-  z-index:50;
   cursor:pointer;
 }
 </style>
@@ -121,130 +150,122 @@ body{
 
 <div id="app" style="display:none">
 
-<div class="topbar">
-  <div class="user">
-    <div class="name" id="username">Игрок</div>
-    <div class="id" id="userid">ID: 0</div>
-  </div>
-  <div class="stats">
-    <div>🌙 <span id="balance">1250</span></div>
-    <div class="sub" id="sub">Free</div>
-    <div class="plus" onclick="openScreen('shop')">+</div>
-  </div>
-</div>
-
+<!-- HOME -->
 <div id="home" class="screen active">
-  <div class="header">Главное меню</div>
+  <div class="topbar">
+    <div class="user">
+      <div class="name">Главное меню</div>
+    </div>
+    <div class="stats">🌙 1250</div>
+  </div>
+
   <div class="menu">
-    <div class="menu-card" onclick="openScreen('chats')"><div class="icon">💬</div>Чаты</div>
-    <div class="menu-card" onclick="openScreen('chars')"><div class="icon">🧍</div>Персонажи</div>
-    <div class="menu-card" onclick="openScreen('daily')"><div class="icon">🎁</div>Ежедневка</div>
-    <div class="menu-card" onclick="openScreen('tasks')"><div class="icon">📋</div>Задания</div>
-    <div class="menu-card" onclick="openScreen('shop')"><div class="icon">🛒</div>Магазин</div>
-    <div class="menu-card" onclick="openScreen('promo')"><div class="icon">🎟</div>Промокоды</div>
-    <div class="menu-card" onclick="openScreen('profile')"><div class="icon">👤</div>Профиль</div>
-    <div class="menu-card" onclick="openScreen('settings')"><div class="icon">⚙️</div>Настройки</div>
-    <div class="menu-card" id="adminBtn" onclick="openScreen('admin')"><div class="icon">🛠</div>Админка</div>
-    <div class="menu-card" id="consoleBtn" onclick="openScreen('console')"><div class="icon">👑</div>Консоль</div>
+    <div class="menu-card" onclick="openChat()">
+      <div class="icon">💬</div>
+      Чат с Акирой
+    </div>
+    <div class="menu-card">
+      <div class="icon">🧍</div>
+      Персонажи
+    </div>
   </div>
 </div>
 
-<div id="chats" class="screen">
-  <div class="header">Чаты</div>
-  <div class="card">Активных чатов пока нет</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
+<!-- CHAT -->
+<div id="chat" class="screen">
+  <div class="chat-top">
+    <div class="char-name">Акира • Цундере • 21</div>
+    <div class="menu-btn" onclick="toggleChatMenu()">☰</div>
+  </div>
+
+  <div class="chat-box" id="chatBox"></div>
+
+  <div class="chat-input">
+    <input id="msgInput" placeholder="Написать сообщение…">
+    <button onclick="sendMsg()">➤</button>
+  </div>
+
+  <div class="back" onclick="openHome()">← Назад</div>
 </div>
 
-<div id="chars" class="screen">
-  <div class="header">Персонажи</div>
-  <div class="card">Акира — 21 год, Цундере, резкая, но привязывается</div>
-  <div class="card">Мия — 19 лет, Дандере, тихая и наблюдательная</div>
-  <div class="card">Рей — 25 лет, Кудере, холодная логика</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="daily" class="screen">
-  <div class="header">Ежедневная награда</div>
-  <div class="card">Заберите 50 🌙 Осколков Луны</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="tasks" class="screen">
-  <div class="header">Задания</div>
-  <div class="card">Написать 3 сообщения персонажу</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="shop" class="screen">
-  <div class="header">Магазин</div>
-  <div class="card">Подписки: Premium / Pro / VIP / Ultra</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="promo" class="screen">
-  <div class="header">Промокоды</div>
-  <div class="card">Введите код</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="profile" class="screen">
-  <div class="header">Профиль</div>
-  <div class="card">Информация пользователя</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="settings" class="screen">
-  <div class="header">Настройки</div>
-  <div class="card">Язык, уведомления</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="admin" class="screen">
-  <div class="header">Админка</div>
-  <div class="card">Выдача осколков и подписок</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="console" class="screen">
-  <div class="header">Консоль овнера</div>
-  <div class="card">Назначение админов и просмотр логов</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="logs" class="screen">
-  <div class="header">Логи</div>
-  <div class="card" id="logList">Пока логов нет</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
+<!-- CHAT MENU -->
+<div id="chatMenu">
+  <div onclick="favorite()">⭐ В избранное</div>
+  <div onclick="clearChat()">🗑 Очистить чат</div>
+  <div onclick="clearMemory()">🧠 Очистить память</div>
 </div>
 
 </div>
-
-<div id="logButton" onclick="openScreen('logs')">📜</div>
 
 <script>
-const OWNER_ID = 8287041036
-
 const tg = window.Telegram?.WebApp
 tg?.ready()
-
-const user = tg?.initDataUnsafe?.user
-const uid = user?.id || 0
-
-username.innerText = user?.first_name || 'Игрок'
-userid.innerText = 'ID: ' + uid
-
-adminBtn.style.display = uid===OWNER_ID?'block':'none'
-consoleBtn.style.display = uid===OWNER_ID?'block':'none'
-logButton.style.display = uid===OWNER_ID?'flex':'none'
 
 setTimeout(()=>{
   loader.style.display='none'
   app.style.display='block'
 },1200)
 
+const chatBox = document.getElementById('chatBox')
+const input = document.getElementById('msgInput')
+const menu = document.getElementById('chatMenu')
+
+function openChat(){
+  openScreen('chat')
+  addCharMsg('Хм… чего тебе надо?')
+}
+
+function openHome(){
+  openScreen('home')
+}
+
 function openScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
   document.getElementById(id).classList.add('active')
+}
+
+function sendMsg(){
+  if(!input.value) return
+  addUserMsg(input.value)
+  setTimeout(()=>{
+    addCharMsg('…Дурак. Но можешь продолжать.')
+  },600)
+  input.value=''
+}
+
+function addUserMsg(text){
+  const d=document.createElement('div')
+  d.className='msg user-msg'
+  d.innerText=text
+  chatBox.appendChild(d)
+  chatBox.scrollTop=9999
+}
+
+function addCharMsg(text){
+  const d=document.createElement('div')
+  d.className='msg char-msg'
+  d.innerText=text
+  chatBox.appendChild(d)
+  chatBox.scrollTop=9999
+}
+
+function toggleChatMenu(){
+  menu.style.display = menu.style.display==='block'?'none':'block'
+}
+
+function clearChat(){
+  chatBox.innerHTML=''
+  toggleChatMenu()
+}
+
+function clearMemory(){
+  addCharMsg('…Я всё забыла. И не смотри так.')
+  toggleChatMenu()
+}
+
+function favorite(){
+  alert('Персонаж добавлен в избранное')
+  toggleChatMenu()
 }
 </script>
 
