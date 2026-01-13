@@ -13,10 +13,10 @@ body{
   background:radial-gradient(circle at top,#1b2340,#060913 75%);
   color:#fff;
   min-height:100vh;
-  overflow:hidden;
+  overflow-x:hidden;
 }
 
-/* ===== LOADER ===== */
+/* LOADER */
 #loader{
   position:fixed;inset:0;
   background:#050814;
@@ -24,7 +24,7 @@ body{
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  z-index:999;
+  z-index:9999;
 }
 .moon{
   width:90px;height:90px;border-radius:50%;
@@ -39,113 +39,71 @@ body{
 }
 #loader p{margin-top:14px;opacity:.6}
 
-/* ===== TOP ===== */
+/* TOP BAR */
 .topbar{
   display:flex;justify-content:space-between;align-items:center;
-  padding:14px;
+  padding:12px 14px;
   background:linear-gradient(180deg,#141c38,#0b1024);
+  box-shadow:0 6px 20px rgba(0,0,0,.6);
 }
-.user .name{font-weight:700}
+.user .name{font-weight:600;font-size:15px}
 .user .id{font-size:11px;opacity:.6}
 .stats{display:flex;align-items:center;gap:10px}
-.sub{padding:4px 10px;border-radius:12px;background:#2a3569}
+.sub{padding:4px 8px;border-radius:10px;background:#2a3569;font-size:12px}
 .plus{
-  width:30px;height:30px;border-radius:50%;
-  background:#3d4cff;
-  display:flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;
+  background:#3d4cff;display:flex;
+  justify-content:center;align-items:center;
 }
 
-/* ===== SCREENS ===== */
-.screen{display:none;padding:18px}
+/* SCREENS */
+.screen{display:none;padding:16px}
 .screen.active{display:block}
-.header{font-size:26px;font-weight:800;margin-bottom:18px}
+.header{font-size:24px;font-weight:700;margin-bottom:14px}
 
-/* ===== MENU ===== */
-.menu{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
+/* MENU */
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .menu-card{
   background:linear-gradient(145deg,#1e2a52,#121a36);
-  border-radius:22px;
-  padding:26px 12px;
+  border-radius:18px;
+  padding:18px 12px;
   text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,.35);
 }
-.menu-card .icon{font-size:30px;margin-bottom:10px}
+.menu-card .icon{font-size:28px;margin-bottom:8px}
 
-/* ===== CHARACTERS ===== */
-.char-card{
-  background:linear-gradient(145deg,#1e2a52,#121a36);
-  border-radius:20px;
-  padding:16px;
-  margin-bottom:14px;
-}
-.char-name{font-size:18px;font-weight:700}
-.char-meta{font-size:12px;opacity:.7;margin:4px 0}
-.char-desc{font-size:14px;line-height:1.5;margin-top:6px}
-.char-btn{
-  margin-top:10px;
-  padding:10px;
-  text-align:center;
-  border-radius:14px;
-  background:#3d4cff;
-}
-
-/* ===== BACK ===== */
-.back{
-  margin-top:18px;
-  padding:16px;
-  text-align:center;
-  border-radius:16px;
+/* CARD */
+.card{
   background:#141c38;
-}
-
-/* ===== CHAT ===== */
-#chatOverlay{
-  position:fixed;inset:0;
-  background:#060913;
-  display:none;
-  flex-direction:column;
-  z-index:200;
-}
-.chat-top{
-  padding:14px;
-  background:#0b1024;
-  font-weight:700;
-}
-.chat-box{
-  flex:1;
-  padding:14px;
-  overflow-y:auto;
-}
-.msg{
-  max-width:80%;
+  border-radius:16px;
   padding:14px;
   margin-bottom:12px;
-  border-radius:18px;
-  line-height:1.5;
 }
-.user-msg{background:#3d4cff;margin-left:auto}
-.char-msg{background:#1e2a52}
 
-.chat-input{
-  display:flex;
-  gap:10px;
+/* BACK */
+.back{
+  margin-top:18px;
   padding:14px;
+  text-align:center;
+  border-radius:14px;
+  background:#1e2a52;
 }
-.chat-input input{
-  flex:1;
-  padding:14px;
-  border-radius:18px;
-  border:none;
-}
-.chat-input button{
-  padding:14px 18px;
-  border-radius:18px;
-  border:none;
-  background:#3d4cff;
-  color:#fff;
+
+/* LOG BUTTON */
+#logButton{
+  position:fixed;
+  bottom:18px;
+  left:50%;
+  transform:translateX(-50%);
+  width:56px;height:56px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#ff4d4d,#b80000);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  font-size:22px;
+  box-shadow:0 10px 30px rgba(255,0,0,.5);
+  z-index:50;
 }
 </style>
 </head>
@@ -157,7 +115,7 @@ body{
   <p>Загрузка мира AnimeAI…</p>
 </div>
 
-<div id="app">
+<div id="app" style="display:none">
 
 <div class="topbar">
   <div class="user">
@@ -166,129 +124,84 @@ body{
   </div>
   <div class="stats">
     <div>🌙 <span id="balance">1250</span></div>
-    <div class="sub">VIP</div>
-    <div class="plus">+</div>
+    <div class="sub" id="sub">Free</div>
+    <div class="plus" onclick="openScreen('shop')">+</div>
   </div>
 </div>
 
-<!-- HOME -->
 <div id="home" class="screen active">
   <div class="header">Главное меню</div>
   <div class="menu">
-    <div class="menu-card" onclick="openChat()"><div class="icon">💬</div>Чаты</div>
+    <div class="menu-card" onclick="openScreen('chats')"><div class="icon">💬</div>Чаты</div>
     <div class="menu-card" onclick="openScreen('chars')"><div class="icon">🧍</div>Персонажи</div>
-    <div class="menu-card"><div class="icon">🎁</div>Ежедневка</div>
-    <div class="menu-card"><div class="icon">📋</div>Задания</div>
-    <div class="menu-card"><div class="icon">🛒</div>Магазин</div>
-    <div class="menu-card"><div class="icon">🎟</div>Промокоды</div>
-    <div class="menu-card"><div class="icon">👤</div>Профиль</div>
-    <div class="menu-card"><div class="icon">⚙️</div>Настройки</div>
-    <div class="menu-card"><div class="icon">🛠</div>Админка</div>
-    <div class="menu-card"><div class="icon">👑</div>Консоль</div>
+    <div class="menu-card" onclick="openScreen('daily')"><div class="icon">🎁</div>Ежедневка</div>
+    <div class="menu-card" onclick="openScreen('tasks')"><div class="icon">📋</div>Задания</div>
+    <div class="menu-card" onclick="openScreen('shop')"><div class="icon">🛒</div>Магазин</div>
+    <div class="menu-card" onclick="openScreen('promo')"><div class="icon">🎟</div>Промокоды</div>
+    <div class="menu-card" onclick="openScreen('profile')"><div class="icon">👤</div>Профиль</div>
+    <div class="menu-card" onclick="openScreen('settings')"><div class="icon">⚙️</div>Настройки</div>
+    <div class="menu-card" id="adminBtn" onclick="openScreen('admin')"><div class="icon">🛠</div>Админка</div>
+    <div class="menu-card" id="consoleBtn" onclick="openScreen('console')"><div class="icon">👑</div>Консоль</div>
   </div>
 </div>
 
-<!-- CHARACTERS -->
-<div id="chars" class="screen">
-  <div class="header">Персонажи</div>
-
-  <div class="char-card">
-    <div class="char-name">Акира</div>
-    <div class="char-meta">21 год • Цундере</div>
-    <div class="char-desc">
-      Резкая на словах, но быстро привязывается. Скрывает чувства за сарказмом и холодным тоном.
-    </div>
-    <div class="char-btn" onclick="openChat()">Начать чат</div>
-  </div>
-
-  <div class="char-card">
-    <div class="char-name">Мия</div>
-    <div class="char-meta">23 года • Дандере</div>
-    <div class="char-desc">
-      Тихая и застенчивая, раскрывается только тем, кому действительно доверяет.
-    </div>
-    <div class="char-btn" onclick="openChat()">Начать чат</div>
-  </div>
-
-  <div class="char-card">
-    <div class="char-name">Рейна</div>
-    <div class="char-meta">26 лет • Яндере</div>
-    <div class="char-desc">
-      Слишком заботливая и опасно преданная. Может пугать своей привязанностью.
-    </div>
-    <div class="char-btn" onclick="openChat()">Начать чат</div>
-  </div>
-
+<div id="chats" class="screen">
+  <div class="header">Чаты</div>
+  <div class="card">Пока нет активных чатов</div>
   <div class="back" onclick="openScreen('home')">← Назад</div>
 </div>
 
+<div id="chars" class="screen">
+  <div class="header">Персонажи</div>
+  <div class="card">Акира — Цундере, 19 лет</div>
+  <div class="card">Мия — Дандере, 21 год</div>
+  <div class="card">Рей — Яндере, 23 года</div>
+  <div class="back" onclick="openScreen('home')">← Назад</div>
 </div>
 
-<!-- CHAT -->
-<div id="chatOverlay">
-  <div class="chat-top">Чат с персонажем</div>
-  <div class="chat-box" id="chatBox"></div>
+<div id="daily" class="screen"><div class="header">Ежедневка</div><div class="card">Забрать награду 🌙</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="tasks" class="screen"><div class="header">Задания</div><div class="card">Подпишитесь на канал</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="shop" class="screen"><div class="header">Магазин</div><div class="card">Подписки и осколки</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="promo" class="screen"><div class="header">Промокоды</div><div class="card">Введите промокод</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="profile" class="screen"><div class="header">Профиль</div><div class="card">Информация пользователя</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="settings" class="screen"><div class="header">Настройки</div><div class="card">Язык и параметры</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
 
-  <div class="chat-input">
-    <input id="msgInput" placeholder="Написать сообщение…">
-    <button onclick="sendMsg()">➤</button>
-  </div>
+<div id="admin" class="screen"><div class="header">Админка</div><div class="card">Выдача осколков и подписок</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="console" class="screen"><div class="header">Консоль овнера</div><div class="card">Управление админами</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="logs" class="screen"><div class="header">Логи</div><div class="card">Здесь будут логи</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
 
-  <div class="back" onclick="closeChat()">← Назад</div>
 </div>
+
+<div id="logButton" onclick="openScreen('logs')">📜</div>
 
 <script>
+const OWNER_ID = 8287041036
+const ADMINS = []
+
 const tg = window.Telegram?.WebApp
 tg?.ready()
 
 const user = tg?.initDataUnsafe?.user
-username.innerText = user?.first_name || 'Игрок'
-userid.innerText = 'ID: ' + (user?.id || 0)
+const uid = user?.id || 0
+
+document.getElementById('userid').innerText = 'ID: ' + uid
+document.getElementById('username').innerText = user?.first_name || 'Игрок'
+
+const isOwner = uid === OWNER_ID
+const isAdmin = ADMINS.includes(uid)
+
+document.getElementById('consoleBtn').style.display = isOwner ? 'block':'none'
+document.getElementById('adminBtn').style.display = (isAdmin || isOwner) ? 'block':'none'
+document.getElementById('logButton').style.display = isOwner ? 'flex':'none'
 
 setTimeout(()=>{
-  loader.style.display='none'
-  app.style.display='block'
-},1300)
+  document.getElementById('loader').style.display='none'
+  document.getElementById('app').style.display='block'
+},1200)
 
 function openScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
   document.getElementById(id).classList.add('active')
-}
-
-const chat = document.getElementById('chatOverlay')
-const box = document.getElementById('chatBox')
-const input = document.getElementById('msgInput')
-
-function openChat(){ chat.style.display='flex' }
-function closeChat(){ chat.style.display='none' }
-
-function sendMsg(){
-  if(!input.value.trim()) return
-  addUser(input.value)
-  input.value=''
-  setTimeout(addCharResponse,900)
-}
-
-function addUser(text){
-  const d=document.createElement('div')
-  d.className='msg user-msg'
-  d.innerText=text
-  box.appendChild(d)
-  box.scrollTop=99999
-}
-
-function addCharResponse(){
-  const text=`Я не собираюсь начинать разговор первой, если ты этого ожидал.
-  Но раз ты написал, значит тебе действительно интересно продолжить диалог.
-  Я предпочитаю говорить развернуто, потому что короткие ответы ничего не значат.
-  У меня есть характер, настроение и собственные мысли, и если ты готов это принять,
-  то, возможно, наше общение станет чем-то большим, чем просто очередной разговор.`
-
-  const d=document.createElement('div')
-  d.className='msg char-msg'
-  d.innerText=text
-  box.appendChild(d)
-  box.scrollTop=99999
 }
 </script>
 
