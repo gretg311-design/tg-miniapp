@@ -16,7 +16,7 @@ body{
   overflow-x:hidden;
 }
 
-/* LOADER */
+/* ===== LOADER ===== */
 #loader{
   position:fixed;inset:0;
   background:#050814;
@@ -24,7 +24,7 @@ body{
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  z-index:9999;
+  z-index:999;
 }
 .moon{
   width:90px;height:90px;border-radius:50%;
@@ -39,7 +39,7 @@ body{
 }
 #loader p{margin-top:14px;opacity:.6}
 
-/* TOP BAR */
+/* ===== TOP BAR ===== */
 .topbar{
   display:flex;justify-content:space-between;align-items:center;
   padding:12px 14px;
@@ -56,23 +56,24 @@ body{
   justify-content:center;align-items:center;
 }
 
-/* SCREENS */
+/* ===== SCREENS ===== */
 .screen{display:none;padding:16px}
 .screen.active{display:block}
 .header{font-size:24px;font-weight:700;margin-bottom:14px}
 
-/* MENU */
+/* ===== MENU ===== */
 .menu{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .menu-card{
   background:linear-gradient(145deg,#1e2a52,#121a36);
   border-radius:18px;
-  padding:18px 12px;
+  padding:20px 12px;
   text-align:center;
   box-shadow:0 10px 25px rgba(0,0,0,.35);
+  font-size:15px;
 }
-.menu-card .icon{font-size:28px;margin-bottom:8px}
+.menu-card .icon{font-size:30px;margin-bottom:8px}
 
-/* CARD */
+/* ===== CARD ===== */
 .card{
   background:#141c38;
   border-radius:16px;
@@ -80,7 +81,7 @@ body{
   margin-bottom:12px;
 }
 
-/* BACK */
+/* ===== BACK ===== */
 .back{
   margin-top:18px;
   padding:14px;
@@ -89,7 +90,7 @@ body{
   background:#1e2a52;
 }
 
-/* LOG BUTTON */
+/* ===== LOG BUTTON ===== */
 #logButton{
   position:fixed;
   bottom:18px;
@@ -117,6 +118,7 @@ body{
 
 <div id="app" style="display:none">
 
+<!-- TOP BAR -->
 <div class="topbar">
   <div class="user">
     <div class="name" id="username">Игрок</div>
@@ -129,6 +131,7 @@ body{
   </div>
 </div>
 
+<!-- HOME -->
 <div id="home" class="screen active">
   <div class="header">Главное меню</div>
   <div class="menu">
@@ -145,30 +148,33 @@ body{
   </div>
 </div>
 
-<div id="chats" class="screen">
-  <div class="header">Чаты</div>
-  <div class="card">Пока нет активных чатов</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
+<!-- OTHER SCREENS -->
+<div id="chats" class="screen"><div class="header">Чаты</div><div class="card">Нет активных чатов</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
 
 <div id="chars" class="screen">
   <div class="header">Персонажи</div>
-  <div class="card">Акира — Цундере, 19 лет</div>
-  <div class="card">Мия — Дандере, 21 год</div>
-  <div class="card">Рей — Яндере, 23 года</div>
+  <div class="card" onclick="openCharacter('Акира','19','Цундере')">Акира — 19 лет — Цундере</div>
+  <div class="card" onclick="openCharacter('Мия','22','Дандере')">Мия — 22 года — Дандере</div>
   <div class="back" onclick="openScreen('home')">← Назад</div>
 </div>
 
-<div id="daily" class="screen"><div class="header">Ежедневка</div><div class="card">Забрать награду 🌙</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="tasks" class="screen"><div class="header">Задания</div><div class="card">Подпишитесь на канал</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="shop" class="screen"><div class="header">Магазин</div><div class="card">Подписки и осколки</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="promo" class="screen"><div class="header">Промокоды</div><div class="card">Введите промокод</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="profile" class="screen"><div class="header">Профиль</div><div class="card">Информация пользователя</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="settings" class="screen"><div class="header">Настройки</div><div class="card">Язык и параметры</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="character" class="screen">
+  <div class="header" id="charName"></div>
+  <div class="card" id="charInfo"></div>
+  <div class="back" onclick="openScreen('chars')">← Назад</div>
+</div>
 
-<div id="admin" class="screen"><div class="header">Админка</div><div class="card">Выдача осколков и подписок</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="console" class="screen"><div class="header">Консоль овнера</div><div class="card">Управление админами</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="logs" class="screen"><div class="header">Логи</div><div class="card">Здесь будут логи</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="daily" class="screen"><div class="header">Ежедневка</div><div class="card">Получите 🌙 осколки луны</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="tasks" class="screen"><div class="header">Задания</div><div class="card">Задания от овнера</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="shop" class="screen"><div class="header">Магазин</div><div class="card">Подписки и осколки</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="promo" class="screen"><div class="header">Промокоды</div><div class="card">Введите код</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="profile" class="screen"><div class="header">Профиль</div><div class="card">Данные игрока</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="settings" class="screen"><div class="header">Настройки</div><div class="card">Язык, интерфейс</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+
+<div id="admin" class="screen"><div class="header">Админка</div><div class="card">Выдача ресурсов</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="console" class="screen"><div class="header">Консоль овнера</div><div class="card">Полный контроль</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+
+<div id="logs" class="screen"><div class="header">Логи</div><div class="card">Пока пусто</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
 
 </div>
 
@@ -181,27 +187,33 @@ const ADMINS = []
 const tg = window.Telegram?.WebApp
 tg?.ready()
 
-const user = tg?.initDataUnsafe?.user
-const uid = user?.id || 0
+const user = tg?.initDataUnsafe?.user || {}
+const uid = user.id || 0
 
-document.getElementById('userid').innerText = 'ID: ' + uid
-document.getElementById('username').innerText = user?.first_name || 'Игрок'
+username.innerText = user.first_name || 'Игрок'
+userid.innerText = 'ID: ' + uid
 
 const isOwner = uid === OWNER_ID
 const isAdmin = ADMINS.includes(uid)
 
-document.getElementById('consoleBtn').style.display = isOwner ? 'block':'none'
-document.getElementById('adminBtn').style.display = (isAdmin || isOwner) ? 'block':'none'
-document.getElementById('logButton').style.display = isOwner ? 'flex':'none'
+consoleBtn.style.display = isOwner ? 'block':'none'
+adminBtn.style.display = (isOwner || isAdmin) ? 'block':'none'
+logButton.style.display = isOwner ? 'flex':'none'
 
 setTimeout(()=>{
-  document.getElementById('loader').style.display='none'
-  document.getElementById('app').style.display='block'
+  loader.style.display='none'
+  app.style.display='block'
 },1200)
 
 function openScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
   document.getElementById(id).classList.add('active')
+}
+
+function openCharacter(name, age, type){
+  charName.innerText = name
+  charInfo.innerText = `Возраст: ${age}\nХарактер: ${type}\nАниме-персонаж с уникальной историей.`
+  openScreen('character')
 }
 </script>
 
