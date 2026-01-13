@@ -77,6 +77,15 @@ body{
   margin-bottom:12px;
 }
 
+/* BUTTON */
+.btn{
+  margin-top:10px;
+  padding:12px;
+  text-align:center;
+  border-radius:12px;
+  background:#3d4cff;
+}
+
 /* BACK */
 .back{
   margin-top:16px;
@@ -84,21 +93,6 @@ body{
   text-align:center;
   border-radius:14px;
   background:#1e2a52;
-}
-
-/* LOG BUTTON */
-#logButton{
-  position:fixed;
-  bottom:18px;
-  left:50%;
-  transform:translateX(-50%);
-  width:56px;height:56px;
-  border-radius:50%;
-  background:linear-gradient(145deg,#ff4d4d,#b80000);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  font-size:22px;
 }
 </style>
 </head>
@@ -118,12 +112,13 @@ body{
     <div class="id" id="userid">ID: 0</div>
   </div>
   <div class="stats">
-    <div>🌙 <span id="balance">100</span></div>
-    <div class="sub">Free</div>
+    <div>🌙 <span id="balance">0</span></div>
+    <div class="sub" id="sub">Free</div>
     <div class="plus">+</div>
   </div>
 </div>
 
+<!-- HOME -->
 <div id="home" class="screen active">
   <div class="header">Главное меню</div>
   <div class="menu">
@@ -132,50 +127,53 @@ body{
     <div class="menu-card" onclick="openScreen('daily')"><div class="icon">🎁</div>Ежедневка</div>
     <div class="menu-card" onclick="openScreen('tasks')"><div class="icon">📋</div>Задания</div>
     <div class="menu-card" onclick="openScreen('shop')"><div class="icon">🛒</div>Магазин</div>
-    <div class="menu-card" onclick="openScreen('promo')"><div class="icon">🎟</div>Промокоды</div>
     <div class="menu-card" onclick="openScreen('profile')"><div class="icon">👤</div>Профиль</div>
     <div class="menu-card" onclick="openScreen('settings')"><div class="icon">⚙️</div>Настройки</div>
-    <div class="menu-card" id="adminBtn" onclick="openScreen('admin')"><div class="icon">🛠</div>Админка</div>
-    <div class="menu-card" id="consoleBtn" onclick="openScreen('console')"><div class="icon">👑</div>Консоль</div>
   </div>
 </div>
 
-<div id="chats" class="screen">
-  <div class="header">Чаты</div>
-  <div class="card">У вас пока нет активных чатов</div>
+<!-- DAILY -->
+<div id="daily" class="screen">
+  <div class="header">Ежедневная награда</div>
+  <div class="card">
+    Забрать +50 🌙 осколков
+    <div class="btn" onclick="claimDaily()">Забрать</div>
+  </div>
   <div class="back" onclick="openScreen('home')">← Назад</div>
 </div>
 
-<div id="chars" class="screen">
-  <div class="header">Персонажи</div>
+<!-- TASKS -->
+<div id="tasks" class="screen">
+  <div class="header">Задания</div>
 
   <div class="card">
-    <b>Акира</b>, 22<br>
-    Сдержанная и холодная на словах, но быстро смущается, когда чувствует внимание. Старается выглядеть сильной, хотя внутри очень ранима.
-  </div>
-
-  <div class="card">
-    <b>Мия</b>, 19<br>
-    Тихая и наблюдательная, предпочитает слушать, а не говорить. Открывается постепенно, особенно если чувствует искренность собеседника.
-  </div>
-
-  <div class="card">
-    <b>Рэн</b>, 27<br>
-    Уверенная и прямолинейная, не любит пустые разговоры. За внешней строгостью скрывается заботливый и надёжный характер.
+    Зайти в приложение
+    <div class="btn" onclick="completeTask('login',30)">Получить +30 🌙</div>
   </div>
 
   <div class="back" onclick="openScreen('home')">← Назад</div>
 </div>
 
-<div id="daily" class="screen"><div class="header">Ежедневка</div><div class="card">Заберите ежедневную награду</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="tasks" class="screen"><div class="header">Задания</div><div class="card">Выполняйте задания и получайте осколки</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="shop" class="screen"><div class="header">Магазин</div><div class="card">Подписки и наборы</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="promo" class="screen"><div class="header">Промокоды</div><div class="card">Введите промокод</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="profile" class="screen"><div class="header">Профиль</div><div class="card">Ваши данные</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<!-- SHOP -->
+<div id="shop" class="screen">
+  <div class="header">Магазин</div>
+  <div class="card">Premium — 1000 🌙</div>
+  <div class="card">VIP — 2500 🌙</div>
+  <div class="back" onclick="openScreen('home')">← Назад</div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen">
+  <div class="header">Профиль</div>
+  <div class="card">Баланс: <b><span id="profileBalance"></span> 🌙</b></div>
+  <div class="card">Подписка: <b>Free</b></div>
+  <div class="back" onclick="openScreen('home')">← Назад</div>
+</div>
+
+<!-- PLACEHOLDERS -->
+<div id="chats" class="screen"><div class="header">Чаты</div><div class="card">Нет активных чатов</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="chars" class="screen"><div class="header">Персонажи</div><div class="card">Акира, Мия, Рэн</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
 <div id="settings" class="screen"><div class="header">Настройки</div><div class="card">Язык и параметры</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-
-<div id="admin" class="screen"><div class="header">Админка</div><div class="card">Выдача осколков и подписок</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="console" class="screen"><div class="header">Консоль овнера</div><div class="card">Управление админами</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
 
 </div>
 
@@ -187,6 +185,45 @@ const user = tg?.initDataUnsafe?.user
 document.getElementById('username').innerText = user?.first_name || 'Игрок'
 document.getElementById('userid').innerText = 'ID: ' + (user?.id || 0)
 
+/* ECONOMY */
+let balance = Number(localStorage.getItem('balance'))
+if(!balance){
+  balance = 100
+  localStorage.setItem('balance',balance)
+}
+updateBalance()
+
+function updateBalance(){
+  document.getElementById('balance').innerText = balance
+  document.getElementById('profileBalance').innerText = balance
+}
+
+/* DAILY */
+function claimDaily(){
+  const last = localStorage.getItem('daily')
+  const now = Date.now()
+  if(last && now - last < 86400000){
+    alert('Ежедневка уже получена')
+    return
+  }
+  balance += 50
+  localStorage.setItem('balance',balance)
+  localStorage.setItem('daily',now)
+  updateBalance()
+  alert('+50 🌙 получено')
+}
+
+/* TASK */
+function completeTask(id,amount){
+  if(localStorage.getItem('task_'+id)) return alert('Уже выполнено')
+  balance += amount
+  localStorage.setItem('balance',balance)
+  localStorage.setItem('task_'+id,true)
+  updateBalance()
+  alert('+'+amount+' 🌙 получено')
+}
+
+/* NAV */
 setTimeout(()=>{
   loader.style.display='none'
   app.style.display='block'
