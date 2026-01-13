@@ -15,7 +15,7 @@ body{
   min-height:100vh;
 }
 
-/* ===== LOADER ===== */
+/* LOADER */
 #loader{
   position:fixed;inset:0;
   background:#050814;
@@ -38,10 +38,10 @@ body{
 }
 #loader p{margin-top:14px;opacity:.6}
 
-/* ===== TOP BAR ===== */
+/* TOP BAR */
 .topbar{
   display:flex;justify-content:space-between;align-items:center;
-  padding:12px 14px;
+  padding:14px;
   background:linear-gradient(180deg,#141c38,#0b1024);
 }
 .user .name{font-weight:600;font-size:15px}
@@ -51,25 +51,25 @@ body{
 .plus{
   width:28px;height:28px;border-radius:50%;
   background:#3d4cff;
-  display:flex;align-items:center;justify-content:center;
+  display:flex;justify-content:center;align-items:center;
 }
 
-/* ===== SCREENS ===== */
+/* SCREENS */
 .screen{display:none;padding:16px}
 .screen.active{display:block}
 .header{font-size:24px;font-weight:700;margin-bottom:14px}
 
-/* ===== MENU ===== */
+/* MENU */
 .menu{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .menu-card{
   background:linear-gradient(145deg,#1e2a52,#121a36);
   border-radius:18px;
-  padding:20px 12px;
+  padding:18px;
   text-align:center;
 }
-.menu-card .icon{font-size:28px;margin-bottom:8px}
+.menu-card .icon{font-size:28px;margin-bottom:6px}
 
-/* ===== CARD ===== */
+/* CARD */
 .card{
   background:#141c38;
   border-radius:16px;
@@ -77,16 +77,16 @@ body{
   margin-bottom:12px;
 }
 
-/* ===== BACK ===== */
+/* BACK */
 .back{
-  margin-top:18px;
+  margin-top:16px;
   padding:14px;
   text-align:center;
   border-radius:14px;
   background:#1e2a52;
 }
 
-/* ===== LOG BUTTON ===== */
+/* LOG BUTTON */
 #logButton{
   position:fixed;
   bottom:18px;
@@ -94,10 +94,10 @@ body{
   transform:translateX(-50%);
   width:56px;height:56px;
   border-radius:50%;
-  background:#b80000;
+  background:linear-gradient(145deg,#ff4d4d,#b80000);
   display:none;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   font-size:22px;
 }
 </style>
@@ -112,20 +112,18 @@ body{
 
 <div id="app" style="display:none">
 
-<!-- TOP BAR -->
 <div class="topbar">
   <div class="user">
     <div class="name" id="username">Игрок</div>
     <div class="id" id="userid">ID: 0</div>
   </div>
   <div class="stats">
-    <div>🌙 <span id="balance">0</span></div>
-    <div class="sub" id="sub">Free</div>
-    <div class="plus" onclick="openScreen('shop')">+</div>
+    <div>🌙 <span id="balance">100</span></div>
+    <div class="sub">Free</div>
+    <div class="plus">+</div>
   </div>
 </div>
 
-<!-- HOME -->
 <div id="home" class="screen active">
   <div class="header">Главное меню</div>
   <div class="menu">
@@ -142,107 +140,62 @@ body{
   </div>
 </div>
 
-<!-- ADMIN -->
-<div id="admin" class="screen">
-  <div class="header">Админка</div>
+<div id="chats" class="screen">
+  <div class="header">Чаты</div>
+  <div class="card">У вас пока нет активных чатов</div>
+  <div class="back" onclick="openScreen('home')">← Назад</div>
+</div>
+
+<div id="chars" class="screen">
+  <div class="header">Персонажи</div>
+
   <div class="card">
-    <button onclick="giveShards(100)">Выдать 100 🌙</button><br><br>
-    <button onclick="giveSub('VIP',7)">Выдать VIP (7 дн)</button>
+    <b>Акира</b>, 22<br>
+    Сдержанная и холодная на словах, но быстро смущается, когда чувствует внимание. Старается выглядеть сильной, хотя внутри очень ранима.
   </div>
+
+  <div class="card">
+    <b>Мия</b>, 19<br>
+    Тихая и наблюдательная, предпочитает слушать, а не говорить. Открывается постепенно, особенно если чувствует искренность собеседника.
+  </div>
+
+  <div class="card">
+    <b>Рэн</b>, 27<br>
+    Уверенная и прямолинейная, не любит пустые разговоры. За внешней строгостью скрывается заботливый и надёжный характер.
+  </div>
+
   <div class="back" onclick="openScreen('home')">← Назад</div>
 </div>
 
-<!-- CONSOLE -->
-<div id="console" class="screen">
-  <div class="header">Консоль овнера</div>
-  <div class="card">Полный контроль экономики</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
+<div id="daily" class="screen"><div class="header">Ежедневка</div><div class="card">Заберите ежедневную награду</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="tasks" class="screen"><div class="header">Задания</div><div class="card">Выполняйте задания и получайте осколки</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="shop" class="screen"><div class="header">Магазин</div><div class="card">Подписки и наборы</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="promo" class="screen"><div class="header">Промокоды</div><div class="card">Введите промокод</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="profile" class="screen"><div class="header">Профиль</div><div class="card">Ваши данные</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="settings" class="screen"><div class="header">Настройки</div><div class="card">Язык и параметры</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
 
-<!-- LOGS -->
-<div id="logs" class="screen">
-  <div class="header">Логи</div>
-  <div class="card" id="logList"></div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<!-- OTHER -->
-<div id="chats" class="screen"><div class="header">Чаты</div><div class="card">Пока пусто</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="chars" class="screen"><div class="header">Персонажи</div><div class="card">Будут добавлены</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="daily" class="screen"><div class="header">Ежедневка</div><div class="card">+50 🌙</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="tasks" class="screen"><div class="header">Задания</div><div class="card">От овнера</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="shop" class="screen"><div class="header">Магазин</div><div class="card">Скоро</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="promo" class="screen"><div class="header">Промокоды</div><div class="card">Введите код</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="profile" class="screen"><div class="header">Профиль</div><div class="card">Данные игрока</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="settings" class="screen"><div class="header">Настройки</div><div class="card">Язык</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="admin" class="screen"><div class="header">Админка</div><div class="card">Выдача осколков и подписок</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
+<div id="console" class="screen"><div class="header">Консоль овнера</div><div class="card">Управление админами</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
 
 </div>
-
-<div id="logButton" onclick="openScreen('logs')">📜</div>
 
 <script>
-/* ===== CONFIG ===== */
-const OWNER_ID = 8287041036
-const ADMINS = []
-
-/* ===== TG ===== */
 const tg = window.Telegram?.WebApp
 tg?.ready()
-const user = tg?.initDataUnsafe?.user || {}
-const uid = user.id || 0
 
-username.innerText = user.first_name || 'Игрок'
-userid.innerText = 'ID: ' + uid
+const user = tg?.initDataUnsafe?.user
+document.getElementById('username').innerText = user?.first_name || 'Игрок'
+document.getElementById('userid').innerText = 'ID: ' + (user?.id || 0)
 
-const isOwner = uid === OWNER_ID
-const isAdmin = ADMINS.includes(uid)
+setTimeout(()=>{
+  loader.style.display='none'
+  app.style.display='block'
+},1200)
 
-consoleBtn.style.display = isOwner ? 'block':'none'
-adminBtn.style.display = (isOwner || isAdmin) ? 'block':'none'
-logButton.style.display = isOwner ? 'flex':'none'
-
-/* ===== ECONOMY ===== */
-let balance = Number(localStorage.getItem('balance')) || 500
-let sub = localStorage.getItem('sub') || 'Free'
-let logs = JSON.parse(localStorage.getItem('logs')||'[]')
-
-function save(){
-  localStorage.setItem('balance',balance)
-  localStorage.setItem('sub',sub)
-  localStorage.setItem('logs',JSON.stringify(logs))
-  render()
-}
-
-function render(){
-  balanceEl.innerText = balance
-  subEl.innerText = sub
-  logList.innerHTML = logs.map(l=>'• '+l).join('<br>')
-}
-
-function giveShards(amount){
-  balance += amount
-  logs.unshift(`Выдано ${amount} 🌙`)
-  save()
-}
-
-function giveSub(type,days){
-  sub = type
-  logs.unshift(`Выдана подписка ${type} (${days} дн)`)
-  save()
-}
-
-/* ===== UI ===== */
 function openScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
   document.getElementById(id).classList.add('active')
 }
-
-/* ===== INIT ===== */
-setTimeout(()=>{
-  loader.style.display='none'
-  app.style.display='block'
-  render()
-},1200)
 </script>
 
 </body>
