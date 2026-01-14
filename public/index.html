@@ -3,237 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <title>AnimeAI 18+</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:system-ui;
-  background:radial-gradient(circle at top,#1b2340,#060913 75%);
-  color:#fff;
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-/* ===== LOADER ===== */
-#loader{
-  position:fixed;inset:0;
-  background:#050814;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-}
-.moon{
-  width:96px;height:96px;border-radius:50%;
-  background:#f5f5f5;
-  box-shadow:0 0 40px rgba(255,255,255,.45);
-  animation:pulse 2s infinite;
-}
-@keyframes pulse{
-  0%{transform:scale(1)}
-  50%{transform:scale(1.08)}
-  100%{transform:scale(1)}
-}
-#loader p{margin-top:16px;opacity:.65}
-
-/* ===== TOP BAR ===== */
-.topbar{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:14px;
-  background:linear-gradient(180deg,#141c38,#0b1024);
-  box-shadow:0 6px 20px rgba(0,0,0,.6);
-}
-.user .name{font-weight:600;font-size:15px}
-.user .id{font-size:11px;opacity:.6}
-.stats{display:flex;align-items:center;gap:10px}
-.sub{
-  padding:4px 10px;
-  border-radius:12px;
-  background:#2a3569;
-  font-size:12px
-}
-.plus{
-  width:30px;height:30px;border-radius:50%;
-  background:#3d4cff;
-  display:flex;justify-content:center;align-items:center;
-  font-size:18px
-}
-
-/* ===== SCREENS ===== */
-.screen{display:none;padding:16px}
-.screen.active{display:block}
-.header{font-size:24px;font-weight:700;margin-bottom:14px}
-
-/* ===== MENU ===== */
-.menu{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px
-}
-.menu-card{
-  background:linear-gradient(145deg,#1e2a52,#121a36);
-  border-radius:18px;
-  padding:20px 10px;
-  text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,.35);
-  font-size:14px
-}
-.menu-card .icon{font-size:28px;margin-bottom:8px}
-
-/* ===== CARD ===== */
-.card{
-  background:#141c38;
-  border-radius:16px;
-  padding:16px;
-  margin-bottom:12px
-}
-
-/* ===== BUTTONS ===== */
-.btn{
-  margin-top:10px;
-  padding:12px;
-  background:#3d4cff;
-  border-radius:12px;
-  text-align:center
-}
-.back{
-  margin-top:18px;
-  padding:14px;
-  text-align:center;
-  border-radius:14px;
-  background:#1e2a52
-}
-
-/* ===== LOG BUTTON ===== */
-#logButton{
-  position:fixed;
-  bottom:18px;
-  left:50%;
-  transform:translateX(-50%);
-  width:58px;height:58px;
-  border-radius:50%;
-  background:linear-gradient(145deg,#ff4d4d,#b80000);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  font-size:24px;
-  box-shadow:0 10px 30px rgba(255,0,0,.5);
-  z-index:100
-}
+body{margin:0;font-family:system-ui;background:#050814;color:#fff}
+#loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.moon{width:90px;height:90px;border-radius:50%;background:#eee;animation:pulse 2s infinite}
+@keyframes pulse{50%{transform:scale(1.1)}}
+#app{display:none}
+.top{padding:12px;background:#141c38;display:flex;justify-content:space-between}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px}
+.btn{background:#1e2a52;padding:20px;border-radius:16px;text-align:center}
 </style>
 </head>
-
 <body>
 
-<!-- ===== LOADER ===== -->
-<div id="loader">
-  <div class="moon"></div>
-  <p>Загрузка мира AnimeAI…</p>
-</div>
+<div id="loader"><div class="moon"></div></div>
 
-<div id="app" style="display:none">
-
-<!-- ===== TOP ===== -->
-<div class="topbar">
-  <div class="user">
-    <div class="name" id="username">Игрок</div>
-    <div class="id" id="userid">ID: 0</div>
+<div id="app">
+  <div class="top">
+    <div>
+      <div id="name">Игрок</div>
+      <small id="uid"></small>
+    </div>
+    <div>🌙 <span id="bal">0</span></div>
   </div>
-  <div class="stats">
-    <div>🌙 <span id="balance">100</span></div>
-    <div class="sub" id="sub">Free</div>
-    <div class="plus" onclick="openScreen('shop')">+</div>
-  </div>
-</div>
 
-<!-- ===== HOME ===== -->
-<div id="home" class="screen active">
-  <div class="header">Главное меню</div>
   <div class="menu">
-    <div class="menu-card" onclick="openScreen('chats')"><div class="icon">💬</div>Чаты</div>
-    <div class="menu-card" onclick="openScreen('chars')"><div class="icon">🧍</div>Персонажи</div>
-    <div class="menu-card" onclick="openScreen('daily')"><div class="icon">🎁</div>Ежедневка</div>
-    <div class="menu-card" onclick="openScreen('tasks')"><div class="icon">📋</div>Задания</div>
-    <div class="menu-card" onclick="openScreen('shop')"><div class="icon">🛒</div>Магазин</div>
-    <div class="menu-card" onclick="openScreen('promo')"><div class="icon">🎟</div>Промокоды</div>
-    <div class="menu-card" onclick="openScreen('profile')"><div class="icon">👤</div>Профиль</div>
-    <div class="menu-card" onclick="openScreen('settings')"><div class="icon">⚙️</div>Настройки</div>
-    <div class="menu-card" id="adminBtn" onclick="openScreen('admin')"><div class="icon">🛠</div>Админка</div>
-    <div class="menu-card" id="consoleBtn" onclick="openScreen('console')"><div class="icon">👑</div>Консоль</div>
+    <div class="btn">💬 Чаты</div>
+    <div class="btn">🧍 Персонажи</div>
+    <div class="btn">🎁 Ежедневка</div>
+    <div class="btn">⚙️ Настройки</div>
   </div>
 </div>
-
-<!-- ===== OTHER SCREENS ===== -->
-<div id="chats" class="screen"><div class="header">Чаты</div><div class="card">Пока нет чатов</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-
-<div id="chars" class="screen">
-  <div class="header">Персонажи</div>
-  <div class="card"><b>Акира</b><br>21 год · спокойный, сдержанный, защитник</div>
-  <div class="card"><b>Мия</b><br>19 лет · мягкая, заботливая, стеснительная</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<div id="daily" class="screen"><div class="header">Ежедневка</div><div class="card">Забрать +20 🌙</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="tasks" class="screen"><div class="header">Задания</div><div class="card">Заданий нет</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="shop" class="screen"><div class="header">Магазин</div><div class="card">Подписки и осколки</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="promo" class="screen"><div class="header">Промокоды</div><div class="card">Введите код</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="profile" class="screen"><div class="header">Профиль</div><div class="card">Имя, пол, ДР</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-<div id="settings" class="screen"><div class="header">Настройки</div><div class="card">Язык, уведомления</div><div class="back" onclick="openScreen('home')">← Назад</div></div>
-
-<!-- ===== ADMIN ===== -->
-<div id="admin" class="screen">
-  <div class="header">Админка</div>
-  <div class="card">Выдача осколков и подписок</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<!-- ===== CONSOLE ===== -->
-<div id="console" class="screen">
-  <div class="header">Консоль овнера</div>
-  <div class="card">Управление админами</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-<!-- ===== LOGS ===== -->
-<div id="logs" class="screen">
-  <div class="header">Логи</div>
-  <div class="card">Логов пока нет</div>
-  <div class="back" onclick="openScreen('home')">← Назад</div>
-</div>
-
-</div>
-
-<div id="logButton" onclick="openScreen('logs')">📜</div>
 
 <script>
-const OWNER_ID = 8287041036
-const tg = window.Telegram?.WebApp
-tg?.ready()
+const tg = window.Telegram.WebApp;
+tg.ready();
+const user = tg.initDataUnsafe.user;
 
-const user = tg?.initDataUnsafe?.user
-const uid = user?.id || OWNER_ID
+document.getElementById("name").innerText = user.first_name;
+document.getElementById("uid").innerText = "ID: "+user.id;
 
-document.getElementById('userid').innerText = 'ID: ' + uid
-document.getElementById('username').innerText = user?.first_name || 'Игрок'
-
-const isOwner = uid === OWNER_ID
-document.getElementById('consoleBtn').style.display = isOwner ? 'block':'none'
-document.getElementById('adminBtn').style.display = isOwner ? 'block':'none'
-document.getElementById('logButton').style.display = isOwner ? 'flex':'none'
+fetch("/api/profile/"+user.id)
+.then(r=>r.json())
+.then(u=>{
+  document.getElementById("bal").innerText = u.balance;
+});
 
 setTimeout(()=>{
-  loader.style.display='none'
-  app.style.display='block'
-},1200)
-
-function openScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
-  document.getElementById(id).classList.add('active')
-}
+  loader.style.display="none";
+  app.style.display="block";
+},1200);
 </script>
-
 </body>
-                                    </html>
+</html>
