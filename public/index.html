@@ -1,95 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Anime Moon 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --neon: #bc13fe; --glass: rgba(30, 0, 50, 0.85); }
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; }
-        .screen { height: 100vh; display: flex; flex-direction: column; }
-        .header { padding: 15px; border-bottom: 1px solid var(--neon); background: var(--glass); display: flex; justify-content: space-between; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; overflow-y: auto; flex-grow: 1; }
-        .nav { height: 70px; border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; background: #050010; }
-        .nav-btn { color: var(--neon); font-size: 11px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        :root { --neon: #bc13fe; --glass: rgba(30, 0, 50, 0.7); --border: rgba(188, 19, 254, 0.5); }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        
+        /* Glassmorphism & Neon */
+        .screen { display: none; height: 100vh; flex-direction: column; background: radial-gradient(circle at top, #1a002b, #000); }
+        .active { display: flex; }
+        .glass-card { background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 0 20px rgba(188, 19, 254, 0.2); }
+
+        /* Loader */
+        .moon-loader { width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 0 40px var(--neon); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
+
+        /* Menu Grid */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; overflow-y: auto; }
+        .nav-item { height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .nav-item:active { transform: scale(0.95); background: var(--neon); }
+
+        .btn-18 { background: var(--neon); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; box-shadow: 0 0 15px var(--neon); margin: 10px; }
+        input, select { background: rgba(255,255,255,0.1); border: 1px solid var(--neon); color: white; padding: 12px; border-radius: 10px; width: 80%; margin: 10px 0; outline: none; }
         .hidden { display: none !important; }
-        #moon-loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s; }
-        .moon-icon { width: 70px; height: 70px; background: #fff; border-radius: 50%; box-shadow: 0 0 35px var(--neon); animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% {transform: scale(1);} 50% {transform: scale(1.15);} }
     </style>
 </head>
 <body>
 
-<div id="moon-loader"><div class="moon-icon"></div></div>
+<div id="scr-load" class="screen active" style="justify-content:center; align-items:center;">
+    <div class="moon-loader"></div>
+    <p style="margin-top:20px; color:var(--neon); letter-spacing:3px;">LOADING...</p>
+</div>
 
-<div class="screen">
-    <div class="header">
-        <span id="u-name">Загрузка...</span>
-        <span>🌙 <b id="u-bal">10</b></span>
+<div id="scr-captcha" class="screen" style="justify-content:center; align-items:center; text-align:center; padding:20px;">
+    <h1 style="color:red; font-size:60px; margin:0;">18+</h1>
+    <p class="glass-card" style="padding:20px;">Данный сервис содержит контент для взрослых. Вам есть 18 лет?</p>
+    <button class="btn-18" onclick="show('reg')">ДА, МНЕ ЕСТЬ 18</button>
+    <button style="background:none; border:none; color:#555;" onclick="tg.close()">НЕТ, ВЫЙТИ</button>
+</div>
+
+<div id="scr-reg" class="screen" style="justify-content:center; align-items:center;">
+    <div class="glass-card" style="padding:30px; width:80%; text-align:center;">
+        <h3>ЗНАКОМСТВО</h3>
+        <input id="reg-name" placeholder="Твое Имя">
+        <select id="reg-gender">
+            <option value="male">Мужчина</option>
+            <option value="female">Женщина</option>
+        </select>
+        <button class="btn-18" onclick="finishReg()">ВОЙТИ В МИР</button>
     </div>
+</div>
 
-    <div id="chars-screen" class="grid"></div>
-
-    <div id="admin-screen" class="hidden" style="padding: 20px; overflow-y: auto;">
-        <h3>Создать персонажа</h3>
-        <input type="text" id="adm-name" placeholder="Имя" style="width:90%; padding:10px; margin-bottom:10px; background:none; border:1px solid var(--neon); color:#fff;">
-        <input type="file" id="adm-file" style="margin-bottom:20px;">
-        <button onclick="createChar()" style="width:100%; padding:15px; background:var(--neon); color:#fff; border:none; border-radius:10px;">СОЗДАТЬ</button>
+<div id="scr-main" class="screen">
+    <div style="padding:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
+        <div id="u-name" style="font-weight:bold; color:var(--neon);">User</div>
+        <div class="glass-card" style="padding:5px 15px;">🌙 <span id="u-bal">100</span></div>
     </div>
-
-    <div class="nav">
-        <div class="nav-btn" onclick="openScr('chars')">ГЕРОИ</div>
-        <div class="nav-btn" id="adm-nav" onclick="openScr('admin')">АДМИНКА</div>
+    <div class="menu-grid">
+        <div class="glass-card nav-item" onclick="openMod('chats')">Чаты</div>
+        <div class="glass-card nav-item" onclick="openMod('chars')">Персонажи</div>
+        <div class="glass-card nav-item" onclick="openMod('daily')">Ежедневка</div>
+        <div class="glass-card nav-item" onclick="openMod('tasks')">Задания</div>
+        <div class="glass-card nav-item" onclick="openMod('shop')">Магазин</div>
+        <div class="glass-card nav-item" onclick="openMod('promo')">Промокоды</div>
+        <div class="glass-card nav-item" onclick="openMod('profile')">Профиль</div>
+        <div class="glass-card nav-item" onclick="openMod('settings')">Настройки</div>
+        <div id="btn-admin" class="glass-card nav-item">Админка</div>
+        <div id="btn-console" class="glass-card nav-item" style="color:red; border-color:red;">Консоль</div>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
+    const OWNER_ID = 8287041036;
     tg.expand();
+    tg.enableClosingConfirmation(); // Блокировка свайпа
 
-    // Функция скрытия загрузки
-    function hideLoader() {
-        const loader = document.getElementById('moon-loader');
-        loader.style.opacity = '0';
-        setTimeout(() => loader.classList.add('hidden'), 500);
+    // Имитация загрузки
+    setTimeout(() => { show('captcha'); }, 3000);
+
+    function show(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr-' + id).classList.add('active');
     }
 
-    window.onload = async () => {
-        document.getElementById('u-name').innerText = tg.initDataUnsafe.user?.first_name || "Сэмпай";
+    function finishReg() {
+        const name = document.getElementById('reg-name').value;
+        if(!name) return alert("Представься!");
         
-        // Показываем админку только владельцу
-        if(tg.initDataUnsafe.user?.id != 8287041036) {
-            document.getElementById('adm-nav').classList.add('hidden');
+        const myId = tg.initDataUnsafe.user?.id || 123; // Для тестов
+        
+        // Настройка прав Овнера
+        if(myId != OWNER_ID) {
+            document.getElementById('btn-console').classList.add('hidden');
         }
-
-        // Пытаемся загрузить данные, если через 5 секунд не выйдет - убираем луну принудительно
-        setTimeout(hideLoader, 5000); 
-
-        try {
-            const res = await fetch('/api/characters');
-            const chars = await res.json();
-            renderChars(chars);
-            hideLoader();
-        } catch (e) {
-            console.error("Ошибка загрузки");
-            hideLoader();
-        }
-    };
-
-    function openScr(id) {
-        document.getElementById('chars-screen').classList.add('hidden');
-        document.getElementById('admin-screen').classList.add('hidden');
-        document.getElementById(id + '-screen').classList.remove('hidden');
+        document.getElementById('u-name').innerText = name + (myId == OWNER_ID ? " (OWNER)" : "");
+        document.getElementById('u-bal').innerText = (myId == OWNER_ID ? "99999999" : "100");
+        
+        show('main');
     }
 
-    function renderChars(list) {
-        const container = document.getElementById('chars-screen');
-        container.innerHTML = list.map(c => `
-            <div class="card" style="background:var(--glass); border-radius:10px; overflow:hidden;">
-                <img src="${c.photoUrl}" style="width:100%; height:120px; object-fit:cover;">
-                <div style="padding:10px; font-size:12px;">${c.name}, ${c.age}</div>
-            </div>
-        `).join('');
+    function openMod(type) {
+        alert("Экран '" + type + "' в разработке. Скоро здесь будет магия!");
     }
 </script>
 </body>
