@@ -3,45 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anime Moon 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --neon: #bc13fe; --glass: rgba(25, 10, 40, 0.95); --border: rgba(188, 19, 254, 0.4); }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; touch-action: none; }
-        
-        .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow-y: auto; padding-bottom: 20px; }
+        .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow-y: auto; padding: 10px; }
         .active { display: flex; }
-
-        .glass { background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(20px); border-radius: 15px; margin: 10px; padding: 15px; }
-        
-        /* Меню */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .menu-btn { height: 85px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid var(--border); border-radius: 15px; background: rgba(188, 19, 254, 0.05); text-transform: uppercase; letter-spacing: 1px; }
+        .glass { background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(20px); border-radius: 15px; margin-bottom: 10px; padding: 15px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+        .menu-btn { height: 85px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid var(--border); border-radius: 15px; background: rgba(188, 19, 254, 0.05); text-transform: uppercase; }
         .menu-btn:active { background: var(--neon); transform: scale(0.95); }
-
-        /* Навигация */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
-        .nav-item { padding: 10px 20px; font-size: 12px; font-weight: bold; color: #fff; }
-
-        /* Формы */
+        .nav-item { padding: 10px 20px; font-size: 12px; font-weight: bold; color: #fff; text-transform: uppercase; }
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon); color: #fff; border-radius: 10px; outline: none; }
-        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 10px; box-shadow: 0 0 15px rgba(188, 19, 254, 0.4); }
-        .btn-danger { background: #ff4444; box-shadow: 0 0 15px rgba(255, 68, 68, 0.4); }
-
-        .header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .sub-text { font-size: 10px; color: #aaa; }
+        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 10px; }
+        .btn-red { background: #ff4444; margin-top: 10px; }
+        .char-card { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .char-img { width: 60px; height: 60px; border-radius: 10px; background: #333; object-fit: cover; border: 1px solid var(--neon); }
     </style>
 </head>
 <body>
 
 <div id="scr-main" class="screen active">
-    <div class="header">
+    <div style="padding:15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
         <div>
-            <div id="display-name" style="color:var(--neon); font-weight:bold;">German Green (BOSS)</div>
-            <div id="display-id" class="sub-text">ID: 8287041036</div>
+            <div id="u-name" style="color:var(--neon); font-weight:bold;">German Green (BOSS)</div>
+            <div id="u-id" style="font-size:10px; color:#aaa;">ID: 8287041036</div>
         </div>
-        <div class="glass" style="margin:0; padding:5px 12px;">🌙 <b id="display-bal">99999999</b></div>
+        <div class="glass" style="margin:0; padding:5px 12px;">🌙 <b id="u-bal">99999999</b></div>
     </div>
     <div class="menu-grid">
         <div class="menu-btn" onclick="openMod('chats')">Чаты</div>
@@ -52,13 +41,13 @@
         <div class="menu-btn" onclick="openMod('promo')">Промокоды</div>
         <div class="menu-btn" onclick="openMod('profile')">Профиль</div>
         <div class="menu-btn" onclick="openMod('settings')">Настройки</div>
-        <div id="btn-admin" class="menu-btn" onclick="openMod('admin')">Админка</div>
-        <div id="btn-console" class="menu-btn" style="color:#ff4444; border-color:#ff4444;" onclick="openMod('console')">Консоль</div>
+        <div id="adm-btn" class="menu-btn" onclick="openMod('admin')">Админка</div>
+        <div id="cons-btn" class="menu-btn" style="color:#ff4444; border-color:#ff4444;" onclick="openMod('console')">Консоль</div>
     </div>
 </div>
 
 <div id="scr-mod" class="screen">
-    <div id="mod-content" style="padding-bottom: 30px;"></div>
+    <div id="mod-content"></div>
 </div>
 
 <nav class="bottom-nav">
@@ -73,77 +62,66 @@
     tg.enableClosingConfirmation();
     tg.ready();
 
-    let user = {
-        id: tg.initDataUnsafe.user?.id || OWNER_ID,
-        name: tg.initDataUnsafe.user?.first_name || "Boss",
-        gender: "М", balance: 99999999, sub: "Ultra", streak: 7, role: "owner"
-    };
+    let user = { id: OWNER_ID, name: "German Green", balance: 99999999, role: "owner", streak: 7 };
+    let chars = [{name: "Азуми", age: 19, sex: "Ж", desc: "Милая и скромная девочка-кошка."}];
 
     function openMod(type) {
-        tg.HapticFeedback.impactOccurred('medium');
+        const cont = document.getElementById('mod-content');
         document.getElementById('scr-main').classList.remove('active');
         document.getElementById('scr-mod').classList.add('active');
-        const cont = document.getElementById('mod-content');
+        
+        let html = `<div class="glass"><h3>${type.toUpperCase()}</h3>`;
 
         if(type === 'console' || type === 'admin') {
-            let isOwner = (user.role === 'owner');
-            cont.innerHTML = `
-                <div class="glass">
-                    <h3 style="color:var(--neon)">${type.toUpperCase()}</h3>
-                    <p class="sub-text">Создание персонажа</p>
-                    <input id="c-name" placeholder="Имя бота">
-                    <select id="c-sex"><option value="М">Мужчина</option><option value="Ж">Женщина</option></select>
-                    <input id="c-age" type="number" placeholder="Возраст (18+)">
-                    <input type="file" accept="image/*">
-                    <button class="btn-main" onclick="tg.showAlert('Бот создан!')">Создать бота</button>
-                    
-                    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-                    
-                    <p class="sub-text">Управление ресурсами</p>
-                    <input id="t-id" placeholder="Telegram ID юзера">
-                    <input id="t-amt" placeholder="Количество">
-                    <button class="btn-main" onclick="tg.showAlert('Выполнено!')">Выдать осколки</button>
-                    ${isOwner ? `<button class="btn-main btn-danger" onclick="tg.showAlert('Снято!')">Снять осколки</button>` : ''}
-                    
-                    <p class="sub-text">Управление подпиской</p>
-                    <select id="t-sub"><option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option></select>
-                    <input id="t-days" placeholder="Количество дней">
-                    <button class="btn-main" onclick="tg.showAlert('Подписка выдана!')">Выдать подписку</button>
+            const isOwner = (user.role === 'owner' && type === 'console');
+            html += `<p class="sub-text">Создание персонажа</p>
+                <input placeholder="Имя бота">
+                <select><option>Мужчина</option><option>Женщина</option></select>
+                <input type="number" placeholder="Возраст (18+)">
+                <textarea placeholder="Описание/Характер"></textarea>
+                <input type="file" accept="image/*">
+                <button class="btn-main">Создать бота</button>
+                <hr style="border-color:var(--border); margin:15px 0;">
+                <p class="sub-text">Управление ресурсами</p>
+                <input placeholder="Telegram ID юзера">
+                <input placeholder="Количество">
+                <button class="btn-main">Выдать осколки</button>`;
+            
+            if(isOwner) html += `<button class="btn-main btn-red">Снять осколки</button>`;
+            
+            html += `<hr style="border-color:var(--border); margin:15px 0;">
+                <p class="sub-text">Управление подпиской</p>
+                <input placeholder="Telegram ID юзера">
+                <select><option>Premium</option><option>Pro</option><option>VIP</option><option>Ultra</option></select>
+                <input placeholder="Количество дней">
+                <button class="btn-main">Выдать подписку</button>`;
 
-                    ${isOwner ? `
-                        <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-                        <button class="btn-main btn-danger" onclick="tg.showConfirm('Удалить всех персонажей?', (q)=>{})">Удалить персонажа</button>
-                        <input id="adm-id" placeholder="ID юзера для Админки">
-                        <button class="btn-main" onclick="tg.showAlert('Админ назначен')">Назначить админа</button>
-                        <button class="btn-main btn-danger" onclick="tg.showAlert('Админ снят')">Снять админа</button>
-                    ` : ''}
-                </div>`;
+            if(isOwner) {
+                html += `<button class="btn-main btn-red" onclick="openMod('del-char')">Удалить персонажа</button>
+                    <hr style="border-color:var(--border); margin:15px 0;">
+                    <p class="sub-text">Управление админами</p>
+                    <input placeholder="ID юзера">
+                    <button class="btn-main">Назначить админа</button>
+                    <button class="btn-main btn-red">Снять админа</button>`;
+            }
         } 
+        else if(type === 'chars' || type === 'del-char') {
+            chars.forEach((c, i) => {
+                html += `<div class="glass char-card">
+                    <div class="char-img"></div>
+                    <div><b>${c.name}, ${c.age} (${c.sex})</b><br><small>${c.desc}</small></div>
+                    ${type === 'del-char' ? `<button class="btn-main btn-red" style="width:auto; padding:5px 10px;" onclick="tg.showConfirm('Удалить?', (ok)=>{})">Удалить</button>` : ''}
+                </div>`;
+            });
+        }
         else if(type === 'settings') {
-            cont.innerHTML = `
-                <div class="glass">
-                    <h3>Настройки</h3>
-                    <p class="sub-text">Ваше имя</p>
-                    <input id="set-name" value="${user.name}">
-                    <p class="sub-text">Ваш пол</p>
-                    <select id="set-gender"><option value="М" ${user.gender==='М'?'selected':''}>Мужчина</option><option value="Ж" ${user.gender==='Ж'?'selected':''}>Женщина</option></select>
-                    <p class="sub-text">Длина ответа (Ultra: 100 слов)</p>
-                    <input type="range" min="20" max="100" value="60">
-                    <button class="btn-main" onclick="tg.showAlert('Сохранено!')">Сохранить</button>
-                </div>`;
+            html += `<p class="sub-text">Ваше имя</p><input value="${user.name}">
+                <p class="sub-text">Ваш пол</p><select><option>Мужчина</option><option>Женщина</option></select>
+                <button class="btn-main">Сохранить</button>`;
         }
-        else if(type === 'daily') {
-            cont.innerHTML = `
-                <div class="glass" style="text-align:center">
-                    <h2>Бонус дня</h2>
-                    <p>Ваша серия: ${user.streak} дн.</p>
-                    <h1 style="color:var(--neon)">+500 🌙</h1>
-                    <button class="btn-main" onclick="tg.showAlert('Вы получили 500 осколков!'); goHome();">Забрать</button>
-                </div>`;
-        }
-        else {
-            cont.innerHTML = `<div class="glass"><h3>${type.toUpperCase()}</h3><p>Модуль в разработке...</p></div>`;
-        }
+        else { html += `<p>Модуль в активной разработке...</p>`; }
+        
+        cont.innerHTML = html + `</div>`;
     }
 
     function goHome() {
@@ -152,10 +130,7 @@
     }
     function goBack() { goHome(); }
 
-    // Блокировка свайпа вниз
-    document.addEventListener('touchmove', (e) => {
-        if (!e.target.closest('.screen')) e.preventDefault();
-    }, { passive: false });
+    document.addEventListener('touchmove', (e) => { if (!e.target.closest('.screen')) e.preventDefault(); }, { passive: false });
 </script>
 </body>
 </html>
