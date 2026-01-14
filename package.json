@@ -1,15 +1,12 @@
 {
-  "name": "anime-world-18",
+  "name": "anime-moon-18",
   "version": "1.0.0",
-  "description": "Anime Mini App with 18+ AI and Crypto Payments",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "path": "^0.12.7",
-    "dotenv": "^16.0.3",
-    "node-fetch": "^2.6.9"
+    "path": "^0.12.7"
   }
 }
