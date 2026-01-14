@@ -1,113 +1,132 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anime AI 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #0a0012; --panel: rgba(30, 0, 50, 0.75); --accent: #bc13fe; --text: #f0f0f0; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; touch-action: none; }
+        :root { --accent: #bc13fe; --glass: rgba(30, 0, 50, 0.85); }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
         
-        /* Loader */
-        #loader { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 999; }
+        /* Луна */
+        #loader { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .moon { width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 0 40px var(--accent); animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+        @keyframes pulse { 0%, 100% {transform: scale(1);} 50% {transform: scale(1.15);} }
 
-        /* Registration */
-        #reg-form { position: fixed; inset: 0; background: var(--bg); z-index: 900; padding: 40px; display: flex; flex-direction: column; gap: 20px; justify-content: center; }
-        input, select, button { background: var(--panel); border: 1px solid var(--accent); color: #fff; padding: 15px; border-radius: 10px; font-size: 16px; }
-        button { background: var(--accent); font-weight: bold; cursor: pointer; }
+        /* UI */
+        .reg { padding: 40px; text-align: center; display: flex; flex-direction: column; gap: 15px; height: 100vh; justify-content: center; }
+        input, select, button { background: var(--glass); border: 1px solid var(--accent); color: #fff; padding: 15px; border-radius: 12px; font-size: 16px; }
+        button { background: var(--accent); font-weight: bold; }
+        
+        .header { padding: 15px; border-bottom: 1px solid var(--accent); background: var(--glass); backdrop-filter: blur(10px); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; overflow-y: auto; height: 60vh; }
+        .card { background: var(--glass); padding: 20px; border-radius: 15px; border: 1px solid rgba(188, 19, 254, 0.2); text-align: center; }
 
-        /* Main UI */
-        .header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--accent); backdrop-filter: blur(10px); }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; height: calc(100vh - 200px); overflow-y: auto; }
-        .card { background: var(--panel); border: 1px solid rgba(188, 19, 254, 0.3); padding: 20px; border-radius: 12px; text-align: center; }
+        /* VIP/Ultra Панель */
+        #vip-tools { margin: 10px; padding: 15px; border: 1px solid gold; border-radius: 15px; display: none; background: rgba(255, 215, 0, 0.05); }
 
-        /* Chat Photo Button */
-        .photo-btn { margin-top: 10px; background: linear-gradient(45deg, #bc13fe, #7a0bc0); border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; }
-
-        /* Bottom Nav */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--panel); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--accent); }
-        .nav-item { flex: 1; text-align: center; font-size: 14px; font-weight: bold; color: var(--accent); }
+        /* Нижний бар */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: rgba(20, 0, 40, 0.95); border-top: 1px solid var(--accent); display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(15px); }
+        .nav-btn { color: var(--accent); font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div id="loader"><div class="moon"></div></div>
 
-<div id="reg-form" class="hidden">
-    <h2 style="text-align: center">Регистрация 18+</h2>
-    <input type="text" id="name" placeholder="Твое имя...">
-    <select id="gender">
-        <option value="male">Парень</option>
-        <option value="female">Девушка</option>
-    </select>
-    <div style="font-size: 12px; text-align: center; opacity: 0.7;">Капча: Подтвердите, что вам есть 18 лет</div>
-    <button onclick="finishReg(true)">МНЕ ЕСТЬ 18 ЛЕТ</button>
-    <button style="background: #444;" onclick="tg.close()">НЕТ</button>
+<div id="reg-screen" class="reg hidden">
+    <h2 style="color: var(--accent)">ANIME AI 18+</h2>
+    <input type="text" id="r-name" placeholder="Твое имя">
+    <select id="r-gender"><option value="male">Парень</option><option value="female">Девушка</option></select>
+    <p style="font-size: 12px;">Подтвердите, что вам есть 18 лет</p>
+    <button onclick="initApp()">МНЕ ЕСТЬ 18 (ВХОД)</button>
+    <button style="background: #333;" onclick="window.Telegram.WebApp.close()">ВЫЙТИ</button>
 </div>
 
 <div id="app" class="hidden">
     <div class="header">
         <div style="display: flex; justify-content: space-between;">
-            <b id="display-name">User</b>
-            <span>🌙 <b id="balance">0</b> <button style="padding: 2px 8px;" onclick="showTab('shop')">+</button></span>
+            <b id="u-name">...</b>
+            <span>🌙 <b id="u-bal">0</b></span>
         </div>
-        <div style="font-size: 11px; opacity: 0.6; margin-top: 5px;">ID: <span id="display-id">0</span> | <span id="sub-status">Ultra (Пробник)</span></div>
+        <div id="u-sub" style="font-size: 10px; color: gold; margin-top: 5px;">Ultra (Пробник)</div>
     </div>
 
-    <div class="menu-grid" id="main-menu">
-        <div class="card" onclick="startChat()">💬 Чаты</div>
-        <div class="card">🎭 Персонажи</div>
-        <div class="card" onclick="getDaily()">🎁 Ежедневка</div>
-        <div class="card">📜 Задания</div>
+    <div id="vip-tools">
+        <div style="font-size: 11px; color: gold; margin-bottom: 5px;">Настройки VIP/Ultra:</div>
+        <input type="range" min="1" max="100" style="width:100%"> <small>Пошлость</small><br>
+        <input type="range" id="w-slider" min="45" max="100" style="width:100%"> <small>Слов: <span id="w-val">45</span></small>
+    </div>
+
+    <div class="grid">
+        <div class="card" onclick="spend('text')">💬 Чаты (1🌙)</div>
+        <div class="card" onclick="spend('photo')">🖼️ Фото (5/2🌙)</div>
+        <div class="card">🎭 Герои</div>
+        <div class="card">🎁 Бонус</div>
         <div class="card">🛒 Магазин</div>
-        <div class="card">🔑 Промо</div>
-        <div class="card">👤 Профиль</div>
-        <div class="card">⚙️ Опции</div>
-        <div class="card">🛡️ Админ</div>
-        <div class="card" id="owner-btn">🖥️ Консоль</div>
+        <div class="card" id="admin-btn" style="display:none">🛡️ Админ</div>
     </div>
 
     <div class="nav-bar">
-        <div class="nav-item" onclick="goBack()">◀ НАЗАД</div>
-        <div class="nav-item" onclick="goHome()">🏠 ДОМОЙ</div>
+        <div class="nav-item nav-btn" onclick="alert('Назад')">◀ НАЗАД</div>
+        <div class="nav-item nav-btn" onclick="location.reload()">🏠 ДОМОЙ</div>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.expand();
+    const API = "https://tg-miniapp-hr0a.onrender.com"; // Твоя ссылка
 
-    // Загрузка
     window.onload = () => {
         setTimeout(() => {
-            document.getElementById('loader').style.display = 'none';
-            // Если первый вход - показать регу
-            document.getElementById('reg-form').classList.remove('hidden');
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('reg-screen').classList.remove('hidden');
         }, 2000);
     };
 
-    function finishReg(isAdult) {
-        if(!isAdult) return tg.close();
-        const name = document.getElementById('name').value;
-        if(!name) return alert("Введите имя!");
+    function initApp() {
+        const name = document.getElementById('r-name').value;
+        if(!name) return alert("Имя?");
         
-        document.getElementById('reg-form').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden');
-        document.getElementById('display-name').innerText = name;
-        // Здесь отправка на бэкенд /api/init
+        fetch(`${API}/api/init`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                id: tg.initDataUnsafe.user?.id || 123,
+                name: name,
+                gender: document.getElementById('r-gender').value,
+                ref: tg.initDataUnsafe.start_param
+            })
+        }).then(r => r.json()).then(user => {
+            document.getElementById('reg-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('u-name').innerText = user.name;
+            document.getElementById('u-bal').innerText = user.balance;
+            document.getElementById('u-sub').innerText = user.sub;
+
+            // Ползунки
+            if(user.sub === 'VIP' || user.sub === 'Ultra') {
+                document.getElementById('vip-tools').style.display = 'block';
+                document.getElementById('w-slider').max = (user.sub === 'VIP' ? 80 : 100);
+            }
+            // Админка
+            if(user.role === 'owner' || user.role === 'admin') document.getElementById('admin-btn').style.display='block';
+        });
     }
 
-    function goHome() { /* Смена экранов */ }
-    function goBack() { /* История экранов */ }
-
-    // Пример кнопки фото под сообщением
-    function createPhotoBtn() {
-        // Под сообщением бота появляется:
-        // <button class="photo-btn" onclick="genPhoto()">Сгенерировать фото (5🌙/2🌙)</button>
+    function spend(type) {
+        fetch(`${API}/api/spend`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ id: tg.initDataUnsafe.user?.id || 123, type })
+        }).then(r => r.json()).then(data => {
+            if(data.success) document.getElementById('u-bal').innerText = data.balance;
+            else alert(data.error);
+        });
     }
+
+    document.getElementById('w-slider').oninput = function() { document.getElementById('w-val').innerText = this.value; };
 </script>
 </body>
 </html>
