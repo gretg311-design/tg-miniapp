@@ -5,140 +5,133 @@
 <title>AnimeAI 18+</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:system-ui;
-  background:radial-gradient(circle at top,#1b2340,#060913 75%);
-  color:#fff;
-  min-height:100vh;
-}
-
-/* LOADER */
-#loader{
-  position:fixed;inset:0;
-  background:#050814;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  z-index:999;
-}
-.moon{
-  width:90px;height:90px;border-radius:50%;
-  background:#eee;
-  box-shadow:0 0 40px rgba(255,255,255,.4);
-  animation:pulse 2s infinite;
-}
-@keyframes pulse{
-  0%{transform:scale(1)}
-  50%{transform:scale(1.08)}
-  100%{transform:scale(1)}
-}
-#loader p{margin-top:14px;opacity:.6}
-
-/* TOP */
-.top{
-  padding:12px;
-  background:#101633;
-  display:flex;
-  justify-content:space-between;
-}
-.small{font-size:11px;opacity:.6}
-
-/* SCREENS */
-.screen{display:none;padding:16px}
-.screen.active{display:block}
-
-/* MENU */
-.menu{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.card{
-  background:#1e2a52;
-  padding:18px;
-  border-radius:16px;
-  text-align:center;
-}
-.back{
-  margin-top:18px;
-  padding:14px;
-  background:#2a3569;
-  border-radius:14px;
-  text-align:center;
-}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: sans-serif;
+    background: radial-gradient(circle at top, #1b2340, #060913 75%);
+    color: #fff;
+    min-height: 100vh;
+  }
+  #loader {
+    position:fixed; inset:0; background:#050814;
+    display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:999;
+  }
+  .moon {
+    width:80px; height:80px; border-radius:50%; background:#eee;
+    box-shadow:0 0 40px rgba(255,255,255,0.4); animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
+  
+  .top { padding:15px; background:#101633; display:flex; justify-content:space-between; align-items:center; }
+  .balance { color:#ffcc00; font-weight:bold; background:#1e2a52; padding:5px 10px; border-radius:10px; }
+  
+  .screen { display:none; padding:15px; }
+  .active { display:block; }
+  
+  .menu { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; }
+  .card { background:#1e2a52; padding:20px; border-radius:15px; text-align:center; border:1px solid #2a3569; }
+  .back { margin-top:20px; text-align:center; opacity:0.6; }
+  .btn { background:#4a90e2; padding:15px; border-radius:10px; text-align:center; margin-top:10px; font-weight:bold; }
 </style>
 </head>
-
 <body>
 
 <div id="loader">
   <div class="moon"></div>
-  <p>Загрузка мира AnimeAI…</p>
+  <p style="margin-top:15px">Загрузка магии...</p>
 </div>
 
 <div id="app" style="display:none">
-
-<div class="top">
-  <div>
-    <div id="uname">Игрок</div>
-    <div class="small" id="uid">ID</div>
+  <div class="top">
+    <div>
+      <div id="uname" style="font-weight:bold">Игрок</div>
+      <div id="uid" style="font-size:10px; opacity:0.5">ID</div>
+    </div>
+    <div class="balance">🌙 <span id="bal">0</span></div>
   </div>
-  <div>🌙 <span id="bal">0</span></div>
-</div>
 
-<div id="home" class="screen active">
-  <div class="menu">
-    <div class="card" onclick="openS('chats')">💬 Чаты</div>
-    <div class="card" onclick="openS('chars')">🧍 Персонажи</div>
-    <div class="card" onclick="openS('daily')">🎁 Ежедневка</div>
-    <div class="card" onclick="openS('tasks')">📋 Задания</div>
-    <div class="card" onclick="openS('shop')">🛒 Магазин</div>
-    <div class="card" onclick="openS('promo')">🎟 Промокоды</div>
-    <div class="card" onclick="openS('profile')">👤 Профиль</div>
-    <div class="card" onclick="openS('settings')">⚙️ Настройки</div>
+  <div id="home" class="screen active">
+    <div class="menu">
+      <div class="card" onclick="show('chats')">💬 Чаты</div>
+      <div class="card" onclick="show('shop')">🛒 Магазин</div>
+      <div class="card" onclick="show('daily')">🎁 Бонус</div>
+      <div class="card" onclick="show('profile')">👤 Профиль</div>
+    </div>
   </div>
-</div>
 
-<div id="chats" class="screen"><h2>Чаты</h2><div class="back" onclick="openS('home')">← Назад</div></div>
-<div id="chars" class="screen"><h2>Персонажи</h2><div class="back" onclick="openS('home')">← Назад</div></div>
-<div id="daily" class="screen"><h2>Ежедневка</h2><div class="back" onclick="openS('home')">← Назад</div></div>
-<div id="tasks" class="screen"><h2>Задания</h2><div class="back" onclick="openS('home')">← Назад</div></div>
-<div id="shop" class="screen"><h2>Магазин</h2><div class="back" onclick="openS('home')">← Назад</div></div>
-<div id="promo" class="screen"><h2>Промокоды</h2><div class="back" onclick="openS('home')">← Назад</div></div>
-<div id="profile" class="screen"><h2>Профиль</h2><div class="back" onclick="openS('home')">← Назад</div></div>
-<div id="settings" class="screen"><h2>Настройки</h2><div class="back" onclick="openS('home')">← Назад</div></div>
+  <div id="shop" class="screen">
+    <h2>Магазин</h2>
+    <div class="btn" onclick="buy(100)">Купить 100 🌙 (Тест)</div>
+    <div class="btn" onclick="buy(500)">Купить 500 🌙 (Тест)</div>
+    <div class="back" onclick="show('home')">← Назад</div>
+  </div>
 
+  <div id="daily" class="screen">
+    <h2>Ежедневный бонус</h2>
+    <div class="btn" style="background:#27ae60" onclick="collectDaily()">Забрать 50 🌙</div>
+    <div class="back" onclick="show('home')">← Назад</div>
+  </div>
+
+  <div id="chats" class="screen"><h2>Чаты</h2><p>Пока нет активных диалогов.</p><div class="back" onclick="show('home')">← Назад</div></div>
+  <div id="profile" class="screen"><h2>Профиль</h2><p>Тут будет ваша статистика.</p><div class="back" onclick="show('home')">← Назад</div></div>
 </div>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.ready();
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  const user = tg.initDataUnsafe.user || {id: 0, first_name: "User"};
 
-const u = tg.initDataUnsafe.user;
-document.getElementById("uname").innerText = u.first_name;
-document.getElementById("uid").innerText = "ID: "+u.id;
+  document.getElementById("uname").innerText = user.first_name;
+  document.getElementById("uid").innerText = "ID: " + user.id;
 
-fetch("/api/user",{
-  method:"POST",
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({id:u.id})
-})
-.then(r=>r.json())
-.then(d=>{
-  document.getElementById("bal").innerText = d.balance;
-  loader.style.display="none";
-  app.style.display="block";
-});
+  // Загружаем данные
+  fetch("/api/user", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({id: user.id})
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("bal").innerText = data.balance;
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  });
 
-function openS(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function buy(amt) {
+    fetch("/api/buy", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({id: user.id, amount: amt})
+    })
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("bal").innerText = data.balance;
+      alert("Добавлено " + amt + " осколков!");
+    });
+  }
+
+  function collectDaily() {
+    fetch("/api/daily", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({id: user.id})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.success) {
+        alert("Вы получили 50 🌙!");
+        location.reload();
+      } else {
+        alert(data.message);
+      }
+    });
+  }
 </script>
-
 </body>
 </html>
