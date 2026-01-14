@@ -1,10 +1,16 @@
 {
-  "name": "animeai",
-  "type": "module",
+  "name": "animeai-miniapp",
+  "version": "1.0.0",
+  "description": "AnimeAI 18+ Telegram Mini App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "express": "^4.19.2",
-    "node-fetch": "^3.3.2",
-    "sqlite3": "^5.1.7",
-    "sqlite": "^5.1.1"
+    "sqlite3": "^5.1.7"
   }
 }
