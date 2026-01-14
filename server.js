@@ -7,29 +7,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = "8287041036";
 let db = {
     users: {}, 
-    admins: [], 
-    characters: [], 
-    tasks: [], 
-    promos: []
+    chars: [{id: 1, name: "Азуми", age: 19, sex: "Ж", desc: "Кошечка", photo: ""}],
+    tasks: [{id: 1, title: "Подписка на канал", reward: 50, link: "https://t.me/yourlink"}],
+    admins: []
 };
 
+// Авторизация и получение данных юзера
 app.post('/api/auth', (req, res) => {
-    const { userId, name } = req.body;
-    const id = String(userId);
-    if (!db.users[id]) {
-        db.users[id] = {
-            id: id,
-            name: name,
-            gender: "М",
-            balance: (id === OWNER_ID) ? 99999999 : 100,
-            sub: "Ultra", // Тестовая подписка
-            subDays: 30,
-            streak: 1,
-            role: (id === OWNER_ID) ? "owner" : (db.admins.includes(id) ? "admin" : "user")
+    const { id, name } = req.body;
+    const uid = String(id);
+    if (!db.users[uid]) {
+        db.users[uid] = {
+            id: uid, name: name, gender: "М", balance: (uid === OWNER_ID) ? 99999999 : 100,
+            sub: "Ultra", streak: 1, role: (uid === OWNER_ID) ? "owner" : (db.admins.includes(uid) ? "admin" : "user")
         };
     }
-    res.json(db.users[id]);
+    res.json({ user: db.users[uid], chars: db.chars, tasks: db.tasks });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server started on ${PORT}`));
+// Сохранение настроек
+app.post('/api/save-settings', (req, res) => {
+    const { id, name, gender } = req.body;
+    if (db.users[id]) {
+        db.users[id].name = name;
+        db.users[id].gender = gender;
+        res.json({ success: true });
+    }
+});
+
+app.listen(process.env.PORT || 3000, () => console.log('Server Live'));
