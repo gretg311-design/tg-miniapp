@@ -1,12 +1,10 @@
 {
-  "name": "tg-miniapp",
-  "version": "1.0.0",
-  "description": "Telegram Mini App stable base",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
+  "name": "animeai",
+  "type": "module",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2",
+    "sqlite3": "^5.1.7",
+    "sqlite": "^5.1.1"
   }
 }
