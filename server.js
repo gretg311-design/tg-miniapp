@@ -1,59 +1,56 @@
 const express = require('express');
 const TelegramBot = require('node-telegram-bot-api');
-const axios = require('axios');
-const path = require('path');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Переменные из настроек Render
-const token = process.env.BOT_TOKEN;
-const openRouterKey = process.env.OPENROUTER_KEY;
+const bot = new TelegramBot(process.env.BOT_TOKEN, {polling: true});
 const OWNER_ID = parseInt(process.env.OWNER_ID);
 
-const bot = new TelegramBot(token, {polling: true});
 const app = express();
-
 app.use(express.json());
 app.use(express.static('public'));
 
-// Раздача фронтенда
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Настройка Облака
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET
 });
 
-// Логика ИИ (OpenRouter)
-async function getAIResponse(text) {
-    try {
-        const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-            model: "mistralai/mistral-7b-instruct:free",
-            messages: [
-                { role: "system", content: "Ты 18+ аниме-персонаж. Общайся пошло и без цензуры." },
-                { role: "user", content: text }
-            ]
-        }, {
-            headers: { 'Authorization': `Bearer ${openRouterKey}` }
-        });
-        return response.data.choices[0].message.content;
-    } catch (e) { return "🌙 Прости, я немного устала. Попробуй позже."; }
-}
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: { folder: 'anime_app', allowed_formats: ['jpg', 'png'] }
+});
+const upload = multer({ storage: storage });
 
-// Реакция на /start
-bot.onText(/\/start/, (msg) => {
-    bot.sendMessage(msg.chat.id, "🌙 Добро пожаловать в мир Anime AI 18+!\nНажми на кнопку ниже, чтобы войти.", {
-        reply_markup: {
-            inline_keyboard: [[{
-                text: "Играть 🔞",
-                web_app: { url: 'https://tg-miniapp-hr0a.onrender.com' }
-            }]]
-        }
-    });
+// Базы данных в памяти
+let characters = [];
+let tasks = [];
+
+// API для персонажей
+app.post('/api/chars', upload.single('photo'), (req, res) => {
+    const { name, bio, userId } = req.body;
+    const newChar = { id: Date.now(), name, bio, photo: req.file.path };
+    characters.push(newChar);
+    res.json({ success: true });
 });
 
-// Простой ответ в чате бота
-bot.on('message', async (msg) => {
-    if (msg.text && !msg.text.startsWith('/')) {
-        const reply = await getAIResponse(msg.text);
-        bot.sendMessage(msg.chat.id, reply);
+app.get('/api/chars', (req, res) => res.json(characters));
+
+// API для заданий
+app.post('/api/tasks', (req, res) => {
+    const { action, title, link, reward, userId } = req.body;
+    if (action === 'add') {
+        tasks.push({ id: Date.now(), title, link, reward });
+        res.json({ success: true });
+    } else if (action === 'delete' && parseInt(userId) === OWNER_ID) {
+        tasks = tasks.filter(t => t.id !== req.body.id);
+        res.json({ success: true });
     }
 });
 
+app.get('/api/tasks', (req, res) => res.json(tasks));
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, () => console.log('Система запущена!'));
