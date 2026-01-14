@@ -6,14 +6,13 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #060a16; color: white; font-family: sans-serif; padding: 15px; margin: 0; }
-        .header { display: flex; justify-content: space-between; color: #60a5fa; margin-bottom: 20px; }
+        .header { display: flex; justify-content: space-between; color: #60a5fa; margin-bottom: 20px; font-weight: bold; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { background: #151c30; border: 1px solid #232d4b; padding: 20px 5px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 12px; }
-        .full { grid-column: span 2; background: #3b82f6; border: none; padding: 15px; border-radius: 12px; color: white; margin-top: 10px; font-weight: bold; }
-        .screen { display: none; }
-        .active { display: block; }
-        .card { background: #1e2944; padding: 10px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #3b82f6; }
-        input, textarea { width: 100%; margin: 5px 0; background: #0b1121; border: 1px solid #3b82f6; color: white; padding: 10px; box-sizing: border-box; border-radius: 8px; }
+        .btn { background: #151c30; border: 1px solid #232d4b; padding: 22px 5px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 11px; letter-spacing: 1px; }
+        .full { grid-column: span 2; background: #3b82f6; border: none; padding: 16px; border-radius: 12px; color: white; margin-top: 10px; font-weight: bold; width: 100%; }
+        .screen { display: none; } .active { display: block; }
+        .card { background: #1e2944; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #3b82f6; }
+        input, textarea { width: 100%; margin: 8px 0; background: #0b1121; border: 1px solid #3b82f6; color: white; padding: 12px; box-sizing: border-box; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -24,43 +23,41 @@
             <span>🌙 <span id="userBal">100</span></span>
         </div>
         <div class="grid">
-            <div class="btn" onclick="tg.showAlert('Чатов пока нет')">💬 ЧАТЫ</div>
+            <div class="btn" onclick="tg.showAlert('Чаты в Telegram')">💬 ЧАТЫ</div>
             <div class="btn" onclick="showScreen('chars-screen', loadChars)">🧍 ПЕРСОНАЖИ</div>
             <div class="btn" onclick="tg.showAlert('Бонус: +5 🌙')">🎁 ЕЖЕДНЕВКА</div>
             <div class="btn" onclick="showScreen('tasks-screen', loadTasks)">📋 ЗАДАНИЯ</div>
-            <div class="btn" onclick="tg.showAlert('Магазин в разработке')">🛒 МАГАЗИН</div>
-            <div class="btn" onclick="tg.showAlert('Введите код')">🎟 ПРОМОКОДЫ</div>
-            <div class="btn" onclick="tg.showAlert('Твой ID: ' + tg.initDataUnsafe.user.id)">👤 ПРОФИЛЬ</div>
-            <div class="btn" onclick="tg.showAlert('Настройки 18+')">⚙️ НАСТРОЙКИ</div>
-            <button class="full" onclick="window.open('https://t.me/your_channel')">📢 НОВОСТИ</button>
+            <div class="btn" onclick="tg.showAlert('Магазин 18+')">🛒 МАГАЗИН</div>
+            <div class="btn" onclick="tg.showAlert('🎟 Код принят')">🎟 ПРОМОКОДЫ</div>
+            <div class="btn" onclick="tg.showAlert('Профиль Овнера')">👤 ПРОФИЛЬ</div>
+            <div class="btn" onclick="tg.showAlert('Настройки обновлены')">⚙️ НАСТРОЙКИ</div>
+            <button class="full" onclick="window.open('https://t.me/news')">📢 НОВОСТИ</button>
             <button class="full" style="background:#ef4444; display:none;" id="godBtn" onclick="showScreen('admin-screen')">💻 КОНСОЛЬ БОГА</button>
         </div>
     </div>
 
     <div id="chars-screen" class="screen">
-        <h3>Персонажи</h3>
+        <h3>🧍 Твои Персонажи</h3>
         <div id="chars-list">Загрузка...</div>
-        <button class="full" onclick="showScreen('main-screen')">Назад</button>
+        <button class="full" style="background:#444" onclick="showScreen('main-screen')">Назад</button>
     </div>
 
     <div id="tasks-screen" class="screen">
-        <h3>Задания</h3>
-        <div id="tasks-list">Заданий нет</div>
-        <button class="full" onclick="showScreen('main-screen')">Назад</button>
+        <h3>📋 Задания</h3>
+        <div id="tasks-list">Список пуст</div>
+        <button class="full" style="background:#444" onclick="showScreen('main-screen')">Назад</button>
     </div>
 
     <div id="admin-screen" class="screen">
-        <h3 style="color:#ef4444">Управление</h3>
-        <p>Добавить персонажа:</p>
-        <input type="text" id="cName" placeholder="Имя">
-        <textarea id="cBio" placeholder="История (18+)"></textarea>
+        <h3 style="color:#ef4444">Управление (Овнер)</h3>
+        <input type="text" id="cName" placeholder="Имя аниме-персонажа">
+        <textarea id="cBio" placeholder="Характер (например: Пошлая сестра)"></textarea>
         <input type="file" id="cFile">
-        <button class="full" style="background:#22c55e" onclick="saveChar()">СОЗДАТЬ ПЕРСОНАЖА</button>
+        <button class="full" style="background:#22c55e" onclick="saveChar()">✅ СОЗДАТЬ & ЗАГРУЗИТЬ</button>
         <hr>
-        <p>Добавить задание:</p>
-        <input type="text" id="tTitle" placeholder="Название (Подпишись)">
-        <input type="text" id="tLink" placeholder="Ссылка (https://t.me/...)">
-        <button class="full" style="background:#3b82f6" onclick="saveTask()">ДОБАВИТЬ ЗАДАНИЕ</button>
+        <input type="text" id="tTitle" placeholder="Текст задания">
+        <input type="text" id="tLink" placeholder="Ссылка (t.me/...)">
+        <button class="full" style="background:#3b82f6" onclick="saveTask()">➕ ДОБАВИТЬ ЗАДАНИЕ</button>
         <button class="full" style="background:#444" onclick="showScreen('main-screen')">ЗАКРЫТЬ</button>
     </div>
 
@@ -81,9 +78,9 @@
             formData.append('name', document.getElementById('cName').value);
             formData.append('bio', document.getElementById('cBio').value);
             formData.append('photo', document.getElementById('cFile').files[0]);
-            formData.append('userId', tg.initDataUnsafe.user.id);
             await fetch('/api/chars', { method: 'POST', body: formData });
-            tg.showAlert("Готово!"); showScreen('main-screen');
+            tg.showAlert("Персонаж создан! Теперь он ответит тебе в чате.");
+            showScreen('main-screen');
         }
 
         async function saveTask() {
@@ -93,11 +90,11 @@
                 body: JSON.stringify({
                     action: 'add',
                     title: document.getElementById('tTitle').value,
-                    link: document.getElementById('tLink').value,
-                    userId: tg.initDataUnsafe.user.id
+                    link: document.getElementById('tLink').value
                 })
             });
-            tg.showAlert("Задание добавлено!"); showScreen('main-screen');
+            tg.showAlert("Задание добавлено!");
+            showScreen('main-screen');
         }
 
         async function loadChars() {
@@ -105,7 +102,7 @@
             const data = await res.json();
             document.getElementById('chars-list').innerHTML = data.map(c => `
                 <div class="card">
-                    <img src="${c.photo}" style="width:100%; border-radius:8px;">
+                    <img src="${c.photo}" style="width:100%; border-radius:10px; margin-bottom:10px;">
                     <b>${c.name}</b><br><small>${c.bio}</small>
                 </div>
             `).join('');
