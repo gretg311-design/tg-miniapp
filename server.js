@@ -1,43 +1,49 @@
 const express = require('express');
-const TelegramBot = require('node-telegram-bot-api');
-const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const axios = require('axios');
-
-const bot = new TelegramBot(process.env.BOT_TOKEN, {polling: true});
-const OWNER_ID = parseInt(process.env.OWNER_ID); // Твой ID
-const OPENROUTER_KEY = process.env.OPENROUTER_KEY;
-
 const app = express();
+
+const MY_WALLET = "UQCm8mTj_LHm0DyCvpNOs8PtwDqfrr_BjDSoJVJnm81WO08d"; // Твой адрес
+const OWNER_ID = 8287041036; // Твой ID
+
+let users = {}; 
+let tasks = []; 
+
+// Фоновая проверка блокчейна TON
+async function checkTonTransactions() {
+    try {
+        const res = await axios.get(`https://toncenter.com/api/v2/getTransactions?address=${MY_WALLET}&limit=20`);
+        const txs = res.data.result;
+        txs.forEach(tx => {
+            const comment = tx.in_msg.message;
+            const amount = tx.in_msg.value / 1000000000;
+            if (comment && comment.startsWith('ID')) {
+                const uid = comment.replace('ID', '');
+                if (users[uid] && !tx.processed) {
+                    users[uid].balance += (amount * 1000); // Начисление: 1 TON = 1000 осколков
+                    tx.processed = true;
+                }
+            }
+        });
+    } catch (e) { /* Блокчейн TON синхронизируется */ }
+}
+setInterval(checkTonTransactions, 30000);
+
 app.use(express.json());
 app.use(express.static('public'));
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.CLOUDINARY_KEY,
-    api_secret: process.env.CLOUDINARY_SECRET
+app.post('/api/register', (req, res) => {
+    const { userId, name, gender } = req.body;
+    users[userId] = { name, gender, balance: 100, premium: false };
+    res.json({ success: true });
 });
 
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: { folder: 'anychars_ai', allowed_formats: ['jpg', 'png', 'jpeg'] }
+app.post('/api/tasks', (req, res) => {
+    const { action, userId, id, title } = req.body;
+    if (action === 'add') { tasks.push({ id: Date.now(), title }); res.json({ success: true }); }
+    else if (action === 'delete' && parseInt(userId) === OWNER_ID) {
+        tasks = tasks.filter(t => t.id !== id);
+        res.json({ success: true });
+    } else { res.status(403).send("Ошибка прав"); }
 });
-const upload = multer({ storage: storage });
 
-let characters = []; 
-let users = {}; // userId: { balance: 100, lastDaily: null }
-
-// --- AI Chat Logic ---
-async function chatWithAI(text, userId, charId) {
-    // Получаем персонажа по ID
-    const char = characters.find(c => c.id === charId) || characters[0]; 
-    if (!char) return "Нет доступных персонажей.";
-
-    // Проверка баланса и списание
-    if (!users[userId] || users[userId].balance < 2) {
-        return "🌙 Недостаточно осколков для чата. Пополни баланс!";
-    }
-    users[userId].balance -= 2; // Списываем 2 осколка за сообщение
-
-    try {
+app.listen(process.env.PORT || 3000);
