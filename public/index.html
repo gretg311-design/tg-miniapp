@@ -1,137 +1,122 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>AnimeAI 18+</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family: sans-serif;
-    background: radial-gradient(circle at top, #1b2340, #060913 75%);
-    color: #fff;
-    min-height: 100vh;
-  }
-  #loader {
-    position:fixed; inset:0; background:#050814;
-    display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:999;
-  }
-  .moon {
-    width:80px; height:80px; border-radius:50%; background:#eee;
-    box-shadow:0 0 40px rgba(255,255,255,0.4); animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
-  
-  .top { padding:15px; background:#101633; display:flex; justify-content:space-between; align-items:center; }
-  .balance { color:#ffcc00; font-weight:bold; background:#1e2a52; padding:5px 10px; border-radius:10px; }
-  
-  .screen { display:none; padding:15px; }
-  .active { display:block; }
-  
-  .menu { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; }
-  .card { background:#1e2a52; padding:20px; border-radius:15px; text-align:center; border:1px solid #2a3569; }
-  .back { margin-top:20px; text-align:center; opacity:0.6; }
-  .btn { background:#4a90e2; padding:15px; border-radius:10px; text-align:center; margin-top:10px; font-weight:bold; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: sans-serif; }
+        body { background: #060913; color: #fff; }
+        .screen { display:none; padding:20px; }
+        .active { display:block; }
+        .card { background:#1e2a52; padding:15px; border-radius:12px; margin-bottom:10px; border: 1px solid #2a3569; }
+        .btn { background:#4a90e2; padding:12px; border-radius:10px; text-align:center; cursor:pointer; font-weight:bold; margin-top:5px; }
+        .owner-btn { background: #e74c3c; margin-top: 20px; }
+        .admin-btn { background: #f1c40f; color: #000; }
+        input { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: none; }
+        .top { padding:15px; background:#101633; display:flex; justify-content:space-between; }
+    </style>
 </head>
 <body>
 
-<div id="loader">
-  <div class="moon"></div>
-  <p style="margin-top:15px">Загрузка магии...</p>
-</div>
-
-<div id="app" style="display:none">
-  <div class="top">
-    <div>
-      <div id="uname" style="font-weight:bold">Игрок</div>
-      <div id="uid" style="font-size:10px; opacity:0.5">ID</div>
+<div id="app">
+    <div class="top">
+        <div id="role-tag" style="font-size: 10px; color: #aaa;">User</div>
+        <div>🌙 <span id="bal">0</span></div>
     </div>
-    <div class="balance">🌙 <span id="bal">0</span></div>
-  </div>
 
-  <div id="home" class="screen active">
-    <div class="menu">
-      <div class="card" onclick="show('chats')">💬 Чаты</div>
-      <div class="card" onclick="show('shop')">🛒 Магазин</div>
-      <div class="card" onclick="show('daily')">🎁 Бонус</div>
-      <div class="card" onclick="show('profile')">👤 Профиль</div>
+    <div id="home" class="screen active">
+        <div id="user-info" style="margin-bottom: 20px;"></div>
+        <div class="card" onclick="show('shop')">🛒 Магазин</div>
+        <div class="card" onclick="show('daily')">🎁 Бонус</div>
+        <div id="admin-zone"></div> </div>
+
+    <div id="console" class="screen">
+        <h2>👑 Консоль Овнера</h2>
+        <div class="card">
+            <p>Выдать осколки</p>
+            <input type="number" id="give-id" placeholder="Telegram ID">
+            <input type="number" id="give-amount" placeholder="Кол-во">
+            <div class="btn" onclick="adminAction('give')">Выдать</div>
+        </div>
+        <div class="card">
+            <p>Добавить админа</p>
+            <input type="number" id="new-admin-id" placeholder="Telegram ID">
+            <div class="btn admin-btn" onclick="addAdmin()">Назначить админом</div>
+        </div>
+        <div class="btn" onclick="loadLogs()">📜 Посмотреть логи</div>
+        <div id="logs-view" style="font-size: 10px; margin-top: 10px; max-height: 100px; overflow-y: auto;"></div>
+        <div class="btn" onclick="show('home')">Назад</div>
     </div>
-  </div>
 
-  <div id="shop" class="screen">
-    <h2>Магазин</h2>
-    <div class="btn" onclick="buy(100)">Купить 100 🌙 (Тест)</div>
-    <div class="btn" onclick="buy(500)">Купить 500 🌙 (Тест)</div>
-    <div class="back" onclick="show('home')">← Назад</div>
-  </div>
-
-  <div id="daily" class="screen">
-    <h2>Ежедневный бонус</h2>
-    <div class="btn" style="background:#27ae60" onclick="collectDaily()">Забрать 50 🌙</div>
-    <div class="back" onclick="show('home')">← Назад</div>
-  </div>
-
-  <div id="chats" class="screen"><h2>Чаты</h2><p>Пока нет активных диалогов.</p><div class="back" onclick="show('home')">← Назад</div></div>
-  <div id="profile" class="screen"><h2>Профиль</h2><p>Тут будет ваша статистика.</p><div class="back" onclick="show('home')">← Назад</div></div>
+    <div id="shop" class="screen"><h2>Магазин</h2><div class="btn" onclick="show('home')">Назад</div></div>
 </div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-  const user = tg.initDataUnsafe.user || {id: 0, first_name: "User"};
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe.user || { id: 8287041036, first_name: "OwnerTest" }; // Для теста
+    let myData = {};
 
-  document.getElementById("uname").innerText = user.first_name;
-  document.getElementById("uid").innerText = "ID: " + user.id;
+    function loadUser() {
+        fetch("/api/user", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ id: user.id })
+        })
+        .then(r => r.json())
+        .then(data => {
+            myData = data;
+            document.getElementById("bal").innerText = data.balance;
+            document.getElementById("role-tag").innerText = data.role.toUpperCase();
+            
+            if (data.role === 'owner' || data.role === 'admin') {
+                let html = `<div class="btn admin-btn" onclick="show('console')">🛠 Консоль управления</div>`;
+                if (data.role === 'owner') {
+                    html += `<div class="btn owner-btn" onclick="alert('Логи загружены в консоль братан')">👀 Режим Овнера</div>`;
+                }
+                document.getElementById("admin-zone").innerHTML = html;
+            }
+        });
+    }
 
-  // Загружаем данные
-  fetch("/api/user", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({id: user.id})
-  })
-  .then(r => r.json())
-  .then(data => {
-    document.getElementById("bal").innerText = data.balance;
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("app").style.display = "block";
-  });
+    function show(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
 
-  function show(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
+    function adminAction(type) {
+        const targetId = document.getElementById('give-id').value;
+        const amount = document.getElementById('give-amount').value;
+        fetch("/api/admin/give", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ adminId: user.id, targetId, amount })
+        }).then(() => alert("Выполнено!"));
+    }
 
-  function buy(amt) {
-    fetch("/api/buy", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({id: user.id, amount: amt})
-    })
-    .then(r => r.json())
-    .then(data => {
-      document.getElementById("bal").innerText = data.balance;
-      alert("Добавлено " + amt + " осколков!");
-    });
-  }
+    function addAdmin() {
+        const targetId = document.getElementById('new-admin-id').value;
+        fetch("/api/owner/add-admin", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ adminId: user.id, targetId })
+        }).then(() => alert("Админ добавлен!"));
+    }
 
-  function collectDaily() {
-    fetch("/api/daily", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({id: user.id})
-    })
-    .then(r => r.json())
-    .then(data => {
-      if(data.success) {
-        alert("Вы получили 50 🌙!");
-        location.reload();
-      } else {
-        alert(data.message);
-      }
-    });
-  }
+    function loadLogs() {
+        fetch("/api/owner/logs", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ adminId: user.id })
+        })
+        .then(r => r.json())
+        .then(logs => {
+            const div = document.getElementById('logs-view');
+            div.innerHTML = logs.map(l => `<div>${l.time}: ${l.admin_id} -> ${l.target_id} (${l.action})</div>`).join('');
+        });
+    }
+
+    loadUser();
 </script>
 </body>
 </html>
