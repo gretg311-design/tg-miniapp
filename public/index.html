@@ -5,128 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --accent: #bc13fe; --glass: rgba(30, 0, 50, 0.85); }
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
-        
-        /* Луна */
-        #loader { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .moon { width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 0 40px var(--accent); animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% {transform: scale(1);} 50% {transform: scale(1.15);} }
-
-        /* UI */
-        .reg { padding: 40px; text-align: center; display: flex; flex-direction: column; gap: 15px; height: 100vh; justify-content: center; }
-        input, select, button { background: var(--glass); border: 1px solid var(--accent); color: #fff; padding: 15px; border-radius: 12px; font-size: 16px; }
-        button { background: var(--accent); font-weight: bold; }
-        
-        .header { padding: 15px; border-bottom: 1px solid var(--accent); background: var(--glass); backdrop-filter: blur(10px); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; overflow-y: auto; height: 60vh; }
-        .card { background: var(--glass); padding: 20px; border-radius: 15px; border: 1px solid rgba(188, 19, 254, 0.2); text-align: center; }
-
-        /* VIP/Ultra Панель */
-        #vip-tools { margin: 10px; padding: 15px; border: 1px solid gold; border-radius: 15px; display: none; background: rgba(255, 215, 0, 0.05); }
-
-        /* Нижний бар */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: rgba(20, 0, 40, 0.95); border-top: 1px solid var(--accent); display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(15px); }
-        .nav-btn { color: var(--accent); font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        :root { --neon: #bc13fe; --glass: rgba(30, 0, 50, 0.8); }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        .screen { height: 100vh; display: flex; flex-direction: column; }
+        .header { padding: 15px; border-bottom: 1px solid var(--neon); background: var(--glass); display: flex; justify-content: space-between; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; overflow-y: auto; flex-grow: 1; }
+        .card { background: var(--glass); border-radius: 12px; border: 1px solid rgba(188,19,254,0.3); text-align: center; padding-bottom: 10px; }
+        .card img { width: 100%; height: 130px; object-fit: cover; border-radius: 12px 12px 0 0; }
+        .nav { height: 65px; border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; background: #050010; }
+        .nav-btn { color: var(--neon); font-size: 11px; font-weight: bold; cursor: pointer; }
         .hidden { display: none; }
+        .btn-pay { background: #222; border: 1px solid var(--neon); color: #fff; padding: 10px; margin: 5px; border-radius: 8px; width: 100%; }
+        #moon-loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .moon-icon { width: 50px; height: 50px; background: #fff; border-radius: 50%; box-shadow: 0 0 25px var(--neon); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% {transform:scale(1)} 50% {transform:scale(1.1)} }
     </style>
 </head>
 <body>
 
-<div id="loader"><div class="moon"></div></div>
+<div id="moon-loader"><div class="moon-icon"></div></div>
 
-<div id="reg-screen" class="reg hidden">
-    <h2 style="color: var(--accent)">ANIME AI 18+</h2>
-    <input type="text" id="r-name" placeholder="Твое имя">
-    <select id="r-gender"><option value="male">Парень</option><option value="female">Девушка</option></select>
-    <p style="font-size: 12px;">Подтвердите, что вам есть 18 лет</p>
-    <button onclick="initApp()">МНЕ ЕСТЬ 18 (ВХОД)</button>
-    <button style="background: #333;" onclick="window.Telegram.WebApp.close()">ВЫЙТИ</button>
-</div>
-
-<div id="app" class="hidden">
+<div class="screen">
     <div class="header">
-        <div style="display: flex; justify-content: space-between;">
-            <b id="u-name">...</b>
-            <span>🌙 <b id="u-bal">0</b></span>
+        <span id="name-tag">...</span>
+        <span>🌙 <b id="bal-tag">0</b></span>
+    </div>
+
+    <div id="chars-screen" class="grid"></div>
+
+    <div id="shop-screen" class="hidden" style="padding: 20px;">
+        <h3>Пополнить Осколки 🌙</h3>
+        <div style="background: var(--glass); padding: 15px; border-radius: 15px;">
+            <p>500 Осколков (Ultra)</p>
+            <button class="btn-pay" onclick="payStars(500, 500)">Купить за ⭐ Звезды</button>
+            <button class="btn-pay" onclick="payCrypto(5, 500)">Оплатить через @CryptoBot</button>
         </div>
-        <div id="u-sub" style="font-size: 10px; color: gold; margin-top: 5px;">Ultra (Пробник)</div>
     </div>
 
-    <div id="vip-tools">
-        <div style="font-size: 11px; color: gold; margin-bottom: 5px;">Настройки VIP/Ultra:</div>
-        <input type="range" min="1" max="100" style="width:100%"> <small>Пошлость</small><br>
-        <input type="range" id="w-slider" min="45" max="100" style="width:100%"> <small>Слов: <span id="w-val">45</span></small>
+    <div id="admin-screen" class="hidden" style="padding: 20px; overflow-y: auto;">
+        <h3>Новый персонаж</h3>
+        <input type="text" id="adm-name" placeholder="Имя" style="width:90%; padding:10px; margin-bottom:10px; background:transparent; border:1px solid var(--neon); color:#fff;">
+        <input type="file" id="adm-file" style="margin-bottom:10px;">
+        <textarea id="adm-story" placeholder="История и Характер" style="width:90%; height:100px; background:transparent; border:1px solid var(--neon); color:#fff;"></textarea>
+        <button onclick="createChar()" style="width:100%; padding:15px; background:var(--neon); color:#fff; border:none; border-radius:10px;">СОЗДАТЬ</button>
     </div>
 
-    <div class="grid">
-        <div class="card" onclick="spend('text')">💬 Чаты (1🌙)</div>
-        <div class="card" onclick="spend('photo')">🖼️ Фото (5/2🌙)</div>
-        <div class="card">🎭 Герои</div>
-        <div class="card">🎁 Бонус</div>
-        <div class="card">🛒 Магазин</div>
-        <div class="card" id="admin-btn" style="display:none">🛡️ Админ</div>
-    </div>
-
-    <div class="nav-bar">
-        <div class="nav-item nav-btn" onclick="alert('Назад')">◀ НАЗАД</div>
-        <div class="nav-item nav-btn" onclick="location.reload()">🏠 ДОМОЙ</div>
+    <div class="nav">
+        <div class="nav-btn" onclick="openScr('chars')">ГЕРОИ</div>
+        <div class="nav-btn" onclick="openScr('shop')">МАГАЗИН</div>
+        <div class="nav-btn" id="adm-nav" onclick="openScr('admin')">АДМИНКА</div>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    const API = "https://tg-miniapp-hr0a.onrender.com"; // Твоя ссылка
+    const API = "https://tg-miniapp-hr0a.onrender.com";
+    tg.expand();
 
     window.onload = () => {
-        setTimeout(() => {
-            document.getElementById('loader').classList.add('hidden');
-            document.getElementById('reg-screen').classList.remove('hidden');
-        }, 2000);
+        document.getElementById('name-tag').innerText = tg.initDataUnsafe.user?.first_name || "Сэмпай";
+        if(tg.initDataUnsafe.user?.id != 8287041036) document.getElementById('adm-nav').classList.add('hidden');
+        setTimeout(() => document.getElementById('moon-loader').classList.add('hidden'), 1500);
     };
 
-    function initApp() {
-        const name = document.getElementById('r-name').value;
-        if(!name) return alert("Имя?");
-        
-        fetch(`${API}/api/init`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                id: tg.initDataUnsafe.user?.id || 123,
-                name: name,
-                gender: document.getElementById('r-gender').value,
-                ref: tg.initDataUnsafe.start_param
-            })
-        }).then(r => r.json()).then(user => {
-            document.getElementById('reg-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            document.getElementById('u-name').innerText = user.name;
-            document.getElementById('u-bal').innerText = user.balance;
-            document.getElementById('u-sub').innerText = user.sub;
-
-            // Ползунки
-            if(user.sub === 'VIP' || user.sub === 'Ultra') {
-                document.getElementById('vip-tools').style.display = 'block';
-                document.getElementById('w-slider').max = (user.sub === 'VIP' ? 80 : 100);
-            }
-            // Админка
-            if(user.role === 'owner' || user.role === 'admin') document.getElementById('admin-btn').style.display='block';
-        });
+    function openScr(id) {
+        ['chars-screen', 'shop-screen', 'admin-screen'].forEach(s => document.getElementById(s).classList.add('hidden'));
+        document.getElementById(id + '-screen').classList.remove('hidden');
     }
 
-    function spend(type) {
-        fetch(`${API}/api/spend`, {
+    async function payStars(stars, moon) {
+        const res = await fetch(`${API}/api/pay/stars`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ id: tg.initDataUnsafe.user?.id || 123, type })
-        }).then(r => r.json()).then(data => {
-            if(data.success) document.getElementById('u-bal').innerText = data.balance;
-            else alert(data.error);
+            body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, starsAmount: stars, moonAmount: moon })
         });
+        const data = await res.json();
+        tg.openInvoice(data.link);
     }
 
-    document.getElementById('w-slider').oninput = function() { document.getElementById('w-val').innerText = this.value; };
+    async function payCrypto(usd, moon) {
+        const res = await fetch(`${API}/api/pay/crypto`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, amountUsd: usd, moonAmount: moon })
+        });
+        const data = await res.json();
+        tg.openTelegramLink(data.payUrl);
+    }
 </script>
 </body>
 </html>
