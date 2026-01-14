@@ -3,109 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anime Moon 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --neon: #bc13fe; --glass: rgba(30, 0, 50, 0.7); --border: rgba(188, 19, 254, 0.5); }
+        :root { --neon: #bc13fe; --glass: rgba(30, 0, 50, 0.75); --border: rgba(188, 19, 254, 0.4); }
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         
-        /* Glassmorphism & Neon */
-        .screen { display: none; height: 100vh; flex-direction: column; background: radial-gradient(circle at top, #1a002b, #000); }
+        .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow: hidden; }
         .active { display: flex; }
-        .glass-card { background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 0 20px rgba(188, 19, 254, 0.2); }
 
-        /* Loader */
-        .moon-loader { width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 0 40px var(--neon); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
+        /* Стиль Стекла */
+        .glass { background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(15px); border-radius: 20px; box-shadow: 0 0 15px rgba(188,19,254,0.1); }
 
-        /* Menu Grid */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; overflow-y: auto; }
-        .nav-item { height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .nav-item:active { transform: scale(0.95); background: var(--neon); }
+        /* Луна */
+        .moon { width: 70px; height: 70px; background: #fff; border-radius: 50%; box-shadow: 0 0 35px var(--neon); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        .btn-18 { background: var(--neon); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; box-shadow: 0 0 15px var(--neon); margin: 10px; }
-        input, select { background: rgba(255,255,255,0.1); border: 1px solid var(--neon); color: white; padding: 12px; border-radius: 10px; width: 80%; margin: 10px 0; outline: none; }
-        .hidden { display: none !important; }
+        /* Навигация снизу */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .nav-item { color: #fff; font-size: 11px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
+
+        /* Сетка меню */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; flex-grow: 1; overflow-y: auto; }
+        .menu-btn { height: 90px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; }
+        
+        .btn-action { background: var(--neon); color: #fff; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="scr-load" class="screen active" style="justify-content:center; align-items:center;">
-    <div class="moon-loader"></div>
-    <p style="margin-top:20px; color:var(--neon); letter-spacing:3px;">LOADING...</p>
+    <div class="moon"></div>
+    <p style="color:var(--neon); margin-top:20px; letter-spacing:3px;">ЗАГРУЗКА...</p>
 </div>
 
 <div id="scr-captcha" class="screen" style="justify-content:center; align-items:center; text-align:center; padding:20px;">
-    <h1 style="color:red; font-size:60px; margin:0;">18+</h1>
-    <p class="glass-card" style="padding:20px;">Данный сервис содержит контент для взрослых. Вам есть 18 лет?</p>
-    <button class="btn-18" onclick="show('reg')">ДА, МНЕ ЕСТЬ 18</button>
-    <button style="background:none; border:none; color:#555;" onclick="tg.close()">НЕТ, ВЫЙТИ</button>
+    <h1 style="color:red; font-size:50px; margin-bottom:10px;">18+</h1>
+    <div class="glass" style="padding:20px; margin-bottom:20px;">
+        Этот контент предназначен строго для взрослых. Вам есть 18 лет?
+    </div>
+    <button class="btn-action" onclick="show('reg')">ДА, МНЕ ЕСТЬ 18</button>
+    <button style="background:none; border:none; color:#555; margin-top:15px;" onclick="tg.close()">НЕТ, ВЫЙТИ</button>
 </div>
 
 <div id="scr-reg" class="screen" style="justify-content:center; align-items:center;">
-    <div class="glass-card" style="padding:30px; width:80%; text-align:center;">
-        <h3>ЗНАКОМСТВО</h3>
-        <input id="reg-name" placeholder="Твое Имя">
-        <select id="reg-gender">
+    <div class="glass" style="padding:30px; width:80%; text-align:center;">
+        <h3 style="color:var(--neon);">РЕГИСТРАЦИЯ</h3>
+        <input id="reg-name" placeholder="Твое имя" style="width:100%; padding:12px; margin:10px 0; background:none; border:1px solid var(--neon); color:#fff; border-radius:10px;">
+        <select id="reg-gender" style="width:100%; padding:12px; margin:10px 0; background:#1a002b; border:1px solid var(--neon); color:#fff; border-radius:10px;">
             <option value="male">Мужчина</option>
             <option value="female">Женщина</option>
         </select>
-        <button class="btn-18" onclick="finishReg()">ВОЙТИ В МИР</button>
+        <button class="btn-action" onclick="finalize()">ВОЙТИ</button>
     </div>
 </div>
 
 <div id="scr-main" class="screen">
-    <div style="padding:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
-        <div id="u-name" style="font-weight:bold; color:var(--neon);">User</div>
-        <div class="glass-card" style="padding:5px 15px;">🌙 <span id="u-bal">100</span></div>
+    <div style="padding:15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;">
+        <span id="u-name" style="color:var(--neon); font-weight:bold;">...</span>
+        <span>🌙 <b id="u-bal">0</b></span>
     </div>
     <div class="menu-grid">
-        <div class="glass-card nav-item" onclick="openMod('chats')">Чаты</div>
-        <div class="glass-card nav-item" onclick="openMod('chars')">Персонажи</div>
-        <div class="glass-card nav-item" onclick="openMod('daily')">Ежедневка</div>
-        <div class="glass-card nav-item" onclick="openMod('tasks')">Задания</div>
-        <div class="glass-card nav-item" onclick="openMod('shop')">Магазин</div>
-        <div class="glass-card nav-item" onclick="openMod('promo')">Промокоды</div>
-        <div class="glass-card nav-item" onclick="openMod('profile')">Профиль</div>
-        <div class="glass-card nav-item" onclick="openMod('settings')">Настройки</div>
-        <div id="btn-admin" class="glass-card nav-item">Админка</div>
-        <div id="btn-console" class="glass-card nav-item" style="color:red; border-color:red;">Консоль</div>
+        <div class="glass menu-btn">ЧАТЫ</div>
+        <div class="glass menu-btn">ПЕРСОНАЖИ</div>
+        <div class="glass menu-btn">ЕЖЕДНЕВКА</div>
+        <div class="glass menu-btn">ЗАДАНИЯ</div>
+        <div class="glass menu-btn">МАГАЗИН</div>
+        <div class="glass menu-btn">ПРОМОКОДЫ</div>
+        <div class="glass menu-btn">ПРОФИЛЬ</div>
+        <div class="glass menu-btn">НАСТРОЙКИ</div>
+        <div id="btn-adm" class="glass menu-btn">АДМИНКА</div>
+        <div id="btn-cons" class="glass menu-btn" style="border-color:red; color:red;">КОНСОЛЬ</div>
     </div>
 </div>
 
+<nav class="bottom-nav" id="main-nav" style="display:none;">
+    <div class="nav-item" onclick="goBack()">◀ НАЗАД</div>
+    <div class="nav-item" onclick="goHome()">🏠 ДОМОЙ</div>
+</nav>
+
 <script>
     const tg = window.Telegram.WebApp;
-    const OWNER_ID = 8287041036;
+    const OWNER_ID = "8287041036";
     tg.expand();
-    tg.enableClosingConfirmation(); // Блокировка свайпа
+    tg.enableClosingConfirmation(); // Блокировка закрытия свайпом
 
-    // Имитация загрузки
-    setTimeout(() => { show('captcha'); }, 3000);
+    let history = ['main'];
 
     function show(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr-' + id).classList.add('active');
+        if(id === 'main') document.getElementById('main-nav').style.display = 'flex';
     }
 
-    function finishReg() {
+    function finalize() {
         const name = document.getElementById('reg-name').value;
-        if(!name) return alert("Представься!");
+        const myId = String(tg.initDataUnsafe.user?.id || OWNER_ID); 
+
+        document.getElementById('u-name').innerText = name + (myId === OWNER_ID ? " (BOSS)" : "");
+        document.getElementById('u-bal').innerText = (myId === OWNER_ID ? "99999999" : "100");
         
-        const myId = tg.initDataUnsafe.user?.id || 123; // Для тестов
-        
-        // Настройка прав Овнера
-        if(myId != OWNER_ID) {
-            document.getElementById('btn-console').classList.add('hidden');
+        if(myId !== OWNER_ID) {
+            document.getElementById('btn-cons').style.display = 'none';
         }
-        document.getElementById('u-name').innerText = name + (myId == OWNER_ID ? " (OWNER)" : "");
-        document.getElementById('u-bal').innerText = (myId == OWNER_ID ? "99999999" : "100");
-        
         show('main');
     }
 
-    function openMod(type) {
-        alert("Экран '" + type + "' в разработке. Скоро здесь будет магия!");
-    }
+    function goHome() { history = ['main']; show('main'); }
+    function goBack() { if(history.length > 1) { history.pop(); show(history[history.length-1]); } }
+
+    setTimeout(() => { show('captcha'); }, 2500);
 </script>
 </body>
 </html>
