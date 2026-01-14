@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anime AI 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --neon: #bc13fe; --glass: rgba(30, 0, 50, 0.8); }
+        :root { --neon: #bc13fe; --glass: rgba(30, 0, 50, 0.85); }
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; }
         .screen { height: 100vh; display: flex; flex-direction: column; }
         .header { padding: 15px; border-bottom: 1px solid var(--neon); background: var(--glass); display: flex; justify-content: space-between; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; overflow-y: auto; flex-grow: 1; }
-        .card { background: var(--glass); border-radius: 12px; border: 1px solid rgba(188,19,254,0.3); overflow: hidden; position: relative; }
-        .card img { width: 100%; height: 140px; object-fit: cover; }
-        .nav { height: 70px; border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; background: #0a001a; }
+        .nav { height: 70px; border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; background: #050010; }
         .nav-btn { color: var(--neon); font-size: 11px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .hidden { display: none; }
-        input, textarea, select { background: rgba(255,255,255,0.05); border: 1px solid var(--neon); color: #fff; padding: 10px; border-radius: 10px; width: 90%; margin-bottom: 10px; }
-        #moon-loader { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .moon-icon { width: 60px; height: 60px; background: #fff; border-radius: 50%; box-shadow: 0 0 30px var(--neon); animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% {transform: scale(1);} 50% {transform: scale(1.1);} }
+        .hidden { display: none !important; }
+        #moon-loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s; }
+        .moon-icon { width: 70px; height: 70px; background: #fff; border-radius: 50%; box-shadow: 0 0 35px var(--neon); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% {transform: scale(1);} 50% {transform: scale(1.15);} }
     </style>
 </head>
 <body>
@@ -28,76 +24,72 @@
 
 <div class="screen">
     <div class="header">
-        <span id="u-name">...</span>
+        <span id="u-name">Загрузка...</span>
         <span>🌙 <b id="u-bal">10</b></span>
     </div>
 
-    <div id="chars-screen" class="grid">
-        </div>
-
-    <div id="shop-screen" class="hidden" style="padding: 20px;">
-        <h3>Магазин Осколков 🌙</h3>
-        <button onclick="payStars(500, 500)" style="width:100%; padding:15px; margin-bottom:10px; border:1px solid var(--neon); background:none; color:#fff;">⭐ 500 Звезд (500 🌙)</button>
-        <button onclick="payCrypto(5, 500)" style="width:100%; padding:15px; border:1px solid var(--neon); background:none; color:#fff;">💎 $5 Crypto (500 🌙)</button>
-    </div>
+    <div id="chars-screen" class="grid"></div>
 
     <div id="admin-screen" class="hidden" style="padding: 20px; overflow-y: auto;">
         <h3>Создать персонажа</h3>
-        <input type="text" id="adm-name" placeholder="Имя">
-        <input type="number" id="adm-age" placeholder="Возраст">
-        <textarea id="adm-pers" placeholder="Характер (пошлый/доминант/т.д.)"></textarea>
-        <textarea id="adm-story" placeholder="История/Лор"></textarea>
-        <p>Загрузить фото из памяти:</p>
-        <input type="file" id="adm-file" accept="image/*">
-        <button onclick="createChar()" style="width:100%; padding:15px; background:var(--neon); color:#fff; border:none; border-radius:10px; margin-top:10px;">СОЗДАТЬ</button>
+        <input type="text" id="adm-name" placeholder="Имя" style="width:90%; padding:10px; margin-bottom:10px; background:none; border:1px solid var(--neon); color:#fff;">
+        <input type="file" id="adm-file" style="margin-bottom:20px;">
+        <button onclick="createChar()" style="width:100%; padding:15px; background:var(--neon); color:#fff; border:none; border-radius:10px;">СОЗДАТЬ</button>
     </div>
 
     <div class="nav">
-        <div class="nav-btn" onclick="show('chars')">ГЕРОИ</div>
-        <div class="nav-btn" onclick="show('shop')">МАГАЗИН</div>
-        <div class="nav-btn" id="adm-nav" onclick="show('admin')">АДМИНКА</div>
+        <div class="nav-btn" onclick="openScr('chars')">ГЕРОИ</div>
+        <div class="nav-btn" id="adm-nav" onclick="openScr('admin')">АДМИНКА</div>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    const API = "https://tg-miniapp-hr0a.onrender.com";
     tg.expand();
 
-    window.onload = () => {
+    // Функция скрытия загрузки
+    function hideLoader() {
+        const loader = document.getElementById('moon-loader');
+        loader.style.opacity = '0';
+        setTimeout(() => loader.classList.add('hidden'), 500);
+    }
+
+    window.onload = async () => {
         document.getElementById('u-name').innerText = tg.initDataUnsafe.user?.first_name || "Сэмпай";
-        // Проверка овнера по ID из нашего закрепленного сообщения
-        if(tg.initDataUnsafe.user?.id != 8287041036) document.getElementById('adm-nav').classList.add('hidden');
-        setTimeout(() => document.getElementById('moon-loader').classList.add('hidden'), 2000);
+        
+        // Показываем админку только владельцу
+        if(tg.initDataUnsafe.user?.id != 8287041036) {
+            document.getElementById('adm-nav').classList.add('hidden');
+        }
+
+        // Пытаемся загрузить данные, если через 5 секунд не выйдет - убираем луну принудительно
+        setTimeout(hideLoader, 5000); 
+
+        try {
+            const res = await fetch('/api/characters');
+            const chars = await res.json();
+            renderChars(chars);
+            hideLoader();
+        } catch (e) {
+            console.error("Ошибка загрузки");
+            hideLoader();
+        }
     };
 
-    function show(id) {
-        ['chars-screen', 'shop-screen', 'admin-screen'].forEach(s => document.getElementById(s).classList.add('hidden'));
+    function openScr(id) {
+        document.getElementById('chars-screen').classList.add('hidden');
+        document.getElementById('admin-screen').classList.add('hidden');
         document.getElementById(id + '-screen').classList.remove('hidden');
     }
 
-    async function createChar() {
-        const file = document.getElementById('adm-file').files[0];
-        const fd = new FormData();
-        fd.append('photo', file);
-        fd.append('name', document.getElementById('adm-name').value);
-        fd.append('age', document.getElementById('adm-age').value);
-        fd.append('personality', document.getElementById('adm-pers').value);
-        fd.append('story', document.getElementById('adm-story').value);
-        
-        await fetch(`${API}/api/admin/add-char`, { method: 'POST', body: fd });
-        alert("Персонаж создан!");
-        show('chars');
-    }
-
-    async function payStars(s, m) {
-        const res = await fetch(`${API}/api/pay/stars`, {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({userId: tg.initDataUnsafe.user.id, starsAmount: s, moonAmount: m})
-        });
-        const data = await res.json();
-        tg.openInvoice(data.link);
+    function renderChars(list) {
+        const container = document.getElementById('chars-screen');
+        container.innerHTML = list.map(c => `
+            <div class="card" style="background:var(--glass); border-radius:10px; overflow:hidden;">
+                <img src="${c.photoUrl}" style="width:100%; height:120px; object-fit:cover;">
+                <div style="padding:10px; font-size:12px;">${c.name}, ${c.age}</div>
+            </div>
+        `).join('');
     }
 </script>
 </body>
