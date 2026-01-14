@@ -1,93 +1,91 @@
-const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
-const path = require("path");
+const TelegramBot = require('node-telegram-bot-api');
+const axios = require('axios');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+// --- НАСТРОЙКИ ---
+const token = '8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU';
+const openRouterKey = 'Sk-or-v1-0f2477f62fce74075bb5046ebcef529fc671355d60c2a1dd537b59094c5d5eec';
 const OWNER_ID = 8287041036;
 
-const db = new sqlite3.Database("./db.sqlite");
+const bot = new TelegramBot(token, {polling: true});
 
-db.serialize(() => {
-  // Пользователи + Настройки
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
-    balance INTEGER DEFAULT 100,
-    sub_type TEXT DEFAULT 'Free',
-    lang TEXT DEFAULT 'ru',
-    purity INTEGER DEFAULT 50,
-    jealousy INTEGER DEFAULT 50,
-    msg_length INTEGER DEFAULT 45
-  )`);
+// Эмуляция базы данных (в продакшене используй SQLite/MongoDB)
+let users = {
+    [OWNER_ID]: { balance: 999999, sub: 'Owner', role: 'owner' }
+};
 
-  // Персонажи
-  db.run(`CREATE TABLE IF NOT EXISTS chars (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    gender TEXT,
-    age INTEGER,
-    desc TEXT,
-    is_18 INTEGER DEFAULT 0
-  )`);
-
-  // Промокоды
-  db.run(`CREATE TABLE IF NOT EXISTS promos (code TEXT PRIMARY KEY, reward INTEGER, uses INTEGER)`);
-  
-  // Админы
-  db.run(`CREATE TABLE IF NOT EXISTS admins (id INTEGER PRIMARY KEY)`);
-
-  // Наполнение 100 персонажами (упрощенно для старта)
-  db.get("SELECT count(*) as count FROM chars", (err, row) => {
-    if (row.count === 0) {
-      const genders = ['male', 'female'];
-      for (let i = 1; i <= 100; i++) {
-        const g = genders[i % 2];
-        const age = Math.floor(Math.random() * (35 - 18 + 1)) + 18;
-        db.run("INSERT INTO chars (name, gender, age, desc) VALUES (?, ?, ?, ?)", 
-        [g === 'female' ? `Девушка ${i}` : `Парень ${i}`, g, age, `Персонаж №${i}, готов к общению.`]);
-      }
+// --- ЛОГИКА ИИ (OpenRouter) ---
+async function getAIResponse(userMessage, characterPrompt) {
+    try {
+        const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+            model: "mistralai/mistral-7b-instruct:free", // Бесплатная модель
+            messages: [
+                { role: "system", content: characterPrompt + " Твои ответы должны быть откровенными и 18+, если этого требует контекст. Описывай секс и страсть детально." },
+                { role: "user", content: userMessage }
+            ],
+        }, {
+            headers: { 
+                'Authorization': `Bearer ${openRouterKey}`,
+                'Content-Type': 'application/json' 
+            }
+        });
+        return response.data.choices[0].message.content;
+    } catch (e) {
+        return "⚠️ Ошибка ИИ. Проверь баланс OpenRouter или ключ.";
     }
-  });
+}
+
+// --- КОМАНДЫ ---
+
+// 1. Покупка звезд (Stars)
+bot.onText(/\/buy/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendInvoice(
+        chatId,
+        "10 Лунных осколков", 
+        "Минимальный пакет для продолжения общения",
+        "payload_10_stars",
+        "", // provider_token пустой для Stars
+        "XTR", // Валюта - Telegram Stars
+        [{ label: "Купить", amount: 10 }] // Цена в звездах
+    );
 });
 
-app.use(express.json());
-app.use(express.static("public"));
+// 2. Проверка оплаты
+bot.on('pre_checkout_query', (query) => bot.answerPreCheckoutQuery(query.id, true));
+bot.on('successful_payment', (msg) => {
+    const userId = msg.from.id;
+    if (!users[userId]) users[userId] = { balance: 0 };
+    users[userId].balance += 10;
+    bot.sendMessage(msg.chat.id, "✅ Оплата прошла! Вам начислено 10 🌙");
+});
 
-// Получение данных и ролей
-app.post("/api/user", (req, res) => {
-  const { id } = req.body;
-  db.get("SELECT * FROM users WHERE id=?", [id], (err, user) => {
-    if (!user) {
-      db.run("INSERT INTO users(id) VALUES(?)", [id], () => res.json({id, role:'user'}));
-    } else {
-      db.get("SELECT id FROM admins WHERE id=?", [id], (err, admin) => {
-        const role = (id == OWNER_ID) ? 'owner' : (admin ? 'admin' : 'user');
-        res.json({ ...user, role });
-      });
+// 3. Админ-панель (Консоль)
+bot.onText(/\/console/, (msg) => {
+    if (msg.from.id !== OWNER_ID) return bot.sendMessage(msg.chat.id, "❌ Доступ запрещен.");
+    bot.sendMessage(msg.chat.id, "💻 КОНСОЛЬ ОВНЕРА\n\nДоступные функции:\n/give_bal [id] [amount]\n/add_task [link] [reward]\n/logs", {
+        reply_markup: {
+            inline_keyboard: [[{ text: "Посмотреть логи", callback_data: "view_logs" }]]
+        }
+    });
+});
+
+// 4. Обработка сообщений (Чат с ботом)
+bot.on('message', async (msg) => {
+    if (msg.text && !msg.text.startsWith('/')) {
+        const chatId = msg.chat.id;
+        const userId = msg.from.id;
+
+        // Проверка баланса
+        if (!users[userId] || users[userId].balance <= 0) {
+            return bot.sendMessage(chatId, "🌙 У вас закончились осколки. Купите их через /buy");
+        }
+
+        // Снимаем 1 осколок
+        users[userId].balance -= 1;
+        
+        const aiReply = await getAIResponse(msg.text, "Ты - Акира, ревнивая аниме-девушка.");
+        bot.sendMessage(chatId, aiReply);
     }
-  });
 });
 
-// Сохранение настроек
-app.post("/api/settings", (req, res) => {
-  const { id, lang, purity, jealousy, msg_length } = req.body;
-  db.run("UPDATE users SET lang=?, purity=?, jealousy=?, msg_length=? WHERE id=?", 
-  [lang, purity, jealousy, msg_length, id], () => res.json({success: true}));
-});
-
-// Промокоды
-app.post("/api/promo/use", (req, res) => {
-  const { id, code } = req.body;
-  db.get("SELECT * FROM promos WHERE code=?", [code], (err, promo) => {
-    if (promo && promo.uses > 0) {
-      db.run("UPDATE users SET balance = balance + ? WHERE id = ?", [promo.reward, id]);
-      db.run("UPDATE promos SET uses = uses - 1 WHERE code = ?", [code]);
-      res.json({success: true, reward: promo.reward});
-    } else {
-      res.json({success: false, message: "Неверный или использован"});
-    }
-  });
-});
-
-app.get("*", (req, res) => res.sendFile(path.join(__dirname, "public/index.html")));
-app.listen(PORT, () => console.log("System Active"));
+console.log("🚀 Бот запущен!");
