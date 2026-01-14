@@ -6,137 +6,111 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0f172a; color: white; min-height: 100vh; padding: 15px; }
-        
-        /* Шапка как на скрине */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .user-info .name { font-style: italic; font-weight: bold; font-size: 18px; }
-        .user-info .id { font-size: 10px; opacity: 0.5; }
-        .stats { display: flex; gap: 10px; align-items: center; }
-        .stat-item { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 20px; }
-        .badge-vip { background: #334155; color: #94a3b8; padding: 4px 12px; border-radius: 15px; font-weight: bold; font-size: 12px; }
-        .plus-btn { background: #3b82f6; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-
-        h2 { margin-bottom: 20px; font-size: 24px; }
-
-        /* Сетка меню как на скрине */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .menu-card { 
-            background: #1e293b; 
-            border-radius: 24px; 
-            padding: 25px 10px; 
-            text-align: center; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 10px;
-            transition: 0.2s;
-        }
-        .menu-card:active { transform: scale(0.95); background: #334155; }
-        .menu-card img, .menu-card .icon { font-size: 32px; }
-        .menu-card span { font-size: 16px; font-weight: 500; }
-
-        /* Скрытые секции управления */
-        .admin-section { margin-top: 20px; display: none; border-top: 1px dashed #334155; padding-top: 20px; }
-        .console-btn { width: 100%; padding: 15px; border-radius: 15px; margin-bottom: 10px; font-weight: bold; border: none; color: white; }
-        .btn-owner { background: #ef4444; }
-        .btn-admin { background: #f59e0b; color: black; }
-
+        body { background: #0f172a; color: white; padding: 15px; }
         .screen { display: none; }
-        .screen.active { display: block; }
-        .back-block { text-align: center; margin-top: 30px; opacity: 0.5; font-size: 14px; }
+        .active { display: block; }
+        .card { background: #1e293b; border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn { background: #3b82f6; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold; margin-top: 10px; border:none; color:white; width:100%; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #0f172a; color: white; }
+        .label { font-size: 12px; opacity: 0.7; }
+        .admin-only { display: none; border: 2px solid #f59e0b; padding: 10px; border-radius: 15px; }
     </style>
 </head>
 <body>
 
-<div id="main-screen" class="screen active">
-    <div class="header">
-        <div class="user-info">
-            <div class="name" id="user-name">Загрузка...</div>
-            <div class="id" id="user-id">ID: 000000</div>
-        </div>
-        <div class="stats">
-            <div class="stat-item">🌙 <span id="balance">0</span></div>
-            <div class="badge-vip" id="sub-type">VIP</div>
-            <div class="plus-btn">+</div>
-        </div>
-    </div>
-
-    <h2>Главное меню</h2>
-
+<div id="home" class="screen active">
+    <h2>AnimeAI 18+</h2>
     <div class="menu-grid">
-        <div class="menu-card" onclick="tg.showAlert('Чаты в разработке')">
-            <div class="icon">💬</div><span>Чаты</span>
-        </div>
-        <div class="menu-card" onclick="tg.showAlert('Персонажи скоро')">
-            <div class="icon">🧍</div><span>Персонажи</span>
-        </div>
-        <div class="menu-card" onclick="location.reload()">
-            <div class="icon">🎁</div><span>Ежедневка</span>
-        </div>
-        <div class="menu-card">
-            <div class="icon">📋</div><span>Задания</span>
-        </div>
-        <div class="menu-card">
-            <div class="icon">🛒</div><span>Магазин</span>
-        </div>
-        <div class="menu-card">
-            <div class="icon">🎟</div><span>Промокоды</span>
-        </div>
-        <div class="menu-card">
-            <div class="icon">👤</div><span>Профиль</span>
-        </div>
-        <div class="menu-card">
-            <div class="icon">⚙️</div><span>Настройки</span>
-        </div>
+        <div class="card" onclick="show('chats')">💬 Чаты</div>
+        <div class="card" onclick="show('chars')">🧍 Персонажи</div>
+        <div class="card" onclick="show('promo')">🎟 Промокод</div>
+        <div class="card" onclick="show('settings')">⚙️ Настройки</div>
     </div>
+    <div id="owner-btn" class="admin-only" onclick="show('console')" style="margin-top:20px; text-align:center; background:#ef4444">👑 КОНСОЛЬ ОВНЕРА</div>
+</div>
 
-    <div id="admin-zone" class="admin-section">
-        <button id="btn-admin-panel" class="console-btn btn-admin" onclick="alert('Админ-панель')">⚙️ АДМИН-ПАНЕЛЬ</button>
-        <button id="btn-owner-panel" class="console-btn btn-owner" onclick="alert('ОВНЕР-ПАНЕЛЬ')">👑 КОРОНА (КОНСОЛЬ)</button>
+<div id="settings" class="screen">
+    <h3>Настройки</h3>
+    <div class="card">
+        <p class="label">Язык / Language</p>
+        <select id="set-lang">
+            <option value="ru">Русский</option>
+            <option value="ua">Українська</option>
+            <option value="en">English</option>
+        </select>
+
+        <p class="label">Ревность персонажей (0-100%)</p>
+        <input type="range" id="set-jealousy" min="0" max="100">
+
+        <p class="label">Пошлость (Только для VIP/Ultra)</p>
+        <input type="range" id="set-purity" min="0" max="100">
+
+        <p class="label">Длина сообщений (Слов)</p>
+        <input type="number" id="set-len" readonly>
+        <p style="font-size:10px" id="len-info"></p>
     </div>
+    <button class="btn" onclick="saveSettings()">Сохранить</button>
+    <button class="btn" style="background:gray" onclick="show('home')">Назад</button>
+</div>
 
-    <div class="back-block">● Back - block</div>
+<div id="promo" class="screen">
+    <h3>Активация промокода</h3>
+    <input type="text" id="promo-input" placeholder="Введите код">
+    <button class="btn" onclick="usePromo()">Активировать</button>
+    <button class="btn" style="background:gray" onclick="show('home')">Назад</button>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    const user = tg.initDataUnsafe.user || { id: 8287041036, first_name: "Owner" };
+    let myData = {};
 
-    const user = tg.initDataUnsafe.user || { id: 8287041036, first_name: "German Green" };
-
-    function init() {
+    function load() {
         fetch("/api/user", {
             method: "POST",
             headers: {"Content-Type":"application/json"},
             body: JSON.stringify({ id: user.id })
-        })
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById("user-name").innerText = user.first_name;
-            document.getElementById("user-id").innerText = "ID: " + user.id;
-            document.getElementById("balance").innerText = data.balance;
-            document.getElementById("sub-type").innerText = data.sub_type.toUpperCase();
-
-            // Логика видимости кнопок
-            const adminZone = document.getElementById("admin-zone");
-            const btnAdmin = document.getElementById("btn-admin-panel");
-            const btnOwner = document.getElementById("btn-owner-panel");
-
-            if (data.role === 'owner') {
-                adminZone.style.display = "block";
-                btnAdmin.style.display = "block";
-                btnOwner.style.display = "block";
-            } else if (data.role === 'admin') {
-                adminZone.style.display = "block";
-                btnAdmin.style.display = "block";
-                btnOwner.style.display = "none"; // Админ не видит корону
-            }
+        }).then(r => r.json()).then(data => {
+            myData = data;
+            if (data.role === 'owner') document.getElementById('owner-btn').style.display = 'block';
+            
+            // Настройка лимитов длины соо
+            let min = 45, max = 45;
+            if(data.sub_type === 'Free') { max = 45; }
+            else if(['Premium', 'Pro'].includes(data.sub_type)) { max = 65; }
+            else if(['VIP', 'Ultra'].includes(data.sub_type)) { max = 100; }
+            
+            document.getElementById('set-len').value = max;
+            document.getElementById('len-info').innerText = `Ваш лимит: ${min}-${max} слов`;
+            
+            // Заполнение полей настроек
+            document.getElementById('set-lang').value = data.lang || 'ru';
+            document.getElementById('set-jealousy').value = data.jealousy || 50;
         });
     }
 
-    init();
+    function saveSettings() {
+        const body = {
+            id: user.id,
+            lang: document.getElementById('set-lang').value,
+            jealousy: document.getElementById('set-jealousy').value,
+            purity: document.getElementById('set-purity').value,
+            msg_length: document.getElementById('set-len').value
+        };
+        fetch("/api/settings", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(body)
+        }).then(() => { alert("Сохранено!"); show('home'); });
+    }
+
+    function show(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    load();
 </script>
 </body>
 </html>
