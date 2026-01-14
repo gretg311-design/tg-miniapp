@@ -1,7 +1,6 @@
 {
   "name": "animeai-miniapp",
   "version": "1.0.0",
-  "description": "AnimeAI 18+ Telegram Mini App",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
