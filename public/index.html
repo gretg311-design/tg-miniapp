@@ -3,58 +3,142 @@
 <head>
 <meta charset="UTF-8">
 <title>AnimeAI 18+</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
-body{margin:0;font-family:system-ui;background:#050814;color:#fff}
-#loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-.moon{width:90px;height:90px;border-radius:50%;background:#eee;animation:pulse 2s infinite}
-@keyframes pulse{50%{transform:scale(1.1)}}
-#app{display:none}
-.top{padding:12px;background:#141c38;display:flex;justify-content:space-between}
-.menu{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px}
-.btn{background:#1e2a52;padding:20px;border-radius:16px;text-align:center}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:system-ui;
+  background:radial-gradient(circle at top,#1b2340,#060913 75%);
+  color:#fff;
+  min-height:100vh;
+}
+
+/* LOADER */
+#loader{
+  position:fixed;inset:0;
+  background:#050814;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+.moon{
+  width:90px;height:90px;border-radius:50%;
+  background:#eee;
+  box-shadow:0 0 40px rgba(255,255,255,.4);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
+#loader p{margin-top:14px;opacity:.6}
+
+/* TOP */
+.top{
+  padding:12px;
+  background:#101633;
+  display:flex;
+  justify-content:space-between;
+}
+.small{font-size:11px;opacity:.6}
+
+/* SCREENS */
+.screen{display:none;padding:16px}
+.screen.active{display:block}
+
+/* MENU */
+.menu{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.card{
+  background:#1e2a52;
+  padding:18px;
+  border-radius:16px;
+  text-align:center;
+}
+.back{
+  margin-top:18px;
+  padding:14px;
+  background:#2a3569;
+  border-radius:14px;
+  text-align:center;
+}
 </style>
 </head>
+
 <body>
 
-<div id="loader"><div class="moon"></div></div>
+<div id="loader">
+  <div class="moon"></div>
+  <p>Загрузка мира AnimeAI…</p>
+</div>
 
-<div id="app">
-  <div class="top">
-    <div>
-      <div id="name">Игрок</div>
-      <small id="uid"></small>
-    </div>
-    <div>🌙 <span id="bal">0</span></div>
+<div id="app" style="display:none">
+
+<div class="top">
+  <div>
+    <div id="uname">Игрок</div>
+    <div class="small" id="uid">ID</div>
   </div>
+  <div>🌙 <span id="bal">0</span></div>
+</div>
 
+<div id="home" class="screen active">
   <div class="menu">
-    <div class="btn">💬 Чаты</div>
-    <div class="btn">🧍 Персонажи</div>
-    <div class="btn">🎁 Ежедневка</div>
-    <div class="btn">⚙️ Настройки</div>
+    <div class="card" onclick="openS('chats')">💬 Чаты</div>
+    <div class="card" onclick="openS('chars')">🧍 Персонажи</div>
+    <div class="card" onclick="openS('daily')">🎁 Ежедневка</div>
+    <div class="card" onclick="openS('tasks')">📋 Задания</div>
+    <div class="card" onclick="openS('shop')">🛒 Магазин</div>
+    <div class="card" onclick="openS('promo')">🎟 Промокоды</div>
+    <div class="card" onclick="openS('profile')">👤 Профиль</div>
+    <div class="card" onclick="openS('settings')">⚙️ Настройки</div>
   </div>
+</div>
+
+<div id="chats" class="screen"><h2>Чаты</h2><div class="back" onclick="openS('home')">← Назад</div></div>
+<div id="chars" class="screen"><h2>Персонажи</h2><div class="back" onclick="openS('home')">← Назад</div></div>
+<div id="daily" class="screen"><h2>Ежедневка</h2><div class="back" onclick="openS('home')">← Назад</div></div>
+<div id="tasks" class="screen"><h2>Задания</h2><div class="back" onclick="openS('home')">← Назад</div></div>
+<div id="shop" class="screen"><h2>Магазин</h2><div class="back" onclick="openS('home')">← Назад</div></div>
+<div id="promo" class="screen"><h2>Промокоды</h2><div class="back" onclick="openS('home')">← Назад</div></div>
+<div id="profile" class="screen"><h2>Профиль</h2><div class="back" onclick="openS('home')">← Назад</div></div>
+<div id="settings" class="screen"><h2>Настройки</h2><div class="back" onclick="openS('home')">← Назад</div></div>
+
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.ready();
-const user = tg.initDataUnsafe.user;
 
-document.getElementById("name").innerText = user.first_name;
-document.getElementById("uid").innerText = "ID: "+user.id;
+const u = tg.initDataUnsafe.user;
+document.getElementById("uname").innerText = u.first_name;
+document.getElementById("uid").innerText = "ID: "+u.id;
 
-fetch("/api/profile/"+user.id)
+fetch("/api/user",{
+  method:"POST",
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({id:u.id})
+})
 .then(r=>r.json())
-.then(u=>{
-  document.getElementById("bal").innerText = u.balance;
-});
-
-setTimeout(()=>{
+.then(d=>{
+  document.getElementById("bal").innerText = d.balance;
   loader.style.display="none";
   app.style.display="block";
-},1200);
+});
+
+function openS(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 </script>
+
 </body>
 </html>
