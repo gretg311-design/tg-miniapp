@@ -1,57 +1,42 @@
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
-const cloudinary = require('cloudinary').v2;
-const multer = require('multer');
 const path = require('path');
-const upload = multer({ dest: 'uploads/' });
-
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-
-// Настройки из Render Environment
-const { OWNER_ID, BOT_TOKEN, CRYPTO_PAY_TOKEN, OPENROUTER_KEY, BOT_USERNAME, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
-
-cloudinary.config({
-  cloud_name: CLOUDINARY_CLOUD_NAME,
-  api_key: CLOUDINARY_API_KEY,
-  api_secret: CLOUDINARY_API_SECRET
-});
-
-// Раздача файлов из папки public
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// База данных в памяти (сбросится при перезагрузке)
-let characters = []; 
+let db = { users: {}, characters: [], tasks: [], promos: [] };
+const OWNER_ID = 8287041036;
 
-// Маршрут для получения списка персонажей (чтобы Луна исчезла)
-app.get('/api/characters', (req, res) => {
-    res.json(characters);
-});
-
-app.post('/api/admin/add-char', upload.single('photo'), async (req, res) => {
-    try {
-        const result = await cloudinary.uploader.upload(req.file.path);
-        const newChar = { 
-            id: Date.now(),
-            name: req.body.name,
-            age: req.body.age,
-            personality: req.body.personality,
-            story: req.body.story,
-            photoUrl: result.secure_url 
+// Инициализация юзера
+app.post('/api/auth', (req, res) => {
+    const { userId, name, gender } = req.body;
+    if (!db.users[userId]) {
+        db.users[userId] = {
+            id: userId, name, gender,
+            balance: (userId == OWNER_ID) ? 99999999 : 100,
+            sub: (userId == OWNER_ID) ? 'Ultra' : 'Ultra', // 7 дней тест
+            subType: (userId == OWNER_ID) ? 'Infinity' : '7days',
+            role: (userId == OWNER_ID) ? 'owner' : 'user',
+            streak: 0, lastCheckIn: null
         };
-        characters.push(newChar);
-        res.json(newChar);
-    } catch (e) {
-        res.status(500).json({ error: "Cloudinary error" });
     }
+    res.json(db.users[userId]);
 });
 
-// Главная страница
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Админ-панель: действия строго по ID
+app.post('/api/admin/action', (req, res) => {
+    const { adminId, targetId, type, value, duration } = req.body;
+    const admin = db.users[adminId];
+    if (!admin || (admin.role !== 'owner' && admin.role !== 'admin')) return res.status(403).send();
+
+    if (type === 'set_balance') {
+        if (admin.role === 'admin' && value < 0) return res.status(403).send("Админ не может отбирать");
+        db.users[targetId].balance += parseInt(value);
+    }
+    if (type === 'set_sub' && admin.role === 'owner') {
+        db.users[targetId].sub = value; // На любой срок
+    }
+    res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 3000;
