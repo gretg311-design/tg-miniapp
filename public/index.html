@@ -1,109 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #0b0f1a; --card: #161b2c; --accent: #3b82f6; --gold: #fbc02d; }
-        
-        /* Блокировка схлопывания Mini App */
-        html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: white; font-family: sans-serif; touch-action: pan-y; }
-        
-        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 30px; box-sizing: border-box; }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: white; font-family: sans-serif; }
+        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 50px; }
         .active { display: block; }
-        
-        /* Топ-бар: Ава, Имя, ID, Баланс */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card); border-bottom: 1px solid #232d4b; }
-        .u-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; }
-        
-        /* Сетка меню 10 кнопок */
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 15px; }
-        .btn { background: var(--card); padding: 22px 10px; border-radius: 16px; text-align: center; border: 1px solid #232d4b; font-weight: bold; font-size: 11px; }
-        
-        .god-btn { grid-column: span 2; background: #ef4444; color: white; border: none; padding: 18px; border-radius: 16px; font-weight: bold; margin-top: 5px; }
-        .help-box { background: #1e293b; padding: 15px; border-radius: 12px; font-size: 12px; border-left: 4px solid var(--accent); margin: 15px; line-height: 1.5; }
-        
-        input { width: 100%; padding: 14px; margin: 10px 0; background: #0b1121; border: 1px solid var(--accent); color: white; border-radius: 12px; box-sizing: border-box; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card); border-bottom: 1px solid #232d4b; sticky: top; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .btn { background: var(--card); padding: 25px 10px; border-radius: 18px; text-align: center; border: 1px solid #232d4b; font-weight: bold; font-size: 11px; }
+        .card { background: var(--card); margin: 10px; padding: 15px; border-radius: 15px; border: 1px solid #232d4b; }
+        .back-btn { width: 90%; margin: 15px 5%; padding: 15px; background: #232d4b; color: white; border: none; border-radius: 12px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #0b1121; border: 1px solid var(--accent); color: white; border-radius: 12px; }
     </style>
 </head>
 <body>
 
-    <div id="sc-reg" class="screen active">
-        <div style="text-align: center; padding: 50px 20px;">
-            <h2>Вход в Мир</h2>
-            <input type="text" id="in-name" placeholder="Твое имя...">
-            <div style="display:flex; justify-content:center; gap:10px; margin: 20px 0;">
-                <button id="btn-m" onclick="setG('М')" style="padding:15px; width:110px; border-radius:12px; background:none; color:white; border:1px solid var(--accent);">Я ПАРЕНЬ</button>
-                <button id="btn-f" onclick="setG('Ж')" style="padding:15px; width:110px; border-radius:12px; background:none; color:white; border:1px solid var(--accent);">Я ДЕВУШКА</button>
-            </div>
-            <button onclick="saveReg()" style="width:100%; padding:18px; background:var(--accent); border:none; color:white; font-weight:bold; border-radius:12px;">ВОЙТИ</button>
-        </div>
-    </div>
-
-    <div id="sc-main" class="screen">
+    <div id="scr-main" class="screen active">
         <div class="top-bar">
             <div style="display:flex; align-items:center; gap:10px;">
-                <img id="u-img" src="" class="u-avatar">
-                <div><b id="u-name">...</b><br><span id="u-id" style="font-size:10px; color:#60a5fa;">ID: 0</span></div>
+                <img id="u-img" src="" style="width:45px; border-radius:50%; border:2px solid var(--accent);">
+                <div><b id="u-n">...</b><br><span id="u-role" style="font-size:10px; color:var(--gold)">USER</span></div>
             </div>
-            <div style="text-align:right;">
-                <div style="font-size:10px; color:var(--gold); font-weight:bold;">PREMIUM: НЕТ</div>
-                <div style="background:#1e253d; padding:4px 10px; border-radius:20px; font-size:13px; margin-top:4px; font-weight:bold;">🌙 <span id="u-balance">100</span> <span style="color:var(--accent)" onclick="tab('sc-shop')">+</span></div>
-            </div>
+            <div id="u-b" style="background:#1e253d; padding:5px 12px; border-radius:20px; font-weight:bold;">🌙 0</div>
         </div>
         <div class="menu-grid">
-            <div class="btn">💬 ЧАТЫ</div><div class="btn">🧍 ГЕРОИ</div>
-            <div class="btn">🎁 БОНУС</div><div class="btn">📋 ЗАДАНИЯ</div>
-            <div class="btn" onclick="tab('sc-shop')">🛒 МАГАЗИН</div><div class="btn">🎟 КОДЫ</div>
-            <div class="btn">👤 ПРОФИЛЬ</div><div class="btn">⚙️ ОПЦИИ</div>
-            <div class="btn">📢 НОВОСТИ</div><div class="btn">🏆 ТОП</div>
-            <button id="god" class="god-btn" style="display:none;" onclick="tg.showAlert('Консоль Бога')">💻 КОНСОЛЬ БОГА</button>
+            <div class="btn" onclick="tab('scr-chats')">💬 ЧАТЫ</div>
+            <div class="btn" onclick="tab('scr-chars')">🧍 ГЕРОИ</div>
+            <div class="btn" onclick="tg.showAlert('Бонус +10🌙 получен!')">🎁 БОНУС</div>
+            <div class="btn" onclick="tab('scr-tasks')">📋 ЗАДАНИЯ</div>
+            <div class="btn" onclick="tab('scr-shop')">🛒 МАГАЗИН</div>
+            <div class="btn" onclick="tab('scr-promo')">🎟 КОДЫ</div>
+            <div class="btn" onclick="tab('scr-profile')">👤 ПРОФИЛЬ</div>
+            <div class="btn" onclick="tab('scr-opts')">⚙️ ОПЦИИ</div>
+            <div class="btn" onclick="tg.showAlert('Событий пока нет')">📢 ИВЕНТЫ</div>
+            <div class="btn" onclick="tg.showAlert('Топ игроков в разработке')">🏆 ТОП</div>
+            <button id="adm-btn" class="btn" style="display:none; background:red; color:white;" onclick="tab('scr-admin')">💻 АДМИНКА</button>
         </div>
     </div>
 
-    <div id="sc-shop" class="screen">
-        <h3 style="margin:20px;">🛒 Магазин</h3>
-        <div class="help-box">
-            <b>❓ Как оплатить через Wallet:</b><br>
-            1. Скопируй адрес и уникальный код.<br>
-            2. В Wallet нажми "Отправить" -> "TON".<br>
-            3. Вставь адрес и <b>ОБЯЗАТЕЛЬНО</b> код в поле Комментарий!
+    <div id="scr-chars" class="screen"><h2 style="padding:15px;">Герои</h2><div id="char-list"></div><button class="back-btn" onclick="tab('scr-main')">НАЗАД</button></div>
+    
+    <div id="scr-tasks" class="screen"><h2 style="padding:15px;">Задания</h2><div id="task-list"></div><button class="back-btn" onclick="tab('scr-main')">НАЗАД</button></div>
+
+    <div id="scr-shop" class="screen">
+        <h2 style="padding:15px;">Магазин</h2>
+        <div class="card">
+            <small>Ваш код оплаты:</small>
+            <h1 id="my-code" style="color:var(--gold);">ID000</h1>
+            <button onclick="copyAddr()" style="width:100%; padding:15px; background:var(--accent); border:none; border-radius:12px; color:white; font-weight:bold;">Копировать Кошелек</button>
         </div>
-        <div style="padding:15px; background:var(--card); margin:15px; border-radius:12px;">
-            <small>Куда слать:</small><br><code id="wal-addr" style="font-size:9px;">UQCm8mTj_LHm0DyCvpNOs8PtwDqfrr_BjDSoJVJnm81WO08d</code>
-            <button onclick="navigator.clipboard.writeText('UQCm8mTj_LHm0DyCvpNOs8PtwDqfrr_BjDSoJVJnm81WO08d'); tg.showAlert('Адрес скопирован')" style="width:100%; margin-top:10px; background:var(--accent); border:none; color:white; padding:8px; border-radius:8px;">Копировать адрес</button>
-            <br><br><small>Твой код (комментарий):</small><br><b id="my-id-code" style="color:var(--gold);">ID000</b>
-            <button onclick="navigator.clipboard.writeText(document.getElementById('my-id-code').innerText); tg.showAlert('Код скопирован')" style="width:100%; margin-top:10px; background:var(--gold); border:none; padding:8px; border-radius:8px; font-weight:bold;">Копировать код</button>
+        <button class="back-btn" onclick="tab('scr-main')">НАЗАД</button>
+    </div>
+
+    <div id="scr-admin" class="screen">
+        <h2 style="padding:15px;">Админ-панель</h2>
+        <div class="card">
+            <h3>Добавить задание</h3>
+            <input type="text" id="a-t-title" placeholder="Название">
+            <input type="text" id="a-t-link" placeholder="Ссылка">
+            <button onclick="admAct('add_task')" style="width:100%; padding:15px; background:green; color:white; border:none; border-radius:12px;">ДОБАВИТЬ</button>
         </div>
-        <button onclick="tab('sc-main')" style="width:90%; margin:20px 5%; padding:15px; background:#444; border:none; color:white; border-radius:12px;">НАЗАД</button>
+        <div id="owner-only" style="display:none;" class="card">
+            <h3>Назначить админа (Овнер)</h3>
+            <input type="number" id="new-adm-id" placeholder="ID пользователя">
+            <button onclick="admAct('set_admin')" style="width:100%; padding:15px; background:blue; color:white; border:none; border-radius:12px;">НАЗНАЧИТЬ</button>
+        </div>
+        <button class="back-btn" onclick="tab('scr-main')">НАЗАД</button>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp; tg.expand();
-        let myG = ""; const OWNER = 8287041036;
-
-        function setG(g) {
-            myG = g;
-            document.getElementById('btn-m').style.background = g==='М'?'#3b82f6':'none';
-            document.getElementById('btn-f').style.background = g==='Ж'?'#3b82f6':'none';
-        }
-
-        function saveReg() {
-            const n = document.getElementById('in-name').value;
-            if(!n || !myG) return tg.showAlert("Заполни имя и пол!");
-            document.getElementById('u-name').innerText = n;
-            document.getElementById('u-id').innerText = "ID: " + tg.initDataUnsafe.user.id;
-            document.getElementById('u-img').src = tg.initDataUnsafe.user.photo_url || "https://via.placeholder.com/42";
-            document.getElementById('my-id-code').innerText = "ID" + tg.initDataUnsafe.user.id;
-            if(tg.initDataUnsafe.user.id === OWNER) document.getElementById('god').style.display = 'block';
-            tab('sc-main');
-        }
+        const tg = window.Telegram.WebApp;
+        let role = 'user';
 
         function tab(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
+
+        async function init() {
+            const res = await fetch('/api/init/' + tg.initDataUnsafe.user.id);
+            const data = await res.json();
+            role = data.role;
+            
+            document.getElementById('u-n').innerText = data.user.name;
+            document.getElementById('u-b').innerText = "🌙 " + data.user.balance;
+            document.getElementById('u-role').innerText = role.toUpperCase();
+            document.getElementById('u-img').src = tg.initDataUnsafe.user.photo_url || "https://via.placeholder.com/45";
+            document.getElementById('my-code').innerText = "ID" + tg.initDataUnsafe.user.id;
+
+            if(role === 'owner' || role === 'admin') document.getElementById('adm-btn').style.display = 'block';
+            if(role === 'owner') document.getElementById('owner-only').style.display = 'block';
+
+            // Отрисовка заданий (с кнопкой удаления для Овнера)
+            const tl = document.getElementById('task-list'); tl.innerHTML = "";
+            data.tasks.forEach(t => {
+                let delBtn = (role === 'owner') ? `<button onclick="admAct('del_task', ${t.id})" style="background:red; border:none; color:white; padding:5px; border-radius:5px; margin-left:10px;">Удалить</button>` : '';
+                tl.innerHTML += `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>${t.title}</span><div><button onclick="window.open('${t.link}')">Перейти</button>${delBtn}</div></div>`;
+            });
+        }
+
+        async function admAct(action, id = null) {
+            let data = id ? { id } : { title: document.getElementById('a-t-title').value, link: document.getElementById('a-t-link').value, newId: document.getElementById('new-adm-id').value };
+            await fetch('/api/admin/action', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, action, data })
+            });
+            init();
+        }
+
+        function copyAddr() {
+            navigator.clipboard.writeText("UQCm8mTj_LHm0DyCvpNOs8PtwDqfrr_BjDSoJVJnm81WO08d");
+            tg.showAlert("Адрес скопирован!");
+        }
+
+        init();
     </script>
 </body>
 </html>
