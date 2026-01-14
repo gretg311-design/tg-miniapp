@@ -6,119 +6,129 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #0b0f1a; --card: #161b2c; --accent: #3b82f6; --gold: #fbc02d; }
-        * { box-sizing: border-box; }
-        html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: white; font-family: sans-serif; }
-        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 50px; }
+        * { box-sizing: border-box; font-family: sans-serif; }
+        body { margin: 0; background: var(--bg); color: white; overflow: hidden; height: 100vh; }
+        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 80px; }
         .active { display: block; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card); border-bottom: 1px solid #232d4b; sticky: top; }
+        
+        /* ПУЛЬСИРУЮЩАЯ ЛУНА */
+        #loading { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:999; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+        .moon { font-size: 80px; filter: drop-shadow(0 0 20px #3b82f6); animation: pulse 2s infinite ease-in-out; }
+        @keyframes pulse { 0%,100% {transform:scale(1); opacity:0.8;} 50% {transform:scale(1.2); opacity:1;} }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card); border-bottom: 1px solid #232d4b; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .btn { background: var(--card); padding: 25px 10px; border-radius: 18px; text-align: center; border: 1px solid #232d4b; font-weight: bold; font-size: 11px; }
-        .card { background: var(--card); margin: 10px; padding: 15px; border-radius: 15px; border: 1px solid #232d4b; }
-        .back-btn { width: 90%; margin: 15px 5%; padding: 15px; background: #232d4b; color: white; border: none; border-radius: 12px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; background: #0b1121; border: 1px solid var(--accent); color: white; border-radius: 12px; }
+        .btn { background: var(--card); padding: 22px 10px; border-radius: 18px; text-align: center; border: 1px solid #232d4b; font-weight: bold; font-size: 11px; }
+        .card { background: var(--card); margin: 10px 15px; padding: 15px; border-radius: 15px; border: 1px solid #232d4b; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0; background: #0b1121; border: 1px solid var(--accent); color: white; border-radius: 10px; }
+        .adm-btn { grid-column: span 2; background: #ef4444; color: white; border: none; padding: 20px; border-radius: 18px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="scr-main" class="screen active">
+    <div id="loading"><div class="moon">🌙</div><p>ЗАГРУЗКА...</p></div>
+
+    <div id="scr-main" class="screen">
         <div class="top-bar">
             <div style="display:flex; align-items:center; gap:10px;">
-                <img id="u-img" src="" style="width:45px; border-radius:50%; border:2px solid var(--accent);">
-                <div><b id="u-n">...</b><br><span id="u-role" style="font-size:10px; color:var(--gold)">USER</span></div>
+                <img id="u-i" src="" style="width:45px; border-radius:50%; border:2px solid var(--accent);">
+                <div><b id="u-n">...</b><br><span id="u-r" style="font-size:10px; color:var(--gold)">USER</span></div>
             </div>
-            <div id="u-b" style="background:#1e253d; padding:5px 12px; border-radius:20px; font-weight:bold;">🌙 0</div>
+            <div style="text-align:right;">
+                <div style="font-size:10px; color:var(--accent)" id="u-prem">PREM: НЕТ</div>
+                <div style="background:#1e253d; padding:5px 12px; border-radius:20px; font-weight:bold;">🌙 <span id="u-b">0</span></div>
+            </div>
         </div>
         <div class="menu-grid">
             <div class="btn" onclick="tab('scr-chats')">💬 ЧАТЫ</div>
             <div class="btn" onclick="tab('scr-chars')">🧍 ГЕРОИ</div>
-            <div class="btn" onclick="tg.showAlert('Бонус +10🌙 получен!')">🎁 БОНУС</div>
+            <div class="btn" onclick="tg.showAlert('Бонус +10🌙')">🎁 БОНУС</div>
             <div class="btn" onclick="tab('scr-tasks')">📋 ЗАДАНИЯ</div>
             <div class="btn" onclick="tab('scr-shop')">🛒 МАГАЗИН</div>
-            <div class="btn" onclick="tab('scr-promo')">🎟 КОДЫ</div>
-            <div class="btn" onclick="tab('scr-profile')">👤 ПРОФИЛЬ</div>
-            <div class="btn" onclick="tab('scr-opts')">⚙️ ОПЦИИ</div>
-            <div class="btn" onclick="tg.showAlert('Событий пока нет')">📢 ИВЕНТЫ</div>
-            <div class="btn" onclick="tg.showAlert('Топ игроков в разработке')">🏆 ТОП</div>
-            <button id="adm-btn" class="btn" style="display:none; background:red; color:white;" onclick="tab('scr-admin')">💻 АДМИНКА</button>
+            <div class="btn" onclick="tg.showAlert('Кодов нет')">🎟 КОДЫ</div>
+            <div class="btn" onclick="tg.showAlert('Профиль')">👤 ПРОФИЛЬ</div>
+            <div class="btn" onclick="tg.showAlert('Опции')">⚙️ ОПЦИИ</div>
+            <div class="btn" onclick="tg.showAlert('Ивенты')">📢 ИВЕНТЫ</div>
+            <div class="btn" onclick="tg.showAlert('Топ')">🏆 ТОП</div>
+            <button id="god" class="adm-btn" style="display:none;" onclick="tab('scr-admin')">💻 АДМИНКА</button>
         </div>
-    </div>
-
-    <div id="scr-chars" class="screen"><h2 style="padding:15px;">Герои</h2><div id="char-list"></div><button class="back-btn" onclick="tab('scr-main')">НАЗАД</button></div>
-    
-    <div id="scr-tasks" class="screen"><h2 style="padding:15px;">Задания</h2><div id="task-list"></div><button class="back-btn" onclick="tab('scr-main')">НАЗАД</button></div>
-
-    <div id="scr-shop" class="screen">
-        <h2 style="padding:15px;">Магазин</h2>
-        <div class="card">
-            <small>Ваш код оплаты:</small>
-            <h1 id="my-code" style="color:var(--gold);">ID000</h1>
-            <button onclick="copyAddr()" style="width:100%; padding:15px; background:var(--accent); border:none; border-radius:12px; color:white; font-weight:bold;">Копировать Кошелек</button>
-        </div>
-        <button class="back-btn" onclick="tab('scr-main')">НАЗАД</button>
     </div>
 
     <div id="scr-admin" class="screen">
-        <h2 style="padding:15px;">Админ-панель</h2>
+        <h2 style="padding:15px;">Панель Бога</h2>
         <div class="card">
-            <h3>Добавить задание</h3>
-            <input type="text" id="a-t-title" placeholder="Название">
-            <input type="text" id="a-t-link" placeholder="Ссылка">
-            <button onclick="admAct('add_task')" style="width:100%; padding:15px; background:green; color:white; border:none; border-radius:12px;">ДОБАВИТЬ</button>
+            <h3>Создать (Админ+)</h3>
+            <input type="text" id="a-title" placeholder="Название/Имя">
+            <input type="text" id="a-link" placeholder="Ссылка/Описание">
+            <button onclick="adm('add_task')" style="background:green; color:white; width:100%; padding:10px; border-radius:8px; border:none; margin-bottom:5px;">+ ЗАДАНИЕ</button>
+            <button onclick="adm('add_char')" style="background:blue; color:white; width:100%; padding:10px; border-radius:8px; border:none;">+ ГЕРОЯ</button>
         </div>
-        <div id="owner-only" style="display:none;" class="card">
-            <h3>Назначить админа (Овнер)</h3>
-            <input type="number" id="new-adm-id" placeholder="ID пользователя">
-            <button onclick="admAct('set_admin')" style="width:100%; padding:15px; background:blue; color:white; border:none; border-radius:12px;">НАЗНАЧИТЬ</button>
+
+        <div id="ow-tools" style="display:none;">
+            <div class="card" style="border-color:red;">
+                <h3>Управление (Овнер)</h3>
+                <input type="number" id="t-id" placeholder="ID юзера">
+                <input type="number" id="t-amt" placeholder="Кол-во осколков">
+                <button onclick="adm('edit_balance', 'add')" style="width:48%; background:green; color:white; padding:10px; border-radius:8px; border:none;">ВЫДАТЬ</button>
+                <button onclick="adm('edit_balance', 'sub')" style="width:48%; background:red; color:white; padding:10px; border-radius:8px; border:none;">ЗАБРАТЬ</button>
+                
+                <h4 style="margin:15px 0 5px;">Выдать подписку</h4>
+                <select id="p-type"><option value="VIP">VIP</option><option value="GOD">GOD</option></select>
+                <input type="text" id="p-days" placeholder="Срок (напр. 30 дней)">
+                <button onclick="adm('set_prem')" style="width:100%; background:var(--gold); color:black; font-weight:bold; padding:12px; border-radius:8px; border:none;">ВЫДАТЬ ПОДПИСКУ</button>
+            </div>
+            <div class="card">
+                <h3>Логи</h3>
+                <div id="l-box" style="font-size:10px; height:100px; overflow-y:auto; background:#000; padding:5px;"></div>
+            </div>
         </div>
-        <button class="back-btn" onclick="tab('scr-main')">НАЗАД</button>
+        <button class="btn" style="width:90%; margin:10px 5%;" onclick="tab('scr-main')">НАЗАД</button>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp; tg.expand();
         let role = 'user';
 
-        function tab(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
+        function tab(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
         async function init() {
-            const res = await fetch('/api/init/' + tg.initDataUnsafe.user.id);
+            const res = await fetch('/api/data/' + tg.initDataUnsafe.user.id);
             const data = await res.json();
+            document.getElementById('loading').style.display = 'none';
+            if(!data.user) { /* Показать экран регистрации как в прошлый раз */ return; }
+
             role = data.role;
-            
             document.getElementById('u-n').innerText = data.user.name;
-            document.getElementById('u-b').innerText = "🌙 " + data.user.balance;
-            document.getElementById('u-role').innerText = role.toUpperCase();
-            document.getElementById('u-img').src = tg.initDataUnsafe.user.photo_url || "https://via.placeholder.com/45";
-            document.getElementById('my-code').innerText = "ID" + tg.initDataUnsafe.user.id;
+            document.getElementById('u-b').innerText = data.user.balance;
+            document.getElementById('u-r').innerText = role.toUpperCase();
+            document.getElementById('u-prem').innerText = "PREM: " + data.user.premium;
+            document.getElementById('u-i').src = tg.initDataUnsafe.user.photo_url || "";
 
-            if(role === 'owner' || role === 'admin') document.getElementById('adm-btn').style.display = 'block';
-            if(role === 'owner') document.getElementById('owner-only').style.display = 'block';
-
-            // Отрисовка заданий (с кнопкой удаления для Овнера)
-            const tl = document.getElementById('task-list'); tl.innerHTML = "";
-            data.tasks.forEach(t => {
-                let delBtn = (role === 'owner') ? `<button onclick="admAct('del_task', ${t.id})" style="background:red; border:none; color:white; padding:5px; border-radius:5px; margin-left:10px;">Удалить</button>` : '';
-                tl.innerHTML += `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><span>${t.title}</span><div><button onclick="window.open('${t.link}')">Перейти</button>${delBtn}</div></div>`;
-            });
+            if(role !== 'user') document.getElementById('god').style.display = 'block';
+            if(role === 'owner') {
+                document.getElementById('ow-tools').style.display = 'block';
+                document.getElementById('l-box').innerHTML = data.logs.map(l => `<div>${l}</div>`).join('');
+            }
+            tab('scr-main');
         }
 
-        async function admAct(action, id = null) {
-            let data = id ? { id } : { title: document.getElementById('a-t-title').value, link: document.getElementById('a-t-link').value, newId: document.getElementById('new-adm-id').value };
-            await fetch('/api/admin/action', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, action, data })
-            });
+        async function adm(action, mode = null) {
+            const body = {
+                userId: tg.initDataUnsafe.user.id,
+                action,
+                data: {
+                    title: document.getElementById('a-title').value,
+                    link: document.getElementById('a-link').value,
+                    targetId: document.getElementById('t-id').value,
+                    amount: document.getElementById('t-amt').value,
+                    mode: mode,
+                    type: document.getElementById('p-type').value,
+                    days: document.getElementById('p-days').value
+                }
+            };
+            await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
             init();
         }
-
-        function copyAddr() {
-            navigator.clipboard.writeText("UQCm8mTj_LHm0DyCvpNOs8PtwDqfrr_BjDSoJVJnm81WO08d");
-            tg.showAlert("Адрес скопирован!");
-        }
-
         init();
     </script>
 </body>
