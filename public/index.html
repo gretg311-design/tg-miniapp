@@ -3,107 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Anime Moon 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --neon: #bc13fe; --glass: rgba(30, 0, 50, 0.8); --border: rgba(188, 19, 254, 0.5); }
+        :root { --neon: #bc13fe; --glass: rgba(25, 10, 40, 0.95); --border: rgba(188, 19, 254, 0.4); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; touch-action: none; }
         
-        /* Исправление Проблемы 2 (Свайп) */
-        html, body { 
-            background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; 
-            margin: 0; padding: 0; overflow: hidden; height: 100vh; width: 100vw;
-            touch-action: none; 
-        }
-        
-        .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+        .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow-y: auto; padding-bottom: 20px; }
         .active { display: flex; }
 
-        /* Стиль Стекла */
-        .glass { background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(15px); border-radius: 20px; box-shadow: 0 0 15px rgba(188,19,254,0.1); transition: 0.2s; }
-        .glass:active { background: rgba(188, 19, 254, 0.3); transform: scale(0.97); }
-
-        /* Шапка */
-        .header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .user-info { display: flex; flex-direction: column; }
-        .user-id { font-size: 10px; color: #aaa; margin-top: 2px; letter-spacing: 1px; }
-
+        .glass { background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(20px); border-radius: 15px; margin: 10px; padding: 15px; }
+        
         /* Меню */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; pointer-events: auto; }
-        .menu-btn { height: 90px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .menu-btn { height: 85px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid var(--border); border-radius: 15px; background: rgba(188, 19, 254, 0.05); text-transform: uppercase; letter-spacing: 1px; }
+        .menu-btn:active { background: var(--neon); transform: scale(0.95); }
 
-        /* Нижняя панель */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; z-index: 100; pointer-events: auto; }
-        .nav-item { color: #fff; font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 15px; cursor: pointer; }
+        /* Навигация */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; z-index: 9999; }
+        .nav-item { padding: 10px 20px; font-size: 12px; font-weight: bold; color: #fff; }
+
+        /* Формы */
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon); color: #fff; border-radius: 10px; outline: none; }
+        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 10px; box-shadow: 0 0 15px rgba(188, 19, 254, 0.4); }
+        .btn-danger { background: #ff4444; box-shadow: 0 0 15px rgba(255, 68, 68, 0.4); }
+
+        .header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .sub-text { font-size: 10px; color: #aaa; }
     </style>
 </head>
 <body>
 
 <div id="scr-main" class="screen active">
     <div class="header">
-        <div class="user-info">
-            <span id="u-name" style="color:var(--neon); font-weight:bold; font-size: 14px;">...</span>
-            <span id="u-id" class="user-id">ID: 0000000000</span> </div>
-        <div class="glass" style="padding:5px 15px;">🌙 <b id="u-bal">0</b></div>
+        <div>
+            <div id="display-name" style="color:var(--neon); font-weight:bold;">German Green (BOSS)</div>
+            <div id="display-id" class="sub-text">ID: 8287041036</div>
+        </div>
+        <div class="glass" style="margin:0; padding:5px 12px;">🌙 <b id="display-bal">99999999</b></div>
     </div>
-    
     <div class="menu-grid">
-        <div class="glass menu-btn" onclick="openMod('chats')">ЧАТЫ</div>
-        <div class="glass menu-btn" onclick="openMod('chars')">ПЕРСОНАЖИ</div>
-        <div class="glass menu-btn" onclick="openMod('daily')">ЕЖЕДНЕВКА</div>
-        <div class="glass menu-btn" onclick="openMod('tasks')">ЗАДАНИЯ</div>
-        <div class="glass menu-btn" onclick="openMod('shop')">МАГАЗИН</div>
-        <div class="glass menu-btn" onclick="openMod('promo')">ПРОМОКОДЫ</div>
-        <div class="glass menu-btn" onclick="openMod('profile')">ПРОФИЛЬ</div>
-        <div class="glass menu-btn" onclick="openMod('settings')">НАСТРОЙКИ</div>
-        <div id="btn-adm" class="glass menu-btn" onclick="openMod('admin')">АДМИНКА</div>
-        <div id="btn-cons" class="glass menu-btn" style="border-color:red; color:red;" onclick="openMod('console')">КОНСОЛЬ</div>
+        <div class="menu-btn" onclick="openMod('chats')">Чаты</div>
+        <div class="menu-btn" onclick="openMod('chars')">Персонажи</div>
+        <div class="menu-btn" onclick="openMod('daily')">Ежедневка</div>
+        <div class="menu-btn" onclick="openMod('tasks')">Задания</div>
+        <div class="menu-btn" onclick="openMod('shop')">Магазин</div>
+        <div class="menu-btn" onclick="openMod('promo')">Промокоды</div>
+        <div class="menu-btn" onclick="openMod('profile')">Профиль</div>
+        <div class="menu-btn" onclick="openMod('settings')">Настройки</div>
+        <div id="btn-admin" class="menu-btn" onclick="openMod('admin')">Админка</div>
+        <div id="btn-console" class="menu-btn" style="color:#ff4444; border-color:#ff4444;" onclick="openMod('console')">Консоль</div>
     </div>
 </div>
 
-<div class="bottom-nav">
-    <div class="nav-item" onclick="goBack()">◀ НАЗАД</div>
-    <div class="nav-item" onclick="goHome()">🏠 ДОМОЙ</div>
+<div id="scr-mod" class="screen">
+    <div id="mod-content" style="padding-bottom: 30px;"></div>
 </div>
+
+<nav class="bottom-nav">
+    <div class="nav-item" onclick="goHome()">🏠 ДОМОЙ</div>
+    <div class="nav-item" onclick="goBack()">◀ НАЗАД</div>
+</nav>
 
 <script>
     const tg = window.Telegram.WebApp;
     const OWNER_ID = "8287041036";
     tg.expand();
-    tg.enableClosingConfirmation(); // Блокировка свайпа (запрос подтверждения)
+    tg.enableClosingConfirmation();
     tg.ready();
 
-    // Инициализация данных
-    window.onload = () => {
-        const user = tg.initDataUnsafe.user;
-        const myId = user ? String(user.id) : OWNER_ID;
-        
-        document.getElementById('u-name').innerText = (user?.first_name || "Owner") + (myId === OWNER_ID ? " (BOSS)" : "");
-        document.getElementById('u-id').innerText = "ID: " + myId; // Отображаем ID под именем
-        document.getElementById('u-bal').innerText = (myId === OWNER_ID ? "99999999" : "100");
-
-        if (myId !== OWNER_ID) {
-            document.getElementById('btn-cons').style.display = 'none';
-        }
+    let user = {
+        id: tg.initDataUnsafe.user?.id || OWNER_ID,
+        name: tg.initDataUnsafe.user?.first_name || "Boss",
+        gender: "М", balance: 99999999, sub: "Ultra", streak: 7, role: "owner"
     };
 
-    function openMod(name) {
+    function openMod(type) {
         tg.HapticFeedback.impactOccurred('medium');
-        alert("Экран " + name.toUpperCase() + " скоро будет готов!");
+        document.getElementById('scr-main').classList.remove('active');
+        document.getElementById('scr-mod').classList.add('active');
+        const cont = document.getElementById('mod-content');
+
+        if(type === 'console' || type === 'admin') {
+            let isOwner = (user.role === 'owner');
+            cont.innerHTML = `
+                <div class="glass">
+                    <h3 style="color:var(--neon)">${type.toUpperCase()}</h3>
+                    <p class="sub-text">Создание персонажа</p>
+                    <input id="c-name" placeholder="Имя бота">
+                    <select id="c-sex"><option value="М">Мужчина</option><option value="Ж">Женщина</option></select>
+                    <input id="c-age" type="number" placeholder="Возраст (18+)">
+                    <input type="file" accept="image/*">
+                    <button class="btn-main" onclick="tg.showAlert('Бот создан!')">Создать бота</button>
+                    
+                    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+                    
+                    <p class="sub-text">Управление ресурсами</p>
+                    <input id="t-id" placeholder="Telegram ID юзера">
+                    <input id="t-amt" placeholder="Количество">
+                    <button class="btn-main" onclick="tg.showAlert('Выполнено!')">Выдать осколки</button>
+                    ${isOwner ? `<button class="btn-main btn-danger" onclick="tg.showAlert('Снято!')">Снять осколки</button>` : ''}
+                    
+                    <p class="sub-text">Управление подпиской</p>
+                    <select id="t-sub"><option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option></select>
+                    <input id="t-days" placeholder="Количество дней">
+                    <button class="btn-main" onclick="tg.showAlert('Подписка выдана!')">Выдать подписку</button>
+
+                    ${isOwner ? `
+                        <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+                        <button class="btn-main btn-danger" onclick="tg.showConfirm('Удалить всех персонажей?', (q)=>{})">Удалить персонажа</button>
+                        <input id="adm-id" placeholder="ID юзера для Админки">
+                        <button class="btn-main" onclick="tg.showAlert('Админ назначен')">Назначить админа</button>
+                        <button class="btn-main btn-danger" onclick="tg.showAlert('Админ снят')">Снять админа</button>
+                    ` : ''}
+                </div>`;
+        } 
+        else if(type === 'settings') {
+            cont.innerHTML = `
+                <div class="glass">
+                    <h3>Настройки</h3>
+                    <p class="sub-text">Ваше имя</p>
+                    <input id="set-name" value="${user.name}">
+                    <p class="sub-text">Ваш пол</p>
+                    <select id="set-gender"><option value="М" ${user.gender==='М'?'selected':''}>Мужчина</option><option value="Ж" ${user.gender==='Ж'?'selected':''}>Женщина</option></select>
+                    <p class="sub-text">Длина ответа (Ultra: 100 слов)</p>
+                    <input type="range" min="20" max="100" value="60">
+                    <button class="btn-main" onclick="tg.showAlert('Сохранено!')">Сохранить</button>
+                </div>`;
+        }
+        else if(type === 'daily') {
+            cont.innerHTML = `
+                <div class="glass" style="text-align:center">
+                    <h2>Бонус дня</h2>
+                    <p>Ваша серия: ${user.streak} дн.</p>
+                    <h1 style="color:var(--neon)">+500 🌙</h1>
+                    <button class="btn-main" onclick="tg.showAlert('Вы получили 500 осколков!'); goHome();">Забрать</button>
+                </div>`;
+        }
+        else {
+            cont.innerHTML = `<div class="glass"><h3>${type.toUpperCase()}</h3><p>Модуль в разработке...</p></div>`;
+        }
     }
 
     function goHome() {
-        tg.HapticFeedback.notificationOccurred('success');
-        location.reload(); 
+        document.getElementById('scr-mod').classList.remove('active');
+        document.getElementById('scr-main').classList.add('active');
     }
+    function goBack() { goHome(); }
 
-    function goBack() {
-        tg.HapticFeedback.impactOccurred('light');
-        alert("Назад");
-    }
-
-    // Запрет свайпа вниз (для iOS)
-    document.addEventListener('touchmove', function (e) {
-        if (e.target.closest('.screen')) return;
-        e.preventDefault();
+    // Блокировка свайпа вниз
+    document.addEventListener('touchmove', (e) => {
+        if (!e.target.closest('.screen')) e.preventDefault();
     }, { passive: false });
 </script>
 </body>
