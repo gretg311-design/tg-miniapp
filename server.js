@@ -3,15 +3,16 @@ const TelegramBot = require('node-telegram-bot-api');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const axios = require('axios');
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, {polling: true});
-const OWNER_ID = parseInt(process.env.OWNER_ID);
+const OWNER_ID = parseInt(process.env.OWNER_ID); // Твой ID
+const OPENROUTER_KEY = process.env.OPENROUTER_KEY;
 
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// Настройка Облака
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
     api_key: process.env.CLOUDINARY_KEY,
@@ -20,37 +21,23 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: { folder: 'anime_app', allowed_formats: ['jpg', 'png'] }
+    params: { folder: 'anychars_ai', allowed_formats: ['jpg', 'png', 'jpeg'] }
 });
 const upload = multer({ storage: storage });
 
-// Базы данных в памяти
-let characters = [];
-let tasks = [];
+let characters = []; 
+let users = {}; // userId: { balance: 100, lastDaily: null }
 
-// API для персонажей
-app.post('/api/chars', upload.single('photo'), (req, res) => {
-    const { name, bio, userId } = req.body;
-    const newChar = { id: Date.now(), name, bio, photo: req.file.path };
-    characters.push(newChar);
-    res.json({ success: true });
-});
+// --- AI Chat Logic ---
+async function chatWithAI(text, userId, charId) {
+    // Получаем персонажа по ID
+    const char = characters.find(c => c.id === charId) || characters[0]; 
+    if (!char) return "Нет доступных персонажей.";
 
-app.get('/api/chars', (req, res) => res.json(characters));
-
-// API для заданий
-app.post('/api/tasks', (req, res) => {
-    const { action, title, link, reward, userId } = req.body;
-    if (action === 'add') {
-        tasks.push({ id: Date.now(), title, link, reward });
-        res.json({ success: true });
-    } else if (action === 'delete' && parseInt(userId) === OWNER_ID) {
-        tasks = tasks.filter(t => t.id !== req.body.id);
-        res.json({ success: true });
+    // Проверка баланса и списание
+    if (!users[userId] || users[userId].balance < 2) {
+        return "🌙 Недостаточно осколков для чата. Пополни баланс!";
     }
-});
+    users[userId].balance -= 2; // Списываем 2 осколка за сообщение
 
-app.get('/api/tasks', (req, res) => res.json(tasks));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Система запущена!'));
+    try {
