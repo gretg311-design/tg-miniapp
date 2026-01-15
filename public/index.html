@@ -10,107 +10,124 @@
         .screen { display: none; height: calc(100vh - 70px); flex-direction: column; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         .active { display: flex; }
         .glass { background: var(--glass); border: 1px solid var(--border); border-radius: 15px; padding: 15px; margin-bottom: 15px; }
-        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #0c0212; border: 1px solid var(--neon); color: #fff; border-radius: 10px; box-sizing: border-box; }
-        #loading-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .menu-btn { height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; border: 1px solid var(--border); border-radius: 12px; background: rgba(188, 19, 254, 0.05); text-transform: uppercase; font-weight: bold; }
+        .btn-main { width: 100%; padding: 12px; background: var(--neon); border: none; color: #fff; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0; background: #0c0212; border: 1px solid var(--neon); color: #fff; border-radius: 8px; box-sizing: border-box; }
+        #cap-layer, #reg-layer { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-<div id="loading-screen">
-    <div id="cap-box" class="glass" style="text-align:center;">
-        <h1 style="color:var(--neon)">18+</h1>
-        <p>Вам исполнилось 18 лет?</p>
-        <button class="btn-main" onclick="showReg()">ДА, МНЕ ЕСТЬ 18</button>
-    </div>
-    <div id="reg-box" class="glass" style="display:none; width:90%;">
+<div id="cap-layer">
+    <h1 style="color:var(--neon); font-size: 40px;">18+</h1>
+    <button class="btn-main" onclick="document.getElementById('cap-layer').style.display='none'; document.getElementById('reg-layer').style.display='flex';">ДА, МНЕ ЕСТЬ 18</button>
+</div>
+
+<div id="reg-layer" style="display:none">
+    <div class="glass" style="width:100%">
         <h2>РЕГИСТРАЦИЯ</h2>
         <input id="r-name" placeholder="Твое имя">
-        <select id="r-gen"><option value="М">Мужской пол</option><option value="Ж">Женский пол</option></select>
-        <button id="save-btn" class="btn-main" onclick="finishReg()">НАЧАТЬ</button>
+        <select id="r-gen"><option value="М">Мужской</option><option value="Ж">Женский</option></select>
+        <button class="btn-main" onclick="startApp()">СОХРАНИТЬ</button>
     </div>
 </div>
 
 <div id="scr-main" class="screen">
     <div class="glass" style="display:flex; justify-content:space-between; align-items:center">
-        <div><b id="u-name" style="color:var(--neon)">...</b><br><small id="u-id"></small></div>
+        <div><b id="u-name">...</b><br><small id="u-id"></small></div>
         <div>🌙 <b id="u-bal">0</b></div>
     </div>
-    
-    <div id="owner-box" class="glass" style="display:none; border-color:red;">
-        <h3 style="color:red; margin:0 0 10px 0;">КОНСОЛЬ ОВНЕРА</h3>
-        <input id="tid" placeholder="TG ID Цели">
-        <input id="tval" placeholder="Значение (число/роль)">
-        <button class="btn-main" onclick="doAdmin('addBalance')">Выдать Осколки</button>
-        <button class="btn-main" style="background:#444;" onclick="doAdmin('setRole')">Назначить Роль</button>
-    </div>
-
-    <div class="glass">
-        <h3>МЕНЮ</h3>
-        <p>Ваша подписка: <span id="u-sub">Free</span></p>
-        <p>Проект "от А до Я" запущен!</p>
+    <div class="menu-grid">
+        <div class="menu-btn" onclick="openMod('shop')">Магазин</div>
+        <div class="menu-btn" onclick="openMod('chars')">Персонажи</div>
+        <div class="menu-btn" onclick="openMod('tasks')">Задания</div>
+        <div class="menu-btn" onclick="openMod('daily')">Ежедневка</div>
+        <div class="menu-btn" onclick="openMod('profile')">Профиль</div>
+        <div id="adm-btn" class="menu-btn" style="display:none; color:cyan" onclick="openMod('admin')">Админка</div>
+        <div id="cons-btn" class="menu-btn" style="display:none; color:red" onclick="openMod('console')">Консоль</div>
     </div>
 </div>
 
+<div id="scr-mod" class="screen"><div id="mod-content"></div></div>
+
+<nav class="bottom-nav"><div onclick="goHome()">🏠 МЕНЮ</div></nav>
+
 <script>
     const tg = window.Telegram.WebApp;
-    tg.expand();
-    let user = {};
+    let user = {}, items = [], chars = [], tasks = [];
 
-    function showReg() {
-        document.getElementById('cap-box').style.display = 'none';
-        document.getElementById('reg-box').style.display = 'block';
-        const raw = tg.initDataUnsafe.user || {id: "8287041036", first_name: "Owner"};
-        document.getElementById('r-name').value = raw.first_name || "";
+    async function startApp() {
+        const raw = tg.initDataUnsafe.user || {id: "8287041036", first_name: "Boss"};
+        const res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: raw.id, name: document.getElementById('r-name').value, gender: document.getElementById('r-gen').value})
+        });
+        const data = await res.json();
+        user = data.user; items = data.items; chars = data.chars; tasks = data.tasks;
+        document.getElementById('reg-layer').style.display = 'none';
+        document.getElementById('scr-main').classList.add('active');
+        renderUI();
     }
 
-    async function finishReg() {
-        const btn = document.getElementById('save-btn');
-        btn.disabled = true; btn.innerText = "ЗАГРУЗКА...";
-        const raw = tg.initDataUnsafe.user || {id: "8287041036"};
+    function renderUI() {
+        document.getElementById('u-name').innerText = user.name + (user.role==='owner'?' (BOSS)':'');
+        document.getElementById('u-id').innerText = "ID: " + user.id;
+        document.getElementById('u-bal').innerText = user.balance;
+        if(user.role==='owner' || user.role==='admin') document.getElementById('adm-btn').style.display='flex';
+        if(user.role==='owner') document.getElementById('cons-btn').style.display='flex';
+    }
 
-        try {
-            const res = await fetch('/api/auth', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    id: String(raw.id),
-                    name: document.getElementById('r-name').value,
-                    gender: document.getElementById('r-gen').value
-                })
-            });
-            const data = await res.json();
-            user = data.user;
-            
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('scr-main').classList.add('active');
-            
-            document.getElementById('u-name').innerText = user.name + (user.role === 'owner' ? ' (БОСС)' : '');
-            document.getElementById('u-id').innerText = "ID: " + user.id;
-            document.getElementById('u-bal').innerText = user.balance;
-            document.getElementById('u-sub').innerText = user.sub;
-            
-            if (user.role === 'owner') document.getElementById('owner-box').style.display = 'block';
-        } catch (e) {
-            alert("Ошибка связи с сервером");
-            btn.disabled = false; btn.innerText = "НАЧАТЬ";
+    function openMod(type) {
+        document.getElementById('scr-main').classList.remove('active');
+        document.getElementById('scr-mod').classList.add('active');
+        const cont = document.getElementById('mod-content');
+        let html = `<div class="glass"><h2>${type.toUpperCase()}</h2>`;
+
+        if(type === 'console' || type === 'admin') {
+            html += `<b>ВЫДАЧА ПО ID:</b>
+            <input id="tid" placeholder="TG ID">
+            <input id="tval" placeholder="Значение/Кол-во">
+            <select id="tact">
+                <option value="addBalance">Дать Осколки</option>
+                <option value="setSub">Дать Подписку (30 дн)</option>
+                ${user.role==='owner' ? '<option value="setRole">Назначить Админа</option>' : ''}
+            </select>
+            <button class="btn-main" onclick="doControl()">ПРИМЕНИТЬ</button><hr>`;
+            html += `<b>ДОБАВИТЬ ЗАДАНИЕ:</b>
+            <input id="tn" placeholder="Текст"><input id="tu" placeholder="Ссылка"><input id="tr" type="number" placeholder="Награда">
+            <button class="btn-main" onclick="doManage('task','add')">ДОБАВИТЬ</button>`;
+        } else if(type === 'profile') {
+            html += `<p>ID: ${user.id}</p><p>Подписка: ${user.sub}</p><p>Роль: ${user.role}</p><p>Стрик: ${user.streak}</p>`;
+        } else if(type === 'tasks') {
+            tasks.forEach(t => html += `<div class="glass">${t.text} (${t.reward} 🌙) ${user.role==='owner' ? `<button onclick="doManage('task','delete','${t._id}')">❌</button>` : ''}</div>`);
         }
+        cont.innerHTML = html + `</div>`;
     }
 
-    async function doAdmin(action) {
+    async function doControl() {
         const res = await fetch('/api/admin/control', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                senderId: String(user.id),
-                targetId: document.getElementById('tid').value,
-                value: document.getElementById('tval').value,
-                action: action
-            })
+            body: JSON.stringify({senderId: user.id, targetId: document.getElementById('tid').value, value: document.getElementById('tval').value, action: document.getElementById('tact').value})
         });
-        const d = await res.json();
-        tg.showAlert(d.success ? "Готово!" : "Ошибка");
+        if(res.ok) { tg.showAlert("Готово!"); location.reload(); }
     }
+
+    async function doManage(type, action, id) {
+        let data = action==='add' ? {text: document.getElementById('tn').value, url: document.getElementById('tu').value, reward: document.getElementById('tr').value} : {};
+        await fetch('/api/manage', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({type, action, data, id, userId: user.id})
+        });
+        location.reload();
+    }
+
+    function goHome() { document.getElementById('scr-mod').classList.remove('active'); document.getElementById('scr-main').classList.add('active'); }
+    tg.expand();
 </script>
 </body>
 </html>
