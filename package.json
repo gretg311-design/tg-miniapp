@@ -1,7 +1,6 @@
 {
   "name": "ot-a-do-ya",
   "version": "1.0.0",
-  "description": "TG Mini App",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
