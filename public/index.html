@@ -6,42 +6,27 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --neon: #bc13fe; --glass: rgba(15, 5, 25, 0.98); --border: rgba(188, 19, 254, 0.5); }
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; touch-action: none; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow-y: auto; padding: 15px; box-sizing: border-box; }
         .active { display: flex; }
         .glass { background: var(--glass); border: 1px solid var(--border); border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .menu-btn { height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid var(--border); border-radius: 15px; background: rgba(188, 19, 254, 0.05); text-transform: uppercase; cursor: pointer; }
-        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 10px; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #0c0212; border: 1px solid var(--neon); color: #fff; border-radius: 10px; box-sizing: border-box; }
-        .char-card { display: flex; align-items: center; gap: 15px; position: relative; }
-        .char-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 1px solid var(--neon); }
-        #layer-cap, #layer-reg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; box-sizing: border-box; }
+        .menu-btn { height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; border: 1px solid var(--border); border-radius: 15px; background: rgba(188, 19, 254, 0.05); cursor: pointer; }
+        .btn-main { width: 100%; padding: 12px; background: var(--neon); border: none; color: #fff; border-radius: 10px; font-weight: bold; margin-top: 5px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0; background: #0c0212; border: 1px solid var(--neon); color: #fff; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-<div id="layer-cap">
-    <h1 style="color:var(--neon); font-size: 40px;">18+</h1>
-    <p>Контент только для взрослых.<br>Вам есть 18 лет?</p>
-    <button class="btn-main" onclick="showReg()">ДА, МНЕ ЕСТЬ 18</button>
-    <button class="btn-main" style="background: #333;" onclick="tg.close()">НЕТ</button>
+<div id="layer-cap" style="position:fixed; width:100%; height:100%; background:#000; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+    <h1 style="color:var(--neon)">18+</h1><button class="btn-main" style="width:200px" onclick="this.parentElement.style.display='none'">МНЕ ЕСТЬ 18</button>
 </div>
 
-<div id="layer-reg" style="display:none">
-    <div class="glass">
-        <h2>РЕГИСТРАЦИЯ</h2>
-        <input id="reg-name" placeholder="Твое имя">
-        <select id="reg-gender"><option value="М">Мужской пол</option><option value="Ж">Женский пол</option></select>
-        <button class="btn-main" onclick="startApp()">НАЧАТЬ ПРИКЛЮЧЕНИЕ</button>
-    </div>
-</div>
-
-<div id="scr-main" class="screen">
-    <div class="glass" style="display:flex; justify-content:space-between; align-items:center;">
-        <div><b id="u-name" style="color:var(--neon)">...</b><br><small id="u-id"></small></div>
-        <div>🌙 <b id="u-bal">0</b></div>
+<div id="scr-main" class="screen active">
+    <div class="glass" style="display:flex; justify-content:space-between">
+        <div id="u-name">Загрузка...</div>
+        <div id="u-bal">🌙 0</div>
     </div>
     <div class="menu-grid">
         <div class="menu-btn" onclick="openMod('chats')">Чаты</div>
@@ -49,97 +34,88 @@
         <div class="menu-btn" onclick="openMod('daily')">Ежедневка</div>
         <div class="menu-btn" onclick="openMod('tasks')">Задания</div>
         <div class="menu-btn" onclick="openMod('shop')">Магазин</div>
-        <div class="menu-btn" onclick="openMod('promo')">Промокоды</div>
         <div class="menu-btn" onclick="openMod('profile')">Профиль</div>
-        <div class="menu-btn" onclick="openMod('settings')">Настройки</div>
         <div id="adm-btn" class="menu-btn" style="display:none" onclick="openMod('admin')">Админка</div>
-        <div id="cons-btn" class="menu-btn" style="display:none; color:red; border-color:red" onclick="openMod('console')">Консоль</div>
+        <div id="cons-btn" class="menu-btn" style="display:none; color:red" onclick="openMod('console')">Консоль</div>
     </div>
 </div>
 
 <div id="scr-mod" class="screen"><div id="mod-content"></div></div>
 
 <nav class="bottom-nav">
-    <div onclick="goHome()">🏠 ДОМОЙ</div>
-    <div onclick="goBack()">◀ НАЗАД</div>
+    <div onclick="goHome()">🏠 МЕНЮ</div>
 </nav>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.expand();
-    let user = {}, allChars = [], allItems = [], tempPhoto = "";
+    let user = {}, allChars = [], allItems = [], allTasks = [];
 
-    function showReg() {
-        document.getElementById('layer-cap').style.display='none';
-        document.getElementById('layer-reg').style.display='flex';
-        const raw = tg.initDataUnsafe.user || {id: "8287041036", first_name: "Owner"};
-        document.getElementById('reg-name').value = raw.first_name;
-    }
-
-    async function startApp() {
-        const raw = tg.initDataUnsafe.user || {id: "8287041036"};
-        const res = await fetch('/api/auth', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ id: raw.id, name: document.getElementById('reg-name').value, gender: document.getElementById('reg-gender').value })
-        });
+    async function init() {
+        const raw = tg.initDataUnsafe.user || {id: "8287041036", first_name: "Admin"};
+        const res = await fetch('/api/auth', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id: raw.id, name: raw.first_name}) });
         const data = await res.json();
-        user = data.user; allChars = data.chars; allItems = data.items;
-        document.getElementById('layer-reg').style.display='none';
-        document.getElementById('scr-main').classList.add('active');
-        renderMain();
+        user = data.user; allChars = data.chars; allItems = data.items; allTasks = data.tasks;
+        renderUI();
     }
 
-    function renderMain() {
-        document.getElementById('u-name').innerText = user.name + (user.role==='owner'?' (BOSS)':'');
-        document.getElementById('u-id').innerText = "ID: " + user.id;
-        document.getElementById('u-bal').innerText = user.balance;
-        if(user.role==='owner' || user.role==='admin') document.getElementById('adm-btn').style.display='flex';
-        if(user.role==='owner') document.getElementById('cons-btn').style.display='flex';
+    function renderUI() {
+        document.getElementById('u-name').innerText = user.name;
+        document.getElementById('u-bal').innerText = "🌙 " + user.balance;
+        document.getElementById('adm-btn').style.display = (user.role==='owner'||user.role==='admin') ? 'flex' : 'none';
+        document.getElementById('cons-btn').style.display = (user.role==='owner') ? 'flex' : 'none';
     }
 
     function openMod(type) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('scr-mod').classList.add('active');
+        document.getElementById('scr-main').style.display = 'none';
+        document.getElementById('scr-mod').style.display = 'flex';
         const cont = document.getElementById('mod-content');
         let html = `<div class="glass"><h2>${type.toUpperCase()}</h2>`;
 
         if(type === 'console') {
-            html += `<b>ДОБАВИТЬ ТОВАР</b><input id="in-n" placeholder="Название"><input id="in-p" type="number" placeholder="Цена"><select id="in-c"><option value="Stars">Stars</option><option value="USD">USD</option></select><button class="btn-main" onclick="manageItem('add')">СОЗДАТЬ ТОВАР</button><hr>`;
-            html += `<b>НОВЫЙ ПЕРСОНАЖ</b><input id="c-n" placeholder="Имя"><input id="c-a" type="number" placeholder="Возраст"><textarea id="c-d" placeholder="Описание"></textarea><input type="file" onchange="encodePhoto(this)"><button class="btn-main" onclick="manageChar('add')">СОЗДАТЬ ПЕРСА ДЛЯ ВСЕХ</button>`;
+            html += `<b>УПРАВЛЕНИЕ ПО ID:</b>
+                <input id="target-id" placeholder="Telegram ID">
+                <select id="action-type"><option value="addBalance">Выдать Осколки</option><option value="setRole">Назначить роль (admin/user)</option></select>
+                <input id="action-val" placeholder="Значение (число или роль)">
+                <button class="btn-main" onclick="adminControl()">ПРИМЕНИТЬ</button><hr>`;
+            html += `<b>ДОБАВИТЬ ЗАДАНИЕ:</b>
+                <input id="t-text" placeholder="Текст (Подпишись...)"><input id="t-url" placeholder="URL"><input id="t-rew" type="number" placeholder="Награда">
+                <button class="btn-main" onclick="manage('task', 'add')">ОПУБЛИКОВАТЬ</button>`;
+        } else if(type === 'daily') {
+            let rewards = {Premium: 50, Pro: 100, VIP: 250, Ultra: 500, Free: 15};
+            let amt = rewards[user.sub] || 15;
+            html += `<p>Твой стрик: ${user.streak} дн.</p><p>Награда сегодня: ${amt} 🌙</p><button class="btn-main">ЗАБРАТЬ</button>`;
+        } else if(type === 'profile') {
+            html += `<p>ID: ${user.id}</p><p>Статус: ${user.sub}</p><p>Роль: ${user.role}</p>`;
         } else if(type === 'chars') {
-            allChars.forEach(c => {
-                html += `<div class="glass char-card"><img src="${c.photo || 'https://via.placeholder.com/60'}" class="char-img"><div><b>${c.name}, ${c.age}</b><br><small>${c.desc}</small></div>${user.role==='owner' ? `<button onclick="manageChar('delete', '${c._id}')" style="position:absolute; right:10px; background:red; border:none; color:#fff; border-radius:5px;">❌</button>` : ''}</div>`;
-            });
-        } else if(type === 'shop') {
-            allItems.length ? allItems.forEach(i => {
-                html += `<div class="glass" style="display:flex; justify-content:space-between; align-items:center;"><span>${i.name}<br><small>${i.price} ${i.currency}</small></span><button class="btn-main" style="width:auto; margin:0; padding:10px 20px;" onclick="tg.showAlert('Оплата через ${i.currency}...')">КУПИТЬ</button></div>`;
-            }) : html += `<p>В магазине пока пусто.</p>`;
+            allChars.forEach(c => html += `<div class="glass"><b>${c.name}</b> ${user.role==='owner' ? `<button onclick="manage('char', 'delete', '${c._id}')">❌</button>` : ''}</div>`);
+        } else if(type === 'tasks') {
+            allTasks.forEach(t => html += `<div class="glass">${t.text} (${t.reward} 🌙) ${user.role==='owner' ? `<button onclick="manage('task', 'delete', '${t._id}')">❌</button>` : ''}</div>`);
         }
         cont.innerHTML = html + `</div>`;
     }
 
-    function encodePhoto(input) {
-        const reader = new FileReader();
-        reader.onload = (e) => { tempPhoto = e.target.result; };
-        reader.readAsDataURL(input.files[0]);
+    async function adminControl() {
+        const res = await fetch('/api/admin/control', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senderId: user.id, targetId: document.getElementById('target-id').value, action: document.getElementById('action-type').value, value: document.getElementById('action-val').value })
+        });
+        const d = await res.json();
+        tg.showAlert(d.success ? "Готово!" : "Ошибка");
     }
 
-    async function manageChar(action, id) {
-        const charData = action==='add' ? {name: document.getElementById('c-n').value, age: document.getElementById('c-a').value, desc: document.getElementById('c-d').value, photo: tempPhoto} : null;
-        const res = await fetch('/api/manage-char', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action, charData, id, userId: user.id}) });
-        const data = await res.json(); allChars = data.chars; openMod('chars');
+    async function manage(type, action, id) {
+        let data = action === 'add' ? (type==='task' ? {text: document.getElementById('t-text').value, url: document.getElementById('t-url').value, reward: document.getElementById('t-rew').value} : {}) : {};
+        const res = await fetch('/api/manage-content', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ type, action, data, id, userId: user.id })
+        });
+        location.reload();
     }
 
-    async function manageItem(action, id) {
-        const itemData = {name: document.getElementById('in-n').value, price: document.getElementById('in-p').value, currency: document.getElementById('in-c').value};
-        const res = await fetch('/api/manage-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action, itemData, id, userId: user.id}) });
-        const data = await res.json(); allItems = data.items; tg.showAlert("Магазин обновлен!");
-    }
-
-    function goHome() { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('scr-main').classList.add('active'); }
-    function goBack() { goHome(); }
-    document.addEventListener('touchmove', (e) => { if (!e.target.closest('.screen')) e.preventDefault(); }, { passive: false });
+    function goHome() { location.reload(); }
+    init();
 </script>
 </body>
 </html>
