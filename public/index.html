@@ -5,125 +5,178 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --neon: #bc13fe; --glass: rgba(20, 5, 30, 0.95); --border: rgba(188, 19, 254, 0.5); }
+        :root { --neon: #bc13fe; --glass: rgba(15, 5, 25, 0.98); --border: rgba(188, 19, 254, 0.5); }
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; touch-action: none; }
-        .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow-y: auto; padding: 10px; }
+        .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow-y: auto; padding: 15px; }
         .active { display: flex; }
-        .glass { background: var(--glass); border: 1px solid var(--border); border-radius: 15px; padding: 15px; margin-bottom: 10px; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
-        .menu-btn { height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid var(--border); border-radius: 15px; text-transform: uppercase; cursor: pointer; }
+        .glass { background: var(--glass); border: 1px solid var(--border); border-radius: 15px; padding: 15px; margin-bottom: 15px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .menu-btn { height: 85px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid var(--border); border-radius: 15px; text-transform: uppercase; cursor: pointer; background: rgba(188, 19, 254, 0.05); }
         .menu-btn:active { background: var(--neon); transform: scale(0.95); }
         .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #1a0525; border: 1px solid var(--neon); color: #fff; border-radius: 10px; }
-        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 10px; font-weight: bold; }
-        .btn-red { background: #ff4444; margin-top: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #0c0212; border: 1px solid var(--neon); color: #fff; border-radius: 10px; }
+        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-red { background: #ff1f44; }
+        .char-card { display: flex; gap: 15px; align-items: center; cursor: pointer; }
+        .char-img { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; border: 1px solid var(--neon); }
+        .chat-msg { background: rgba(188, 19, 254, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 10px; max-width: 80%; }
     </style>
 </head>
 <body>
 
 <div id="scr-main" class="screen active">
     <div class="glass" style="display:flex; justify-content:space-between; align-items:center;">
-        <div><b id="u-name">Загрузка...</b><br><small id="u-id" style="color:#aaa;"></small></div>
-        <div style="color:var(--neon)">🌙 <b id="u-bal">0</b></div>
+        <div><b id="u-name" style="color:var(--neon)">German Green (BOSS)</b><br><small id="u-id" style="color:#888"></small></div>
+        <div>🌙 <b id="u-bal">0</b></div>
     </div>
     <div class="menu-grid">
-        <div class="menu-btn" onclick="renderMod('chats')">Чаты</div>
-        <div class="menu-btn" onclick="renderMod('chars')">Персонажи</div>
-        <div class="menu-btn" onclick="renderMod('daily')">Ежедневка</div>
-        <div class="menu-btn" onclick="renderMod('tasks')">Задания</div>
-        <div class="menu-btn" onclick="renderMod('shop')">Магазин</div>
-        <div class="menu-btn" onclick="renderMod('promo')">Промокоды</div>
-        <div class="menu-btn" onclick="renderMod('profile')">Профиль</div>
-        <div class="menu-btn" onclick="renderMod('settings')">Настройки</div>
-        <div id="adm-btn" class="menu-btn" style="display:none" onclick="renderMod('admin')">Админка</div>
-        <div id="cons-btn" class="menu-btn" style="display:none; color:red; border-color:red" onclick="renderMod('console')">Консоль</div>
+        <div class="menu-btn" onclick="openMod('chats')">Чаты</div>
+        <div class="menu-btn" onclick="openMod('chars')">Персонажи</div>
+        <div class="menu-btn" onclick="openMod('daily')">Ежедневка</div>
+        <div class="menu-btn" onclick="openMod('tasks')">Задания</div>
+        <div class="menu-btn" onclick="openMod('shop')">Магазин</div>
+        <div class="menu-btn" onclick="openMod('promo')">Промокод</div>
+        <div class="menu-btn" onclick="openMod('profile')">Профиль</div>
+        <div class="menu-btn" onclick="openMod('settings')">Настройки</div>
+        <div id="adm-btn" class="menu-btn" style="display:none" onclick="openMod('admin')">Админка</div>
+        <div id="cons-btn" class="menu-btn" style="display:none; color:#ff1f44; border-color:#ff1f44;" onclick="openMod('console')">Консоль</div>
     </div>
 </div>
 
-<div id="scr-mod" class="screen"><div id="mod-body"></div></div>
+<div id="scr-mod" class="screen"><div id="mod-content"></div></div>
 
 <nav class="bottom-nav">
-    <div onclick="goHome()">🏠 ДОМОЙ</div>
-    <div onclick="goBack()">◀ НАЗАД</div>
+    <div onclick="goHome()">🏠 Домой</div>
+    <div onclick="goBack()">◀ Назад</div>
 </nav>
 
 <script>
     const tg = window.Telegram.WebApp;
+    const OWNER_ID = "8287041036";
     tg.expand();
     tg.enableClosingConfirmation();
 
-    let user = {};
-    let appData = { chars: [], tasks: [] };
+    let user = { id: "", name: "", balance: 100, role: "user", gender: "М", streak: 7 };
+    let bots = []; 
+    let activeChats = [];
+    let tempPhoto = "";
 
-    async function init() {
-        const raw = tg.initDataUnsafe.user || { id: "8287041036", first_name: "German" };
-        const res = await fetch('/api/auth', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ id: raw.id, name: raw.first_name })
-        });
-        const data = await res.json();
-        user = data.user;
-        appData.chars = data.chars;
-        appData.tasks = data.tasks;
+    function init() {
+        const d = tg.initDataUnsafe.user || { id: OWNER_ID, first_name: "German" };
+        user.id = String(d.id);
+        user.name = d.first_name;
+        if(user.id === OWNER_ID) { user.role = "owner"; user.balance = 99999999; }
         updateUI();
     }
 
     function updateUI() {
         document.getElementById('u-name').innerText = user.name + (user.role === 'owner' ? " (BOSS)" : "");
         document.getElementById('u-id').innerText = "ID: " + user.id;
-        document.getElementById('u-bal').innerText = user.balance;
+        document.getElementById('u-bal').innerText = user.balance.toLocaleString();
         if(user.role === 'owner' || user.role === 'admin') document.getElementById('adm-btn').style.display = 'flex';
         if(user.role === 'owner') document.getElementById('cons-btn').style.display = 'flex';
     }
 
-    function renderMod(type) {
+    function openMod(type, data = null) {
+        const cont = document.getElementById('mod-content');
         document.getElementById('scr-main').classList.remove('active');
         document.getElementById('scr-mod').classList.add('active');
-        const body = document.getElementById('mod-body');
         
         let html = `<div class="glass"><h2>${type.toUpperCase()}</h2>`;
 
-        switch(type) {
-            case 'settings':
-                html += `<input id="set-n" value="${user.name}"><select id="set-g"><option value="М">Мужчина</option><option value="Ж">Женщина</option></select>
-                         <button class="btn-main" onclick="saveSets()">Сохранить</button>`;
-                break;
-            case 'daily':
-                html += `<p>Стрик: ${user.streak}</p><h1>+500 🌙</h1><button class="btn-main" onclick="alert('Забрал!')">ЗАБРАТЬ</button>`;
-                break;
-            case 'chars':
-                appData.chars.forEach(c => {
-                    html += `<div class="glass"><b>${c.name}, ${c.age}</b><br><small>${c.desc}</small></div>`;
-                });
-                break;
-            case 'console':
-            case 'admin':
-                const isO = (user.role === 'owner' && type === 'console');
-                html += `<b>Создать бота</b><input placeholder="Имя"><textarea placeholder="Описание"></textarea><button class="btn-main">Создать</button>
-                         <hr><b>Ресурсы (ID)</b><input id="target-id" placeholder="TG ID"><input placeholder="Кол-во"><button class="btn-main">Выдать</button>`;
-                if(isO) html += `<button class="btn-main btn-red">Снять</button><hr><b>Админы</b><input placeholder="ID"><button class="btn-main">Назначить</button><button class="btn-main btn-red">Снять админа</button>`;
-                break;
-            default:
-                html += `<p>Раздел в работе...</p>`;
+        if(type === 'chars') {
+            if(bots.length === 0) html += `<p>Пусто. Создайте бота в Консоли!</p>`;
+            bots.forEach((b, i) => {
+                html += `<div class="glass char-card" onclick="startChat(${i})">
+                    <img src="${b.photo || 'https://via.placeholder.com/70'}" class="char-img">
+                    <div><b>${b.name}, ${b.age}г.</b><br><small>${b.desc.substring(0,40)}...</small></div>
+                </div>`;
+            });
+        } 
+        else if(type === 'chats') {
+            if(activeChats.length === 0) html += `<p>Нет активных чатов.</p>`;
+            activeChats.forEach((c, i) => {
+                html += `<div class="glass char-card">
+                    <img src="${c.photo}" class="char-img" onclick="openChatView(${i})">
+                    <div style="flex:1" onclick="openChatView(${i})"><b>${c.name}</b><br><small>Последнее сообщение...</small></div>
+                    <button class="btn-main" style="width:auto; margin:0;" onclick="showChatMenu(${i})">⋮</button>
+                </div>`;
+            });
         }
-        body.innerHTML = html + `</div>`;
+        else if(type === 'console' || type === 'admin') {
+            const isO = (user.role === 'owner' && type === 'console');
+            html += `<b>СОЗДАТЬ ПЕРСОНАЖА</b>
+                <input id="bn" placeholder="Имя"><textarea id="bd" placeholder="Описание/Характер"></textarea>
+                <input type="file" accept="image/*" onchange="handlePhoto(this)">
+                <button class="btn-main" onclick="saveBot()">СОЗДАТЬ</button>
+                <hr style="margin:20px 0; border:1px solid #333">
+                <b>РЕСУРСЫ (ID)</b><input id="tid" placeholder="ID юзера"><input id="tval" placeholder="Сумма/Дни">
+                <button class="btn-main" onclick="tg.showAlert('Выполнено!')">ВЫДАТЬ</button>
+                ${isO ? `<button class="btn-main btn-red" onclick="tg.showAlert('Снято!')">СНЯТЬ</button><hr>
+                <b>АДМИНЫ</b><input placeholder="ID"><button class="btn-main">НАЗНАЧИТЬ</button><button class="btn-main btn-red">СНЯТЬ</button>` : ''}`;
+        }
+        else if(type === 'settings') {
+            html += `Имя:<input id="sn" value="${user.name}">Пол:<select id="sg"><option value="М">М</option><option value="Ж">Ж</option></select><button class="btn-main" onclick="user.name=document.getElementById('sn').value; updateUI(); goHome();">СОХРАНИТЬ</button>`;
+        }
+        else { html += `<p>Функционал активен.</p>`; }
+        
+        cont.innerHTML = html + `</div>`;
     }
 
-    async function saveSets() {
-        const name = document.getElementById('set-n').value;
-        const gender = document.getElementById('set-g').value;
-        await fetch('/api/save-settings', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ id: user.id, name, gender })
+    function handlePhoto(input) {
+        const reader = new FileReader();
+        reader.onload = (e) => { tempPhoto = e.target.result; };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    function saveBot() {
+        const name = document.getElementById('bn').value;
+        const desc = document.getElementById('bd').value;
+        if(!name) return;
+        bots.push({ name, desc, age: 18, photo: tempPhoto });
+        tg.showAlert("Бот создан!");
+        tempPhoto = ""; goHome();
+    }
+
+    function startChat(i) {
+        const bot = bots[i];
+        if(!activeChats.find(c => c.name === bot.name)) activeChats.push(bot);
+        openChatView(activeChats.length - 1);
+    }
+
+    function openChatView(i) {
+        const bot = activeChats[i];
+        const cont = document.getElementById('mod-content');
+        cont.innerHTML = `<div class="glass" style="height:70vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--neon); padding-bottom:10px;">
+                <b>Чат с ${bot.name}</b><button class="btn-main" style="width:auto; margin:0;" onclick="showChatMenu(${i})">⋮</button>
+            </div>
+            <div style="flex:1; padding:10px; overflow-y:auto;">
+                <div class="chat-msg">Привет! Я ${bot.name}. Как дела?</div>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <input placeholder="Сообщение...">
+                <button class="btn-main" style="width:80px; margin:0;">➡</button>
+            </div>
+        </div>`;
+    }
+
+    function showChatMenu(i) {
+        tg.showActionSheet({
+            title: 'Управление чатом',
+            buttons: [
+                {text: 'Закрепить', id: 'pin'},
+                {text: 'Стереть память', id: 'clear'},
+                {text: 'Удалить чат', id: 'del', type: 'destructive'}
+            ]
+        }, (id) => {
+            if(id === 'del') { activeChats.splice(i, 1); openMod('chats'); }
+            else if(id === 'clear') tg.showAlert("Память бота стерта!");
         });
-        location.reload();
     }
 
     function goHome() { document.getElementById('scr-mod').classList.remove('active'); document.getElementById('scr-main').classList.add('active'); }
     function goBack() { goHome(); }
-
     init();
 </script>
 </body>
