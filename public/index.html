@@ -7,26 +7,40 @@
     <style>
         :root { --neon: #bc13fe; --glass: rgba(15, 5, 25, 0.98); --border: rgba(188, 19, 254, 0.5); }
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; touch-action: none; }
-        .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow-y: auto; padding: 15px; }
+        .screen { display: none; height: calc(100vh - 70px); flex-direction: column; overflow-y: auto; padding: 15px; box-sizing: border-box; }
         .active { display: flex; }
         .glass { background: var(--glass); border: 1px solid var(--border); border-radius: 15px; padding: 15px; margin-bottom: 15px; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .menu-btn { height: 85px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid var(--border); border-radius: 15px; text-transform: uppercase; cursor: pointer; background: rgba(188, 19, 254, 0.05); }
-        .menu-btn:active { background: var(--neon); transform: scale(0.95); }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #0c0212; border: 1px solid var(--neon); color: #fff; border-radius: 10px; }
-        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-red { background: #ff1f44; }
-        .char-card { display: flex; gap: 15px; align-items: center; cursor: pointer; }
-        .char-img { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; border: 1px solid var(--neon); }
-        .chat-msg { background: rgba(188, 19, 254, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 10px; max-width: 80%; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .menu-btn { height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid var(--border); border-radius: 15px; background: rgba(188, 19, 254, 0.05); text-transform: uppercase; cursor: pointer; }
+        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 10px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--glass); border-top: 1px solid var(--neon); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #0c0212; border: 1px solid var(--neon); color: #fff; border-radius: 10px; box-sizing: border-box; }
+        .char-card { display: flex; align-items: center; gap: 15px; position: relative; }
+        .char-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 1px solid var(--neon); }
+        #layer-cap, #layer-reg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-<div id="scr-main" class="screen active">
+<div id="layer-cap">
+    <h1 style="color:var(--neon); font-size: 40px;">18+</h1>
+    <p>Контент только для взрослых.<br>Вам есть 18 лет?</p>
+    <button class="btn-main" onclick="showReg()">ДА, МНЕ ЕСТЬ 18</button>
+    <button class="btn-main" style="background: #333;" onclick="tg.close()">НЕТ</button>
+</div>
+
+<div id="layer-reg" style="display:none">
+    <div class="glass">
+        <h2>РЕГИСТРАЦИЯ</h2>
+        <input id="reg-name" placeholder="Твое имя">
+        <select id="reg-gender"><option value="М">Мужской пол</option><option value="Ж">Женский пол</option></select>
+        <button class="btn-main" onclick="startApp()">НАЧАТЬ ПРИКЛЮЧЕНИЕ</button>
+    </div>
+</div>
+
+<div id="scr-main" class="screen">
     <div class="glass" style="display:flex; justify-content:space-between; align-items:center;">
-        <div><b id="u-name" style="color:var(--neon)">German Green (BOSS)</b><br><small id="u-id" style="color:#888"></small></div>
+        <div><b id="u-name" style="color:var(--neon)">...</b><br><small id="u-id"></small></div>
         <div>🌙 <b id="u-bal">0</b></div>
     </div>
     <div class="menu-grid">
@@ -35,149 +49,97 @@
         <div class="menu-btn" onclick="openMod('daily')">Ежедневка</div>
         <div class="menu-btn" onclick="openMod('tasks')">Задания</div>
         <div class="menu-btn" onclick="openMod('shop')">Магазин</div>
-        <div class="menu-btn" onclick="openMod('promo')">Промокод</div>
+        <div class="menu-btn" onclick="openMod('promo')">Промокоды</div>
         <div class="menu-btn" onclick="openMod('profile')">Профиль</div>
         <div class="menu-btn" onclick="openMod('settings')">Настройки</div>
         <div id="adm-btn" class="menu-btn" style="display:none" onclick="openMod('admin')">Админка</div>
-        <div id="cons-btn" class="menu-btn" style="display:none; color:#ff1f44; border-color:#ff1f44;" onclick="openMod('console')">Консоль</div>
+        <div id="cons-btn" class="menu-btn" style="display:none; color:red; border-color:red" onclick="openMod('console')">Консоль</div>
     </div>
 </div>
 
 <div id="scr-mod" class="screen"><div id="mod-content"></div></div>
 
 <nav class="bottom-nav">
-    <div onclick="goHome()">🏠 Домой</div>
-    <div onclick="goBack()">◀ Назад</div>
+    <div onclick="goHome()">🏠 ДОМОЙ</div>
+    <div onclick="goBack()">◀ НАЗАД</div>
 </nav>
 
 <script>
     const tg = window.Telegram.WebApp;
-    const OWNER_ID = "8287041036";
     tg.expand();
-    tg.enableClosingConfirmation();
+    let user = {}, allChars = [], allItems = [], tempPhoto = "";
 
-    let user = { id: "", name: "", balance: 100, role: "user", gender: "М", streak: 7 };
-    let bots = []; 
-    let activeChats = [];
-    let tempPhoto = "";
-
-    function init() {
-        const d = tg.initDataUnsafe.user || { id: OWNER_ID, first_name: "German" };
-        user.id = String(d.id);
-        user.name = d.first_name;
-        if(user.id === OWNER_ID) { user.role = "owner"; user.balance = 99999999; }
-        updateUI();
+    function showReg() {
+        document.getElementById('layer-cap').style.display='none';
+        document.getElementById('layer-reg').style.display='flex';
+        const raw = tg.initDataUnsafe.user || {id: "8287041036", first_name: "Owner"};
+        document.getElementById('reg-name').value = raw.first_name;
     }
 
-    function updateUI() {
-        document.getElementById('u-name').innerText = user.name + (user.role === 'owner' ? " (BOSS)" : "");
+    async function startApp() {
+        const raw = tg.initDataUnsafe.user || {id: "8287041036"};
+        const res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ id: raw.id, name: document.getElementById('reg-name').value, gender: document.getElementById('reg-gender').value })
+        });
+        const data = await res.json();
+        user = data.user; allChars = data.chars; allItems = data.items;
+        document.getElementById('layer-reg').style.display='none';
+        document.getElementById('scr-main').classList.add('active');
+        renderMain();
+    }
+
+    function renderMain() {
+        document.getElementById('u-name').innerText = user.name + (user.role==='owner'?' (BOSS)':'');
         document.getElementById('u-id').innerText = "ID: " + user.id;
-        document.getElementById('u-bal').innerText = user.balance.toLocaleString();
-        if(user.role === 'owner' || user.role === 'admin') document.getElementById('adm-btn').style.display = 'flex';
-        if(user.role === 'owner') document.getElementById('cons-btn').style.display = 'flex';
+        document.getElementById('u-bal').innerText = user.balance;
+        if(user.role==='owner' || user.role==='admin') document.getElementById('adm-btn').style.display='flex';
+        if(user.role==='owner') document.getElementById('cons-btn').style.display='flex';
     }
 
-    function openMod(type, data = null) {
-        const cont = document.getElementById('mod-content');
-        document.getElementById('scr-main').classList.remove('active');
+    function openMod(type) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr-mod').classList.add('active');
-        
+        const cont = document.getElementById('mod-content');
         let html = `<div class="glass"><h2>${type.toUpperCase()}</h2>`;
 
-        if(type === 'chars') {
-            if(bots.length === 0) html += `<p>Пусто. Создайте бота в Консоли!</p>`;
-            bots.forEach((b, i) => {
-                html += `<div class="glass char-card" onclick="startChat(${i})">
-                    <img src="${b.photo || 'https://via.placeholder.com/70'}" class="char-img">
-                    <div><b>${b.name}, ${b.age}г.</b><br><small>${b.desc.substring(0,40)}...</small></div>
-                </div>`;
+        if(type === 'console') {
+            html += `<b>ДОБАВИТЬ ТОВАР</b><input id="in-n" placeholder="Название"><input id="in-p" type="number" placeholder="Цена"><select id="in-c"><option value="Stars">Stars</option><option value="USD">USD</option></select><button class="btn-main" onclick="manageItem('add')">СОЗДАТЬ ТОВАР</button><hr>`;
+            html += `<b>НОВЫЙ ПЕРСОНАЖ</b><input id="c-n" placeholder="Имя"><input id="c-a" type="number" placeholder="Возраст"><textarea id="c-d" placeholder="Описание"></textarea><input type="file" onchange="encodePhoto(this)"><button class="btn-main" onclick="manageChar('add')">СОЗДАТЬ ПЕРСА ДЛЯ ВСЕХ</button>`;
+        } else if(type === 'chars') {
+            allChars.forEach(c => {
+                html += `<div class="glass char-card"><img src="${c.photo || 'https://via.placeholder.com/60'}" class="char-img"><div><b>${c.name}, ${c.age}</b><br><small>${c.desc}</small></div>${user.role==='owner' ? `<button onclick="manageChar('delete', '${c._id}')" style="position:absolute; right:10px; background:red; border:none; color:#fff; border-radius:5px;">❌</button>` : ''}</div>`;
             });
-        } 
-        else if(type === 'chats') {
-            if(activeChats.length === 0) html += `<p>Нет активных чатов.</p>`;
-            activeChats.forEach((c, i) => {
-                html += `<div class="glass char-card">
-                    <img src="${c.photo}" class="char-img" onclick="openChatView(${i})">
-                    <div style="flex:1" onclick="openChatView(${i})"><b>${c.name}</b><br><small>Последнее сообщение...</small></div>
-                    <button class="btn-main" style="width:auto; margin:0;" onclick="showChatMenu(${i})">⋮</button>
-                </div>`;
-            });
+        } else if(type === 'shop') {
+            allItems.length ? allItems.forEach(i => {
+                html += `<div class="glass" style="display:flex; justify-content:space-between; align-items:center;"><span>${i.name}<br><small>${i.price} ${i.currency}</small></span><button class="btn-main" style="width:auto; margin:0; padding:10px 20px;" onclick="tg.showAlert('Оплата через ${i.currency}...')">КУПИТЬ</button></div>`;
+            }) : html += `<p>В магазине пока пусто.</p>`;
         }
-        else if(type === 'console' || type === 'admin') {
-            const isO = (user.role === 'owner' && type === 'console');
-            html += `<b>СОЗДАТЬ ПЕРСОНАЖА</b>
-                <input id="bn" placeholder="Имя"><textarea id="bd" placeholder="Описание/Характер"></textarea>
-                <input type="file" accept="image/*" onchange="handlePhoto(this)">
-                <button class="btn-main" onclick="saveBot()">СОЗДАТЬ</button>
-                <hr style="margin:20px 0; border:1px solid #333">
-                <b>РЕСУРСЫ (ID)</b><input id="tid" placeholder="ID юзера"><input id="tval" placeholder="Сумма/Дни">
-                <button class="btn-main" onclick="tg.showAlert('Выполнено!')">ВЫДАТЬ</button>
-                ${isO ? `<button class="btn-main btn-red" onclick="tg.showAlert('Снято!')">СНЯТЬ</button><hr>
-                <b>АДМИНЫ</b><input placeholder="ID"><button class="btn-main">НАЗНАЧИТЬ</button><button class="btn-main btn-red">СНЯТЬ</button>` : ''}`;
-        }
-        else if(type === 'settings') {
-            html += `Имя:<input id="sn" value="${user.name}">Пол:<select id="sg"><option value="М">М</option><option value="Ж">Ж</option></select><button class="btn-main" onclick="user.name=document.getElementById('sn').value; updateUI(); goHome();">СОХРАНИТЬ</button>`;
-        }
-        else { html += `<p>Функционал активен.</p>`; }
-        
         cont.innerHTML = html + `</div>`;
     }
 
-    function handlePhoto(input) {
+    function encodePhoto(input) {
         const reader = new FileReader();
         reader.onload = (e) => { tempPhoto = e.target.result; };
         reader.readAsDataURL(input.files[0]);
     }
 
-    function saveBot() {
-        const name = document.getElementById('bn').value;
-        const desc = document.getElementById('bd').value;
-        if(!name) return;
-        bots.push({ name, desc, age: 18, photo: tempPhoto });
-        tg.showAlert("Бот создан!");
-        tempPhoto = ""; goHome();
+    async function manageChar(action, id) {
+        const charData = action==='add' ? {name: document.getElementById('c-n').value, age: document.getElementById('c-a').value, desc: document.getElementById('c-d').value, photo: tempPhoto} : null;
+        const res = await fetch('/api/manage-char', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action, charData, id, userId: user.id}) });
+        const data = await res.json(); allChars = data.chars; openMod('chars');
     }
 
-    function startChat(i) {
-        const bot = bots[i];
-        if(!activeChats.find(c => c.name === bot.name)) activeChats.push(bot);
-        openChatView(activeChats.length - 1);
+    async function manageItem(action, id) {
+        const itemData = {name: document.getElementById('in-n').value, price: document.getElementById('in-p').value, currency: document.getElementById('in-c').value};
+        const res = await fetch('/api/manage-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action, itemData, id, userId: user.id}) });
+        const data = await res.json(); allItems = data.items; tg.showAlert("Магазин обновлен!");
     }
 
-    function openChatView(i) {
-        const bot = activeChats[i];
-        const cont = document.getElementById('mod-content');
-        cont.innerHTML = `<div class="glass" style="height:70vh; display:flex; flex-direction:column;">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--neon); padding-bottom:10px;">
-                <b>Чат с ${bot.name}</b><button class="btn-main" style="width:auto; margin:0;" onclick="showChatMenu(${i})">⋮</button>
-            </div>
-            <div style="flex:1; padding:10px; overflow-y:auto;">
-                <div class="chat-msg">Привет! Я ${bot.name}. Как дела?</div>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <input placeholder="Сообщение...">
-                <button class="btn-main" style="width:80px; margin:0;">➡</button>
-            </div>
-        </div>`;
-    }
-
-    function showChatMenu(i) {
-        tg.showActionSheet({
-            title: 'Управление чатом',
-            buttons: [
-                {text: 'Закрепить', id: 'pin'},
-                {text: 'Стереть память', id: 'clear'},
-                {text: 'Удалить чат', id: 'del', type: 'destructive'}
-            ]
-        }, (id) => {
-            if(id === 'del') { activeChats.splice(i, 1); openMod('chats'); }
-            else if(id === 'clear') tg.showAlert("Память бота стерта!");
-        });
-    }
-
-    function goHome() { document.getElementById('scr-mod').classList.remove('active'); document.getElementById('scr-main').classList.add('active'); }
+    function goHome() { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('scr-main').classList.add('active'); }
     function goBack() { goHome(); }
-    init();
+    document.addEventListener('touchmove', (e) => { if (!e.target.closest('.screen')) e.preventDefault(); }, { passive: false });
 </script>
 </body>
 </html>
