@@ -3,86 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Осколки Луны</title>
     <style>
-        body { background: #0b0e14; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        .container { padding: 20px; text-align: center; }
+        :root { --main-color: #00f2ff; --accent-color: #ff00ff; --bg: #0b0e14; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 20px; }
         
-        /* Карточки магазина */
-        .sub-card { 
-            background: linear-gradient(145deg, #1a1f29, #12161d);
-            border: 1px solid #333; border-radius: 15px;
-            margin: 15px 0; padding: 15px; text-align: left;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .sub-card h3 { color: #00f2ff; margin: 0 0 10px 0; }
-        .sub-card p { font-size: 0.9em; color: #aaa; }
-        .sub-card .price { font-weight: bold; color: #fff; display: block; margin-top: 10px; }
+        /* Капча 18+ */
+        #captcha { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        .btn { 
-            background: #00f2ff; color: #000; border: none; padding: 10px 20px;
-            border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;
-        }
-        .btn-daily { background: #ff00ff; color: #fff; margin-bottom: 20px; }
-        
-        /* Ежедневка */
-        .daily-box {
-            background: rgba(255, 0, 255, 0.1);
-            border: 1px dashed #ff00ff; padding: 15px; border-radius: 15px; margin-bottom: 20px;
-        }
+        .daily-card { border: 2px solid var(--accent-color); padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 20px; background: rgba(255,0,255,0.05); }
+        .sub-card { background: #1a1f29; border: 1px solid #333; border-radius: 15px; padding: 15px; margin: 15px 0; }
+        .sub-card h3 { color: var(--main-color); margin: 0; }
+        .price { color: #00ffaa; font-weight: bold; font-size: 1.1em; }
+        .btn { background: var(--main-color); border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-pink { background: var(--accent-color); color: white; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🌙 Осколки Луны</h2>
-        <div id="balance-info">Баланс: <span id="balance">0</span></div>
 
-        <div class="daily-box">
-            <h4>Ежедневный сбор</h4>
-            <p style="font-size: 0.8em;">Заходи каждый день и забирай свою долю Луны. На 7-й день тебя ждет двойной бонус!</p>
-            <button class="btn btn-daily" onclick="getDaily()">Забрать награду</button>
-            <div id="streak-info">Стрик: 0 дней</div>
-        </div>
+    <div id="captcha">
+        <h1 style="color:red">18+</h1>
+        <p>Для входа подтвердите возраст</p>
+        <button class="btn" style="width:200px" onclick="document.getElementById('captcha').remove()">Мне есть 18</button>
+    </div>
 
-        <h3>Магазин Подписок (30 дней)</h3>
-        
-        <div class="sub-card">
-            <h3>Premium</h3>
-            <p>Доступ к базовым генерациям. +50 Осколков Луны ежедневно.</p>
-            <span class="price">💰 500 Осколков</span>
-            <button class="btn">Купить</button>
-        </div>
+    <div class="daily-card">
+        <h3>🎁 Ежедневная награда</h3>
+        <p>Заходи 7 дней подряд — получи <b>x2 Осколков</b>!</p>
+        <button class="btn btn-pink" onclick="claimDaily()">Забрать Осколки</button>
+    </div>
 
-        <div class="sub-card">
-            <h3>Ultra</h3>
-            <p>Статус абсолютной власти. +500 Осколков ежедневно, x2 бонус за стрик и эксклюзивные фото персонажей.</p>
-            <span class="price">💰 10,000 Осколков</span>
-            <button class="btn">Купить</button>
-        </div>
+    <h2 style="color: var(--main-color)">МАГАЗИН (30 ДНЕЙ)</h2>
+
+    <div class="sub-card">
+        <h3>Premium</h3>
+        <p>+50 Осколков Луны ежедневно. Базовый статус.</p>
+        <div class="price">500 Осколков</div>
+        <button class="btn">Купить</button>
+    </div>
+
+    <div class="sub-card">
+        <h3>Pro</h3>
+        <p>+100 Осколков Луны ежедневно. Больше возможностей.</p>
+        <div class="price">1,500 Осколков</div>
+        <button class="btn">Купить</button>
+    </div>
+
+    <div class="sub-card" style="border-color: gold">
+        <h3>Ultra</h3>
+        <p>+500 Осколков ежедневно. x2 бонус за стрик всегда.</p>
+        <div class="price">10,000 Осколков</div>
+        <button class="btn">Купить</button>
     </div>
 
     <script>
-        let tgId = 12345; // Сюда подставится реальный ID из Telegram.WebApp
-
-        async function loadUser() {
-            const res = await fetch(`/api/user/${tgId}`);
-            const user = await res.json();
-            document.getElementById('balance').innerText = user.balance;
-            document.getElementById('streak-info').innerText = `Стрик: ${user.streak} дней`;
-        }
-
-        async function getDaily() {
+        async function claimDaily() {
+            // В реальном приложении тут будет window.Telegram.WebApp.initDataUnsafe.user.id
+            const tgId = 12345; 
             const res = await fetch('/api/daily', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ tgId })
             });
             const data = await res.json();
-            alert(data.message || `Получено: ${data.reward} Осколков!`);
-            loadUser();
+            alert(data.msg || `Вы получили ${data.reward} Осколков Луны!`);
         }
-
-        loadUser();
     </script>
 </body>
 </html>
