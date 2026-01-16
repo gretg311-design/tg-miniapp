@@ -5,37 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
         body { background: #0b0e14; color: #fff; font-family: sans-serif; padding: 20px; }
-        .daily-box { border: 2px solid #ff00ff; border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 25px; }
+        .daily-box { border: 2px solid #ff00ff; border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 25px; box-shadow: 0 0 10px #ff00ff33; }
         .sub-card { background: #1a1f29; border-radius: 15px; padding: 15px; margin: 15px 0; border: 1px solid #333; }
-        .sub-name { color: #00f2ff; font-weight: bold; font-size: 1.2em; }
+        .sub-name { color: #00f2ff; font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
         .price { color: #00ffaa; font-weight: bold; margin: 10px 0; }
-        .btn { background: #00f2ff; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .btn-pink { background: #ff00ff; color: white; }
+        .btn { background: #00f2ff; color: #000; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-pink { background: #ff00ff; color: white; margin-top: 15px; }
     </style>
 </head>
 <body>
     <div class="daily-box">
-        <h3>🎁 Ежедневная награда</h3>
-        <p>Заходи 7 дней подряд — получи <b>x2 Осколков</b>!</p>
-        <button class="btn btn-pink" onclick="claim()">Забрать Осколки</button>
+        <h3 style="margin:0">🎁 Ежедневная награда</h3>
+        <p style="font-size: 14px;">Заходи 7 дней подряд — получи <b>x2 Осколков</b>!</p>
+        <button class="btn btn-pink" onclick="claimDaily()">Забрать Осколки</button>
     </div>
 
-    <h2 style="color: #00f2ff">МАГАЗИН (30 ДНЕЙ)</h2>
+    <h2 style="color: #00f2ff; margin-bottom: 10px;">МАГАЗИН (30 ДНЕЙ)</h2>
+    
     <div class="sub-card">
         <div class="sub-name">Premium</div>
-        <p>+50 Осколков ежедневно. Базовый статус.</p>
+        <p style="font-size: 13px; color: #ccc;">+50 Осколков Луны ежедневно. Базовый статус.</p>
         <div class="price">500 Осколков</div>
         <button class="btn">Купить</button>
     </div>
+
+    <div class="sub-card">
+        <div class="sub-name">Pro</div>
+        <p style="font-size: 13px; color: #ccc;">+100 Осколков Луны ежедневно. Больше возможностей.</p>
+        <div class="price">1,500 Осколков</div>
+        <button class="btn">Купить</button>
+    </div>
+
     <script>
-        async function claim() {
+        async function claimDaily() {
             const res = await fetch('/api/daily', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ tgId: 12345 }) // Сюда подставится реальный ID
+                body: JSON.stringify({ tgId: 12345 }) // Тут будет реальный ID
             });
             const data = await res.json();
-            alert(data.msg || `Получено: ${data.reward} Осколков Луны!`);
+            alert(data.success ? `Получено ${data.reward} Осколков!` : data.msg);
         }
     </script>
 </body>
