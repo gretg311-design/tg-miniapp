@@ -6,35 +6,32 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// Ссылка берется из Variables Railway
+// Проверяем, что видит сервер в реальности
 const MONGO_URL = process.env.MONGO_URL;
 
+console.log("--- ПРОВЕРКА ОКРУЖЕНИЯ ---");
 if (!MONGO_URL) {
-    console.log("❌ ОШИБКА: Переменная MONGO_URL не видна серверу!");
+    console.log("❌ КРИТИЧЕСКАЯ ОШИБКА: Переменная MONGO_URL пустая (undefined)!");
+    console.log("Совет: Проверь вкладку Variables в Railway и нажми Redeploy.");
 } else {
+    console.log("✅ MONGO_URL обнаружена, пытаюсь подключиться...");
+    
     mongoose.connect(MONGO_URL)
-        .then(() => console.log('🌙 База Осколков Луны подключена успешно'))
-        .catch(err => console.error('❌ Ошибка MongoDB:', err.message));
+        .then(() => console.log('🌙 СИСТЕМА ГОТОВА: База Осколков Луны подключена'))
+        .catch(err => console.error('❌ ОШИБКА ПОДКЛЮЧЕНИЯ К МОНГО:', err.message));
 }
 
-// Схема по твоим правилам
+// Модель игрока (все правила про x2 бонусы и подписки)
 const UserSchema = new mongoose.Schema({
     tgId: { type: Number, unique: true },
     balance: { type: Number, default: 100 },
-    subscription: { type: String, default: 'None' }, // Premium, Pro, VIP, Ultra
+    subscription: { type: String, default: 'None' },
     lastDaily: { type: Date, default: new Date(0) },
     streak: { type: Number, default: 0 }
 });
 const User = mongoose.model('User', UserSchema);
 
-// Награды по твоему списку
-const REWARDS = {
-    'Premium': 50,
-    'Pro': 100,
-    'VIP': 250,
-    'Ultra': 500,
-    'None': 20
-};
+const REWARDS = { 'Premium': 50, 'Pro': 100, 'VIP': 250, 'Ultra': 500, 'None': 20 };
 
 app.post('/api/daily', async (req, res) => {
     try {
@@ -43,31 +40,26 @@ app.post('/api/daily', async (req, res) => {
         if (!user) user = await User.create({ tgId });
 
         const now = new Date();
-        const diffHours = (now - user.lastDaily) / (1000 * 60 * 60);
+        const diff = (now - user.lastDaily) / (1000 * 60 * 60);
 
-        if (diffHours < 24) {
-            return res.json({ success: false, msg: `Жди еще ${Math.ceil(24 - diffHours)}ч.` });
-        }
+        if (diff < 24) return res.json({ success: false, msg: `Приходи через ${Math.ceil(24 - diff)}ч.` });
 
-        // Стрик сбрасывается, если пропустил больше 48 часов
-        user.streak = (diffHours < 48) ? user.streak + 1 : 1;
+        user.streak = (diff < 48) ? user.streak + 1 : 1;
+        let reward = REWARDS[user.subscription] || 20;
 
-        let reward = REWARDS[user.subscription] || REWARDS['None'];
-
-        // Твое правило: x2 бонус за 7 дней для всех платных подписок
-        if (user.streak >= 7 && user.subscription !== 'None') {
-            reward *= 2;
-        }
+        // Твое правило x2 на 7-й день
+        if (user.streak >= 7 && user.subscription !== 'None') reward *= 2;
 
         user.balance += reward;
         user.lastDaily = now;
         await user.save();
-
-        res.json({ success: true, reward, streak: user.streak, balance: user.balance });
+        res.json({ success: true, reward, balance: user.balance });
     } catch (e) {
-        res.json({ success: false, msg: "Ошибка системы наград" });
+        res.json({ success: false, msg: "База данных недоступна" });
     }
 });
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Сервер на порту ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 СЕРВЕР ЗАПУЩЕН НА ПОРТУ ${PORT}`);
+});
