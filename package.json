@@ -1,13 +1,16 @@
 {
-  "name": "ot-a-do-ya",
+  "name": "ot-a-do-ya-project",
   "version": "1.0.0",
+  "description": "Mini App с Осколками Луны и персонажами",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "mongoose": "^7.6.3",
-    "path": "^0.12.7"
+    "mongoose": "^7.0.0"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
