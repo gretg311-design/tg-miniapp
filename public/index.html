@@ -2,111 +2,87 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Осколки Луны</title>
     <style>
-        :root { --neon: #bc13fe; --glass: rgba(20, 10, 30, 0.95); }
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; }
-        .screen { display: none; height: 100vh; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; padding-bottom: 80px; }
-        .active { display: flex; }
-        .glass { background: var(--glass); border: 1px solid var(--neon); border-radius: 15px; padding: 15px; margin-bottom: 15px; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .menu-btn { height: 70px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--neon); border-radius: 12px; font-size: 12px; font-weight: bold; background: rgba(188, 19, 254, 0.1); }
-        .btn-main { width: 100%; padding: 15px; background: var(--neon); border: none; color: #fff; border-radius: 10px; font-weight: bold; }
-        .nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: #000; border-top: 1px solid var(--neon); display: flex; justify-content: center; align-items: center; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #111; border: 1px solid var(--neon); color: #fff; border-radius: 8px; }
+        body { background: #0b0e14; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        .container { padding: 20px; text-align: center; }
+        
+        /* Карточки магазина */
+        .sub-card { 
+            background: linear-gradient(145deg, #1a1f29, #12161d);
+            border: 1px solid #333; border-radius: 15px;
+            margin: 15px 0; padding: 15px; text-align: left;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .sub-card h3 { color: #00f2ff; margin: 0 0 10px 0; }
+        .sub-card p { font-size: 0.9em; color: #aaa; }
+        .sub-card .price { font-weight: bold; color: #fff; display: block; margin-top: 10px; }
+        
+        .btn { 
+            background: #00f2ff; color: #000; border: none; padding: 10px 20px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;
+        }
+        .btn-daily { background: #ff00ff; color: #fff; margin-bottom: 20px; }
+        
+        /* Ежедневка */
+        .daily-box {
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px dashed #ff00ff; padding: 15px; border-radius: 15px; margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h2>🌙 Осколки Луны</h2>
+        <div id="balance-info">Баланс: <span id="balance">0</span></div>
 
-<div id="scr-reg" class="screen active" style="justify-content: center;">
-    <div class="glass">
-        <h2 style="text-align: center; color: var(--neon);">РЕГИСТРАЦИЯ</h2>
-        <input id="r-name" placeholder="Ваше имя">
-        <select id="r-gen"><option value="М">Мужской</option><option value="Ж">Женский</option></select>
-        <button class="btn-main" onclick="auth()">ВОЙТИ</button>
+        <div class="daily-box">
+            <h4>Ежедневный сбор</h4>
+            <p style="font-size: 0.8em;">Заходи каждый день и забирай свою долю Луны. На 7-й день тебя ждет двойной бонус!</p>
+            <button class="btn btn-daily" onclick="getDaily()">Забрать награду</button>
+            <div id="streak-info">Стрик: 0 дней</div>
+        </div>
+
+        <h3>Магазин Подписок (30 дней)</h3>
+        
+        <div class="sub-card">
+            <h3>Premium</h3>
+            <p>Доступ к базовым генерациям. +50 Осколков Луны ежедневно.</p>
+            <span class="price">💰 500 Осколков</span>
+            <button class="btn">Купить</button>
+        </div>
+
+        <div class="sub-card">
+            <h3>Ultra</h3>
+            <p>Статус абсолютной власти. +500 Осколков ежедневно, x2 бонус за стрик и эксклюзивные фото персонажей.</p>
+            <span class="price">💰 10,000 Осколков</span>
+            <button class="btn">Купить</button>
+        </div>
     </div>
-</div>
 
-<div id="scr-main" class="screen">
-    <div class="glass" style="display: flex; justify-content: space-between;">
-        <span id="u-name">...</span>
-        <span id="u-bal">🌙 0</span>
-    </div>
-    <div class="menu-grid">
-        <div class="menu-btn" onclick="show('shop')">МАГАЗИН</div>
-        <div class="menu-btn" onclick="show('tasks')">ЗАДАНИЯ</div>
-        <div class="menu-btn" onclick="show('daily')">ЕЖЕДНЕВКА</div>
-        <div class="menu-btn" onclick="show('profile')">ПРОФИЛЬ</div>
-        <div id="btn-adm" class="menu-btn" style="display:none; color: red;" onclick="show('admin')">АДМИНКА</div>
-    </div>
-</div>
+    <script>
+        let tgId = 12345; // Сюда подставится реальный ID из Telegram.WebApp
 
-<div id="scr-mod" class="screen">
-    <div id="mod-cont"></div>
-    <button class="btn-main" onclick="show('main')">НАЗАД</button>
-</div>
-
-<script>
-    const tg = window.Telegram.WebApp;
-    let user = {}, tasks = [];
-
-    async function auth() {
-        const raw = tg.initDataUnsafe.user || {id: "8287041036", first_name: "Boss"};
-        const res = await fetch('/api/auth', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({id: raw.id, name: document.getElementById('r-name').value, gender: document.getElementById('r-gen').value})
-        });
-        const data = await res.json();
-        user = data.user; tasks = data.tasks;
-        show('main');
-    }
-
-    function show(scr) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if (scr === 'main') {
-            document.getElementById('scr-main').classList.add('active');
-            document.getElementById('u-name').innerText = user.name + (user.role==='owner'?' (BOSS)':'');
-            document.getElementById('u-bal').innerText = "🌙 " + user.balance;
-            if(user.role==='owner' || user.role==='admin') document.getElementById('btn-adm').style.display='flex';
-        } else {
-            document.getElementById('scr-mod').classList.add('active');
-            renderMod(scr);
+        async function loadUser() {
+            const res = await fetch(`/api/user/${tgId}`);
+            const user = await res.json();
+            document.getElementById('balance').innerText = user.balance;
+            document.getElementById('streak-info').innerText = `Стрик: ${user.streak} дней`;
         }
-    }
 
-    function renderMod(type) {
-        const cont = document.getElementById('mod-cont');
-        if (type === 'admin') {
-            cont.innerHTML = `<div class="glass"><h3>КОНСОЛЬ ПО ID</h3>
-                <input id="tid" placeholder="Telegram ID">
-                <input id="tval" placeholder="Кол-во / Роль">
-                <button class="btn-main" onclick="adminAct('addBalance')">ДАТЬ ШАРДЫ</button>
-                <button class="btn-main" style="margin-top:5px;" onclick="adminAct('setRole')">ДАТЬ РОЛЬ</button>
-            </div>`;
-        } else if (type === 'daily') {
-            cont.innerHTML = `<div class="glass"><h3>ЕЖЕДНЕВКА</h3><p>Твой стрик: ${user.streak} дн.</p><button class="btn-main" onclick="getDaily()">ЗАБРАТЬ НАГРАДУ</button></div>`;
-        } else if (type === 'profile') {
-            cont.innerHTML = `<div class="glass"><h3>ПРОФИЛЬ</h3><p>ID: ${user.id}</p><p>Подписка: ${user.sub}</p></div>`;
+        async function getDaily() {
+            const res = await fetch('/api/daily', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tgId })
+            });
+            const data = await res.json();
+            alert(data.message || `Получено: ${data.reward} Осколков!`);
+            loadUser();
         }
-    }
 
-    async function adminAct(action) {
-        await fetch('/api/admin/control', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({senderId: user.id, targetId: document.getElementById('tid').value, value: document.getElementById('tval').value, action})
-        });
-        tg.showAlert("Готово");
-    }
-
-    async function getDaily() {
-        const res = await fetch('/api/daily', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: user.id}) });
-        const d = await res.json(); user.balance = d.balance; user.streak = d.streak; show('main');
-    }
-
-    tg.expand();
-</script>
+        loadUser();
+    </script>
 </body>
 </html>
