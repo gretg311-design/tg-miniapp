@@ -6,198 +6,143 @@
     <title>Луна: От А до Я</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --purp: #6a0dad; --light-purp: #a37cf7; --glass: rgba(255, 255, 255, 0.08); --bg: #050505; }
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        
-        /* Загрузка */
-        #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .moon { width: 120px; height: 120px; background: radial-gradient(circle at 30% 30%, var(--light-purp), var(--purp)); border-radius: 50%; box-shadow: 0 0 50px var(--purp); animation: pulse 2s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); box-shadow: 0 0 80px var(--purp); } }
-        .disclaimer { position: absolute; bottom: 20px; right: 20px; font-size: 10px; color: #444; }
-
-        /* Экраны */
-        .screen { display: none; padding: 20px; height: calc(100vh - 70px); overflow-y: auto; box-sizing: border-box; }
+        :root { --purp: #6a0dad; --glass: rgba(255, 255, 255, 0.08); --bg: #050505; --gold: #ffd700; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; height: 100%; }
+        .screen { display: none; padding: 20px; height: 100vh; box-sizing: border-box; overflow-y: auto; padding-bottom: 80px; }
         .active { display: block; }
         
-        /* Меню */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .btn-menu { background: var(--glass); border: 1px solid var(--purp); padding: 18px; border-radius: 12px; color: white; text-align: center; font-weight: bold; cursor: pointer; }
-        .shop-btn { grid-column: span 2; border: 2px solid #ffd700; background: linear-gradient(90deg, #1a1a1a, #000); }
+        /* Луна */
+        #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+        .moon { width: 120px; height: 120px; background: radial-gradient(circle at 30% 30%, #a37cf7, var(--purp)); border-radius: 50%; box-shadow: 0 0 50px var(--purp); animation: p 2s infinite ease-in-out; }
+        @keyframes p { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
-        /* Чат */
-        .chat-item { display: flex; justify-content: space-between; align-items: center; background: var(--glass); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid var(--purp); }
-        .chat-dots { font-size: 24px; cursor: pointer; padding: 0 10px; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
-
-        /* Настройки */
-        .setting-row { margin-bottom: 25px; }
-        input[type=range] { width: 100%; accent-color: var(--purp); }
-
-        /* Панели */
-        .top-bar { display: flex; justify-content: space-between; padding: 15px; background: #0a0a0a; border-bottom: 1px solid var(--purp); }
-        .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; height: 60px; background: #000; border-top: 1px solid var(--purp); z-index: 500; }
-        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; }
-
-        #chat-input-area { position: fixed; bottom: 65px; width: 100%; background: #111; padding: 10px; display: none; box-sizing: border-box; }
-        input[disabled] { opacity: 0.5; }
+        /* Интерфейс */
+        .btn-menu { background: var(--glass); border: 1px solid var(--purp); padding: 16px; border-radius: 12px; color: white; text-align: center; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card { background: var(--glass); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        input, select { background: #111; border: 1px solid var(--purp); color: white; padding: 12px; width: 100%; border-radius: 8px; box-sizing: border-box; margin-top: 5px; }
+        
+        .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; border-top: 1px solid var(--purp); height: 65px; z-index: 100; }
+        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="loading-screen">
-        <div class="moon"></div>
-        <p style="margin-top:20px; letter-spacing: 2px; font-size: 14px;">ЗАГРУЗКА ЛУНЫ...</p>
-        <div class="disclaimer">все персонажи вымышлены и их истории</div>
+<div id="loading-screen"><div class="moon"></div><p style="margin-top:20px; letter-spacing: 2px;">ЛУНА ПРОСЫПАЕТСЯ...</p></div>
+
+<div id="captcha-screen" class="screen" style="text-align:center;">
+    <h1 style="color:red; font-size:70px; margin-top:60px;">18+</h1>
+    <p>Подтвердите свой возраст</p>
+    <div class="btn-menu" style="margin-top:40px;" onclick="showScreen('reg-screen')">МНЕ ЕСТЬ 18 ЛЕТ</div>
+</div>
+
+<div id="reg-screen" class="screen">
+    <h3>Регистрация</h3>
+    <label>Как вас называть?</label>
+    <input type="text" id="r-name" placeholder="Ваше имя">
+    <label style="display:block; margin-top:15px;">Ваш пол:</label>
+    <select id="r-gender"><option>Мужской</option><option>Женский</option></select>
+    <div class="btn-menu" style="margin-top:40px; border-color:var(--gold)" onclick="auth()">ПОЛУЧИТЬ ULTRA БОНУС</div>
+</div>
+
+<div id="main-menu" class="screen">
+    <div style="display:flex; justify-content:space-between; padding-bottom:15px; border-bottom:1px solid var(--purp);">
+        <div><b id="u-name"></b><br><small id="u-id" style="color:#888"></small></div>
+        <div style="text-align:right"><b id="u-bal"></b> 💎<br><small id="u-sub" style="color:var(--gold)"></small></div>
     </div>
-
-    <div id="captcha-screen" class="screen" style="text-align:center; padding-top:80px;">
-        <h1 style="color:red; font-size:70px; margin:0;">18+</h1>
-        <p>Контент для взрослых. Вам есть 18 лет?</p>
-        <button class="btn-menu" onclick="showScreen('reg-screen')" style="width:200px">ДА, МНЕ ЕСТЬ 18</button>
+    <div class="menu-grid" style="margin-top:20px;">
+        <div class="btn-menu" onclick="showScreen('chats-screen')">ЧАТЫ</div>
+        <div class="btn-menu">ПЕРСОНАЖИ</div>
+        <div class="btn-menu" onclick="daily()">🎁 БОНУС</div>
+        <div class="btn-menu">🎫 ПРОМО</div>
+        <div class="btn-menu" onclick="showScreen('profile-screen')">👤 ПРОФИЛЬ</div>
+        <div class="btn-menu" onclick="showScreen('settings-screen')">⚙️ НАСТРОЙКИ</div>
+        <div id="adm-btn" class="btn-menu" style="display:none">АДМИН</div>
+        <div id="con-btn" class="btn-menu" style="display:none">КОНСОЛЬ</div>
+        <div class="btn-menu" style="grid-column: span 2; border-color:var(--gold)" onclick="showScreen('shop-screen')">👑 МАГАЗИН</div>
     </div>
+</div>
 
-    <div id="reg-screen" class="screen">
-        <h2>Регистрация</h2>
-        <input type="text" id="reg-name" placeholder="Ваше Имя" class="btn-menu" style="width:100%; margin-bottom:15px; text-align:left;">
-        <select id="reg-gender" class="btn-menu" style="width:100%; text-align:left;">
-            <option value="Мужской">Мужской</option>
-            <option value="Женский">Женский</option>
-        </select>
-        <button class="btn-menu" style="width:100%; margin-top:30px; border-color: gold;" onclick="finishReg()">ПОЛУЧИТЬ ULTRA НА 7 ДНЕЙ</button>
-    </div>
+<div id="settings-screen" class="screen">
+    <h3>⚙️ Настройки</h3>
+    <div class="card"><label>Длина ответа (слов): <b id="v-len">45</b></label>
+    <input type="range" min="45" max="100" value="45" oninput="document.getElementById('v-len').innerText=this.value"></div>
+    <div class="card"><label>Уровень пошлости: <b id="v-lewd">Минимум</b></label>
+    <input type="range" min="1" max="4" value="1" oninput="const l=['','Минимум','Средняя','Сильная','МАКС']; document.getElementById('v-lewd').innerText=l[this.value]"></div>
+    <div class="btn-menu" onclick="showScreen('main-menu')">СОХРАНИТЬ</div>
+</div>
 
-    <div id="main-menu" class="screen">
-        <div class="top-bar">
-            <div><b id="u-name">...</b><br><small id="u-id" style="color:#888"></small></div>
-            <div style="text-align:right"><span id="u-bal">0</span> 💎<br><small id="u-sub" style="color:var(--light-purp)"></small></div>
-        </div>
-        <div class="menu-grid">
-            <div class="btn-menu" onclick="showScreen('chats-screen')">ЧАТЫ</div>
-            <div class="btn-menu" onclick="showScreen('chars-screen')">ПЕРСОНАЖИ</div>
-            <div class="btn-menu" onclick="claimDaily()">ЕЖЕДНЕВКА</div>
-            <div class="btn-menu" onclick="showScreen('promo-screen')">ПРОМОКОДЫ</div>
-            <div class="btn-menu" onclick="showScreen('profile-screen')">ПРОФИЛЬ</div>
-            <div class="btn-menu" onclick="showScreen('settings-screen')">НАСТРОЙКИ</div>
-            <div id="admin-btn" class="btn-menu" style="display:none" onclick="showScreen('admin-screen')">АДМИН</div>
-            <div id="console-btn" class="btn-menu" style="display:none" onclick="showScreen('console-screen')">КОНСОЛЬ</div>
-            <div class="btn-menu shop-btn" onclick="showScreen('shop-screen')">МАГАЗИН</div>
-        </div>
-    </div>
+<div id="shop-screen" class="screen">
+    <h3>Магазин (30 дней)</h3>
+    <div class="card">Premium - 50💎/д | 2 TON <div class="btn-menu">КУПИТЬ</div></div>
+    <div class="card">Pro - 100💎/д | 4 TON <div class="btn-menu">КУПИТЬ</div></div>
+    <div class="card" style="border-color:cyan">Ultra - 500💎/д | 15 TON <div class="btn-menu">КУПИТЬ</div></div>
+</div>
 
-    <div id="chats-screen" class="screen">
-        <h3>Ваши чаты</h3>
-        <div id="chats-list">
-            <div class="chat-item">
-                <div onclick="openChat('Акира')"><b>Акира</b><br><small>Последнее сообщение...</small></div>
-                <div class="chat-dots" onclick="openChatMenu('Акира')">⋮</div>
-            </div>
-        </div>
-    </div>
+<div id="profile-screen" class="screen">
+    <h3>Профиль</h3>
+    <div class="card"><p>ID: <b id="p-id"></b></p><p>Статус: <b id="p-sub"></b></p><p>Баланс: <b id="p-bal"></b></p></div>
+    <div class="btn-menu" onclick="showScreen('main-menu')">НАЗАД</div>
+</div>
 
-    <div id="settings-screen" class="screen">
-        <h3>Настройки</h3>
-        <div class="setting-row">
-            <label>Длина сообщения бота (от 45 слов): <span id="val-len">45</span></label>
-            <input type="range" min="45" max="100" value="45" oninput="updateSetting('msgLength', this.value)">
-        </div>
-        <div class="setting-row">
-            <label>Пошлость: <span id="val-lewd">Минимум</span></label>
-            <input type="range" min="1" max="4" value="1" oninput="updateSetting('lewdness', this.value)">
-        </div>
-        <button class="btn-menu" style="width:100%" onclick="showScreen('main-menu')">СОХРАНИТЬ</button>
-    </div>
+<div class="nav-bar" id="nav" style="display:none">
+    <div class="nav-btn" onclick="showScreen('main-menu')">🏠 ДОМОЙ</div>
+    <div class="nav-btn" onclick="goBack()">⬅️ НАЗАД</div>
+</div>
 
-    <div id="chat-modal" class="modal" onclick="this.style.display='none'">
-        <div style="background:#111; width:80%; border-radius:15px; padding:20px;" onclick="event.stopPropagation()">
-            <h4 id="modal-char-name">Персонаж</h4>
-            <button class="btn-menu" style="width:100%; margin-bottom:10px;">⭐ В ИЗБРАННОЕ</button>
-            <button class="btn-menu" style="width:100%; margin-bottom:10px;" onclick="clearMemory()">🧠 СТЕРЕТЬ ПАМЯТЬ</button>
-            <button class="btn-menu" style="width:100%; border-color:red; color:red;" onclick="deleteChat()">🗑️ УДАЛИТЬ ЧАТ</button>
-        </div>
-    </div>
+<script>
+    const tg = window.Telegram.WebApp; tg.expand(); tg.enableClosingConfirmation();
+    let user = null; let hist = ['main-menu'];
 
-    <div class="nav-bar" id="nav-bar" style="display:none;">
-        <div class="nav-btn" onclick="showScreen('main-menu')">🏠 ДОМОЙ</div>
-        <div class="nav-btn" onclick="goBack()">⬅️ НАЗАД</div>
-    </div>
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('nav').style.display = ['main-menu','settings-screen','profile-screen','shop-screen'].includes(id) ? 'flex' : 'none';
+        if(hist[hist.length-1]!==id) hist.push(id);
+    }
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
+    function goBack() { if(hist.length>1) { hist.pop(); showScreen(hist[hist.length-1]); } }
 
-        let user = null;
-        let history = ['main-menu'];
+    window.onload = async () => {
+        const savedId = localStorage.getItem('lunar_id');
+        if(savedId) await auth(savedId);
+        else { setTimeout(() => { document.getElementById('loading-screen').style.display='none'; showScreen('captcha-screen'); }, 2500); }
+    };
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(!['loading-screen','captcha-screen','reg-screen'].includes(id)) {
-                document.getElementById('nav-bar').style.display = 'flex';
-                if(history[history.length-1] !== id) history.push(id);
-            }
-        }
+    async function auth(sid) {
+        const tid = sid || tg.initDataUnsafe?.user?.id || 12345;
+        const name = document.getElementById('r-name').value;
+        const gen = document.getElementById('r-gender').value;
+        const res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ tgId: tid, name, gender: gen })
+        });
+        user = await res.json();
+        localStorage.setItem('lunar_id', user.tgId);
+        updateUI();
+        document.getElementById('loading-screen').style.display='none';
+        showScreen('main-menu');
+    }
 
-        function goBack() {
-            if(history.length > 1) {
-                history.pop();
-                showScreen(history[history.length-1]);
-            }
-        }
+    function updateUI() {
+        document.getElementById('u-name').innerText = user.name;
+        document.getElementById('u-id').innerText = 'ID: ' + user.tgId;
+        document.getElementById('u-bal').innerText = user.balance;
+        document.getElementById('u-sub').innerText = user.subscription;
+        document.getElementById('p-id').innerText = user.tgId;
+        document.getElementById('p-sub').innerText = user.subscription;
+        document.getElementById('p-bal').innerText = user.balance;
+        if(['admin','owner'].includes(user.role)) document.getElementById('adm-btn').style.display='block';
+        if(user.role==='owner') document.getElementById('con-btn').style.display='block';
+    }
 
-        setTimeout(() => {
-            document.getElementById('loading-screen').style.display = 'none';
-            showScreen('captcha-screen');
-        }, 3000);
-
-        async function finishReg() {
-            const name = document.getElementById('reg-name').value;
-            const gender = document.getElementById('reg-gender').value;
-            if(!name) return alert("Введите имя!");
-
-            const res = await fetch('/api/auth', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ tgId: tg.initDataUnsafe?.user?.id || 123, name, gender })
-            });
-            user = await res.json();
-            updateUI();
-            showScreen('main-menu');
-        }
-
-        function updateUI() {
-            document.getElementById('u-name').innerText = user.name;
-            document.getElementById('u-id').innerText = user.tgId;
-            document.getElementById('u-bal').innerText = user.balance;
-            document.getElementById('u-sub').innerText = user.subscription + (user.subscription === 'Ultra' ? ' ⚡' : '');
-            
-            if(['admin','owner'].includes(user.role)) document.getElementById('admin-btn').style.display = 'block';
-            if(user.role === 'owner') document.getElementById('console-btn').style.display = 'block';
-        }
-
-        function updateSetting(type, val) {
-            if(type === 'msgLength') document.getElementById('val-len').innerText = val;
-            if(type === 'lewdness') {
-                const levels = ["", "Минимум", "Средняя", "Сильная", "МАКСИМУМ"];
-                document.getElementById('val-lewd').innerText = levels[val];
-            }
-        }
-
-        function openChatMenu(name) {
-            document.getElementById('modal-char-name').innerText = name;
-            document.getElementById('chat-modal').style.display = 'flex';
-        }
-
-        async function claimDaily() {
-            const res = await fetch('/api/daily', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ tgId: user.tgId })
-            });
-            const data = await res.json();
-            tg.showAlert(data.success ? `Вы получили ${data.reward} 💎` : data.msg);
-            if(data.success) { user.balance = data.balance; updateUI(); }
-        }
-    </script>
+    async function daily() {
+        const res = await fetch('/api/daily', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({tgId: user.tgId}) });
+        const d = await res.json();
+        tg.showAlert(d.success ? `Награда: ${d.reward} 💎` : d.msg);
+        if(d.success) { user.balance = d.balance; updateUI(); }
+    }
+</script>
 </body>
 </html>
