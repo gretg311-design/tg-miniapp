@@ -7,16 +7,20 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-const { MONGO_URL, OWNER_ID, OPENROUTER_API_KEY } = process.env;
+// Переменные из Railway
+const { MONGO_URL, OWNER_ID, OPENROUTER_API_KEY, PORT = 8080 } = process.env;
 
-mongoose.connect(MONGO_URL).then(() => console.log('🌙 БД ПОДКЛЮЧЕНА'));
+// Подключение к БД
+mongoose.connect(MONGO_URL)
+    .then(() => console.log('🌙 БД ПОДКЛЮЧЕНА УСПЕШНО'))
+    .catch(err => console.error('❌ ОШИБКА БД:', err));
 
-// СХЕМА ЮЗЕРА (Все твои правила по подпискам и бонусам тут)
+// Схема пользователя по твоим правилам
 const UserSchema = new mongoose.Schema({
-    tgId: { type: Number, unique: true },
+    tgId: { type: Number, unique: true, required: true },
     name: String,
     gender: { type: String, default: "Мужской" },
-    role: { type: String, default: 'user' },
+    role: { type: String, default: 'user' }, // owner, admin, user
     balance: { type: Number, default: 100 },
     subscription: { type: String, default: 'None' },
     subExpiry: { type: Date },
@@ -29,46 +33,93 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// ВХОД / РЕГИСТРАЦИЯ
+// --- API ЭНДПОИНТЫ ---
+
+// 1. Вход и Регистрация (Твой запрос: вход без повторной капчи)
 app.post('/api/auth', async (req, res) => {
-    const { tgId, name, gender } = req.body;
-    let user = await User.findOne({ tgId });
-    
-    if (!user) {
-        const isOwner = (tgId == OWNER_ID);
-        user = await User.create({
-            tgId, 
-            name: name || "Странник", 
-            gender: gender || "Мужской",
-            role: isOwner ? 'owner' : 'user',
-            balance: isOwner ? 999999 : 100,
-            subscription: isOwner ? 'Ultra' : 'Ultra', // Новичкам Ultra на 7 дней
-            subExpiry: isOwner ? new Date(2099, 0, 1) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        });
+    try {
+        const { tgId, name, gender } = req.body;
+        let user = await User.findOne({ tgId });
+
+        if (!user) {
+            // Если заходит OWNER_ID, даем права бога
+            const isOwner = (tgId == OWNER_ID);
+            user = await User.create({
+                tgId,
+                name: name || "Странник",
+                gender: gender || "Мужской",
+                role: isOwner ? 'owner' : 'user',
+                balance: isOwner ? 999999 : 100,
+                subscription: isOwner ? 'Ultra' : 'None',
+                subExpiry: isOwner ? new Date(2099, 0, 1) : null
+            });
+        }
+        res.json(user);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
-    res.json(user);
 });
 
-// ЕЖЕДНЕВНЫЙ БОНУС (x2 на 7 день)
+// 2. Ежедневный бонус (Твое правило: x2 на 7-й день)
 app.post('/api/daily', async (req, res) => {
     const { tgId } = req.body;
     const user = await User.findOne({ tgId });
+    if (!user) return res.status(404).send('User not found');
+
     const now = new Date();
-    const diff = (now - user.lastDaily) / (1000 * 60 * 60);
+    const last = new Date(user.lastDaily);
+    const hoursSince = (now - last) / (1000 * 60 * 60);
 
-    if (diff < 24) return res.json({ success: false, msg: `Приходи через ${Math.ceil(24 - diff)}ч.` });
+    if (hoursSince < 24) {
+        return res.json({ success: false, msg: `Бонус будет доступен через ${Math.ceil(24 - hoursSince)}ч.` });
+    }
 
-    user.streak = (diff < 48) ? user.streak + 1 : 1;
-    
+    // Проверка стрейка
+    if (hoursSince < 48) {
+        user.streak += 1;
+    } else {
+        user.streak = 1;
+    }
+
+    // Твои награды: Premium 50, Pro 100, VIP 250, Ultra 500
     const rewards = { 'None': 20, 'Premium': 50, 'Pro': 100, 'VIP': 250, 'Ultra': 500 };
     let reward = rewards[user.subscription] || 20;
-    
-    if (user.streak >= 7) reward *= 2; // Твое правило x2 бонуса
+
+    // x2 бонус если стрейк 7 дней
+    if (user.streak >= 7) {
+        reward *= 2;
+    }
 
     user.balance += reward;
     user.lastDaily = now;
     await user.save();
+
     res.json({ success: true, reward, balance: user.balance, streak: user.streak });
 });
 
-app.listen(process.env.PORT || 8080, '0.0.0.0');
+// 3. Админ-команда: Выдача баланса/подписки ТОЛЬКО по TG ID
+app.post('/api/admin/give', async (req, res) => {
+    const { adminId, targetId, type, amount, subType } = req.body;
+    const admin = await User.findOne({ tgId: adminId });
+
+    if (!admin || (admin.role !== 'admin' && admin.role !== 'owner')) {
+        return res.status(403).json({ error: 'Нет доступа' });
+    }
+
+    const target = await User.findOne({ tgId: targetId });
+    if (!target) return res.json({ error: 'Пользователь не найден' });
+
+    if (type === 'shards') target.balance += parseInt(amount);
+    if (type === 'sub') {
+        target.subscription = subType;
+        target.subExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Строго 30 дней
+    }
+
+    await target.save();
+    res.json({ success: true });
+});
+
+// Запуск сервера на 0.0.0.0 для Railway
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 ЛУНА ЗАПУЩЕНА НА ПОРТУ ${PORT}`);
+});
