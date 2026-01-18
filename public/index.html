@@ -1,44 +1,127 @@
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    const tgUser = tg.initDataUnsafe?.user || { id: 8287041036, first_name: "BOSS" };
-    let user = null;
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Luna AI</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --purple: #a020f0; --border: #301934; --dark: #000; }
+        body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; padding: 15px; box-sizing: border-box; }
+        .header-box { border: 1px solid var(--border); border-radius: 20px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .user-name { font-style: italic; font-weight: bold; font-size: 16px; text-transform: uppercase; }
+        .user-id { color: #888; font-size: 11px; margin-top: 4px; }
+        .balance { color: var(--purple); font-weight: bold; font-size: 16px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .btn { background: var(--dark); border: 1px solid var(--border); border-radius: 15px; padding: 20px 5px; text-align: center; text-transform: uppercase; font-weight: bold; font-size: 10px; cursor: pointer; }
+        .btn.console { border-color: #ff0000; color: #ff0000; }
+        .screen { display: none; flex-direction: column; width: 100%; }
+        .active { display: flex; }
+        .content-card { background: #0a0a0a; border: 1px solid var(--border); border-radius: 15px; padding: 15px; margin-top: 10px; }
+        input, select { width: 100%; background: #111; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        .action-btn { background: var(--purple); border: none; color: white; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .footer { position: fixed; bottom: 20px; width: calc(100% - 30px); display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 15px; background: var(--dark); }
+        .nav-item { font-weight: bold; font-size: 12px; text-transform: uppercase; color: #888; cursor: pointer; }
+    </style>
+</head>
+<body>
 
-    function init() {
-        fetch('/api/auth', { 
-            method: 'POST', 
-            headers: {'Content-Type': 'application/json'}, 
-            body: JSON.stringify({tgId: tgUser.id}) 
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.isNew) {
-                // Если юзер новый, регистрируем его автоматом для теста или просим пол
-                register();
+    <div id="screen-main" class="screen active">
+        <div class="header-box">
+            <div class="user-info">
+                <div id="u-name" class="user-name">ЗАГРУЗКА...</div>
+                <div id="u-id" class="user-id">ID: 00000000</div>
+            </div>
+            <div class="balance">🌙 <span id="u-bal">0</span></div>
+        </div>
+        <div class="grid">
+            <div class="btn" onclick="openS('chats')">Чаты</div>
+            <div class="btn" onclick="openS('chars')">Персонажи</div>
+            <div class="btn" onclick="openS('daily')">Ежедневка</div>
+            <div class="btn" onclick="openS('tasks')">Задания</div>
+            <div class="btn" onclick="openS('shop')">Магазин</div>
+            <div class="btn" onclick="openS('promo')">Промокоды</div>
+            <div class="btn" onclick="openS('profile')">Профиль</div>
+            <div class="btn" onclick="openS('settings')">Настройки</div>
+            <div id="btn-adm" class="btn" style="display:none;" onclick="openS('admin')">Админка</div>
+            <div id="btn-con" class="btn console" style="display:none;" onclick="openS('console')">Консоль</div>
+        </div>
+    </div>
+
+    <div id="screen-sec" class="screen">
+        <h2 id="sec-title" style="text-transform: uppercase; color: var(--purple);"></h2>
+        <div id="sec-body" class="content-card"></div>
+    </div>
+
+    <div class="footer">
+        <div class="nav-item" onclick="goHome()">🏠 Домой</div>
+        <div class="nav-item" onclick="goHome()">◀ Назад</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const tgData = tg.initDataUnsafe?.user || { id: 8287041036, first_name: "Admin" };
+        let user = null;
+
+        function loadData() {
+            fetch('/api/auth', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tgId: tgData.id })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.isNew) {
+                    fetch('/api/register', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ tgId: tgData.id, name: tgData.first_name, gender: 'Мужской' })
+                    }).then(r => r.json()).then(u => { user = u; updateUI(); });
+                } else {
+                    user = data;
+                    updateUI();
+                }
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('u-name').innerHTML = user.name + (user.role === 'owner' ? ' <span style="color:red">(BOSS)</span>' : '');
+            document.getElementById('u-id').innerText = 'ID: ' + user.tgId;
+            document.getElementById('u-bal').innerText = user.balance;
+            if(user.role === 'owner' || user.role === 'admin') document.getElementById('btn-adm').style.display = 'block';
+            if(user.role === 'owner') document.getElementById('btn-con').style.display = 'block';
+        }
+
+        function openS(name) {
+            document.getElementById('screen-main').classList.remove('active');
+            document.getElementById('screen-sec').classList.add('active');
+            document.getElementById('sec-title').innerText = name;
+            const body = document.getElementById('sec-body');
+            
+            if(name === 'settings') {
+                body.innerHTML = `ИМЯ: <input id="sn" value="${user.name}">ПОЛ: <select id="sg"><option value="Мужской" ${user.gender==='Мужской'?'selected':''}>М</option><option value="Женский" ${user.gender==='Женский'?'selected':''}>Ж</option></select>ДЛИНА: <input type="range" id="sl" value="${user.lengthOffset}"><button class="action-btn" onclick="saveSets()">СОХРАНИТЬ</button>`;
+            } else if(name === 'admin') {
+                body.innerHTML = `<input id="cn" placeholder="Имя персонажа"><textarea id="cd" placeholder="Промпт"></textarea><input type="file" id="cf"><button class="action-btn" onclick="alert('Отправлено')">СОЗДАТЬ</button>`;
             } else {
-                user = data;
-                renderUI();
+                body.innerHTML = `<p>Раздел ${name.toUpperCase()} активен.</p>`;
             }
-        });
-    }
+        }
 
-    function register() {
-        fetch('/api/register', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({tgId: tgUser.id, name: tgUser.first_name, gender: 'Мужской'})
-        })
-        .then(res => res.json())
-        .then(data => { user = data; renderUI(); });
-    }
+        function saveSets() {
+            fetch('/api/update-settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tgId: user.tgId, name: document.getElementById('sn').value, gender: document.getElementById('sg').value, lengthOffset: document.getElementById('sl').value })
+            }).then(() => location.reload());
+        }
 
-    function renderUI() {
-        document.getElementById('u-name').innerHTML = user.name + (user.role === 'owner' ? ' <span style="color:red">(BOSS)</span>' : '');
-        document.getElementById('u-id').innerText = 'ID: ' + user.tgId;
-        document.getElementById('u-bal').innerText = user.balance;
-        if(user.role === 'owner' || user.role === 'admin') document.getElementById('btn-adm').style.display = 'block';
-        if(user.role === 'owner') document.getElementById('btn-con').style.display = 'block';
-    }
+        function goHome() {
+            document.getElementById('screen-sec').classList.remove('active');
+            document.getElementById('screen-main').classList.add('active');
+        }
 
-    init();
-</script>
+        loadData();
+    </script>
+</body>
+</html>
