@@ -1,161 +1,87 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Луна: от А до Я</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root { --main-purple: #6a0dad; --bg-dark: #050505; --neon-glow: 0 0 15px rgba(106, 13, 173, 0.6); }
-        body { background: var(--bg-dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        
-        /* Состояния экранов */
-        .screen { display: none; width: 100%; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; }
-        .active { display: flex; }
+const express = require('express');
+const mongoose = require('mongoose');
+const multer = require('multer'); // Для загрузки фото из галереи
+const path = require('path');
+require('dotenv').config();
 
-        /* Луна */
-        .moon { width: 120px; height: 120px; background: radial-gradient(circle at 30% 30%, #a37cf7, #6a0dad); border-radius: 50%; box-shadow: 0 0 40px #6a0dad; margin-top: 30vh; animation: pulse 2s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+const app = express();
+const upload = multer({ dest: 'public/uploads/' }); // Папка для фото
 
-        /* Профиль */
-        .header { text-align: center; margin-bottom: 20px; width: 100%; }
-        .user-name { font-size: 24px; font-weight: bold; text-transform: uppercase; margin: 0; }
-        .user-id { font-size: 14px; color: #888; margin: 5px 0; }
-        .balance { font-size: 18px; color: #a37cf7; margin-top: 10px; }
+app.use(express.json());
+app.use(express.static('public'));
 
-        /* Сетка кнопок */
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 400px; margin-top: 20px; }
-        .btn { background: rgba(106, 13, 173, 0.1); border: 1px solid var(--main-purple); border-radius: 12px; color: white; padding: 20px 10px; font-size: 14px; text-transform: uppercase; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: var(--neon-glow); }
-        .btn:active { background: var(--main-purple); }
-        .btn.console { border-color: #ff0040; box-shadow: 0 0 15px rgba(255, 0, 64, 0.4); color: #ff0040; }
+const { MONGO_URL, OWNER_ID, PORT = 8080 } = process.env;
 
-        /* Нижняя панель */
-        .footer { position: fixed; bottom: 20px; display: flex; gap: 20px; width: 90%; }
-        .nav-btn { flex: 1; background: #222; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; text-transform: uppercase; }
+mongoose.connect(MONGO_URL).then(() => console.log('🌙 БД ПОДКЛЮЧЕНА'));
 
-        /* Капча и формы */
-        .overlay { text-align: center; padding: 40px 20px; }
-        .captcha-btn { background: #6a0dad; padding: 15px 40px; border-radius: 30px; border: none; color: white; font-size: 18px; margin-top: 20px; }
-        input, select { background: #111; border: 1px solid var(--main-purple); color: white; padding: 10px; border-radius: 5px; width: 80%; margin-bottom: 15px; }
-    </style>
-</head>
-<body>
+// Схема юзера
+const UserSchema = new mongoose.Schema({
+    tgId: Number,
+    name: String,
+    gender: String,
+    role: { type: String, default: 'user' },
+    balance: { type: Number, default: 100 },
+    subscription: { type: String, default: 'Free' },
+    streak: { type: Number, default: 0 },
+    lastDaily: { type: Date, default: new Date(0) }
+});
+const User = mongoose.model('User', UserSchema);
 
-    <div id="screen-loading" class="screen active">
-        <div class="moon"></div>
-        <h2 style="margin-top: 20px;">ЗАГРУЗКА...</h2>
-    </div>
+// Схема персонажа
+const CharSchema = new mongoose.Schema({
+    name: String,
+    desc: String,
+    photo: String,
+    creatorId: Number
+});
+const Char = mongoose.model('Character', CharSchema);
 
-    <div id="screen-captcha" class="screen">
-        <div class="overlay">
-            <h1>ПОДТВЕРЖДЕНИЕ</h1>
-            <p>ДАННЫЙ КОНТЕНТ ПРЕДНАЗНАЧЕН ТОЛЬКО ДЛЯ ЛИЦ СТАРШЕ 18 ЛЕТ. ВАМ ЕСТЬ 18?</p>
-            <button class="captcha-btn" onclick="passCaptcha()">МНЕ ЕСТЬ 18</button>
-        </div>
-    </div>
+// Вход и проверка BOSS
+app.post('/api/auth', async (req, res) => {
+    const { tgId, name } = req.body;
+    let user = await User.findOne({ tgId });
+    if (!user) return res.json({ isNew: true });
+    
+    // Если зашел Овнер — всегда BOSS и Ultra
+    if (tgId == OWNER_ID) {
+        user.role = 'owner';
+        user.subscription = 'Ultra';
+        await user.save();
+    }
+    res.json(user);
+});
 
-    <div id="screen-reg" class="screen">
-        <h1>КТО ТЫ, СТРАННИК?</h1>
-        <select id="reg-gender">
-            <option value="Мужской">Я МУЖЧИНА</option>
-            <option value="Женский">Я ЖЕНЩИНА</option>
-        </select>
-        <button class="captcha-btn" onclick="completeReg()">ВОЙТИ В ОБИТЕЛЬ</button>
-    </div>
+// Ежедневка (15-500 + x2 стрейк)
+app.post('/api/daily', async (req, res) => {
+    const { tgId } = req.body;
+    const user = await User.findOne({ tgId });
+    const rewards = { 'Free': 15, 'Premium': 50, 'Pro': 100, 'VIP': 250, 'Ultra': 500 };
+    let reward = rewards[user.subscription] || 15;
+    
+    const now = new Date();
+    const diff = (now - user.lastDaily) / (1000 * 60 * 60 * 24);
 
-    <div id="screen-main" class="screen">
-        <div class="header">
-            <div id="u-name" class="user-name">НИКИТА <span id="u-status" style="color: gold;"></span></div>
-            <div id="u-id" class="user-id">ID: 00000000</div>
-            <div id="u-balance" class="balance">ОСКОЛКИ ЛУНЫ: 0</div>
-        </div>
+    if (diff < 1) return res.status(400).json({ error: "Еще не время" });
+    
+    if (diff <= 2) user.streak += 1; else user.streak = 1;
+    if (user.streak >= 7) reward *= 2;
 
-        <div class="grid-container">
-            <div class="btn" onclick="openSection('chats')">ЧАТЫ</div>
-            <div class="btn" onclick="openSection('chars')">ПЕРСОНАЖИ</div>
-            <div class="btn" onclick="openSection('daily')">ЕЖЕДНЕВКА</div>
-            <div class="btn" onclick="openSection('tasks')">ЗАДАНИЯ</div>
-            <div class="btn" onclick="openSection('shop')">МАГАЗИН</div>
-            <div class="btn" onclick="openSection('promo')">ПРОМОКОДЫ</div>
-            <div class="btn" onclick="openSection('profile')">ПРОФИЛЬ</div>
-            <div class="btn" onclick="openSection('settings')">НАСТРОЙКИ</div>
-            <div class="btn" id="btn-admin" style="display:none;" onclick="openSection('admin')">АДМИНКА</div>
-            <div class="btn console" id="btn-console" style="display:none;" onclick="openSection('console')">КОНСОЛЬ</div>
-        </div>
+    user.balance += reward;
+    user.lastDaily = now;
+    await user.save();
+    res.json({ reward, balance: user.balance });
+});
 
-        <div class="footer">
-            <button class="nav-btn" onclick="goHome()">ДОМОЙ</button>
-            <button class="nav-btn" onclick="goBack()">НАЗАД</button>
-        </div>
-    </div>
+// Создание персонажа (Фото из галереи)
+app.post('/api/create-character', upload.single('photo'), async (req, res) => {
+    const { name, desc, creatorId } = req.body;
+    await Char.create({
+        name,
+        desc,
+        photo: `/uploads/${req.file.filename}`,
+        creatorId
+    });
+    res.json({ success: true });
+});
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        
-        const userData = {
-            tgId: tg.initDataUnsafe?.user?.id || 12345678,
-            name: tg.initDataUnsafe?.user?.first_name || "Странник"
-        };
-
-        let currentUser = null;
-
-        // Порядок запуска
-        setTimeout(() => {
-            showScreen('screen-captcha');
-        }, 2000);
-
-        function passCaptcha() {
-            checkAuth();
-        }
-
-        function checkAuth() {
-            fetch('/api/auth', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(userData)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.isNew) {
-                    showScreen('screen-reg');
-                } else {
-                    initApp(data);
-                }
-            });
-        }
-
-        function completeReg() {
-            const gender = document.getElementById('reg-gender').value;
-            fetch('/api/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({...userData, gender})
-            })
-            .then(res => res.json())
-            .then(data => initApp(data));
-        }
-
-        function initApp(user) {
-            currentUser = user;
-            document.getElementById('u-name').innerHTML = `${user.name.toUpperCase()} ${user.role === 'owner' ? '<span style="color:#ff0040;">(BOSS)</span>' : user.role === 'admin' ? '(ADMIN)' : ''}`;
-            document.getElementById('u-id').innerText = `ID: ${user.tgId}`;
-            document.getElementById('u-balance').innerText = `ОСКОЛКИ ЛУНЫ: ${user.balance}`;
-
-            if(user.role === 'owner' || user.role === 'admin') document.getElementById('btn-admin').style.display = 'block';
-            if(user.role === 'owner') document.getElementById('btn-console').style.display = 'block';
-
-            showScreen('screen-main');
-        }
-
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function goHome() { showScreen('screen-main'); }
-        function goBack() { showScreen('screen-main'); }
-        function openSection(name) { alert('Раздел ' + name + ' в разработке'); }
-    </script>
-</body>
-</html>
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 СЕРВЕР ЗАПУЩЕН` text));
