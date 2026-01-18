@@ -7,26 +7,30 @@ require('dotenv').config();
 
 const app = express();
 
-// Создаем необходимые папки перед запуском, чтобы контейнер не стопался
-const uploadDir = path.join(__dirname, 'public', 'uploads');
+// --- АВТОМАТИЧЕСКОЕ СОЗДАНИЕ ПАПОК ДЛЯ СТАБИЛЬНОСТИ ---
+const publicDir = path.join(__dirname, 'public');
+const uploadDir = path.join(publicDir, 'uploads');
+
+if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir);
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-const upload = multer({ dest: uploadDir });
-
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(publicDir));
 
 const { MONGO_URL, OWNER_ID, PORT = 8080 } = process.env;
 
-// Коннект к БД с обработкой ошибок
+// Обработка ошибок подключения к БД
 mongoose.connect(MONGO_URL)
     .then(() => console.log('🌙 БД ПОДКЛЮЧЕНА'))
-    .catch(err => console.error('ОШИБКА БД:', err));
+    .catch(err => {
+        console.error('КРИТИЧЕСКАЯ ОШИБКА БД:', err.message);
+        process.exit(1); // Выход, если база не алё
+    });
 
 const UserSchema = new mongoose.Schema({
     tgId: Number,
     name: String,
-    gender: String,
+    gender: { type: String, default: 'Мужской' },
     role: { type: String, default: 'user' },
     balance: { type: Number, default: 100 },
     subscription: { type: String, default: 'Free' },
@@ -36,7 +40,7 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// ВХОД
+// Эндпоинты
 app.post('/api/auth', async (req, res) => {
     try {
         const { tgId } = req.body;
@@ -52,7 +56,6 @@ app.post('/api/auth', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// РЕГИСТРАЦИЯ (Критически важно!)
 app.post('/api/register', async (req, res) => {
     try {
         const { tgId, name, gender } = req.body;
@@ -64,7 +67,6 @@ app.post('/api/register', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ОБНОВЛЕНИЕ НАСТРОЕК
 app.post('/api/update-settings', async (req, res) => {
     try {
         const { tgId, name, gender, lengthOffset } = req.body;
@@ -73,7 +75,6 @@ app.post('/api/update-settings', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ЕЖЕДНЕВКА
 app.post('/api/daily', async (req, res) => {
     try {
         const { tgId } = req.body;
@@ -87,4 +88,7 @@ app.post('/api/daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 СЕРВЕР НА ПОРТУ ${PORT}`));
+// Запуск на 0.0.0.0 критичен для Railway
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 СЕРВЕР ЖИВ НА ПОРТУ ${PORT}`);
+});
