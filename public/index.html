@@ -1,1 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Луна: от А до Я</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --main-purple: #6a0dad; --bg-dark: #050505; --neon-glow: 0 0 15px rgba(106, 13, 173, 0.6); }
+        body { background: var(--bg-dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        /* Экраны */
+        .screen { display: none; width: 100%; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; }
+        .active { display: flex; }
+
+        /* Анимация Луны */
+        .moon { width: 120px; height: 120px; background: radial-gradient(circle at 30% 30%, #a37cf7, #6a0dad); border-radius: 50%; box-shadow: 0 0 40px #6a0dad; margin-top: 25vh; animation: pulse 2s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+
+        /* Профиль и Шапка */
+        .header { text-align: center; margin-bottom: 20px; width: 100%; }
+        .user-name { font-size: 26px; font-weight: bold; text-transform: uppercase; margin: 0; }
+        .user-id { font-size: 14px; color: #888; margin: 2px 0 10px 0; }
+        .balance-box { background: rgba(163, 124, 247, 0.1); padding: 10px 20px; border-radius: 20px; border: 1px solid var(--main-purple); display: inline-block; }
+
+        /* Сетка 10 кнопок */
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 450px; margin-top: 10px; }
+        .btn { background: rgba(20, 20, 20, 0.8); border: 1px solid var(--main-purple); border-radius: 15px; color: white; padding: 22px 10px; font-size: 13px; font-weight: bold; text-transform: uppercase; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: var(--neon-glow); }
+        .btn:active { transform: scale(0.95); background: var(--main-purple); }
+        .btn.console { border-color: #ff0040; color: #ff0040; box-shadow: 0 0 15px rgba(255, 0, 64, 0.3); }
+
+        /* Футер */
+        .footer { position: fixed; bottom: 20px; display: flex; gap: 15px; width: 90%; max-width: 450px; }
+        .nav-btn { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 15px; border-radius: 12px; font-weight: bold; text-transform: uppercase; }
+
+        /* Формы и контент разделов */
+        #section-content { width: 100%; max-width: 450px; margin-top: 10px; display: none; }
+        input, select, textarea { width: 100%; background: #111; border: 1px solid var(--main-purple); color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
+        .action-btn { background: var(--main-purple); border: none; color: white; padding: 15px 30px; border-radius: 30px
 
