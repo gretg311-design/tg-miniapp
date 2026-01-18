@@ -3,146 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Луна: От А до Я</title>
+    <title>Луна</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --purp: #6a0dad; --glass: rgba(255, 255, 255, 0.08); --bg: #050505; --gold: #ffd700; }
-        body, html { margin: 0; padding: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; height: 100%; }
-        .screen { display: none; padding: 20px; height: 100vh; box-sizing: border-box; overflow-y: auto; padding-bottom: 80px; }
-        .active { display: block; }
-        
-        /* Луна */
-        #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .moon { width: 120px; height: 120px; background: radial-gradient(circle at 30% 30%, #a37cf7, var(--purp)); border-radius: 50%; box-shadow: 0 0 50px var(--purp); animation: p 2s infinite ease-in-out; }
-        @keyframes p { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-
-        /* Интерфейс */
-        .btn-menu { background: var(--glass); border: 1px solid var(--purp); padding: 16px; border-radius: 12px; color: white; text-align: center; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: var(--glass); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
-        input, select { background: #111; border: 1px solid var(--purp); color: white; padding: 12px; width: 100%; border-radius: 8px; box-sizing: border-box; margin-top: 5px; }
-        
-        .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; border-top: 1px solid var(--purp); height: 65px; z-index: 100; }
-        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+        body { background: #050505; color: white; font-family: sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column; }
+        .moon { width: 150px; height: 150px; background: radial-gradient(circle at 30% 30%, #a37cf7, #6a0dad); border-radius: 50%; box-shadow: 0 0 50px #6a0dad; animation: pulse 2s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        h1 { margin-top: 20px; font-weight: 300; letter-spacing: 2px; }
     </style>
 </head>
 <body>
+    <div class="moon"></div>
+    <h1 id="status">ЗАГРУЗКА...</h1>
 
-<div id="loading-screen"><div class="moon"></div><p style="margin-top:20px; letter-spacing: 2px;">ЛУНА ПРОСЫПАЕТСЯ...</p></div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const user = {
+            tgId: tg.initDataUnsafe?.user?.id || 12345,
+            name: tg.initDataUnsafe?.user?.first_name || "Странник"
+        };
 
-<div id="captcha-screen" class="screen" style="text-align:center;">
-    <h1 style="color:red; font-size:70px; margin-top:60px;">18+</h1>
-    <p>Подтвердите свой возраст</p>
-    <div class="btn-menu" style="margin-top:40px;" onclick="showScreen('reg-screen')">МНЕ ЕСТЬ 18 ЛЕТ</div>
-</div>
-
-<div id="reg-screen" class="screen">
-    <h3>Регистрация</h3>
-    <label>Как вас называть?</label>
-    <input type="text" id="r-name" placeholder="Ваше имя">
-    <label style="display:block; margin-top:15px;">Ваш пол:</label>
-    <select id="r-gender"><option>Мужской</option><option>Женский</option></select>
-    <div class="btn-menu" style="margin-top:40px; border-color:var(--gold)" onclick="auth()">ПОЛУЧИТЬ ULTRA БОНУС</div>
-</div>
-
-<div id="main-menu" class="screen">
-    <div style="display:flex; justify-content:space-between; padding-bottom:15px; border-bottom:1px solid var(--purp);">
-        <div><b id="u-name"></b><br><small id="u-id" style="color:#888"></small></div>
-        <div style="text-align:right"><b id="u-bal"></b> 💎<br><small id="u-sub" style="color:var(--gold)"></small></div>
-    </div>
-    <div class="menu-grid" style="margin-top:20px;">
-        <div class="btn-menu" onclick="showScreen('chats-screen')">ЧАТЫ</div>
-        <div class="btn-menu">ПЕРСОНАЖИ</div>
-        <div class="btn-menu" onclick="daily()">🎁 БОНУС</div>
-        <div class="btn-menu">🎫 ПРОМО</div>
-        <div class="btn-menu" onclick="showScreen('profile-screen')">👤 ПРОФИЛЬ</div>
-        <div class="btn-menu" onclick="showScreen('settings-screen')">⚙️ НАСТРОЙКИ</div>
-        <div id="adm-btn" class="btn-menu" style="display:none">АДМИН</div>
-        <div id="con-btn" class="btn-menu" style="display:none">КОНСОЛЬ</div>
-        <div class="btn-menu" style="grid-column: span 2; border-color:var(--gold)" onclick="showScreen('shop-screen')">👑 МАГАЗИН</div>
-    </div>
-</div>
-
-<div id="settings-screen" class="screen">
-    <h3>⚙️ Настройки</h3>
-    <div class="card"><label>Длина ответа (слов): <b id="v-len">45</b></label>
-    <input type="range" min="45" max="100" value="45" oninput="document.getElementById('v-len').innerText=this.value"></div>
-    <div class="card"><label>Уровень пошлости: <b id="v-lewd">Минимум</b></label>
-    <input type="range" min="1" max="4" value="1" oninput="const l=['','Минимум','Средняя','Сильная','МАКС']; document.getElementById('v-lewd').innerText=l[this.value]"></div>
-    <div class="btn-menu" onclick="showScreen('main-menu')">СОХРАНИТЬ</div>
-</div>
-
-<div id="shop-screen" class="screen">
-    <h3>Магазин (30 дней)</h3>
-    <div class="card">Premium - 50💎/д | 2 TON <div class="btn-menu">КУПИТЬ</div></div>
-    <div class="card">Pro - 100💎/д | 4 TON <div class="btn-menu">КУПИТЬ</div></div>
-    <div class="card" style="border-color:cyan">Ultra - 500💎/д | 15 TON <div class="btn-menu">КУПИТЬ</div></div>
-</div>
-
-<div id="profile-screen" class="screen">
-    <h3>Профиль</h3>
-    <div class="card"><p>ID: <b id="p-id"></b></p><p>Статус: <b id="p-sub"></b></p><p>Баланс: <b id="p-bal"></b></p></div>
-    <div class="btn-menu" onclick="showScreen('main-menu')">НАЗАД</div>
-</div>
-
-<div class="nav-bar" id="nav" style="display:none">
-    <div class="nav-btn" onclick="showScreen('main-menu')">🏠 ДОМОЙ</div>
-    <div class="nav-btn" onclick="goBack()">⬅️ НАЗАД</div>
-</div>
-
-<script>
-    const tg = window.Telegram.WebApp; tg.expand(); tg.enableClosingConfirmation();
-    let user = null; let hist = ['main-menu'];
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('nav').style.display = ['main-menu','settings-screen','profile-screen','shop-screen'].includes(id) ? 'flex' : 'none';
-        if(hist[hist.length-1]!==id) hist.push(id);
-    }
-
-    function goBack() { if(hist.length>1) { hist.pop(); showScreen(hist[hist.length-1]); } }
-
-    window.onload = async () => {
-        const savedId = localStorage.getItem('lunar_id');
-        if(savedId) await auth(savedId);
-        else { setTimeout(() => { document.getElementById('loading-screen').style.display='none'; showScreen('captcha-screen'); }, 2500); }
-    };
-
-    async function auth(sid) {
-        const tid = sid || tg.initDataUnsafe?.user?.id || 12345;
-        const name = document.getElementById('r-name').value;
-        const gen = document.getElementById('r-gender').value;
-        const res = await fetch('/api/auth', {
+        fetch('/api/auth', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ tgId: tid, name, gender: gen })
-        });
-        user = await res.json();
-        localStorage.setItem('lunar_id', user.tgId);
-        updateUI();
-        document.getElementById('loading-screen').style.display='none';
-        showScreen('main-menu');
-    }
-
-    function updateUI() {
-        document.getElementById('u-name').innerText = user.name;
-        document.getElementById('u-id').innerText = 'ID: ' + user.tgId;
-        document.getElementById('u-bal').innerText = user.balance;
-        document.getElementById('u-sub').innerText = user.subscription;
-        document.getElementById('p-id').innerText = user.tgId;
-        document.getElementById('p-sub').innerText = user.subscription;
-        document.getElementById('p-bal').innerText = user.balance;
-        if(['admin','owner'].includes(user.role)) document.getElementById('adm-btn').style.display='block';
-        if(user.role==='owner') document.getElementById('con-btn').style.display='block';
-    }
-
-    async function daily() {
-        const res = await fetch('/api/daily', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({tgId: user.tgId}) });
-        const d = await res.json();
-        tg.showAlert(d.success ? `Награда: ${d.reward} 💎` : d.msg);
-        if(d.success) { user.balance = d.balance; updateUI(); }
-    }
-</script>
+            body: JSON.stringify(user)
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('status').innerText = "ПРИВЕТ, " + data.name.toUpperCase();
+        })
+        .catch(() => { document.getElementById('status').innerText = "ОШИБКА СЕТИ"; });
+    </script>
 </body>
 </html>
