@@ -1,7 +1,7 @@
 {
-  "name": "ot-a-do-ya-project",
-  "version": "1.0.0",
-  "description": "Project A to Z",
+  "name": "luna-app",
+  "version": "1.1.0",
+  "description": "Luna Project From A to Z",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
