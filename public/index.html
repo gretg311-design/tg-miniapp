@@ -6,267 +6,110 @@
     <title>Anime AI 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --purple: #a020f0; --border: #301934; --dark: #000; --card-bg: #0a0510; }
+        :root { --purple: #a020f0; --border: #301934; --dark: #000; }
+        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; }
         
-        body { 
-            background: var(--dark); 
-            color: white; 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
-        }
-
-        /* КАРТОЧКА ПРОФИЛЯ (КАК НА СКРИНЕ) */
+        /* КАРТОЧКА КАК НА СКРИНЕ */
         .profile-card {
-            width: 100%;
-            border: 1px solid var(--purple);
+            border: 1px solid var(--border);
             border-radius: 25px;
             padding: 20px;
-            background: var(--card-bg);
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-sizing: border-box;
-            margin-bottom: 25px;
+            background: rgba(16, 5, 25, 0.5);
         }
+        .user-name { font-style: italic; font-weight: bold; font-size: 18px; }
+        .user-id { font-size: 13px; color: #888; margin-top: 5px; }
+        .balance { color: var(--purple); font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 5px; }
 
-        .user-info .name {
-            font-style: italic;
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 4px;
-        }
-
-        .user-info .id {
-            color: #888;
-            font-size: 13px;
-        }
-
-        .balance-box {
-            color: var(--purple);
-            font-weight: bold;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* СЕТКА 10 КНОПОК */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            width: 100%;
-        }
-
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .btn {
-            background: var(--card-bg);
+            background: transparent;
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 30px 10px;
             text-align: center;
             text-transform: uppercase;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 1px;
-            cursor: pointer;
-            transition: 0.3s;
         }
-
-        .btn:active {
-            border-color: var(--purple);
-            background: #150a20;
-        }
-
-        /* КНОПКИ ДЛЯ BOSS */
-        .btn.admin-btn { border-color: var(--border); color: white; }
+        .btn.boss-btn { border-color: var(--border); }
         .btn.console-btn { border-color: #ff0000; color: #ff0000; }
 
-        /* ЭКРАНЫ */
-        .screen { display: none; width: 100%; flex-direction: column; }
-        .screen.active { display: flex; }
-
-        /* НАВИГАЦИЯ ВНИЗУ */
         .nav-bar {
             position: fixed;
-            bottom: 25px;
+            bottom: 20px;
             width: calc(100% - 30px);
             display: flex;
-            justify-content: space-between;
-            padding-top: 20px;
+            justify-content: space-around;
+            padding-top: 15px;
             border-top: 1px solid var(--border);
         }
-
-        .nav-item {
-            color: white;
-            text-transform: uppercase;
-            font-weight: bold;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-        }
-
-        input, select {
-            width: 100%;
-            background: #111;
-            border: 1px solid var(--purple);
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 10px 0;
-            box-sizing: border-box;
-        }
-
-        .save-btn {
-            background: var(--purple);
-            border: none;
-            color: white;
-            padding: 18px;
-            border-radius: 15px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-top: 10px;
-        }
+        .nav-item { font-weight: bold; font-size: 14px; text-transform: uppercase; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <div id="main-screen" class="screen active">
-        <div class="profile-card">
-            <div class="user-info">
-                <div id="u-name" class="name">ЗАГРУЗКА...</div>
-                <div id="u-id" class="id">ID: --------</div>
-            </div>
-            <div class="balance-box">
-                🌙 <span id="u-bal">0</span>
-            </div>
+    <div id="u-card" class="profile-card">
+        <div>
+            <div id="u-name" class="user-name">ЗАГРУЗКА...</div>
+            <div id="u-id" class="user-id">ID: --------</div>
         </div>
-
-        <div class="grid">
-            <div class="btn" onclick="openSection('Чаты')">Чаты</div>
-            <div class="btn" onclick="openSection('Персонажи')">Персонажи</div>
-            <div class="btn" onclick="openSection('Ежедневка')">Ежедневка</div>
-            <div class="btn" onclick="openSection('Задания')">Задания</div>
-            <div class="btn" onclick="openSection('Магазин')">Магазин</div>
-            <div class="btn" onclick="openSection('Промокоды')">Промокоды</div>
-            <div class="btn" onclick="openSection('Профиль')">Профиль</div>
-            <div class="btn" onclick="openSettings()">Настройки</div>
-            <div class="btn admin-btn" id="adm-btn" style="display:none;" onclick="openSection('Админка')">Админка</div>
-            <div class="btn console-btn" id="con-btn" style="display:none;" onclick="openSection('Консоль')">Консоль</div>
-        </div>
+        <div class="balance">🌙 <span id="u-bal">0</span></div>
     </div>
 
-    <div id="settings-screen" class="screen">
-        <h2 style="color: var(--purple); text-transform: uppercase;">Настройки</h2>
-        <label>ИМЯ:</label>
-        <input type="text" id="set-name">
-        <label>ПОЛ:</label>
-        <select id="set-gender">
-            <option value="Мужской">МУЖСКОЙ</option>
-            <option value="Женский">ЖЕНСКИЙ</option>
-        </select>
-        <label>ДЛИНА ОТВЕТОВ:</label>
-        <input type="range" id="set-len" min="1" max="100">
-        <button class="save-btn" onclick="saveSettings()">Сохранить</button>
-    </div>
-
-    <div id="other-screen" class="screen">
-        <h2 id="screen-title" style="color: var(--purple); text-transform: uppercase;"></h2>
-        <div style="background: var(--card-bg); border: 1px solid var(--border); padding: 20px; border-radius: 20px;">
-            Раздел находится в разработке...
-        </div>
+    <div class="grid">
+        <div class="btn">Чаты</div><div class="btn">Персонажи</div>
+        <div class="btn">Ежедневка</div><div class="btn">Задания</div>
+        <div class="btn">Магазин</div><div class="btn">Промокоды</div>
+        <div class="btn">Профиль</div><div class="btn">Настройки</div>
+        <div class="btn boss-btn" id="adm" style="display:none">Админка</div>
+        <div class="btn console-btn" id="con" style="display:none">Консоль</div>
     </div>
 
     <div class="nav-bar">
-        <div class="nav-item" onclick="goHome()">🏠 ДОМОЙ</div>
-        <div class="nav-item" onclick="goHome()">◀ НАЗАД</div>
+        <div class="nav-item">🏠 ДОМОЙ</div>
+        <div class="nav-item">◀ НАЗАД</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
-        // Используем твой ID для BOSS-прав
-        const tgUser = tg.initDataUnsafe?.user || { id: 8287041036, first_name: "BOSS" };
-        let user = null;
+        const userId = tg.initDataUnsafe?.user?.id || 8287041036;
+        const userName = tg.initDataUnsafe?.user?.first_name || "User";
 
-        function init() {
+        function load() {
             fetch('/api/auth', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ tgId: tgUser.id })
+                body: JSON.stringify({ tgId: userId })
             })
-            .then(res => res.json())
+            .then(r => r.json())
             .then(data => {
-                if (data.isNew) {
-                    registerUser();
+                if(data.isNew) {
+                    fetch('/api/register', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ tgId: userId, name: userName, gender: 'Мужской' })
+                    }).then(r => r.json()).then(u => render(u));
                 } else {
-                    user = data;
-                    render();
+                    render(data);
                 }
+            }).catch(e => {
+                document.getElementById('u-name').innerText = "ОШИБКА СЕРВЕРА";
             });
         }
 
-        function registerUser() {
-            fetch('/api/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ tgId: tgUser.id, name: tgUser.first_name, gender: 'Мужской' })
-            })
-            .then(res => res.json())
-            .then(data => { user = data; render(); });
-        }
-
-        function render() {
-            document.getElementById('u-name').innerHTML = `${user.name} ${user.role === 'owner' ? '<span style="color:white; font-style:normal;">(BOSS)</span>' : ''}`;
+        function render(user) {
+            document.getElementById('u-name').innerHTML = `${user.name} ${user.role === 'owner' ? '(BOSS)' : ''}`;
             document.getElementById('u-id').innerText = `ID: ${user.tgId}`;
             document.getElementById('u-bal').innerText = user.balance;
-
-            // Проверка прав BOSS
-            if (user.role === 'owner' || user.role === 'admin') document.getElementById('adm-btn').style.display = 'block';
-            if (user.role === 'owner') document.getElementById('con-btn').style.display = 'block';
+            if(user.role === 'owner' || user.role === 'admin') document.getElementById('adm').style.display = 'block';
+            if(user.role === 'owner') document.getElementById('con').style.display = 'block';
         }
-
-        function openSettings() {
-            hideAll();
-            document.getElementById('settings-screen').classList.add('active');
-            document.getElementById('set-name').value = user.name;
-        }
-
-        function openSection(title) {
-            hideAll();
-            const s = document.getElementById('other-screen');
-            document.getElementById('screen-title').innerText = title;
-            s.classList.add('active');
-        }
-
-        function saveSettings() {
-            const name = document.getElementById('set-name').value;
-            const gender = document.getElementById('set-gender').value;
-            const len = document.getElementById('set-len').value;
-
-            fetch('/api/update-settings', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ tgId: user.tgId, name, gender, lengthOffset: len })
-            }).then(() => location.reload());
-        }
-
-        function hideAll() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        }
-
-        function goHome() {
-            hideAll();
-            document.getElementById('main-screen').classList.add('active');
-        }
-
-        init();
+        load();
     </script>
 </body>
 </html>
