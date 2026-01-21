@@ -1,14 +1,19 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-const { MONGO_URL, OWNER_ID } = process.env;
+const MONGO_URL = process.env.MONGO_URL;
+const OWNER_ID = String(process.env.OWNER_ID || "8287041036");
 
-// Подключение к БД (без await снаружи, чтобы не тормозить запуск)
-mongoose.connect(MONGO_URL).then(() => console.log('🌙 DB Connected'));
+// Подключение к БД
+mongoose.connect(MONGO_URL)
+  .then(() => console.log('✅ MongoDB connected successfully'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 const UserSchema = new mongoose.Schema({
     tgId: Number,
@@ -17,47 +22,37 @@ const UserSchema = new mongoose.Schema({
     role: { type: String, default: 'user' },
     balance: { type: Number, default: 100 },
     subscription: { type: String, default: 'Free' },
-    streak: { type: Number, default: 0 },
     lengthOffset: { type: Number, default: 50 }
 });
 const User = mongoose.model('User', UserSchema);
 
-// API: Авторизация
+// API АВТОРИЗАЦИИ
 app.post('/api/auth', async (req, res) => {
-    const { tgId } = req.body;
-    let user = await User.findOne({ tgId });
-    if (!user) return res.json({ isNew: true });
-    
-    if (String(tgId) === String(OWNER_ID)) {
-        user.role = 'owner';
-        user.subscription = 'Ultra';
-        await user.save();
+    try {
+        const { tgId } = req.body;
+        console.log("Auth request from ID:", tgId);
+        
+        let user = await User.findOne({ tgId: Number(tgId) });
+        if (!user) return res.json({ isNew: true });
+
+        // Если это ты - даем BOSS
+        if (String(tgId) === OWNER_ID && user.role !== 'owner') {
+            user.role = 'owner';
+            await user.save();
+        }
+        res.json(user);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
-    res.json(user);
 });
 
-// API: Регистрация
 app.post('/api/register', async (req, res) => {
-    const { tgId, name, gender } = req.body;
-    const user = await User.create({
-        tgId, name, gender,
-        role: (String(tgId) === String(OWNER_ID)) ? 'owner' : 'user'
-    });
-    res.json(user);
+    try {
+        const { tgId, name, gender } = req.body;
+        const role = (String(tgId) === OWNER_ID) ? 'owner' : 'user';
+        const user = await User.create({ tgId, name, gender, role });
+        res.json(user);
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// API: Настройки
-app.post('/api/update-settings', async (req, res) => {
-    const { tgId, name, gender, lengthOffset } = req.body;
-    const user = await User.findOneAndUpdate({ tgId }, { name, gender, lengthOffset }, { new: true });
-    res.json(user);
-});
-
-// Экспорт для Vercel
 module.exports = app;
-
-// Обычный запуск для локальных тестов
-if (require.main === module) {
-    const PORT = process.env.PORT || 8080;
-    app.listen(PORT, () => console.log(`🚀 Alive on ${PORT}`));
-}
