@@ -3,113 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Anime AI 18+</title>
+    <title>LUNA 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --purple: #a020f0; --border: #301934; --dark: #000; }
-        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; }
+        body { 
+            background: radial-gradient(circle at center, #1a0b2e 0%, #000 100%); 
+            color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px;
+            overflow: hidden; touch-action: none; /* Защита от свайпа вниз */
+        }
+        .glass { 
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(160, 32, 240, 0.3);
+            backdrop-filter: blur(10px); border-radius: 20px; padding: 15px;
+        }
+        .moon-loader {
+            position: fixed; inset: 0; background: #000; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .moon {
+            width: 80px; height: 80px; background: #fff; border-radius: 50%;
+            box-shadow: 0 0 50px #a020f0; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+
+        .boss-name { color: #ff3e3e; text-shadow: 0 0 10px #ff3e3e; animation: glow 1.5s infinite alternate; }
+        .ultra-name { color: #a020f0; text-shadow: 0 0 10px #a020f0; animation: glow 2s infinite alternate; }
+        @keyframes glow { from { opacity: 0.7; } to { opacity: 1; } }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn { 
+            background: rgba(160, 32, 240, 0.1); border: 1px solid #301934;
+            border-radius: 15px; padding: 20px 10px; text-align: center;
+            font-size: 12px; font-weight: bold; text-transform: uppercase;
+        }
+        .btn:active { transform: scale(0.95); border-color: #a020f0; }
         
-        /* КАРТОЧКА КАК НА СКРИНЕ */
-        .profile-card {
-            border: 1px solid var(--border);
-            border-radius: 25px;
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(16, 5, 25, 0.5);
-        }
-        .user-name { font-style: italic; font-weight: bold; font-size: 18px; }
-        .user-id { font-size: 13px; color: #888; margin-top: 5px; }
-        .balance { color: var(--purple); font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 5px; }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 30px 10px;
-            text-align: center;
-            text-transform: uppercase;
-            font-weight: bold;
-            font-size: 11px;
-            letter-spacing: 1px;
-        }
-        .btn.boss-btn { border-color: var(--border); }
-        .btn.console-btn { border-color: #ff0000; color: #ff0000; }
-
-        .nav-bar {
-            position: fixed;
-            bottom: 20px;
-            width: calc(100% - 30px);
-            display: flex;
-            justify-content: space-around;
-            padding-top: 15px;
-            border-top: 1px solid var(--border);
-        }
-        .nav-item { font-weight: bold; font-size: 14px; text-transform: uppercase; cursor: pointer; }
+        #nav-bottom { position: fixed; bottom: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
-    <div id="u-card" class="profile-card">
+    <div id="loader" class="moon-loader"><div class="moon"></div></div>
+
+    <div class="glass" style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <div id="u-name" class="user-name">ЗАГРУЗКА...</div>
-            <div id="u-id" class="user-id">ID: --------</div>
+            <div id="u-name" style="font-weight: bold; font-size: 18px;">Загрузка...</div>
+            <div id="u-id" style="font-size: 10px; color: #888;">ID: 0000000000</div>
         </div>
-        <div class="balance">🌙 <span id="u-bal">0</span></div>
+        <div id="u-bal" style="color: #f1c40f; font-size: 20px; font-weight: bold;">🌙 100</div>
     </div>
 
-    <div class="grid">
+    <div class="grid" id="main-menu">
         <div class="btn">Чаты</div><div class="btn">Персонажи</div>
-        <div class="btn">Ежедневка</div><div class="btn">Задания</div>
-        <div class="btn">Магазин</div><div class="btn">Промокоды</div>
+        <div class="btn">Ежедневка</div><div class="btn">Промокоды</div>
+        <div class="btn">Магазин</div><div class="btn">Задания</div>
         <div class="btn">Профиль</div><div class="btn">Настройки</div>
-        <div class="btn boss-btn" id="adm" style="display:none">Админка</div>
-        <div class="btn console-btn" id="con" style="display:none">Консоль</div>
+        <div class="btn" id="adm-btn" style="display:none">Админка</div>
+        <div class="btn" id="own-btn" style="display:none; color: #ff3e3e; border-color: #ff3e3e;">Консоль</div>
     </div>
 
-    <div class="nav-bar">
-        <div class="nav-item">🏠 ДОМОЙ</div>
-        <div class="nav-item">◀ НАЗАД</div>
+    <div id="nav-bottom">
+        <div class="btn" style="padding: 10px 20px;">Назад</div>
+        <div class="btn" style="padding: 10px 20px;">Домой</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        const userId = tg.initDataUnsafe?.user?.id || 8287041036;
-        const userName = tg.initDataUnsafe?.user?.first_name || "User";
+        tg.isClosingConfirmationEnabled = true;
 
-        function load() {
-            fetch('/api/auth', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ tgId: userId })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if(data.isNew) {
-                    fetch('/api/register', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ tgId: userId, name: userName, gender: 'Мужской' })
-                    }).then(r => r.json()).then(u => render(u));
-                } else {
-                    render(data);
-                }
-            }).catch(e => {
-                document.getElementById('u-name').innerText = "ОШИБКА СЕРВЕРА";
-            });
-        }
+        const user = tg.initDataUnsafe.user || { id: 8287041036, first_name: "BOSS" };
 
-        function render(user) {
-            document.getElementById('u-name').innerHTML = `${user.name} ${user.role === 'owner' ? '(BOSS)' : ''}`;
-            document.getElementById('u-id').innerText = `ID: ${user.tgId}`;
-            document.getElementById('u-bal').innerText = user.balance;
-            if(user.role === 'owner' || user.role === 'admin') document.getElementById('adm').style.display = 'block';
-            if(user.role === 'owner') document.getElementById('con').style.display = 'block';
-        }
-        load();
+        fetch('/api/auth', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ tgId: user.id, name: user.first_name })
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('loader').style.display = 'none';
+            const nameEl = document.getElementById('u-name');
+            nameEl.innerText = data.name + (data.role === 'owner' ? ' (BOSS)' : (data.subscription !== 'Free' ? ` (${data.subscription})` : ''));
+            
+            if(data.role === 'owner') nameEl.className = 'boss-name';
+            else if(data.subscription === 'Ultra') nameEl.className = 'ultra-name';
+
+            document.getElementById('u-id').innerText = 'ID: ' + data.tgId;
+            document.getElementById('u-bal').innerText = data.role === 'owner' ? '🌙 ∞' : '🌙 ' + data.balance;
+
+            if(data.role === 'owner' || data.role === 'admin') document.getElementById('adm-btn').style.display = 'block';
+            if(data.role === 'owner') document.getElementById('own-btn').style.display = 'block';
+        });
     </script>
 </body>
 </html>
