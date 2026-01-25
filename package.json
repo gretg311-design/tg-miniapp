@@ -1,14 +1,12 @@
 {
-  "name": "tg-miniapp-luna",
-  "version": "1.0.0",
+  "name": "luna-project-final",
+  "version": "1.2.0",
   "main": "server.js",
   "dependencies": {
     "express": "^4.18.2",
     "mongoose": "^7.0.0",
+    "axios": "^1.6.0",
     "dotenv": "^16.0.3",
     "cors": "^2.8.5"
-  },
-  "scripts": {
-    "start": "node server.js"
   }
 }
