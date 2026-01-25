@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
         <div class="btn">Магазин</div><div class="btn">Задания</div>
         <div class="btn">Профиль</div><div class="btn">Настройки</div>
         <div id="adm" class="btn" style="display:none">Админка</div>
-        <div id="own" class="btn" style="display:none; border-color: red;">Консоль</div>
+        <div id="own" class="btn" style="display:none; border-color: #ff3e3e;">Консоль</div>
     </div>
 
     <script>
@@ -35,27 +35,32 @@
         tg.expand();
         tg.isClosingConfirmationEnabled = true;
 
+        // Если не в Телеге, используем твой ID для теста
         const userData = tg.initDataUnsafe.user || { id: 8287041036, first_name: "BOSS" };
 
-        fetch('/api/auth', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ tgId: userData.id, name: userData.first_name })
-        })
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById('loader').style.display = 'none';
-            const nameEl = document.getElementById('u-name');
-            nameEl.innerText = data.name + (data.role === 'owner' ? ' (BOSS)' : '');
-            if(data.role === 'owner') nameEl.classList.add('boss');
-            
-            document.getElementById('u-bal').innerText = data.role === 'owner' ? '🌙 ∞' : '🌙 ' + data.balance;
-            if(data.role === 'owner' || data.role === 'admin') document.getElementById('adm').style.display = 'block';
-            if(data.role === 'owner') document.getElementById('own').style.display = 'block';
-        })
-        .catch(e => {
-            alert("Ошибка связи! Проверь MONGO_URL и доступ 0.0.0.0/0 в MongoDB");
-        });
+        async function init() {
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ tgId: userData.id, name: userData.first_name })
+                });
+                const data = await res.json();
+                
+                document.getElementById('loader').style.display = 'none';
+                const nameEl = document.getElementById('u-name');
+                nameEl.innerText = data.name + (data.role === 'owner' ? ' (BOSS)' : '');
+                if(data.role === 'owner') nameEl.classList.add('boss');
+                
+                document.getElementById('u-bal').innerText = data.role === 'owner' ? '🌙 ∞' : '🌙 ' + (data.balance || 0);
+                if(data.role === 'owner' || data.role === 'admin') document.getElementById('adm').style.display = 'block';
+                if(data.role === 'owner') document.getElementById('own').style.display = 'block';
+            } catch (e) {
+                console.error(e);
+                alert("Ошибка! Проверь MONGO_URL в Vercel и доступ IP 0.0.0.0/0 в MongoDB");
+            }
+        }
+        init();
     </script>
 </body>
 </html>
