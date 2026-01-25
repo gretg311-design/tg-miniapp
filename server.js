@@ -1,16 +1,19 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Подключение к БД
-mongoose.connect(process.env.MONGO_URL).catch(err => console.log("DB Error:", err));
+// Подключение к MongoDB
+mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => console.log("DB Connected")).catch(err => console.log("DB Error:", err));
 
+// Схема пользователя
 const User = mongoose.model('User', new mongoose.Schema({
     tgId: Number,
     name: String,
@@ -21,17 +24,17 @@ const User = mongoose.model('User', new mongoose.Schema({
 
 const OWNER_ID = 8287041036;
 
-// Маршрут авторизации
+// API авторизации
 app.post('/api/auth', async (req, res) => {
     try {
         const { tgId, name } = req.body;
-        if (!tgId) return res.status(400).send("No ID");
-        
+        if (!tgId) return res.status(400).json({ error: "No ID provided" });
+
         let user = await User.findOne({ tgId: Number(tgId) });
         if (!user) {
             user = await User.create({ 
                 tgId: Number(tgId), 
-                name: name, 
+                name: name || "User", 
                 role: Number(tgId) === OWNER_ID ? 'owner' : 'user' 
             });
         }
@@ -41,7 +44,7 @@ app.post('/api/auth', async (req, res) => {
     }
 });
 
-// Заглушка для теста
-app.get('/api/test', (req, res) => res.send("Server is LIVE"));
+// Проверка работоспособности
+app.get('/api/health', (req, res) => res.json({ status: "working" }));
 
 module.exports = app;
