@@ -1,68 +1,33 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>LUNA 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { 
-            background: radial-gradient(circle at center, #1a0b2e 0%, #000 100%); 
-            color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px;
-            overflow: hidden; touch-action: none; /* Защита от свайпа вниз */
-        }
-        .glass { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(160, 32, 240, 0.3);
-            backdrop-filter: blur(10px); border-radius: 20px; padding: 15px;
-        }
-        .moon-loader {
-            position: fixed; inset: 0; background: #000; z-index: 1000;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .moon {
-            width: 80px; height: 80px; background: #fff; border-radius: 50%;
-            box-shadow: 0 0 50px #a020f0; animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
-
-        .boss-name { color: #ff3e3e; text-shadow: 0 0 10px #ff3e3e; animation: glow 1.5s infinite alternate; }
-        .ultra-name { color: #a020f0; text-shadow: 0 0 10px #a020f0; animation: glow 2s infinite alternate; }
-        @keyframes glow { from { opacity: 0.7; } to { opacity: 1; } }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .btn { 
-            background: rgba(160, 32, 240, 0.1); border: 1px solid #301934;
-            border-radius: 15px; padding: 20px 10px; text-align: center;
-            font-size: 12px; font-weight: bold; text-transform: uppercase;
-        }
-        .btn:active { transform: scale(0.95); border-color: #a020f0; }
-        
-        #nav-bottom { position: fixed; bottom: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
+        .moon-loader { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 100; }
+        .moon { width: 60px; height: 60px; background: #fff; border-radius: 50%; box-shadow: 0 0 30px #a020f0; animation: p 2s infinite; }
+        @keyframes p { 0%,100% {transform: scale(1);} 50% {transform: scale(1.2);} }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); padding: 15px; border-bottom: 1px solid #a020f0; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
+        .btn { background: #1a1a1a; border: 1px solid #333; padding: 20px; text-align: center; border-radius: 10px; font-size: 12px; }
+        .boss { color: #ff3e3e; text-shadow: 0 0 10px #ff3e3e; }
     </style>
 </head>
 <body>
     <div id="loader" class="moon-loader"><div class="moon"></div></div>
-
-    <div class="glass" style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <div id="u-name" style="font-weight: bold; font-size: 18px;">Загрузка...</div>
-            <div id="u-id" style="font-size: 10px; color: #888;">ID: 0000000000</div>
-        </div>
-        <div id="u-bal" style="color: #f1c40f; font-size: 20px; font-weight: bold;">🌙 100</div>
+    <div class="glass">
+        <div id="u-name">Загрузка...</div>
+        <div id="u-bal" style="color: #f1c40f;">🌙 --</div>
     </div>
-
-    <div class="grid" id="main-menu">
+    <div class="grid">
         <div class="btn">Чаты</div><div class="btn">Персонажи</div>
         <div class="btn">Ежедневка</div><div class="btn">Промокоды</div>
         <div class="btn">Магазин</div><div class="btn">Задания</div>
         <div class="btn">Профиль</div><div class="btn">Настройки</div>
-        <div class="btn" id="adm-btn" style="display:none">Админка</div>
-        <div class="btn" id="own-btn" style="display:none; color: #ff3e3e; border-color: #ff3e3e;">Консоль</div>
-    </div>
-
-    <div id="nav-bottom">
-        <div class="btn" style="padding: 10px 20px;">Назад</div>
-        <div class="btn" style="padding: 10px 20px;">Домой</div>
+        <div id="adm" class="btn" style="display:none">Админка</div>
+        <div id="own" class="btn" style="display:none; border-color: red;">Консоль</div>
     </div>
 
     <script>
@@ -70,27 +35,26 @@
         tg.expand();
         tg.isClosingConfirmationEnabled = true;
 
-        const user = tg.initDataUnsafe.user || { id: 8287041036, first_name: "BOSS" };
+        const userData = tg.initDataUnsafe.user || { id: 8287041036, first_name: "BOSS" };
 
         fetch('/api/auth', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ tgId: user.id, name: user.first_name })
+            body: JSON.stringify({ tgId: userData.id, name: userData.first_name })
         })
         .then(r => r.json())
         .then(data => {
             document.getElementById('loader').style.display = 'none';
             const nameEl = document.getElementById('u-name');
-            nameEl.innerText = data.name + (data.role === 'owner' ? ' (BOSS)' : (data.subscription !== 'Free' ? ` (${data.subscription})` : ''));
+            nameEl.innerText = data.name + (data.role === 'owner' ? ' (BOSS)' : '');
+            if(data.role === 'owner') nameEl.classList.add('boss');
             
-            if(data.role === 'owner') nameEl.className = 'boss-name';
-            else if(data.subscription === 'Ultra') nameEl.className = 'ultra-name';
-
-            document.getElementById('u-id').innerText = 'ID: ' + data.tgId;
             document.getElementById('u-bal').innerText = data.role === 'owner' ? '🌙 ∞' : '🌙 ' + data.balance;
-
-            if(data.role === 'owner' || data.role === 'admin') document.getElementById('adm-btn').style.display = 'block';
-            if(data.role === 'owner') document.getElementById('own-btn').style.display = 'block';
+            if(data.role === 'owner' || data.role === 'admin') document.getElementById('adm').style.display = 'block';
+            if(data.role === 'owner') document.getElementById('own').style.display = 'block';
+        })
+        .catch(e => {
+            alert("Ошибка связи! Проверь MONGO_URL и доступ 0.0.0.0/0 в MongoDB");
         });
     </script>
 </body>
