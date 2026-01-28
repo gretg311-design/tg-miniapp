@@ -1,44 +1,74 @@
-const tg = window.Telegram.WebApp;
-tg.expand();
-
-const userData = tg.initDataUnsafe.user || { id: 8287041036, first_name: "BOSS" };
-
-async function init(retries = 5) {
-    try {
-        const res = await fetch('/api/auth', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ tgId: userData.id, name: userData.first_name })
-        });
-
-        if (!res.ok) throw new Error('Сервер ответил ошибкой');
-
-        const data = await res.json();
-        
-        // Убираем луну
-        document.getElementById('loader').style.display = 'none';
-        
-        // Наполняем данными
-        const nameEl = document.getElementById('u-name');
-        nameEl.innerText = data.name + (data.role === 'owner' ? ' (BOSS)' : '');
-        if(data.role === 'owner') nameEl.classList.add('boss');
-        
-        document.getElementById('u-bal').innerText = data.role === 'owner' ? '🌙 ∞' : '🌙 ' + (data.balance || 0);
-        
-        // Показываем админку/консоль
-        if(data.role === 'owner' || data.role === 'admin') document.getElementById('adm').style.display = 'block';
-        if(data.role === 'owner') document.getElementById('own').style.display = 'block';
-
-        window.scrollTo(0, document.body.scrollHeight);
-
-    } catch (e) {
-        if (retries > 0) {
-            console.log(`Попытка подключения... осталось ${retries}`);
-            setTimeout(() => init(retries - 1), 1500); // Пробуем снова через 1.5 сек
-        } else {
-            document.getElementById('u-name').innerText = "Ошибка подключения к базе!";
-            alert("Луна не может связаться с базой. Проверь MONGO_URL и IP Access в Atlas!");
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { 
+            background: #000; color: #fff; font-family: sans-serif; margin: 0; 
+            overflow: hidden; touch-action: none; /* Защита от свайпа */
+            height: 100vh;
         }
-    }
-}
-init();
+        .moon-loader { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 100; }
+        .moon { width: 70px; height: 70px; background: #fff; border-radius: 50%; box-shadow: 0 0 30px #a020f0; animation: p 2s infinite ease-in-out; }
+        @keyframes p { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); padding: 20px; border-bottom: 1px solid rgba(160,32,240,0.5); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; }
+        .btn { background: #111; border: 1px solid #222; padding: 20px; text-align: center; border-radius: 12px; font-size: 13px; font-weight: bold; }
+        .btn:active { background: #222; border-color: #a020f0; }
+        .boss-text { color: #ff3e3e; text-shadow: 0 0 8px #ff3e3e; font-weight: 900; }
+    </style>
+</head>
+<body>
+    <div id="loader" class="moon-loader"><div class="moon"></div></div>
+
+    <div class="glass">
+        <div id="u-name" style="font-size: 18px;">Загрузка...</div>
+        <div id="u-bal" style="color: #f1c40f; font-size: 20px; margin-top: 5px;">🌙 --</div>
+    </div>
+
+    <div class="grid">
+        <div class="btn">Чаты</div><div class="btn">Персонажи</div>
+        <div class="btn">Ежедневка</div><div class="btn">Промокоды</div>
+        <div class="btn">Магазин</div><div class="btn">Задания</div>
+        <div class="btn">Профиль</div><div class="btn">Настройки</div>
+        <div id="adm-btn" class="btn" style="display:none; color: #a020f0;">Админ Панель</div>
+        <div id="own-btn" class="btn" style="display:none; color: #ff3e3e; border-color: #ff3e3e;">Консоль Boss</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation(); // Защита от случайного закрытия
+
+        const user = tg.initDataUnsafe.user || { id: 8287041036, first_name: "BOSS" };
+
+        async function init() {
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ tgId: user.id, name: user.first_name })
+                });
+                const data = await res.json();
+                
+                document.getElementById('loader').style.display = 'none';
+                const nameEl = document.getElementById('u-name');
+                
+                if(data.role === 'owner') {
+                    nameEl.innerHTML = `<span class="boss-text">${data.name} [OWNER]</span>`;
+                    document.getElementById('own-btn').style.display = 'block';
+                    document.getElementById('adm-btn').style.display = 'block';
+                    document.getElementById('u-bal').innerText = "🌙 ∞";
+                } else {
+                    nameEl.innerText = data.name;
+                    document.getElementById('u-bal').innerText = "🌙 " + data.balance;
+                    if(data.role === 'admin') document.getElementById('adm-btn').style.display = 'block';
+                }
+            } catch (e) { alert("Критическая ошибка связи с сервером!"); }
+        }
+        init();
+    </script>
+</body>
+</html>
