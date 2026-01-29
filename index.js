@@ -10,31 +10,31 @@ app.use(express.json());
 
 const OWNER_ID = 8287041036;
 
-mongoose.connect(process.env.MONGO_URL).catch(err => console.log(err));
-
-const User = mongoose.model('User', new mongoose.Schema({
-    tgId: Number,
-    name: String,
-    role: { type: String, default: 'user' },
-    balance: { type: Number, default: 100 }
-}));
+// Коннект с таймаутом, чтобы сервер не висел вечно
+mongoose.connect(process.env.MONGO_URL, {
+    serverSelectionTimeoutMS: 5000 
+}).catch(err => console.log("Ошибка базы:", err));
 
 app.post('/api/auth', async (req, res) => {
     try {
         const { tgId, name } = req.body;
+        if (!tgId) return res.status(400).json({ error: "No ID" });
+
         let user = await User.findOne({ tgId: Number(tgId) });
         if (!user) {
             user = await User.create({ 
                 tgId: Number(tgId), 
-                name: name, 
+                name: name || "User", 
                 role: Number(tgId) === OWNER_ID ? 'owner' : 'user' 
             });
         }
         res.json(user);
-    } catch (e) { res.status(500).send(e.message); }
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
-// ОБЯЗАТЕЛЬНО ДЛЯ VERCEL:
+// Отдаем HTML
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
