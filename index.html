@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -7,18 +8,13 @@
     <style>
         :root { --p-color: #a020f0; --boss-color: #ff3e3e; }
         
-        /* ПОЛНАЯ БЛОКИРОВКА СКРОЛЛА И СВАЙПА */
         html, body { 
-            margin: 0; padding: 0; 
-            width: 100vw; height: 100vh; 
-            overflow: hidden; 
-            background: #000; 
-            position: fixed; 
-            touch-action: none; 
-            -webkit-user-select: none;
-            user-select: none;
+            margin: 0; padding: 0; width: 100vw; height: 100vh; 
+            overflow: hidden; background: #000; position: fixed; 
+            touch-action: none; -webkit-user-select: none;
         }
 
+        /* ЦЕНТРАЛЬНЫЙ ЛОАДЕР / ЛУНА */
         #loader { 
             position: fixed; inset: 0; background: #000; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; 
@@ -27,118 +23,135 @@
             width: 80px; height: 80px; background: #fff; border-radius: 50%; 
             box-shadow: 0 0 40px var(--p-color); animation: pulse 1.5s infinite; 
         }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); box-shadow: 0 0 60px var(--p-color); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
-        #main-ui { display: none; height: 100vh; flex-direction: column; background: #000; }
-
-        .header { 
-            padding: 25px 20px; background: #0a0a0a; 
-            border-bottom: 2px solid var(--p-color); display: flex; justify-content: space-between; align-items: center;
+        /* ЭКРАН РЕГИСТРАЦИИ */
+        #reg-screen { 
+            display: none; position: fixed; inset: 0; background: #000; 
+            flex-direction: column; justify-content: center; align-items: center; z-index: 5000;
         }
+        .reg-input {
+            background: #111; border: 2px solid var(--p-color); color: #fff;
+            padding: 15px; border-radius: 12px; width: 80%; font-size: 18px;
+            text-align: center; outline: none; margin-bottom: 20px;
+        }
+        .reg-btn {
+            background: var(--p-color); color: #fff; border: none;
+            padding: 15px 40px; border-radius: 12px; font-weight: bold; font-size: 16px;
+        }
+
+        /* ОСНОВНОЙ ИНТЕРФЕЙС */
+        #main-ui { display: none; height: 100vh; flex-direction: column; }
+        .header { padding: 25px 20px; background: #0a0a0a; border-bottom: 2px solid var(--p-color); display: flex; justify-content: space-between; align-items: center; }
         .user-name { font-size: 20px; font-weight: 900; text-transform: uppercase; }
         .boss-glow { color: var(--boss-color); text-shadow: 0 0 15px var(--boss-color); }
         .balance { color: #f1c40f; font-size: 22px; font-weight: 900; }
 
-        /* СЕТКА КАРТОЧЕК */
-        .grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; 
-            flex-grow: 1; align-content: start;
-        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; flex-grow: 1; align-content: start; }
         .card { 
             background: #151515; border: 1px solid #222; border-radius: 18px; 
             padding: 30px 10px; text-align: center; font-size: 14px; font-weight: 800;
-            color: #fff; text-transform: uppercase; transition: 0.1s;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            color: #fff; text-transform: uppercase; display: flex; align-items: center; justify-content: center;
         }
-        .card:active { transform: scale(0.95); background: #202020; border-color: var(--p-color); }
-
+        .card:active { transform: scale(0.95); border-color: var(--p-color); }
         .own-card { grid-column: span 2; border: 2px solid var(--boss-color); color: var(--boss-color); display: none; }
         .adm-card { grid-column: span 2; border: 2px solid var(--p-color); color: var(--p-color); display: none; }
     </style>
 </head>
 <body scroll="no">
 
-    <div id="loader">
-        <div class="moon"></div>
+    <div id="loader"><div class="moon"></div></div>
+
+    <div id="reg-screen">
+        <h2 style="margin-bottom: 20px; letter-spacing: 2px;">ПРЕДСТАВЬТЕСЬ</h2>
+        <input type="text" id="name-input" class="reg-input" placeholder="Введите ваше имя..." maxlength="15">
+        <button class="reg-btn" onclick="registerUser()">ВОЙТИ В LUNA</button>
     </div>
 
     <div id="main-ui">
         <div class="header">
             <div class="user-info">
-                <div id="u-name" class="user-name">ЗАГРУЗКА...</div>
+                <div id="u-name" class="user-name">---</div>
                 <div style="font-size: 10px; color: #444; margin-top:4px;">ID: <span id="u-id">000000</span></div>
             </div>
             <div id="u-bal" class="balance">🌙 --</div>
         </div>
-
         <div class="grid">
-            <div class="card" onclick="action('ЧАТЫ')">Чаты</div>
-            <div class="card" onclick="action('ПЕРСОНАЖИ')">Персонажи</div>
-            <div class="card" onclick="action('ЕЖЕДНЕВКА')">Ежедневка</div>
-            <div class="card" onclick="action('ПРОМОКОДЫ')">Промокоды</div>
-            <div class="card" onclick="action('МАГАЗИН')">Магазин</div>
-            <div class="card" onclick="action('ЗАДАНИЯ')">Задания</div>
-            <div class="card" onclick="action('ПРОФИЛЬ')">Профиль</div>
-            <div class="card" onclick="action('НАСТРОЙКИ')">Настройки</div>
-            <div id="adm-card" class="card adm-card" onclick="action('АДМИНКА')">Админ Панель</div>
-            <div id="own-card" class="card own-card" onclick="action('КОНСОЛЬ BOSS')">Консоль BOSS</div>
+            <div class="card" onclick="tg.showAlert('Чаты')">Чаты</div>
+            <div class="card" onclick="tg.showAlert('Персонажи')">Персонажи</div>
+            <div class="card" onclick="tg.showAlert('Ежедневка')">Ежедневка</div>
+            <div class="card" onclick="tg.showAlert('Промокоды')">Промокоды</div>
+            <div class="card" onclick="tg.showAlert('Магазин')">Магазин</div>
+            <div class="card" onclick="tg.showAlert('Задания')">Задания</div>
+            <div class="card" onclick="tg.showAlert('Профиль')">Профиль</div>
+            <div class="card" onclick="tg.showAlert('Настройки')">Настройки</div>
+            <div id="adm-card" class="card adm-card" onclick="tg.showAlert('Админка')">Админ Панель</div>
+            <div id="own-card" class="card own-card" onclick="tg.showAlert('BOSS консоль')">Консоль BOSS</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.enableClosingConfirmation(); 
-        tg.headerColor = '#0a0a0a';
-        tg.backgroundColor = '#000000';
-
-        // БЛОКИРОВКА СВАЙПА ВНИЗ (GHOST SCROLL)
-        document.addEventListener('touchmove', function (e) {
-            if (e.target.closest('.grid')) return; // Разрешаем скролл только внутри сетки, если она выйдет за экран
-            e.preventDefault();
-        }, { passive: false });
+        tg.enableClosingConfirmation();
 
         const BOSS_ID = 8287041036;
-
-        function action(name) {
-            tg.HapticFeedback.impactOccurred('medium');
-            tg.showAlert("Вы открыли раздел: " + name);
-        }
+        const tgUser = tg.initDataUnsafe.user || { id: BOSS_ID };
 
         async function init() {
-            const user = tg.initDataUnsafe.user || { id: BOSS_ID, first_name: "BOSS" };
-            
             try {
+                // Проверяем, есть ли юзер в базе
                 const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ tgId: user.id, name: user.first_name })
+                    body: JSON.stringify({ tgId: tgUser.id })
                 });
                 const data = await res.json();
 
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('main-ui').style.display = 'flex';
-
-                document.getElementById('u-id').innerText = user.id;
-                const nameEl = document.getElementById('u-name');
-                const balEl = document.getElementById('u-bal');
-
-                // ПРОВЕРКА НА BOSS
-                if (user.id === BOSS_ID || data.role === 'owner') {
-                    nameEl.innerText = (data.name || user.first_name);
-                    nameEl.classList.add('boss-glow');
-                    balEl.innerText = "🌙 ∞";
-                    document.getElementById('own-card').style.display = 'flex';
-                    document.getElementById('adm-card').style.display = 'flex';
+                if (data.isNew) {
+                    // Если новый - показываем регистрацию
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('reg-screen').style.display = 'flex';
                 } else {
-                    nameEl.innerText = (data.name || user.first_name);
-                    balEl.innerText = "🌙 " + (data.balance || 0);
-                    if (data.role === 'admin') document.getElementById('adm-card').style.display = 'flex';
+                    // Если старый - пускаем в меню
+                    showMenu(data);
                 }
+            } catch (e) { alert("Ошибка подключения!"); }
+        }
 
-            } catch (e) {
-                console.error(e);
+        async function registerUser() {
+            const name = document.getElementById('name-input').value.trim();
+            if (!name) return tg.showAlert("Введите имя!");
+            
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            const res = await fetch('/api/auth', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tgId: tgUser.id, name: name })
+            });
+            const data = await res.json();
+            showMenu(data);
+        }
+
+        function showMenu(data) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('reg-screen').style.display = 'none';
+            document.getElementById('main-ui').style.display = 'flex';
+
+            document.getElementById('u-id').innerText = data.tgId;
+            const nameEl = document.getElementById('u-name');
+            const balEl = document.getElementById('u-bal');
+
+            nameEl.innerText = data.name;
+            if (data.role === 'owner') {
+                nameEl.classList.add('boss-glow');
+                balEl.innerText = "🌙 ∞";
+                document.getElementById('own-card').style.display = 'flex';
+                document.getElementById('adm-card').style.display = 'flex';
+            } else {
+                balEl.innerText = "🌙 " + data.balance;
+                if (data.role === 'admin') document.getElementById('adm-card').style.display = 'flex';
             }
         }
 
