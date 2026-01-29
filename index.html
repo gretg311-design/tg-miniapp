@@ -6,90 +6,105 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --p-color: #a020f0; --boss-color: #ff3e3e; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        body { 
-            background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0; padding: 0; height: 100vh; width: 100vw;
-            overflow: hidden; position: fixed; touch-action: none; /* ЗАЩИТА ОТ СВАЙПА */
+        /* ПОЛНАЯ БЛОКИРОВКА СКРОЛЛА И СВАЙПА */
+        html, body { 
+            margin: 0; padding: 0; 
+            width: 100vw; height: 100vh; 
+            overflow: hidden; 
+            background: #000; 
+            position: fixed; 
+            touch-action: none; 
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        /* ЭКРАН ЗАГРУЗКИ / ЛУНА */
         #loader { 
             position: fixed; inset: 0; background: #000; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; 
         }
         .moon { 
             width: 80px; height: 80px; background: #fff; border-radius: 50%; 
-            box-shadow: 0 0 40px var(--p-color); animation: pulse 1.5s infinite ease-in-out; 
+            box-shadow: 0 0 40px var(--p-color); animation: pulse 1.5s infinite; 
         }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 60px var(--p-color); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); box-shadow: 0 0 60px var(--p-color); } }
 
-        /* ИНТЕРФЕЙС */
-        #main-ui { display: none; height: 100%; flex-direction: column; }
+        #main-ui { display: none; height: 100vh; flex-direction: column; background: #000; }
 
         .header { 
-            padding: 25px 20px; background: rgba(15,15,15,0.95); 
-            border-bottom: 1px solid var(--p-color); display: flex; justify-content: space-between; align-items: center;
+            padding: 25px 20px; background: #0a0a0a; 
+            border-bottom: 2px solid var(--p-color); display: flex; justify-content: space-between; align-items: center;
         }
-        .user-name { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; }
+        .user-name { font-size: 20px; font-weight: 900; text-transform: uppercase; }
         .boss-glow { color: var(--boss-color); text-shadow: 0 0 15px var(--boss-color); }
-        .balance { color: #f1c40f; font-size: 20px; font-weight: 900; }
+        .balance { color: #f1c40f; font-size: 22px; font-weight: 900; }
 
         /* СЕТКА КАРТОЧЕК */
         .grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; 
-            overflow-y: auto; flex-grow: 1; padding-bottom: 40px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; 
+            flex-grow: 1; align-content: start;
         }
         .card { 
-            background: #111; border: 1px solid #222; border-radius: 16px; 
-            padding: 25px 10px; text-align: center; font-size: 13px; font-weight: 700;
-            transition: 0.2s; display: flex; align-items: center; justify-content: center;
-            text-transform: uppercase; letter-spacing: 1px;
+            background: #151515; border: 1px solid #222; border-radius: 18px; 
+            padding: 30px 10px; text-align: center; font-size: 14px; font-weight: 800;
+            color: #fff; text-transform: uppercase; transition: 0.1s;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        .card:active { transform: scale(0.96); background: #181818; border-color: var(--p-color); }
+        .card:active { transform: scale(0.95); background: #202020; border-color: var(--p-color); }
 
-        .own-card { grid-column: span 2; border-color: var(--boss-color); color: var(--boss-color); display: none; }
-        .adm-card { grid-column: span 2; border-color: var(--p-color); color: var(--p-color); display: none; }
+        .own-card { grid-column: span 2; border: 2px solid var(--boss-color); color: var(--boss-color); display: none; }
+        .adm-card { grid-column: span 2; border: 2px solid var(--p-color); color: var(--p-color); display: none; }
     </style>
 </head>
-<body>
+<body scroll="no">
 
     <div id="loader">
         <div class="moon"></div>
-        <p id="loader-text" style="margin-top:20px; font-size:12px; color:var(--p-color); font-weight:bold;">LUNA AUTH...</p>
     </div>
 
     <div id="main-ui">
         <div class="header">
             <div class="user-info">
-                <div id="u-name" class="user-name">USER</div>
-                <div style="font-size: 10px; color: #555; margin-top:4px;">ID: <span id="u-id">000000</span></div>
+                <div id="u-name" class="user-name">ЗАГРУЗКА...</div>
+                <div style="font-size: 10px; color: #444; margin-top:4px;">ID: <span id="u-id">000000</span></div>
             </div>
-            <div id="u-bal" class="balance">🌙 0</div>
+            <div id="u-bal" class="balance">🌙 --</div>
         </div>
 
         <div class="grid">
-            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Чаты</div>
-            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Персонажи</div>
-            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Ежедневка</div>
-            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Промокоды</div>
-            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Магазин</div>
-            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Задания</div>
-            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Профиль</div>
-            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Настройки</div>
-            <div id="adm-card" class="card adm-card">Админ Панель</div>
-            <div id="own-card" class="card own-card">Консоль BOSS</div>
+            <div class="card" onclick="action('ЧАТЫ')">Чаты</div>
+            <div class="card" onclick="action('ПЕРСОНАЖИ')">Персонажи</div>
+            <div class="card" onclick="action('ЕЖЕДНЕВКА')">Ежедневка</div>
+            <div class="card" onclick="action('ПРОМОКОДЫ')">Промокоды</div>
+            <div class="card" onclick="action('МАГАЗИН')">Магазин</div>
+            <div class="card" onclick="action('ЗАДАНИЯ')">Задания</div>
+            <div class="card" onclick="action('ПРОФИЛЬ')">Профиль</div>
+            <div class="card" onclick="action('НАСТРОЙКИ')">Настройки</div>
+            <div id="adm-card" class="card adm-card" onclick="action('АДМИНКА')">Админ Панель</div>
+            <div id="own-card" class="card own-card" onclick="action('КОНСОЛЬ BOSS')">Консоль BOSS</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.isClosingConfirmationEnabled = true; // Защита от свайпа
+        tg.enableClosingConfirmation(); 
+        tg.headerColor = '#0a0a0a';
+        tg.backgroundColor = '#000000';
 
-        // Твой ID
+        // БЛОКИРОВКА СВАЙПА ВНИЗ (GHOST SCROLL)
+        document.addEventListener('touchmove', function (e) {
+            if (e.target.closest('.grid')) return; // Разрешаем скролл только внутри сетки, если она выйдет за экран
+            e.preventDefault();
+        }, { passive: false });
+
         const BOSS_ID = 8287041036;
+
+        function action(name) {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.showAlert("Вы открыли раздел: " + name);
+        }
 
         async function init() {
             const user = tg.initDataUnsafe.user || { id: BOSS_ID, first_name: "BOSS" };
@@ -102,7 +117,6 @@
                 });
                 const data = await res.json();
 
-                // Как только данные есть - убираем луну
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('main-ui').style.display = 'flex';
 
@@ -110,26 +124,25 @@
                 const nameEl = document.getElementById('u-name');
                 const balEl = document.getElementById('u-bal');
 
+                // ПРОВЕРКА НА BOSS
                 if (user.id === BOSS_ID || data.role === 'owner') {
-                    nameEl.innerText = (data.name || user.first_name).toUpperCase();
+                    nameEl.innerText = (data.name || user.first_name);
                     nameEl.classList.add('boss-glow');
                     balEl.innerText = "🌙 ∞";
                     document.getElementById('own-card').style.display = 'flex';
                     document.getElementById('adm-card').style.display = 'flex';
                 } else {
-                    nameEl.innerText = (data.name || user.first_name).toUpperCase();
+                    nameEl.innerText = (data.name || user.first_name);
                     balEl.innerText = "🌙 " + (data.balance || 0);
                     if (data.role === 'admin') document.getElementById('adm-card').style.display = 'flex';
                 }
 
             } catch (e) {
-                document.getElementById('loader-text').innerText = "ОШИБКА БАЗЫ ДАННЫХ";
-                document.getElementById('loader-text').style.color = "red";
+                console.error(e);
             }
         }
 
-        // Запуск через 1 сек, чтобы Луна успела "подышать"
-        setTimeout(init, 1000);
+        setTimeout(init, 500);
     </script>
 </body>
 </html>
