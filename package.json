@@ -1,6 +1,7 @@
 {
-  "name": "luna-final-stable",
-  "version": "1.3.0",
+  "name": "luna-project",
+  "version": "1.0.0",
+  "main": "server.js",
   "dependencies": {
     "express": "^4.18.2",
     "mongoose": "^7.0.0",
