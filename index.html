@@ -6,34 +6,56 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; height: 100vh; }
-        .moon-loader { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 100; }
-        .moon { width: 60px; height: 60px; background: #fff; border-radius: 50%; box-shadow: 0 0 30px #a020f0; animation: p 2s infinite; }
-        @keyframes p { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding: 15px; border-bottom: 1px solid #a020f0; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .btn { background: #111; border: 1px solid #333; padding: 18px; text-align: center; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .boss { color: #ff3e3e; text-shadow: 0 0 10px #ff3e3e; }
+        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; background: #000; }
+        .moon { width: 70px; height: 70px; background: #fff; border-radius: 50%; box-shadow: 0 0 30px #a020f0; animation: p 2s infinite; }
+        @keyframes p { 0%,100% {transform: scale(1);} 50% {transform: scale(1.1);} }
+        .btn-18 { background: #ff3e3e; color: #fff; padding: 15px 40px; border-radius: 30px; font-weight: bold; border: none; margin-top: 20px; cursor: pointer; }
+        .main-menu { display: none; padding: 15px; }
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding: 15px; border-bottom: 1px solid #a020f0; margin-bottom: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { background: #111; border: 1px solid #333; padding: 20px; text-align: center; border-radius: 12px; font-size: 13px; font-weight: bold; }
+        .boss-btn { border-color: #ff3e3e; color: #ff3e3e; display: none; }
+        .boss-name { color: #ff3e3e; text-shadow: 0 0 10px #ff3e3e; }
     </style>
 </head>
 <body>
-    <div id="loader" class="moon-loader"><div class="moon"></div></div>
-    <div class="glass">
-        <div id="u-name" style="font-size: 16px;">Загрузка...</div>
-        <div id="u-bal" style="color: #f1c40f; font-size: 18px;">🌙 --</div>
+    <div id="captcha-screen" class="screen">
+        <div class="moon"></div>
+        <h2 style="margin-top:30px;">КОНТЕНТ 18+</h2>
+        <p style="color: #888; text-align: center; padding: 0 20px;">Вам уже исполнилось 18 лет?</p>
+        <button class="btn-18" onclick="verifyAge()">МНЕ ЕСТЬ 18 ЛЕТ</button>
     </div>
-    <div class="grid">
-        <div class="btn">Чаты</div><div class="btn">Персонажи</div>
-        <div class="btn">Ежедневка</div><div class="btn">Промокоды</div>
-        <div class="btn">Магазин</div><div class="btn">Задания</div>
-        <div class="btn">Профиль</div><div class="btn">Настройки</div>
-        <div id="adm" class="btn" style="display:none; color: #a020f0;">Админ Панель</div>
-        <div id="own" class="btn" style="display:none; color: #ff3e3e; border-color: #ff3e3e;">Консоль BOSS</div>
+
+    <div id="main-menu" class="main-menu">
+        <div class="glass">
+            <div id="u-name" style="font-size: 18px;">Загрузка...</div>
+            <div id="u-bal" style="color: #f1c40f; font-size: 20px; margin-top: 5px;">🌙 --</div>
+        </div>
+        <div class="grid">
+            <div class="btn">Чаты</div><div class="btn">Персонажи</div>
+            <div class="btn">Ежедневка</div><div class="btn">Промокоды</div>
+            <div class="btn">Магазин</div><div class="btn">Задания</div>
+            <div class="btn">Профиль</div><div class="btn">Настройки</div>
+            <div id="adm-btn" class="btn" style="display:none; color: #a020f0;">Админка</div>
+            <div id="own-btn" class="btn boss-btn">Консоль BOSS</div>
+        </div>
     </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        const user = tg.initDataUnsafe.user || { id: 8287041036, first_name: "BOSS" };
-        async function init() {
+        tg.enableClosingConfirmation();
+
+        // Берем реальные данные из ТГ
+        const user = tg.initDataUnsafe.user || { id: 8287041036, first_name: "BOSS_TEST" };
+
+        function verifyAge() {
+            document.getElementById('captcha-screen').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+            initUser();
+        }
+
+        async function initUser() {
             try {
                 const res = await fetch('/api/auth', {
                     method: 'POST',
@@ -41,16 +63,22 @@
                     body: JSON.stringify({ tgId: user.id, name: user.first_name })
                 });
                 const data = await res.json();
-                document.getElementById('loader').style.display = 'none';
+                
                 const nameEl = document.getElementById('u-name');
-                nameEl.innerText = data.name + (data.role === 'owner' ? ' [OWNER]' : '');
-                if(data.role === 'owner') nameEl.className = 'boss';
-                document.getElementById('u-bal').innerText = data.role === 'owner' ? "🌙 ∞" : "🌙 " + data.balance;
-                if(data.role === 'owner' || data.role === 'admin') document.getElementById('adm').style.display = 'block';
-                if(data.role === 'owner') document.getElementById('own').style.display = 'block';
-            } catch (e) { console.error(e); }
+                if (data.role === 'owner') {
+                    nameEl.innerHTML = `<span class="boss-name">${data.name} [BOSS]</span>`;
+                    document.getElementById('own-btn').style.display = 'block';
+                    document.getElementById('adm-btn').style.display = 'block';
+                    document.getElementById('u-bal').innerText = "🌙 ∞";
+                } else {
+                    nameEl.innerText = data.name;
+                    document.getElementById('u-bal').innerText = "🌙 " + (data.balance || 0);
+                    if (data.role === 'admin') document.getElementById('adm-btn').style.display = 'block';
+                }
+            } catch (e) {
+                alert("Ошибка авторизации!");
+            }
         }
-        init();
     </script>
 </body>
 </html>
