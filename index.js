@@ -8,10 +8,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Жесткая привязка OWNER_ID (никто не сменит, это на сервере)
 const OWNER_ID = 8287041036;
 
-mongoose.connect(process.env.MONGO_URL);
+mongoose.connect(process.env.MONGO_URL).catch(err => console.log(err));
 
 const User = mongoose.model('User', new mongoose.Schema({
     tgId: Number,
@@ -20,7 +19,6 @@ const User = mongoose.model('User', new mongoose.Schema({
     balance: { type: Number, default: 100 }
 }));
 
-// API Авторизация
 app.post('/api/auth', async (req, res) => {
     try {
         const { tgId, name } = req.body;
@@ -33,10 +31,10 @@ app.post('/api/auth', async (req, res) => {
             });
         }
         res.json(user);
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { res.status(500).send(e.message); }
 });
 
-// Фикс для "Cannot GET /"
+// ОБЯЗАТЕЛЬНО ДЛЯ VERCEL:
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
