@@ -10,42 +10,40 @@ app.use(express.json());
 
 const OWNER_ID = 8287041036;
 
-mongoose.connect(process.env.MONGO_URL);
+// Улучшенное подключение
+mongoose.connect(process.env.MONGO_URL, {
+    serverSelectionTimeoutMS: 5000 // Ждать базу не больше 5 секунд
+}).catch(err => console.error("Ошибка подключения к MongoDB:", err));
 
-const userSchema = new mongoose.Schema({
+const User = mongoose.model('User', new mongoose.Schema({
     tgId: Number,
     name: String,
     role: { type: String, default: 'user' },
-    balance: { type: Number, default: 100 },
-    streak: { type: Number, default: 0 }
-});
-
-const User = mongoose.model('User', userSchema);
+    balance: { type: Number, default: 100 }
+}));
 
 app.post('/api/auth', async (req, res) => {
     try {
         const { tgId, name } = req.body;
-        if (!tgId) return res.status(400).send("No ID");
-
+        
+        // Если база не ответит вовремя, блок catch поймает ошибку
         let user = await User.findOne({ tgId: Number(tgId) });
         
-        // Одноразовая регистрация + проверка на BOSS
         if (!user) {
             user = await User.create({ 
                 tgId: Number(tgId), 
-                name: name, 
+                name: name || "Аноним", 
                 role: Number(tgId) === OWNER_ID ? 'owner' : 'user' 
             });
-        } else {
-            // Если ты уже в базе, но зашел с этого ID - сервер подтверждает статус OWNER
-            if (Number(tgId) === OWNER_ID && user.role !== 'owner') {
-                user.role = 'owner';
-                await user.save();
-            }
+        } else if (Number(tgId) === OWNER_ID && user.role !== 'owner') {
+            user.role = 'owner';
+            await user.save();
         }
+        
         res.json(user);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        console.error(e);
+        res.status(500).json({ error: "Ошибка базы данных", details: e.message });
     }
 });
 
