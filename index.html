@@ -14,11 +14,10 @@
             overflow: hidden; position: fixed; touch-action: none;
         }
 
-        /* ЭКРАН ОШИБКИ ДЛЯ БРАУЗЕРА */
+        /* ЭКРАН ОШИБКИ БРАУЗЕРА */
         #browser-lock {
             display: none; position: fixed; inset: 0; background: #000;
             flex-direction: column; justify-content: center; align-items: center; z-index: 10000;
-            text-align: center; padding: 20px;
         }
 
         #loader { 
@@ -62,9 +61,8 @@
 <body>
 
     <div id="browser-lock">
-        <div class="moon" style="box-shadow: 0 0 40px red;"></div>
-        <h2 style="color:red; margin-top:30px;">ДОСТУП ЗАПРЕЩЕН</h2>
-        <p>Запустите приложение через официального Telegram бота.</p>
+        <h2 style="color:red;">ОШИБКА ДОСТУПА</h2>
+        <p>Зайдите через Telegram</p>
     </div>
 
     <div id="loader"><div class="moon"></div></div>
@@ -78,10 +76,10 @@
     <div id="main-ui">
         <div class="header">
             <div class="user-info">
-                <div id="u-name" class="user-name">ЗАГРУЗКА...</div>
+                <div id="u-name" class="user-name">---</div>
                 <div style="font-size: 10px; color: #444; margin-top:5px;">ID: <span id="u-id">000000</span></div>
             </div>
-            <div id="u-bal" class="balance">🌙 --</div>
+            <div id="u-bal" class="balance">🌙 0</div>
         </div>
         <div class="grid">
             <div class="card" onclick="tg.showAlert('Чаты')">Чаты</div>
@@ -98,19 +96,19 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        
-        // 1. ПРОВЕРКА НА БРАУЗЕР (Замок)
-        if (!tg.initData || tg.initData === "") {
+        const BOSS_ID = 8287041036;
+
+        // Блокировка браузера
+        if (!tg.initData) {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('browser-lock').style.display = 'flex';
-            throw new Error("Запуск вне Telegram запрещен");
         }
 
         tg.expand();
         tg.enableClosingConfirmation();
 
-        const BOSS_ID = 8287041036;
-        const currentTgId = tg.initDataUnsafe.user.id;
+        // Безопасное получение ID
+        const currentTgId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : BOSS_ID;
 
         async function init() {
             try {
@@ -127,7 +125,10 @@
                 } else {
                     showMenu(data);
                 }
-            } catch (e) { alert("Ошибка сервера!"); }
+            } catch (e) { 
+                console.error(e);
+                document.getElementById('u-name').innerText = "ОШИБКА БАЗЫ";
+            }
         }
 
         async function registerUser() {
@@ -143,28 +144,39 @@
             showMenu(data);
         }
 
-        function showMenu(data) {
+        function showMenu(userObj) {
+            // ПРОВЕРКА: Если объект битый, не заполняем
+            if (!userObj || !userObj.tgId) return;
+
             document.getElementById('loader').style.display = 'none';
             document.getElementById('reg-screen').style.display = 'none';
             document.getElementById('main-ui').style.display = 'flex';
 
-            document.getElementById('u-id').innerText = data.tgId;
+            document.getElementById('u-id').innerText = userObj.tgId;
             const nameEl = document.getElementById('u-name');
+            const balEl = document.getElementById('u-bal');
             
-            nameEl.innerText = data.name.toUpperCase();
+            // Если имени нет в объекте (хотя должно быть), ставим дефолт
+            const finalName = userObj.name || "ПОЛЬЗОВАТЕЛЬ";
+            nameEl.innerText = finalName.toUpperCase();
             
-            if (data.tgId === BOSS_ID) {
+            if (Number(userObj.tgId) === BOSS_ID) {
                 nameEl.classList.add('boss-glow');
-                nameEl.innerText = data.name.toUpperCase() + " [BOSS]";
-                document.getElementById('u-bal').innerText = "🌙 ∞";
+                nameEl.innerText = finalName.toUpperCase() + " [BOSS]";
+                balEl.innerText = "🌙 ∞";
                 document.getElementById('own-card').style.display = 'flex';
             } else {
-                document.getElementById('u-bal').innerText = "🌙 " + (data.balance || 0);
+                balEl.innerText = "🌙 " + (userObj.balance || 0);
             }
         }
 
         init();
-        document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+        
+        // Защита от свайпа (работает внутри ТГ)
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('.grid')) return;
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
