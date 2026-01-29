@@ -2,81 +2,98 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; }
+        :root { --p-color: #a020f0; --boss-color: #ff3e3e; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* Экран капчи 18+ */
-        .screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
-        .moon { width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 0 40px #a020f0; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px #a020f0; } 50% { transform: scale(1.1); box-shadow: 0 0 50px #a020f0; } }
-        .btn-18 { background: linear-gradient(45deg, #a020f0, #6a0dad); color: white; border: none; padding: 15px 40px; border-radius: 25px; font-weight: bold; margin-top: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(160, 32, 240, 0.4); }
+        body { 
+            background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0; padding: 0; height: 100vh; width: 100vw;
+            overflow: hidden; position: fixed; touch-action: none; /* ЗАЩИТА ОТ СВАЙПА */
+        }
 
-        /* Шапка как на скрине */
-        .header { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(10px); padding: 20px; border-bottom: 2px solid #a020f0; display: flex; justify-content: space-between; align-items: center; }
-        .user-info { display: flex; flex-direction: column; }
-        .user-name { font-size: 18px; font-weight: bold; color: #fff; }
-        .boss-glow { color: #ff3e3e; text-shadow: 0 0 15px #ff3e3e; }
-        .balance { color: #f1c40f; font-size: 22px; font-weight: bold; }
+        /* ЭКРАН ЗАГРУЗКИ / ЛУНА */
+        #loader { 
+            position: fixed; inset: 0; background: #000; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; 
+        }
+        .moon { 
+            width: 80px; height: 80px; background: #fff; border-radius: 50%; 
+            box-shadow: 0 0 40px var(--p-color); animation: pulse 1.5s infinite ease-in-out; 
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 60px var(--p-color); } }
 
-        /* Сетка кнопок */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; height: 60vh; overflow-y: auto; }
-        .m-btn { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 25px 10px; text-align: center; font-size: 14px; font-weight: 600; transition: 0.3s; position: relative; }
-        .m-btn:active { background: #252525; transform: scale(0.95); border-color: #a020f0; }
-        
-        /* Кнопки Овнера и Админа */
-        #own-btn { border: 2px solid #ff3e3e; color: #ff3e3e; display: none; grid-column: span 2; box-shadow: 0 0 10px rgba(255, 62, 62, 0.2); }
-        #adm-btn { border: 2px solid #a020f0; color: #a020f0; display: none; grid-column: span 2; }
+        /* ИНТЕРФЕЙС */
+        #main-ui { display: none; height: 100%; flex-direction: column; }
+
+        .header { 
+            padding: 25px 20px; background: rgba(15,15,15,0.95); 
+            border-bottom: 1px solid var(--p-color); display: flex; justify-content: space-between; align-items: center;
+        }
+        .user-name { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; }
+        .boss-glow { color: var(--boss-color); text-shadow: 0 0 15px var(--boss-color); }
+        .balance { color: #f1c40f; font-size: 20px; font-weight: 900; }
+
+        /* СЕТКА КАРТОЧЕК */
+        .grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; 
+            overflow-y: auto; flex-grow: 1; padding-bottom: 40px;
+        }
+        .card { 
+            background: #111; border: 1px solid #222; border-radius: 16px; 
+            padding: 25px 10px; text-align: center; font-size: 13px; font-weight: 700;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .card:active { transform: scale(0.96); background: #181818; border-color: var(--p-color); }
+
+        .own-card { grid-column: span 2; border-color: var(--boss-color); color: var(--boss-color); display: none; }
+        .adm-card { grid-column: span 2; border-color: var(--p-color); color: var(--p-color); display: none; }
     </style>
 </head>
 <body>
 
-    <div id="captcha" class="screen">
+    <div id="loader">
         <div class="moon"></div>
-        <h1 style="margin-top:20px; letter-spacing: 2px;">LUNA 18+</h1>
-        <button class="btn-18" onclick="startApp()">МНЕ ЕСТЬ 18 ЛЕТ</button>
+        <p id="loader-text" style="margin-top:20px; font-size:12px; color:var(--p-color); font-weight:bold;">LUNA AUTH...</p>
     </div>
 
-    <div id="app" style="display:none;">
+    <div id="main-ui">
         <div class="header">
             <div class="user-info">
-                <span id="u-name" class="user-name">Загрузка...</span>
-                <span style="font-size: 12px; color: #888;">ID: <span id="u-id">----</span></span>
+                <div id="u-name" class="user-name">USER</div>
+                <div style="font-size: 10px; color: #555; margin-top:4px;">ID: <span id="u-id">000000</span></div>
             </div>
             <div id="u-bal" class="balance">🌙 0</div>
         </div>
 
-        <div class="menu-grid">
-            <div class="m-btn">ЧАТЫ</div>
-            <div class="m-btn">ПЕРСОНАЖИ</div>
-            <div class="m-btn">ЕЖЕДНЕВКА</div>
-            <div class="m-btn">ПРОМОКОДЫ</div>
-            <div class="m-btn">МАГАЗИН</div>
-            <div class="m-btn">ЗАДАНИЯ</div>
-            <div class="m-btn">ПРОФИЛЬ</div>
-            <div class="m-btn">НАСТРОЙКИ</div>
-            <div id="adm-btn" class="m-btn" onclick="alert('Админ панель')">АДМИН ПАНЕЛЬ</div>
-            <div id="own-btn" class="m-btn" onclick="alert('Консоль BOSS')">КОНСОЛЬ BOSS</div>
+        <div class="grid">
+            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Чаты</div>
+            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Персонажи</div>
+            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Ежедневка</div>
+            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Промокоды</div>
+            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Магазин</div>
+            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Задания</div>
+            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Профиль</div>
+            <div class="card" onclick="tg.HapticFeedback.impactOccurred('light')">Настройки</div>
+            <div id="adm-card" class="card adm-card">Админ Панель</div>
+            <div id="own-card" class="card own-card">Консоль BOSS</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.enableClosingConfirmation();
+        tg.isClosingConfirmationEnabled = true; // Защита от свайпа
 
-        // ТВОЙ ID ДЛЯ ТЕСТА И ПРОВЕРКИ
-        const MY_ID = 8287041036;
-        const user = tg.initDataUnsafe.user || { id: MY_ID, first_name: "BOSS" };
+        // Твой ID
+        const BOSS_ID = 8287041036;
 
-        function startApp() {
-            document.getElementById('captcha').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-            loadData();
-        }
-
-        async function loadData() {
+        async function init() {
+            const user = tg.initDataUnsafe.user || { id: BOSS_ID, first_name: "BOSS" };
+            
             try {
                 const res = await fetch('/api/auth', {
                     method: 'POST',
@@ -84,27 +101,35 @@
                     body: JSON.stringify({ tgId: user.id, name: user.first_name })
                 });
                 const data = await res.json();
-                
+
+                // Как только данные есть - убираем луну
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('main-ui').style.display = 'flex';
+
                 document.getElementById('u-id').innerText = user.id;
                 const nameEl = document.getElementById('u-name');
                 const balEl = document.getElementById('u-bal');
 
-                // ПРОВЕРКА BOSS СТАТУСА
-                if (user.id === MY_ID || data.role === 'owner') {
-                    nameEl.innerText = data.name + " [BOSS]";
+                if (user.id === BOSS_ID || data.role === 'owner') {
+                    nameEl.innerText = (data.name || user.first_name).toUpperCase();
                     nameEl.classList.add('boss-glow');
                     balEl.innerText = "🌙 ∞";
-                    document.getElementById('own-btn').style.display = 'block';
-                    document.getElementById('adm-btn').style.display = 'block';
+                    document.getElementById('own-card').style.display = 'flex';
+                    document.getElementById('adm-card').style.display = 'flex';
                 } else {
-                    nameEl.innerText = data.name;
+                    nameEl.innerText = (data.name || user.first_name).toUpperCase();
                     balEl.innerText = "🌙 " + (data.balance || 0);
-                    if (data.role === 'admin') document.getElementById('adm-btn').style.display = 'block';
+                    if (data.role === 'admin') document.getElementById('adm-card').style.display = 'flex';
                 }
+
             } catch (e) {
-                document.getElementById('u-name').innerText = "Ошибка сервера";
+                document.getElementById('loader-text').innerText = "ОШИБКА БАЗЫ ДАННЫХ";
+                document.getElementById('loader-text').style.color = "red";
             }
         }
+
+        // Запуск через 1 сек, чтобы Луна успела "подышать"
+        setTimeout(init, 1000);
     </script>
 </body>
 </html>
