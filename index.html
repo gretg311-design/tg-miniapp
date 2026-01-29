@@ -5,39 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; height: 100vh; }
-        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; background: #000; }
-        .moon { width: 70px; height: 70px; background: #fff; border-radius: 50%; box-shadow: 0 0 30px #a020f0; animation: p 2s infinite; }
-        @keyframes p { 0%,100% {transform: scale(1);} 50% {transform: scale(1.1);} }
-        .btn-18 { background: #ff3e3e; color: #fff; padding: 15px 40px; border-radius: 30px; font-weight: bold; border: none; margin-top: 20px; cursor: pointer; }
-        .main-menu { display: none; padding: 15px; }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding: 15px; border-bottom: 1px solid #a020f0; margin-bottom: 15px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { background: #111; border: 1px solid #333; padding: 20px; text-align: center; border-radius: 12px; font-size: 13px; font-weight: bold; }
-        .boss-btn { border-color: #ff3e3e; color: #ff3e3e; display: none; }
-        .boss-name { color: #ff3e3e; text-shadow: 0 0 10px #ff3e3e; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; }
+        
+        /* Экран капчи 18+ */
+        .screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        .moon { width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 0 40px #a020f0; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px #a020f0; } 50% { transform: scale(1.1); box-shadow: 0 0 50px #a020f0; } }
+        .btn-18 { background: linear-gradient(45deg, #a020f0, #6a0dad); color: white; border: none; padding: 15px 40px; border-radius: 25px; font-weight: bold; margin-top: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(160, 32, 240, 0.4); }
+
+        /* Шапка как на скрине */
+        .header { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(10px); padding: 20px; border-bottom: 2px solid #a020f0; display: flex; justify-content: space-between; align-items: center; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-size: 18px; font-weight: bold; color: #fff; }
+        .boss-glow { color: #ff3e3e; text-shadow: 0 0 15px #ff3e3e; }
+        .balance { color: #f1c40f; font-size: 22px; font-weight: bold; }
+
+        /* Сетка кнопок */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; height: 60vh; overflow-y: auto; }
+        .m-btn { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 25px 10px; text-align: center; font-size: 14px; font-weight: 600; transition: 0.3s; position: relative; }
+        .m-btn:active { background: #252525; transform: scale(0.95); border-color: #a020f0; }
+        
+        /* Кнопки Овнера и Админа */
+        #own-btn { border: 2px solid #ff3e3e; color: #ff3e3e; display: none; grid-column: span 2; box-shadow: 0 0 10px rgba(255, 62, 62, 0.2); }
+        #adm-btn { border: 2px solid #a020f0; color: #a020f0; display: none; grid-column: span 2; }
     </style>
 </head>
 <body>
-    <div id="captcha-screen" class="screen">
+
+    <div id="captcha" class="screen">
         <div class="moon"></div>
-        <h2 style="margin-top:30px;">КОНТЕНТ 18+</h2>
-        <p style="color: #888; text-align: center; padding: 0 20px;">Вам уже исполнилось 18 лет?</p>
-        <button class="btn-18" onclick="verifyAge()">МНЕ ЕСТЬ 18 ЛЕТ</button>
+        <h1 style="margin-top:20px; letter-spacing: 2px;">LUNA 18+</h1>
+        <button class="btn-18" onclick="startApp()">МНЕ ЕСТЬ 18 ЛЕТ</button>
     </div>
 
-    <div id="main-menu" class="main-menu">
-        <div class="glass">
-            <div id="u-name" style="font-size: 18px;">Загрузка...</div>
-            <div id="u-bal" style="color: #f1c40f; font-size: 20px; margin-top: 5px;">🌙 --</div>
+    <div id="app" style="display:none;">
+        <div class="header">
+            <div class="user-info">
+                <span id="u-name" class="user-name">Загрузка...</span>
+                <span style="font-size: 12px; color: #888;">ID: <span id="u-id">----</span></span>
+            </div>
+            <div id="u-bal" class="balance">🌙 0</div>
         </div>
-        <div class="grid">
-            <div class="btn">Чаты</div><div class="btn">Персонажи</div>
-            <div class="btn">Ежедневка</div><div class="btn">Промокоды</div>
-            <div class="btn">Магазин</div><div class="btn">Задания</div>
-            <div class="btn">Профиль</div><div class="btn">Настройки</div>
-            <div id="adm-btn" class="btn" style="display:none; color: #a020f0;">Админка</div>
-            <div id="own-btn" class="btn boss-btn">Консоль BOSS</div>
+
+        <div class="menu-grid">
+            <div class="m-btn">ЧАТЫ</div>
+            <div class="m-btn">ПЕРСОНАЖИ</div>
+            <div class="m-btn">ЕЖЕДНЕВКА</div>
+            <div class="m-btn">ПРОМОКОДЫ</div>
+            <div class="m-btn">МАГАЗИН</div>
+            <div class="m-btn">ЗАДАНИЯ</div>
+            <div class="m-btn">ПРОФИЛЬ</div>
+            <div class="m-btn">НАСТРОЙКИ</div>
+            <div id="adm-btn" class="m-btn" onclick="alert('Админ панель')">АДМИН ПАНЕЛЬ</div>
+            <div id="own-btn" class="m-btn" onclick="alert('Консоль BOSS')">КОНСОЛЬ BOSS</div>
         </div>
     </div>
 
@@ -46,16 +66,17 @@
         tg.expand();
         tg.enableClosingConfirmation();
 
-        // Берем реальные данные из ТГ
-        const user = tg.initDataUnsafe.user || { id: 8287041036, first_name: "BOSS_TEST" };
+        // ТВОЙ ID ДЛЯ ТЕСТА И ПРОВЕРКИ
+        const MY_ID = 8287041036;
+        const user = tg.initDataUnsafe.user || { id: MY_ID, first_name: "BOSS" };
 
-        function verifyAge() {
-            document.getElementById('captcha-screen').style.display = 'none';
-            document.getElementById('main-menu').style.display = 'block';
-            initUser();
+        function startApp() {
+            document.getElementById('captcha').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            loadData();
         }
 
-        async function initUser() {
+        async function loadData() {
             try {
                 const res = await fetch('/api/auth', {
                     method: 'POST',
@@ -64,19 +85,24 @@
                 });
                 const data = await res.json();
                 
+                document.getElementById('u-id').innerText = user.id;
                 const nameEl = document.getElementById('u-name');
-                if (data.role === 'owner') {
-                    nameEl.innerHTML = `<span class="boss-name">${data.name} [BOSS]</span>`;
+                const balEl = document.getElementById('u-bal');
+
+                // ПРОВЕРКА BOSS СТАТУСА
+                if (user.id === MY_ID || data.role === 'owner') {
+                    nameEl.innerText = data.name + " [BOSS]";
+                    nameEl.classList.add('boss-glow');
+                    balEl.innerText = "🌙 ∞";
                     document.getElementById('own-btn').style.display = 'block';
                     document.getElementById('adm-btn').style.display = 'block';
-                    document.getElementById('u-bal').innerText = "🌙 ∞";
                 } else {
                     nameEl.innerText = data.name;
-                    document.getElementById('u-bal').innerText = "🌙 " + (data.balance || 0);
+                    balEl.innerText = "🌙 " + (data.balance || 0);
                     if (data.role === 'admin') document.getElementById('adm-btn').style.display = 'block';
                 }
             } catch (e) {
-                alert("Ошибка авторизации!");
+                document.getElementById('u-name').innerText = "Ошибка сервера";
             }
         }
     </script>
