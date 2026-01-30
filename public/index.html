@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>От А до Я</title>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
+        .pulsating-moon { font-size: 50px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0.5; transform: scale(1); } }
+        .header { display: flex; justify-content: space-between; padding: 15px; background: #111; border-bottom: 2px solid #333; }
+        .ultra-glow { animation: rgb 3s infinite; font-weight: bold; }
+        @keyframes rgb { 0% {color: red;} 33% {color: lime;} 66% {color: blue;} 100% {color: red;} }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .btn { background: #222; border: 1px solid #444; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 14px; text-transform: uppercase; }
+        .hidden { display: none; }
+        #chat-plus { font-size: 60px; color: #444; text-align: center; margin-top: 50px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="loading" style="display:flex; height:100vh; flex-direction:column; justify-content:center; align-items:center;">
+        <div class="pulsating-moon">🌙</div>
+        <p>Проверка ID...</p>
+    </div>
+
+    <div id="app" class="hidden">
+        <div class="header">
+            <div id="h-name">Имя</div>
+            <div id="h-sub">FREE</div>
+            <div id="h-shards">100 🌙</div>
+        </div>
+
+        <div id="screen-main" class="grid">
+            <div class="btn" onclick="showScreen('chats')">Чаты</div>
+            <div class="btn" onclick="showScreen('chars')">Персонажи</div>
+            <div class="btn" onclick="showScreen('daily')">Ежедневка</div>
+            <div class="btn" onclick="showScreen('tasks')">Задания</div>
+            <div class="btn" onclick="showScreen('shop')">Магазин</div>
+            <div class="btn" onclick="showScreen('promo')">Промокоды</div>
+            <div class="btn" onclick="showScreen('profile')">Профиль</div>
+            <div class="btn" onclick="showScreen('settings')">Настройки</div>
+            <div id="adm-btn" class="btn hidden">Админ</div>
+            <div id="own-btn" class="btn hidden" style="border-color:red">Овнер</div>
+        </div>
+
+        <div id="screen-chats" class="hidden">
+            <div id="chat-plus" onclick="showScreen('chars')">+</div>
+        </div>
+    </div>
+
+    <script>
+        // Защита от свайпа вниз
+        window.addEventListener('touchstart', e => { if (e.pageY < 10) e.preventDefault(); }, {passive: false});
+
+        const OWNER_ID = 8287041036;
+        let userData = {};
+
+        async function init() {
+            // Тут должен быть Telegram.WebApp.init()
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                // Проверка прав Овнера
+                if (OWNER_ID === 8287041036) { 
+                    document.getElementById('own-btn').classList.remove('hidden');
+                    document.getElementById('adm-btn').classList.remove('hidden');
+                }
+            }, 2500);
+        }
+
+        function showScreen(name) {
+            document.getElementById('screen-main').classList.add('hidden');
+            document.getElementById('screen-chats').classList.add('hidden');
+            document.getElementById('screen-' + name).classList.remove('hidden');
+        }
+
+        init();
+    </script>
+</body>
+</html>
