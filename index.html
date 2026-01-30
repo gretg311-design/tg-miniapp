@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --p-color: #a020f0; --boss-color: #ff3e3e; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; position: fixed; touch-action: none; }
+        
+        #loader, #reg-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .moon { width: 85px; height: 85px; background: #fff; border-radius: 50%; box-shadow: 0 0 40px var(--p-color); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        .reg-input { background: #111; border: 2px solid var(--p-color); color: #fff; padding: 15px; border-radius: 15px; width: 85%; text-align: center; margin-bottom: 20px; outline: none; font-size: 18px; }
+        .reg-btn { background: var(--p-color); color: #fff; border: none; padding: 15px 50px; border-radius: 15px; font-weight: bold; box-shadow: 0 0 20px var(--p-color); }
+
+        #main-ui { display: none; height: 100vh; flex-direction: column; }
+        .header { padding: 25px 20px; background: #0a0a0a; border-bottom: 2px solid var(--p-color); display: flex; justify-content: space-between; align-items: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; flex-grow: 1; align-content: start; }
+        .card { background: #121212; border: 1px solid #222; border-radius: 18px; padding: 30px 10px; text-align: center; font-size: 13px; font-weight: 800; text-transform: uppercase; color: #fff; }
+        .card:active { transform: scale(0.95); border-color: var(--p-color); }
+        .own-card { grid-column: span 2; border: 2px solid var(--boss-color); color: var(--boss-color); display: none; }
+        .boss-glow { color: var(--boss-color); text-shadow: 0 0 15px var(--boss-color); }
+    </style>
+</head>
+<body>
+    <div id="loader"><div class="moon"></div></div>
+    <div id="reg-screen" style="display:none;">
+        <h2 style="letter-spacing: 2px; margin-bottom: 25px;">КТО ТЫ?</h2>
+        <input type="text" id="name-input" class="reg-input" placeholder="ВВЕДИ ИМЯ..." maxlength="12">
+        <button class="reg-btn" onclick="register()">НАЧАТЬ</button>
+    </div>
+
+    <div id="main-ui">
+        <div class="header">
+            <div>
+                <div id="u-name" style="font-size: 20px; font-weight: 900; text-transform: uppercase;">ЗАГРУЗКА</div>
+                <div style="font-size: 10px; color: #444; margin-top: 5px;">ID: <span id="u-id">000000</span></div>
+            </div>
+            <div id="u-bal" style="color: #f1c40f; font-size: 22px; font-weight: 900;">🌙 0</div>
+        </div>
+        <div class="grid">
+            <div class="card" onclick="tg.showAlert('ЧАТЫ')">Чаты</div>
+            <div class="card" onclick="tg.showAlert('ПЕРСОНАЖИ')">Персонажи</div>
+            <div class="card" onclick="tg.showAlert('ЕЖЕДНЕВКА')">Ежедневка</div>
+            <div class="card" onclick="tg.showAlert('ПРОМОКОДЫ')">Промокоды</div>
+            <div class="card" onclick="tg.showAlert('МАГАЗИН')">Магазин</div>
+            <div class="card" onclick="tg.showAlert('ЗАДАНИЯ')">Задания</div>
+            <div id="own-card" class="card own-card" onclick="tg.showAlert('BOSS КОНСОЛЬ')">Консоль BOSS</div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const BOSS_ID = 8287041036;
+        const currentId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : BOSS_ID;
+
+        async function auth(name = null) {
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ tgId: currentId, name })
+                });
+                if (res.status === 404) {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('reg-screen').style.display = 'flex';
+                } else {
+                    const data = await res.json();
+                    showMenu(data);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function register() {
+            const n = document.getElementById('name-input').value.trim();
+            if (n) auth(n);
+        }
+
+        function showMenu(user) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('reg-screen').style.display = 'none';
+            document.getElementById('main-ui').style.display = 'flex';
+            document.getElementById('u-id').innerText = user.tgId;
+            const nameEl = document.getElementById('u-name');
+            nameEl.innerText = user.name;
+            if (Number(user.tgId) === BOSS_ID) {
+                nameEl.classList.add('boss-glow');
+                nameEl.innerText += " [BOSS]";
+                document.getElementById('u-bal').innerText = "🌙 ∞";
+                document.getElementById('own-card').style.display = 'block';
+            } else {
+                document.getElementById('u-bal').innerText = "🌙 " + (user.balance || 0);
+            }
+        }
+        auth();
+        document.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+    </script>
+</body>
+</html>
