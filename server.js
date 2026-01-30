@@ -10,8 +10,8 @@ app.use(express.json());
 
 const OWNER_ID = 8287041036;
 
-// Подключение к БД (ссылку вставишь в Env на Vercel)
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+// Подключение к БД
+mongoose.connect(process.env.MONGO_URI);
 
 const UserSchema = new mongoose.Schema({
     tg_id: { type: Number, unique: true },
@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// Регистрация
+// Регистрация / Вход
 app.post('/api/auth', async (req, res) => {
     try {
         const { tg_id, name, gender } = req.body;
@@ -36,7 +36,7 @@ app.post('/api/auth', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Ежедневка (Твоя логика с бонусами)
+// Ежедневка (15 база + бонусы + стрик x2)
 app.post('/api/daily', async (req, res) => {
     const { tg_id } = req.body;
     const user = await User.findOne({ tg_id });
@@ -56,7 +56,7 @@ app.post('/api/daily', async (req, res) => {
     res.json({ shards: user.shards });
 });
 
-// Чат через OpenRouter (1 соо = 1 осколок)
+// Чат через OpenRouter
 app.post('/api/chat', async (req, res) => {
     const { tg_id, message } = req.body;
     const user = await User.findOne({ tg_id });
@@ -76,7 +76,7 @@ app.post('/api/chat', async (req, res) => {
     } catch (e) { res.status(500).send(e.message); }
 });
 
-// Оплата CryptoBot (Для Украины TON/USDT)
+// Оплата CryptoBot
 app.post('/api/pay', async (req, res) => {
     try {
         const { amount, asset } = req.body;
