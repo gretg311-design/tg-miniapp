@@ -10,31 +10,33 @@ app.use(express.json());
 
 const OWNER_ID = 8287041036;
 
-mongoose.connect(process.env.MONGO_URI);
+// Подключение к БД (ссылку вставишь в Env на Vercel)
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const UserSchema = new mongoose.Schema({
     tg_id: { type: Number, unique: true },
     name: String,
     gender: String,
     shards: { type: Number, default: 100 },
-    sub: { type: String, default: 'free' }, // free, premium, pro, vip, ultra
-    sub_expire: Date,
+    sub: { type: String, default: 'free' },
     streak: { type: Number, default: 0 },
     last_daily: Date
 });
 const User = mongoose.model('User', UserSchema);
 
-// Регистрация / Вход
+// Регистрация
 app.post('/api/auth', async (req, res) => {
-    const { tg_id, name, gender } = req.body;
-    let user = await User.findOne({ tg_id });
-    if (!user) {
-        user = await User.create({ tg_id, name, gender, shards: 100 });
-    }
-    res.json(user);
+    try {
+        const { tg_id, name, gender } = req.body;
+        let user = await User.findOne({ tg_id });
+        if (!user) {
+            user = await User.create({ tg_id, name, gender, shards: 100 });
+        }
+        res.json(user);
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Ежедневка (15 база + бонусы подписок + стрик x2)
+// Ежедневка (Твоя логика с бонусами)
 app.post('/api/daily', async (req, res) => {
     const { tg_id } = req.body;
     const user = await User.findOne({ tg_id });
@@ -54,15 +56,15 @@ app.post('/api/daily', async (req, res) => {
     res.json({ shards: user.shards });
 });
 
-// OpenRouter (1 соо = 1 осколок)
+// Чат через OpenRouter (1 соо = 1 осколок)
 app.post('/api/chat', async (req, res) => {
-    const { tg_id, message, char_id } = req.body;
+    const { tg_id, message } = req.body;
     const user = await User.findOne({ tg_id });
-    if (user.shards < 1) return res.status(403).json({ error: 'Нет осколков' });
+    if (!user || user.shards < 1) return res.status(403).json({ error: 'Нет осколков' });
 
     try {
         const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-            model: "google/gemini-2.0-flash-exp:free", // Твоя модель
+            model: "google/gemini-2.0-flash-exp:free",
             messages: [{ role: "user", content: message }]
         }, {
             headers: { "Authorization": `Bearer ${process.env.OPENROUTER_KEY}` }
@@ -74,13 +76,15 @@ app.post('/api/chat', async (req, res) => {
     } catch (e) { res.status(500).send(e.message); }
 });
 
-// CryptoBot (Инвойс)
+// Оплата CryptoBot (Для Украины TON/USDT)
 app.post('/api/pay', async (req, res) => {
-    const { amount, asset } = req.body; // 5 stars = 10 shards
-    const response = await axios.post('https://pay.crypt.bot/api/createInvoice', {
-        asset: asset, amount: amount
-    }, { headers: { 'Crypto-Pay-API-Token': process.env.CRYPTO_BOT_TOKEN } });
-    res.json(response.data);
+    try {
+        const { amount, asset } = req.body;
+        const response = await axios.post('https://pay.crypt.bot/api/createInvoice', {
+            asset, amount
+        }, { headers: { 'Crypto-Pay-API-Token': process.env.CRYPTO_BOT_TOKEN } });
+        res.json(response.data);
+    } catch (e) { res.status(500).send(e.message); }
 });
 
 module.exports = app;
