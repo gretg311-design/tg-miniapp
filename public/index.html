@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,9 +9,9 @@
         @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
         .header { display: flex; justify-content: space-between; padding: 15px; background: #111; border-bottom: 2px solid #333; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .btn { background: #222; border: 1px solid #444; border-radius: 12px; height: 75px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; }
+        .btn { background: #222; border: 1px solid #444; border-radius: 12px; height: 75px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .hidden { display: none; }
-        #chat-plus { font-size: 80px; color: #333; text-align: center; margin-top: 50px; }
+        #chat-plus { font-size: 80px; color: #333; text-align: center; margin-top: 50px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -35,7 +35,7 @@
             <div class="btn" onclick="openSec('profile')">Профиль</div>
             <div class="btn" onclick="openSec('settings')">Настройки</div>
             <div id="adm-btn" class="btn hidden">Админ</div>
-            <div id="own-btn" class="btn hidden" style="color:red">Консоль</div>
+            <div id="own-btn" class="btn hidden" style="color:red; border-color:red">Овнер</div>
         </div>
         <div id="screen-chats" class="hidden">
             <div id="chat-plus" onclick="openSec('chars')">+</div>
@@ -43,18 +43,18 @@
     </div>
 
     <script>
-        // Запрет свайпа вниз (Pull-to-refresh)
+        // Защита от свайпа вниз
         window.addEventListener('touchstart', e => { if (e.pageY < 5) e.preventDefault(); }, {passive: false});
 
         const OWNER_ID = 8287041036;
         
         async function init() {
-            // Имитация загрузки луны
             setTimeout(() => {
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('app').classList.remove('hidden');
-                // Проверка на Овнера
-                if (OWNER_ID === 8287041036) {
+                // Логика Овнера/Админа (здесь нужно подставить реальный ID из Telegram WebApp)
+                const currentId = OWNER_ID; // Для теста
+                if (currentId === OWNER_ID) {
                     document.getElementById('own-btn').classList.remove('hidden');
                     document.getElementById('adm-btn').classList.remove('hidden');
                 }
