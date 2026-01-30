@@ -18,9 +18,12 @@ const User = mongoose.model('User', new mongoose.Schema({
     balance: { type: Number, default: 100 }
 }));
 
+// API АВТОРИЗАЦИИ
 app.post('/api/auth', async (req, res) => {
     try {
         const { tgId, name } = req.body;
+        if (!tgId) return res.status(400).send("No ID");
+
         let user = await User.findOne({ tgId: Number(tgId) });
         if (!user) {
             if (!name) return res.status(404).json({ register: true });
