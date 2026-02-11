@@ -5,60 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap');
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
-        #splash { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .moon { width: 80px; height: 80px; background: radial-gradient(circle at 30% 30%, #fff, #8a2be2 70%); border-radius: 50%; box-shadow: 0 0 40px #8a2be2; animation: p 2s infinite; }
-        @keyframes p { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         
-        .header { display: flex; justify-content: space-between; padding: 25px 20px; }
-        .u-name { color: #b026ff; font-weight: 800; font-size: 19px; }
-        .balance { color: #ffa500; font-weight: 700; }
+        #splash { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 1000; transition: opacity 0.8s; }
+        .moon { width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #fff, #8a2be2 75%); border-radius: 50%; box-shadow: 0 0 50px #8a2be2; animation: p 2s infinite ease-in-out; }
+        @keyframes p { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .btn { background: rgba(30, 0, 60, 0.5); border: 1px solid rgba(138,43,226,0.3); backdrop-filter: blur(10px); border-radius: 15px; height: 90px; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: 800; cursor: pointer; text-align: center; }
-        .console { border: 1px solid red; color: red; }
+        #app { display: none; flex-direction: column; height: 100vh; }
+        .header { display: flex; justify-content: space-between; padding: 25px 20px 10px; }
+        .u-name { color: #b026ff; font-weight: 800; font-size: 19px; text-transform: uppercase; }
+        .balance { color: #ffa500; font-weight: 700; font-size: 18px; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; flex-grow: 1; align-content: start; }
+        .btn { background: rgba(30, 5, 50, 0.5); border: 1px solid rgba(138, 43, 226, 0.2); backdrop-filter: blur(10px); border-radius: 20px; height: 90px; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; }
+        .console { border: 1px solid #ff3b3b; color: #ff3b3b; }
+
+        .window { display: none; position: fixed; inset: 0; background: #000; z-index: 500; padding: 20px; flex-direction: column; }
+        .active { display: flex !important; }
+        .close { margin-top: auto; padding: 20px; text-align: center; color: #8a2be2; font-weight: 800; cursor: pointer; }
         
-        .window { display: none; position: fixed; inset: 0; background: #000; z-index: 500; padding: 20px; }
-        .active { display: block !important; }
-        .close { margin-top: 20px; color: #8a2be2; text-align: center; cursor: pointer; }
+        input, select { width: 100%; padding: 15px; background: #1a0033; border: 1px solid #8a2be2; color: #fff; border-radius: 12px; margin: 10px 0; font-size: 16px; }
+        .footer { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid #222; background: #000; }
     </style>
 </head>
 <body onload="init()">
+
     <div id="splash"><div class="moon"></div></div>
-    <div class="header">
-        <div class="u-name" id="n">...</div>
-        <div class="balance">🌙 <span id="s">0</span></div>
-    </div>
-    <div class="grid">
-        <div class="btn" onclick="openW('chats')">ЧАТЫ</div>
-        <div class="btn" onclick="openW('chars')">ПЕРСОНАЖИ</div>
-        <div class="btn" onclick="openW('daily')">ЕЖЕДНЕВКА</div>
-        <div class="btn" onclick="openW('tasks')">ЗАДАНИЯ</div>
-        <div class="btn" onclick="openW('shop')">МАГАЗИН</div>
-        <div class="btn" onclick="openW('promo')">ПРОМОКОДЫ</div>
-        <div class="btn" onclick="openW('profile')">ПРОФИЛЬ</div>
-        <div class="btn" onclick="openW('settings')">НАСТРОЙКИ</div>
-        <div class="btn" id="adm-b" onclick="openW('admin')">АДМИНКА</div>
-        <div class="btn console" id="own-b" onclick="openW('console')">КОНСОЛЬ</div>
+
+    <div id="app">
+        <div class="header">
+            <div class="u-name" id="h-name">ЗАГРУЗКА...</div>
+            <div class="balance">🌙 <span id="h-shards">0</span></div>
+        </div>
+
+        <div id="main-grid" class="grid">
+            <div class="btn" onclick="openW('chats')">ЧАТЫ</div>
+            <div class="btn" onclick="openW('chars')">ПЕРСОНАЖИ</div>
+            <div class="btn" onclick="openW('daily')">ЕЖЕДНЕВКА</div>
+            <div class="btn" onclick="openW('tasks')">ЗАДАНИЯ</div>
+            <div class="btn" onclick="openW('shop')">МАГАЗИН</div>
+            <div class="btn" onclick="openW('promo')">ПРОМОКОДЫ</div>
+            <div class="btn" onclick="openW('profile')">ПРОФИЛЬ</div>
+            <div class="btn" onclick="openW('settings')">НАСТРОЙКИ</div>
+            <div class="btn" onclick="openW('admin')">АДМИНКА</div>
+            <div class="btn console" id="c-btn" onclick="openW('console')">КОНСОЛЬ</div>
+        </div>
+
+        <div id="w-reg" class="window">
+            <h2>РЕГИСТРАЦИЯ 18+</h2>
+            <input type="text" id="r-name" placeholder="Твое имя">
+            <select id="r-gender"><option value="male">Мужчина</option><option value="female">Женщина</option></select>
+            <div class="btn" onclick="register()">СОХРАНИТЬ</div>
+        </div>
+
+        <div id="w-console" class="window">
+            <h2 style="color:#ff3b3b">КОНСОЛЬ ОВНЕРА</h2>
+            <p>Управление системой...</p>
+            <div class="close" onclick="closeW()">◀ НАЗАД</div>
+        </div>
+
+        <div class="footer">
+            <div onclick="closeW()">◀ НАЗАД</div>
+            <div onclick="closeW()">🏠 ДОМОЙ</div>
+        </div>
     </div>
 
-    <div id="w-console" class="window"><h2>КОНСОЛЬ</h2><div class="close" onclick="closeW()">НАЗАД</div></div>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const OWNER_ID = "8287041036";
+        let myId = "";
+
         async function init() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('tgId') || OWNER_ID;
-            const res = await fetch(`/api/get-user?tgId=${id}`);
-            const data = await res.json();
-            setTimeout(() => {
-                document.getElementById('splash').style.display = 'none';
-                document.getElementById('n').innerText = data.user.name;
-                document.getElementById('s').innerText = data.user.shards;
-                if(id !== OWNER_ID) document.getElementById('own-b').style.display = 'none';
-            }, 1500);
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            myId = tg.initDataUnsafe?.user?.id?.toString() || new URLSearchParams(window.location.search).get('tgId') || OWNER_ID;
+
+            try {
+                const res = await fetch(`/api/get-user?tgId=${myId}`);
+                const data = await res.json();
+
+                setTimeout(() => {
+                    document.getElementById('splash').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('splash').style.display = 'none';
+                        document.getElementById('app').style.display = 'flex';
+                        
+                        if (data.exists) {
+                            document.getElementById('h-name').innerText = data.user.name;
+                            document.getElementById('h-shards').innerText = data.user.shards;
+                            if (myId !== OWNER_ID) document.getElementById('c-btn').style.display = 'none';
+                        } else {
+                            openW('reg');
+                        }
+                    }, 800);
+                }, 2000);
+            } catch (e) { console.error("Ошибка сети"); }
         }
-        function openW(id) { document.getElementById('w-'+id).classList.add('active'); }
-        function closeW() { document.querySelectorAll('.window').forEach(w => w.classList.remove('active')); }
+
+        function openW(id) {
+            document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+            document.getElementById('main-grid').style.display = 'none';
+            document.getElementById('w-' + id).classList.add('active');
+        }
+
+        function closeW() {
+            document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+            document.getElementById('main-grid').style.display = 'grid';
+        }
+
+        async function register() {
+            const name = document.getElementById('r-name').value;
+            const gender = document.getElementById('r-gender').value;
+            if(!name) return alert("Введите имя");
+            await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tgId: myId, name, gender })
+            });
+            location.reload();
+        }
     </script>
 </body>
 </html>
