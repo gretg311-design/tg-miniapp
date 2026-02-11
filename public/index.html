@@ -3,206 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anime AI 18+</title>
+    <title>Project A-Z</title>
     <style>
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        
+        /* ЛУНА ЗАГРУЗКИ */
+        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; z-index: 100; transition: 0.5s; }
+        .moon { width: 100px; height: 100px; background: radial-gradient(circle at 30% 30%, #fff, #8a2be2 70%); border-radius: 50%; box-shadow: 0 0 50px #8a2be2; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        /* Анимация пульсации для загрузки */
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.7; }
-        }
+        /* ИНТЕРФЕЙС */
+        #main-app { display: none; flex-direction: column; height: 100vh; }
+        .header { display: flex; justify-content: space-between; padding: 25px 20px 10px; }
+        .u-name { color: #b026ff; font-weight: 800; font-size: 19px; }
+        .balance { display: flex; align-items: center; font-weight: 700; }
+        .balance span { color: #ffa500; margin-right: 5px; }
 
-        #splash-screen {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; flex-grow: 1; }
+        .btn { background: rgba(40, 0, 70, 0.5); border: 1px solid rgba(138, 43, 226, 0.2); backdrop-filter: blur(10px); border-radius: 20px; display: flex; justify-content: center; align-items: center; text-transform: uppercase; font-size: 12px; font-weight: 700; cursor: pointer; height: 100px; }
+        .console-btn { border: 1px solid #f00; color: #f00; }
 
-        .loader-moon {
-            font-size: 80px;
-            animation: pulse 1.5s infinite ease-in-out;
-            filter: drop-shadow(0 0 20px #8a2be2);
-        }
-
-        /* Верхняя панель */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            padding-top: 10px;
-        }
-
-        .user-info {
-            color: #a020f0; /* Фиолетовый как на скрине */
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .balance {
-            display: flex;
-            align-items: center;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .balance-moon {
-            color: #ffa500;
-            margin-right: 5px;
-            font-size: 20px;
-        }
-
-        /* Сетка кнопок */
-        .main-menu {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            padding: 15px;
-            flex-grow: 1;
-            align-content: start;
-        }
-
-        .menu-btn {
-            background: rgba(30, 0, 50, 0.6); /* Темное стекло */
-            border: 1px solid rgba(138, 43, 226, 0.3);
-            border-radius: 20px;
-            height: 100px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .menu-btn:active {
-            transform: scale(0.95);
-            background: rgba(138, 43, 226, 0.4);
-        }
-
-        /* Особая кнопка КОНСОЛЬ */
-        .console-btn {
-            border: 1px solid #ff0000;
-            color: #ff0000;
-        }
-
-        /* Нижняя панель */
-        .footer-nav {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 14px;
-            background: #000;
-        }
-
-        .nav-item {
-            cursor: pointer;
-            opacity: 0.8;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Скрытые элементы */
+        /* ОКНА */
+        .window { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 50; padding: 20px; box-sizing: border-box; }
+        .window.active { display: block; }
+        .close { margin-top: 30px; color: #8a2be2; font-weight: 700; cursor: pointer; text-align: center; }
+        
+        input, select { width: 100%; padding: 12px; background: #1a0033; border: 1px solid #8a2be2; color: #fff; border-radius: 10px; margin: 10px 0; }
+        .footer { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid #222; }
         .hidden { display: none !important; }
-
     </style>
 </head>
-<body onload="initializeApp()">
+<body onload="start()">
 
-    <div id="splash-screen">
-        <div class="loader-moon">🌙</div>
-    </div>
+    <div id="splash"><div class="moon"></div></div>
 
-    <div id="app-content" class="hidden">
+    <div id="main-app">
         <div class="header">
-            <div class="user-info" id="display-name">Азуми Ай (BOSS)</div>
-            <div class="balance">
-                <span class="balance-moon">🌙</span>
-                <span id="display-shards">99999999</span>
-            </div>
+            <div class="u-name" id="h-name">USER</div>
+            <div class="balance"><span>🌙</span><div id="h-shards">0</div></div>
         </div>
 
-        <div class="main-menu">
-            <div class="menu-btn" onclick="openTab('chats')">ЧАТЫ</div>
-            <div class="menu-btn" onclick="openTab('chars')">ПЕРСОНАЖИ</div>
-            <div class="menu-btn" onclick="openTab('daily')">ЕЖЕДНЕВКА</div>
-            <div class="menu-btn" onclick="openTab('tasks')">ЗАДАНИЯ</div>
-            <div class="menu-btn" onclick="openTab('shop')">МАГАЗИН</div>
-            <div class="menu-btn" onclick="openTab('promo')">ПРОМОКОДЫ</div>
-            <div class="menu-btn" onclick="openTab('profile')">ПРОФИЛЬ</div>
-            <div class="menu-btn" onclick="openTab('settings')">НАСТРОЙКИ</div>
-            <div class="menu-btn" onclick="openTab('admin')">АДМИНКА</div>
-            <div class="menu-btn console-btn" id="console-node" onclick="openTab('console')">КОНСОЛЬ</div>
+        <div id="menu" class="menu-grid">
+            <div class="btn" onclick="openW('chats')">ЧАТЫ</div>
+            <div class="btn" onclick="openW('chars')">ПЕРСОНАЖИ</div>
+            <div class="btn" onclick="openW('daily')">ЕЖЕДНЕВКА</div>
+            <div class="btn" onclick="openW('tasks')">ЗАДАНИЯ</div>
+            <div class="btn" onclick="openW('shop')">МАГАЗИН</div>
+            <div class="btn" onclick="openW('promo')">ПРОМОКОДЫ</div>
+            <div class="btn" onclick="openW('profile')">ПРОФИЛЬ</div>
+            <div class="btn" onclick="openW('settings')">НАСТРОЙКИ</div>
+            <div class="btn" onclick="openW('admin')">АДМИНКА</div>
+            <div class="btn console-btn" id="c-btn" onclick="openW('console')">КОНСОЛЬ</div>
         </div>
 
-        <div class="footer-nav">
-            <div class="nav-item">◀ НАЗАД</div>
-            <div class="nav-item">🏠 ДОМОЙ</div>
+        <div id="w-reg" class="window">
+            <h2>РЕГИСТРАЦИЯ 18+</h2>
+            <input type="text" id="r-name" placeholder="Твое имя">
+            <select id="r-gender"><option value="male">Мужчина</option><option value="female">Женщина</option></select>
+            <div class="btn" onclick="doReg()">СОХРАНИТЬ</div>
         </div>
+
+        <div id="w-chats" class="window"><h2>ЧАТЫ</h2><div class="close" onclick="closeW()">◀ НАЗАД</div></div>
+        <div id="w-console" class="window"><h2 style="color:red">КОНСОЛЬ ОВНЕРА</h2><div class="close" onclick="closeW()">◀ НАЗАД</div></div>
+        <div class="footer"><div onclick="closeW()">◀ НАЗАД</div><div onclick="closeW()">🏠 ДОМОЙ</div></div>
     </div>
 
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const OWNER_ID = "8287041036";
+        let myId = "0";
 
-        async function initializeApp() {
-            // Имитируем запрос к БД
-            const tgId = new URLSearchParams(window.location.search).get('tgId') || OWNER_ID;
+        async function start() {
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            myId = tg.initDataUnsafe?.user?.id?.toString() || new URLSearchParams(window.location.search).get('tgId') || "0";
 
-            try {
-                const response = await fetch(`/api/get-user?tgId=${tgId}`);
-                const data = await response.json();
+            const res = await fetch(`/api/get-user?tgId=${myId}`);
+            const data = await res.json();
 
-                // Имитация задержки загрузки
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = '0';
                 setTimeout(() => {
-                    document.getElementById('splash-screen').classList.add('hidden');
-                    document.getElementById('app-content').classList.remove('hidden');
-                    
-                    if (tgId === OWNER_ID) {
-                        document.getElementById('display-name').innerText = "Азуми Ай (BOSS)";
-                        document.getElementById('display-shards').innerText = "99999999";
+                    document.getElementById('splash').classList.add('hidden');
+                    document.getElementById('main-app').style.display = 'flex';
+                    if (data.exists) {
+                        document.getElementById('h-name').innerText = data.user.name.toUpperCase();
+                        document.getElementById('h-shards').innerText = data.user.shards;
+                        if (myId !== OWNER_ID) document.getElementById('c-btn').classList.add('hidden');
                     } else {
-                        document.getElementById('console-node').classList.add('hidden');
-                        // Логика для обычного юзера
+                        openW('reg');
                     }
-                }, 1500);
-            } catch (e) {
-                console.error("Ошибка загрузки");
-                // Даже если сервер упал, показываем интерфейс для теста
-                document.getElementById('splash-screen').classList.add('hidden');
-                document.getElementById('app-content').classList.remove('hidden');
-            }
+                }, 500);
+            }, 2000);
         }
 
-        function openTab(name) {
-            console.log("Открываю: " + name);
+        function openW(id) {
+            document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('w-' + id).classList.add('active');
         }
 
-        // Блокировка свайпа вниз
-        window.addEventListener('touchstart', e => {
-            if (e.pageY < 10) e.preventDefault();
-        }, {passive: false});
+        function closeW() {
+            document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+            document.getElementById('menu').classList.remove('hidden');
+        }
+
+        async function doReg() {
+            const name = document.getElementById('r-name').value;
+            const gender = document.getElementById('r-gender').value;
+            await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tgId: myId, name, gender })
+            });
+            location.reload();
+        }
     </script>
 </body>
 </html>
