@@ -1,55 +1,68 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const axios = require('axios');
 const cors = require('cors');
+const axios = require('axios');
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-const OWNER_ID = 8287041036;
+// Твой ID и настройки цен
+const OWNER_ID = "8287041036";
+const CRYPTO_BOT_TOKEN = process.env.CRYPTO_BOT_TOKEN;
 
-// Логируем попытку подключения
-console.log("Попытка подключения к MongoDB...");
+mongoose.connect(process.env.MONGO_URI);
 
-mongoose.connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 5000
-}).then(() => {
-    console.log("✅ База данных подключена успешно");
-}).catch(err => {
-    console.error("❌ Ошибка подключения к базе:", err.message);
-});
-
-const UserSchema = new mongoose.Schema({
-    tg_id: { type: Number, unique: true },
+const userSchema = new mongoose.Schema({
+    tgId: String,
     name: String,
     gender: String,
-    shards: { type: Number, default: 100 },
-    sub: { type: String, default: 'free' },
+    shards: { type: Number, default: 10 },
+    subscription: { type: String, default: 'free' },
+    subEndDate: Date,
     streak: { type: Number, default: 0 },
-    last_daily: Date
+    lastCheckIn: Date,
+    settings: { vulgarity: { type: Number, default: 1 }, msgLength: { type: Number, default: 45 } }
 });
-const User = mongoose.model('User', UserSchema);
 
-// Регистрация
-app.post('/api/auth', async (req, res) => {
-    try {
-        const { tg_id, name, gender } = req.body;
-        if (!tg_id) return res.status(400).json({ error: "Нет ID" });
+const User = mongoose.model('User', userSchema);
 
-        let user = await User.findOne({ tg_id });
-        if (!user) {
-            user = await User.create({ tg_id, name, gender, shards: 100 });
-        }
-        res.json(user);
-    } catch (e) {
-        console.error("Ошибка в /api/auth:", e.message);
-        res.status(500).json({ error: e.message });
+// Проверка пользователя при входе
+app.get('/api/get-user', async (req, res) => {
+    const { tgId } = req.query;
+    if (tgId === OWNER_ID) {
+        return res.json({ exists: true, user: { name: "Овнер", shards: "∞", subscription: "Бесконечная" } });
     }
+    const user = await User.findOne({ tgId });
+    res.json({ exists: !!user, user });
 });
 
-// Ежедневка и остальные роуты...
-// (оставь их как в прошлом сообщении)
+// Отправка сообщения (1 сообщение = 1 осколок)
+app.post('/api/chat', async (req, res) => {
+    const { tgId, text } = req.body;
+    
+    if (tgId === OWNER_ID) {
+        return res.json({ text: "Слушаю, босс. Лимиты отключены.", shardsLeft: "∞" });
+    }
+
+    const user = await User.findOne({ tgId });
+    if (!user || user.shards < 1) return res.status(403).json({ error: "Нет осколков" });
+
+    user.shards -= 1;
+    await user.save();
+    res.json({ text: "Ответ ИИ...", shardsLeft: user.shards });
+});
+
+// Оплата через Crypto Bot (TON / USDT)
+app.post('/api/pay', async (req, res) => {
+    const { amount, asset } = req.body;
+    try {
+        const response = await axios.post('https://pay.crypt.bot/api/createInvoice', {
+            asset, amount, description: "Пополнение баланса"
+        }, { headers: { 'Crypto-Pay-API-Token': CRYPTO_BOT_TOKEN } });
+        res.json(response.data.result);
+    } catch (e) { res.status(500).send(e.message); }
+});
 
 module.exports = app;
