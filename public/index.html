@@ -3,72 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Лунный Бот</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
-        .moon { font-size: 60px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
-        .header { display: flex; justify-content: space-between; padding: 15px; background: #111; border-bottom: 2px solid #333; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .btn { background: #222; border: 1px solid #444; border-radius: 12px; height: 75px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .hidden { display: none; }
-        #chat-plus { font-size: 80px; color: #333; text-align: center; margin-top: 50px; cursor: pointer; }
+        body { background: #05010a; color: #e0d0ff; font-family: sans-serif; margin: 0; }
+        .glass { background: rgba(48, 10, 86, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; }
+        .screen { display: none; padding: 20px; }
+        .active { display: block; }
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; background: #0a0212; padding: 15px 0; border-top: 1px solid #333; }
+        .btn { padding: 15px; text-align: center; cursor: pointer; margin: 5px; }
     </style>
 </head>
-<body>
-    <div id="loading" style="display:flex; height:100vh; flex-direction:column; justify-content:center; align-items:center;">
-        <div class="moon">🌙</div>
+<body onload="initApp()">
+
+    <div id="loading-screen" class="active" style="text-align: center; margin-top: 40vh;">
+        <h1 style="font-size: 50px;">🌙</h1>
+        <p>Загрузка системы...</p>
     </div>
 
-    <div id="app" class="hidden">
-        <div class="header">
-            <div id="h-name">Имя</div>
-            <div id="h-sub">FREE</div>
-            <div id="h-shards">100 🌙</div>
-        </div>
-        <div id="screen-main" class="grid">
-            <div class="btn" onclick="openSec('chats')">Чаты</div>
-            <div class="btn" onclick="openSec('chars')">Персонажи</div>
-            <div class="btn" onclick="openSec('daily')">Ежедневка</div>
-            <div class="btn" onclick="openSec('tasks')">Задания</div>
-            <div class="btn" onclick="openSec('shop')">Магазин</div>
-            <div class="btn" onclick="openSec('promo')">Промокоды</div>
-            <div class="btn" onclick="openSec('profile')">Профиль</div>
-            <div class="btn" onclick="openSec('settings')">Настройки</div>
-            <div id="adm-btn" class="btn hidden">Админ</div>
-            <div id="own-btn" class="btn hidden" style="color:red; border-color:red">Овнер</div>
-        </div>
-        <div id="screen-chats" class="hidden">
-            <div id="chat-plus" onclick="openSec('chars')">+</div>
-        </div>
+    <div id="reg-screen" class="screen glass" style="margin: 50px 20px;">
+        <h2>Регистрация 18+</h2>
+        <input type="text" id="reg-name" placeholder="Твоё имя" style="width: 80%; padding: 10px;">
+        <div class="btn glass" onclick="finishReg()">Войти</div>
     </div>
 
-    <script>
-        // Защита от свайпа вниз
-        window.addEventListener('touchstart', e => { if (e.pageY < 5) e.preventDefault(); }, {passive: false});
+    <div id="main-app" class="screen">
+        <div class="glass" style="padding: 15px; display: flex; justify-content: space-between;">
+            <div><b id="u-name">Имя</b><br><small id="u-id">ID</small></div>
+            <div><span id="u-shards">0</span> 🌙</div>
+        </div>
 
-        const OWNER_ID = 8287041036;
+        <div id="menu-content" style="margin-top: 20px;">
+            <div class="btn glass" onclick="showTab('chat')">Начать общение</div>
+            <div class="btn glass" onclick="showTab('shop')">Магазин (TON/Stars)</div>
+            <div class="btn glass" onclick="showTab('tasks')">Задания (Осколки)</div>
+            <div id="admin-btn" class="btn glass" style="display:none; border-color: gold;">АДМИН ПАНЕЛЬ</div>
+        </div>
+
+        <nav class="nav">
+            <span onclick="showTab('chat')">💬</span>
+            <span onclick="showTab('tasks')">📋</span>
+            <span onclick="showTab('shop')">💎</span>
+            <span onclick="showTab('settings')">⚙️</span>
+        </nav>
+    </div>
+
+<script>
+    const OWNER_ID = "8287041036";
+    
+    async function initApp() {
+        // Имитация получения ID из Telegram
+        const urlParams = new URLSearchParams(window.location.search);
+        const tgId = urlParams.get('id') || OWNER_ID; // Для теста ставим твой
+
+        const res = await fetch(`/api/get-user?tgId=${tgId}`);
+        const data = await res.json();
+
+        setTimeout(() => {
+            document.getElementById('loading-screen').classList.remove('active');
+            if (data.exists) {
+                renderUser(data.user, tgId);
+            } else {
+                document.getElementById('reg-screen').classList.add('active');
+            }
+        }, 2000);
+    }
+
+    function renderUser(user, tgId) {
+        document.getElementById('main-app').classList.add('active');
+        document.getElementById('u-name').innerText = user.name;
+        document.getElementById('u-id').innerText = "ID: " + tgId;
+        document.getElementById('u-shards').innerText = user.shards;
         
-        async function init() {
-            setTimeout(() => {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-                // Логика Овнера/Админа (здесь нужно подставить реальный ID из Telegram WebApp)
-                const currentId = OWNER_ID; // Для теста
-                if (currentId === OWNER_ID) {
-                    document.getElementById('own-btn').classList.remove('hidden');
-                    document.getElementById('adm-btn').classList.remove('hidden');
-                }
-            }, 2500);
+        if (tgId === OWNER_ID) {
+            document.getElementById('admin-btn').style.display = 'block';
         }
+    }
 
-        function openSec(name) {
-            document.getElementById('screen-main').classList.add('hidden');
-            document.getElementById('screen-chats').classList.add('hidden');
-            const target = document.getElementById('screen-' + name);
-            if (target) target.classList.remove('hidden');
-        }
+    function showTab(tab) {
+        alert("Переход в раздел: " + tab);
+    }
 
-        init();
-    </script>
+    // Блокировка закрытия при свайпе вниз
+    window.addEventListener('touchmove', (e) => {
+        if (window.scrollY === 0 && e.touches[0].pageY > 0) e.preventDefault();
+    }, { passive: false });
+</script>
 </body>
 </html>
