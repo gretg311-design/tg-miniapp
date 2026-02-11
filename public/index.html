@@ -3,360 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Лунный Бот</title>
+    <title>Anime AI 18+</title>
     <style>
-        :root {
-            --glass-bg: rgba(48, 10, 86, 0.6);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --moon-color: #e0d0ff;
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
-        body { 
-            background: #05010a; color: var(--moon-color); font-family: 'Segoe UI', sans-serif;
-            margin: 0; overflow-y: auto; touch-action: pan-y;
-            -webkit-user-select: none; /* Отключаем выделение текста */
-            user-select: none;
-        }
-        .screen { display: none; padding: 20px; }
-        .active { display: block; }
 
-        /* Красивая пульсирующая луна */
+        /* Анимация пульсации для загрузки */
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
+            0% { transform: scale(1); opacity: 0.7; }
             50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-        .pulsing-moon {
-            font-size: 100px; line-height: 1; text-align: center;
-            animation: pulse 2s infinite ease-in-out;
-            color: var(--moon-color); text-shadow: 0 0 20px var(--moon-color);
+            100% { transform: scale(1); opacity: 0.7; }
         }
 
-        /* Общие стили для стекла */
-        .glass-panel {
-            background: var(--glass-bg); backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color); border-radius: 15px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
-            padding: 15px; margin: 10px auto; max-width: 90%;
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
-        .btn-glass {
-            @extend .glass-panel; /* наследуем стили стекла */
-            background: rgba(80, 20, 140, 0.7); /* Чуть темнее */
-            text-align: center; cursor: pointer;
-            transition: background 0.3s ease;
+
+        .loader-moon {
+            font-size: 80px;
+            animation: pulse 1.5s infinite ease-in-out;
+            filter: drop-shadow(0 0 20px #8a2be2);
         }
-        .btn-glass:hover { background: rgba(100, 30, 160, 0.8); }
 
         /* Верхняя панель */
         .header {
-            display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 100;
-            @extend .glass-panel;
-            border-radius: 0 0 15px 15px; /* Только низ скругленный */
-            margin: 0; padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            padding-top: 10px;
         }
-        .header-left, .header-right { display: flex; flex-direction: column; }
-        .header-right span { cursor: pointer; margin-left: 5px; }
 
-        /* Нижнее меню навигации */
-        .nav-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
-            display: flex; justify-content: space-around; align-items: center;
-            background: rgba(10, 2, 18, 0.9); /* Почти черный, полупрозрачный */
-            border-top: 1px solid var(--border-color);
-            z-index: 1000;
+        .user-info {
+            color: #a020f0; /* Фиолетовый как на скрине */
+            font-weight: bold;
+            font-size: 18px;
         }
+
+        .balance {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .balance-moon {
+            color: #ffa500;
+            margin-right: 5px;
+            font-size: 20px;
+        }
+
+        /* Сетка кнопок */
+        .main-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 15px;
+            flex-grow: 1;
+            align-content: start;
+        }
+
+        .menu-btn {
+            background: rgba(30, 0, 50, 0.6); /* Темное стекло */
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 20px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .menu-btn:active {
+            transform: scale(0.95);
+            background: rgba(138, 43, 226, 0.4);
+        }
+
+        /* Особая кнопка КОНСОЛЬ */
+        .console-btn {
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+
+        /* Нижняя панель */
+        .footer-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            background: #000;
+        }
+
         .nav-item {
-            color: var(--moon-color); font-size: 24px; cursor: pointer;
-            padding: 5px 15px; border-radius: 8px;
-            transition: background 0.3s ease;
+            cursor: pointer;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
         }
-        .nav-item.active-nav { background: rgba(80, 20, 140, 0.7); }
-        .nav-item:hover { background: rgba(60, 15, 110, 0.5); }
 
-        /* Стили для полей ввода */
-        input[type="text"], input[type="number"], select {
-            width: calc(100% - 20px); padding: 10px; margin: 5px 0;
-            border-radius: 8px; border: 1px solid var(--border-color);
-            background: rgba(20, 5, 30, 0.7); color: var(--moon-color);
-            box-sizing: border-box;
-        }
-        /* Сетка для кнопок */
-        .grid-buttons {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px; padding: 15px;
-        }
-        /* Админ/Овнер кнопки */
-        .admin-btn { border-color: gold; color: gold; }
-        .owner-btn { border-color: red; color: red; }
+        /* Скрытые элементы */
+        .hidden { display: none !important; }
+
     </style>
 </head>
-<body>
+<body onload="initializeApp()">
 
-    <div id="loading-screen" class="screen active" style="text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100vh;">
-        <div class="pulsing-moon">🌙</div>
-        <p>Загрузка системы...</p>
+    <div id="splash-screen">
+        <div class="loader-moon">🌙</div>
     </div>
 
-    <div id="reg-screen" class="screen glass-panel" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%;">
-        <h2 style="text-align: center;">Подтвердите 18+</h2>
-        <input type="text" id="reg-name" placeholder="Ваше имя">
-        <select id="reg-gender">
-            <option value="male">Мужчина</option>
-            <option value="female">Женщина</option>
-        </select>
-        <div class="btn-glass" onclick="registerUser()" style="margin-top: 20px;">Войти</div>
-    </div>
-
-    <div id="main-app" class="screen">
+    <div id="app-content" class="hidden">
         <div class="header">
-            <div class="header-left">
-                <b id="user-display-name">Загрузка...</b>
-                <small id="user-display-id">ID: ...</small>
-                <small id="user-display-sub" style="color: #bc8cff;">Подписка: Free</small>
-            </div>
-            <div class="header-right">
-                <span id="user-display-shards">0</span> 🌙 <span onclick="showTab('shop')">[+]</span>
+            <div class="user-info" id="display-name">Азуми Ай (BOSS)</div>
+            <div class="balance">
+                <span class="balance-moon">🌙</span>
+                <span id="display-shards">99999999</span>
             </div>
         </div>
 
-        <div id="chats-tab" class="screen active">
-            <h3>Чаты</h3>
-            <div class="grid-buttons" id="chat-list">
-                <div class="btn-glass">Чат с Персонажем 1</div>
-                <div class="btn-glass">Чат с Персонажем 2</div>
-            </div>
+        <div class="main-menu">
+            <div class="menu-btn" onclick="openTab('chats')">ЧАТЫ</div>
+            <div class="menu-btn" onclick="openTab('chars')">ПЕРСОНАЖИ</div>
+            <div class="menu-btn" onclick="openTab('daily')">ЕЖЕДНЕВКА</div>
+            <div class="menu-btn" onclick="openTab('tasks')">ЗАДАНИЯ</div>
+            <div class="menu-btn" onclick="openTab('shop')">МАГАЗИН</div>
+            <div class="menu-btn" onclick="openTab('promo')">ПРОМОКОДЫ</div>
+            <div class="menu-btn" onclick="openTab('profile')">ПРОФИЛЬ</div>
+            <div class="menu-btn" onclick="openTab('settings')">НАСТРОЙКИ</div>
+            <div class="menu-btn" onclick="openTab('admin')">АДМИНКА</div>
+            <div class="menu-btn console-btn" id="console-node" onclick="openTab('console')">КОНСОЛЬ</div>
         </div>
 
-        <div id="characters-tab" class="screen">
-            <h3>Персонажи</h3>
-            <div class="grid-buttons" id="characters-gallery">
-                <div class="btn-glass">Персонаж А</div>
-                <div class="btn-glass">Персонаж Б</div>
-            </div>
+        <div class="footer-nav">
+            <div class="nav-item">◀ НАЗАД</div>
+            <div class="nav-item">🏠 ДОМОЙ</div>
         </div>
-
-        <div id="daily-tab" class="screen">
-            <h3>Ежедневная награда</h3>
-            <div class="btn-glass">Забрать 🌙 (Стрик: 1/7)</div>
-        </div>
-
-        <div id="promocode-tab" class="screen">
-            <h3>Промокод</h3>
-            <input type="text" placeholder="Введите промокод">
-            <div class="btn-glass">Активировать</div>
-        </div>
-
-        <div id="tasks-tab" class="screen">
-            <h3>Задания</h3>
-            <div class="grid-buttons">
-                <div class="btn-glass">Подписаться на канал</div>
-            </div>
-        </div>
-
-        <div id="shop-tab" class="screen">
-            <h3>Магазин</h3>
-            <div class="grid-buttons">
-                <div class="btn-glass">Пак осколков (Stars)</div>
-                <div class="btn-glass">Пак осколков (TON)</div>
-                <div class="btn-glass">Подписка Pro (Stars)</div>
-                <div class="btn-glass">Подписка Ultra (TON)</div>
-            </div>
-        </div>
-        
-        <div id="profile-tab" class="screen">
-            <h3>Профиль</h3>
-            <div class="glass-panel">
-                <p>Ник: <span id="profile-name"></span></p>
-                <p>ID: <span id="profile-id"></span></p>
-                <p>Баланс: <span id="profile-shards"></span> 🌙</p>
-                <p>Подписка: <span id="profile-sub"></span></p>
-                <p>Пол: <span id="profile-gender"></span></p>
-            </div>
-        </div>
-
-        <div id="settings-tab" class="screen">
-            <h3>Настройки</h3>
-            <div class="glass-panel">
-                <p>Смена имени:</p><input type="text" placeholder="Новое имя">
-                <p>Смена пола:</p><select><option>Мужчина</option><option>Женщина</option></select>
-                <p>Пошлость (1-6): <span id="vulgarity-level">1</span></p>
-                <input type="range" min="1" max="6" value="1" id="vulgarity-slider">
-                <p>Длина сообщений: <span id="length-level">45</span> слов</p>
-                <input type="range" min="45" max="100" value="45" id="length-slider">
-            </div>
-        </div>
-
-        <div id="admin-tab" class="screen">
-            <h3>Админ Панель</h3>
-            <div class="grid-buttons">
-                <div class="btn-glass">Создать Персонажа</div>
-                <div class="btn-glass">Выдать Подписку/Осколки</div>
-            </div>
-        </div>
-
-        <div id="owner-tab" class="screen">
-            <h3>👑 КОНСОЛЬ ОВНЕРА</h3>
-            <div class="grid-buttons">
-                <div class="btn-glass owner-btn">Управление Админами</div>
-                <div class="btn-glass owner-btn">Цены Магазина</div>
-                <div class="btn-glass owner-btn">Управление Заданиями</div>
-                <div class="btn-glass owner-btn">Управление Персонажами</div>
-                <div class="btn-glass owner-btn">Глобальный Баланс</div>
-                <div class="btn-glass owner-btn">Промокоды</div>
-                <div class="btn-glass owner-btn">Рассылка</div>
-                <div class="btn-glass owner-btn">Настройки Подписки</div>
-                <div class="btn-glass owner-btn">Логи Системы</div>
-                <div class="btn-glass owner-btn">Сброс Данных</div>
-            </div>
-        </div>
-
-        <nav class="nav-bar">
-            <div class="nav-item active-nav" onclick="showTab('chats-tab')">💬</div>
-            <div class="nav-item" onclick="showTab('characters-tab')">👥</div>
-            <div class="nav-item" onclick="showTab('daily-tab')">🎁</div>
-            <div class="nav-item" onclick="showTab('promocode-tab')">🎫</div>
-            <div class="nav-item" onclick="showTab('tasks-tab')">📋</div>
-            <div class="nav-item" onclick="showTab('shop-tab')">💎</div>
-            <div class="nav-item" onclick="showTab('profile-tab')">👤</div>
-            <div class="nav-item" onclick="showTab('settings-tab')">⚙️</div>
-            <div class="nav-item" id="nav-admin-btn" style="display:none;" onclick="showTab('admin-tab')">🛡️</div>
-            <div class="nav-item" id="nav-owner-btn" style="display:none;" onclick="showTab('owner-tab')">👑</div>
-        </nav>
     </div>
 
-<script>
-    const OWNER_ID = "8287041036";
-    let currentUser = null; // Глобальный объект для текущего пользователя
+    <script>
+        const OWNER_ID = "8287041036";
 
-    // Блокировка pull-to-refresh
-    window.addEventListener('touchmove', (e) => {
-        if (window.scrollY === 0 && e.touches[0].pageY > 0) e.preventDefault();
-    }, { passive: false });
+        async function initializeApp() {
+            // Имитируем запрос к БД
+            const tgId = new URLSearchParams(window.location.search).get('tgId') || OWNER_ID;
 
-    document.addEventListener('DOMContentLoaded', initApp);
+            try {
+                const response = await fetch(`/api/get-user?tgId=${tgId}`);
+                const data = await response.json();
 
-    async function initApp() {
-        let tgId;
-        try {
-            // В реальной жизни: const tg = window.Telegram.WebApp; tgId = tg.initDataUnsafe.user.id;
-            // Для локального теста:
-            tgId = new URLSearchParams(window.location.search).get('tgId') || OWNER_ID; 
-        } catch (e) {
-            console.warn("Telegram WebApp API не инициализирован. Используем тестовый TG ID.", e);
-            tgId = OWNER_ID; 
-        }
-
-        console.log(`Инициализация для TG ID: ${tgId}`);
-
-        try {
-            const response = await fetch(`/api/get-user?tgId=${tgId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // Имитация задержки загрузки
+                setTimeout(() => {
+                    document.getElementById('splash-screen').classList.add('hidden');
+                    document.getElementById('app-content').classList.remove('hidden');
+                    
+                    if (tgId === OWNER_ID) {
+                        document.getElementById('display-name').innerText = "Азуми Ай (BOSS)";
+                        document.getElementById('display-shards').innerText = "99999999";
+                    } else {
+                        document.getElementById('console-node').classList.add('hidden');
+                        // Логика для обычного юзера
+                    }
+                }, 1500);
+            } catch (e) {
+                console.error("Ошибка загрузки");
+                // Даже если сервер упал, показываем интерфейс для теста
+                document.getElementById('splash-screen').classList.add('hidden');
+                document.getElementById('app-content').classList.remove('hidden');
             }
-            const data = await response.json();
-            
-            setTimeout(() => { // Имитация задержки для красивой луны
-                document.getElementById('loading-screen').classList.remove('active');
-                if (data.exists) {
-                    currentUser = data.user;
-                    renderMainApp(tgId);
-                } else {
-                    document.getElementById('reg-screen').classList.add('active');
-                }
-            }, 2000); // 2 секунды показа луны
-            
-        } catch (error) {
-            console.error("Ошибка при получении данных пользователя:", error);
-            document.getElementById('loading-screen').innerHTML = '<h1 style="color:red;">Ошибка загрузки!</h1><p>Пожалуйста, попробуйте позже.</p>';
-        }
-    }
-
-    async function registerUser() {
-        const tgId = new URLSearchParams(window.location.search).get('tgId') || OWNER_ID; // Используем тот же ID для регистрации
-        const name = document.getElementById('reg-name').value;
-        const gender = document.getElementById('reg-gender').value;
-
-        if (!name) { alert("Пожалуйста, введите ваше имя."); return; }
-
-        try {
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tgId, name, gender })
-            });
-            const data = await response.json();
-
-            if (response.ok) {
-                currentUser = data.user;
-                document.getElementById('reg-screen').classList.remove('active');
-                renderMainApp(tgId);
-            } else {
-                alert("Ошибка регистрации: " + data.error);
-            }
-        } catch (error) {
-            console.error("Ошибка при отправке регистрации:", error);
-            alert("Ошибка сети при регистрации.");
-        }
-    }
-
-    function renderMainApp(tgId) {
-        document.getElementById('main-app').classList.add('active');
-        document.getElementById('user-display-name').innerText = currentUser.name || "Пользователь";
-        document.getElementById('user-display-id').innerText = `ID: ${tgId}`;
-        document.getElementById('user-display-shards').innerText = currentUser.shards === "∞" ? "∞" : currentUser.shards;
-        document.getElementById('user-display-sub').innerText = `Подписка: ${currentUser.subscription || 'Free'}`;
-
-        // Обновляем профиль
-        document.getElementById('profile-name').innerText = currentUser.name || "N/A";
-        document.getElementById('profile-id').innerText = tgId;
-        document.getElementById('profile-shards').innerText = currentUser.shards === "∞" ? "∞" : currentUser.shards;
-        document.getElementById('profile-sub').innerText = currentUser.subscription || 'Free';
-        document.getElementById('profile-gender').innerText = currentUser.gender || 'Не указан';
-
-
-        // Показываем кнопки админа/овнера
-        if (tgId === OWNER_ID) {
-            document.getElementById('nav-owner-btn').style.display = 'flex';
-            document.getElementById('nav-admin-btn').style.display = 'flex'; // Овнер видит и админскую
-        } else if (currentUser.isAdmin) { // Допустим, мы добавим поле isAdmin в модель User
-            document.getElementById('nav-admin-btn').style.display = 'flex';
         }
 
-        // Обновляем ползунки настроек (если есть данные)
-        if (currentUser.settings) {
-            document.getElementById('vulgarity-slider').value = currentUser.settings.vulgarity;
-            document.getElementById('vulgarity-level').innerText = currentUser.settings.vulgarity;
-            document.getElementById('length-slider').value = currentUser.settings.msgLength;
-            document.getElementById('length-level').innerText = currentUser.settings.msgLength;
+        function openTab(name) {
+            console.log("Открываю: " + name);
         }
 
-        // Слушатели для ползунков
-        document.getElementById('vulgarity-slider').oninput = function() {
-            document.getElementById('vulgarity-level').innerText = this.value;
-            // Здесь можно отправить запрос на сервер для сохранения настройки
-        };
-        document.getElementById('length-slider').oninput = function() {
-            document.getElementById('length-level').innerText = this.value;
-            // Здесь можно отправить запрос на сервер для сохранения настройки
-        };
-    }
-
-    function showTab(tabId) {
-        document.querySelectorAll('.screen').forEach(s => {
-            if (s.id.endsWith('-tab')) { // Скрываем только вкладки контента
-                s.classList.remove('active');
-            }
-        });
-        document.getElementById(tabId).classList.add('active');
-
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active-nav'));
-        const activeNavItem = document.querySelector(`[onclick="showTab('${tabId}')"]`);
-        if (activeNavItem) activeNavItem.classList.add('active-nav');
-    }
-
-    // Для демонстрации: при загрузке сразу показываем 'chats-tab'
-    showTab('chats-tab');
-
-</script>
+        // Блокировка свайпа вниз
+        window.addEventListener('touchstart', e => {
+            if (e.pageY < 10) e.preventDefault();
+        }, {passive: false});
+    </script>
 </body>
 </html>
