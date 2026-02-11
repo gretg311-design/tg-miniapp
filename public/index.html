@@ -3,43 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Project A-Z</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap');
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
+        #splash { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .moon { width: 80px; height: 80px; background: radial-gradient(circle at 30% 30%, #fff, #8a2be2 70%); border-radius: 50%; box-shadow: 0 0 40px #8a2be2; animation: p 2s infinite; }
+        @keyframes p { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         
-        #splash { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 1000; transition: 0.5s; }
-        .moon { width: 100px; height: 100px; background: radial-gradient(circle at 30% 30%, #fff, #8a2be2 70%); border-radius: 50%; box-shadow: 0 0 50px #8a2be2; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-
-        #main-app { display: none; flex-direction: column; height: 100vh; }
-        .header { display: flex; justify-content: space-between; padding: 25px 20px 10px; }
+        .header { display: flex; justify-content: space-between; padding: 25px 20px; }
         .u-name { color: #b026ff; font-weight: 800; font-size: 19px; }
         .balance { color: #ffa500; font-weight: 700; }
 
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; flex-grow: 1; }
-        .btn { background: rgba(40, 0, 70, 0.5); border: 1px solid rgba(138, 43, 226, 0.2); backdrop-filter: blur(10px); border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 700; cursor: pointer; height: 90px; text-align: center; }
-        .console-btn { border: 1px solid #f00; color: #f00; }
-
-        .window { display: none; position: fixed; inset: 0; background: #000; z-index: 500; padding: 20px; overflow-y: auto; }
-        .window.active { display: block; }
-        .close-btn { margin-top: 20px; color: #8a2be2; text-align: center; font-weight: 800; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .btn { background: rgba(30, 0, 60, 0.5); border: 1px solid rgba(138,43,226,0.3); backdrop-filter: blur(10px); border-radius: 15px; height: 90px; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: 800; cursor: pointer; text-align: center; }
+        .console { border: 1px solid red; color: red; }
         
-        input, textarea, select { width: 100%; padding: 12px; background: #1a0033; border: 1px solid #8a2be2; color: #fff; border-radius: 12px; margin: 8px 0; box-sizing: border-box; }
-        .footer { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid #222; }
+        .window { display: none; position: fixed; inset: 0; background: #000; z-index: 500; padding: 20px; }
+        .active { display: block !important; }
+        .close { margin-top: 20px; color: #8a2be2; text-align: center; cursor: pointer; }
     </style>
 </head>
 <body onload="init()">
-
-<div id="splash"><div class="moon"></div></div>
-
-<div id="main-app">
+    <div id="splash"><div class="moon"></div></div>
     <div class="header">
-        <div class="u-name" id="h-name">...</div>
-        <div class="balance">🌙 <span id="h-shards">0</span></div>
+        <div class="u-name" id="n">...</div>
+        <div class="balance">🌙 <span id="s">0</span></div>
     </div>
-
-    <div id="menu-grid" class="menu-grid">
+    <div class="grid">
         <div class="btn" onclick="openW('chats')">ЧАТЫ</div>
         <div class="btn" onclick="openW('chars')">ПЕРСОНАЖИ</div>
         <div class="btn" onclick="openW('daily')">ЕЖЕДНЕВКА</div>
@@ -48,116 +38,27 @@
         <div class="btn" onclick="openW('promo')">ПРОМОКОДЫ</div>
         <div class="btn" onclick="openW('profile')">ПРОФИЛЬ</div>
         <div class="btn" onclick="openW('settings')">НАСТРОЙКИ</div>
-        <div class="btn" id="admin-node" onclick="openW('admin')">АДМИНКА</div>
-        <div class="btn console-btn" id="owner-node" onclick="openW('console')">КОНСОЛЬ</div>
+        <div class="btn" id="adm-b" onclick="openW('admin')">АДМИНКА</div>
+        <div class="btn console" id="own-b" onclick="openW('console')">КОНСОЛЬ</div>
     </div>
 
-    <div id="w-reg" class="window">
-        <h2>РЕГИСТРАЦИЯ 18+</h2>
-        <input type="text" id="reg-name" placeholder="Твое имя">
-        <select id="reg-gender"><option value="male">Мужчина</option><option value="female">Женщина</option></select>
-        <div class="btn" onclick="register()">ВОЙТИ</div>
-    </div>
-
-    <div id="w-settings" class="window">
-        <h2>НАСТРОЙКИ</h2>
-        <p>Пошлость (1-6):</p>
-        <input type="range" min="1" max="6" id="v-range">
-        <p>Длина сообщений:</p>
-        <input type="range" min="45" max="100" id="l-range">
-        <div class="close-btn" onclick="closeW()">НАЗАД</div>
-    </div>
-
-    <div id="w-admin" class="window">
-        <h2>АДМИН ПАНЕЛЬ</h2>
-        <input type="text" id="c-name" placeholder="Имя персонажа">
-        <input type="text" id="c-age" placeholder="Возраст">
-        <textarea id="c-desc" placeholder="Описание (ИИ будет опираться на него)"></textarea>
-        <div class="btn" onclick="addChar()">СОЗДАТЬ ПЕРСОНАЖА</div>
-        <div class="close-btn" onclick="closeW()">НАЗАД</div>
-    </div>
-
-    <div id="w-console" class="window">
-        <h2 style="color:red">КОНСОЛЬ ОВНЕРА</h2>
-        <input type="text" placeholder="Telegram ID">
-        <div class="btn" style="margin-bottom:5px">ВЫДАТЬ ПОДПИСКУ</div>
-        <div class="btn" style="margin-bottom:5px">ИЗМЕНИТЬ ЦЕНЫ</div>
-        <div class="close-btn" onclick="closeW()">НАЗАД</div>
-    </div>
-
-    <div id="w-chats" class="window"><h2>ВАШИ ЧАТЫ</h2><div id="chat-cont"></div><div class="close-btn" onclick="closeW()">НАЗАД</div></div>
-    <div id="w-chars" class="window"><h2>ВСЕ ПЕРСОНАЖИ</h2><div id="char-cont"></div><div class="close-btn" onclick="closeW()">НАЗАД</div></div>
-
-    <div class="footer"><div onclick="closeW()">◀ НАЗАД</div><div onclick="showHome()">🏠 ДОМОЙ</div></div>
-</div>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-    const OWNER_ID = "8287041036";
-    let myId = "0";
-
-    async function init() {
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        myId = tg.initDataUnsafe?.user?.id?.toString() || new URLSearchParams(window.location.search).get('tgId') || OWNER_ID;
-
-        const res = await fetch(`/api/get-user?tgId=${myId}`);
-        const data = await res.json();
-
-        setTimeout(() => {
-            document.getElementById('splash').style.opacity = '0';
+    <div id="w-console" class="window"><h2>КОНСОЛЬ</h2><div class="close" onclick="closeW()">НАЗАД</div></div>
+    <script>
+        const OWNER_ID = "8287041036";
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('tgId') || OWNER_ID;
+            const res = await fetch(`/api/get-user?tgId=${id}`);
+            const data = await res.json();
             setTimeout(() => {
                 document.getElementById('splash').style.display = 'none';
-                document.getElementById('main-app').style.display = 'flex';
-                if (data.exists) {
-                    document.getElementById('h-name').innerText = data.user.name.toUpperCase();
-                    document.getElementById('h-shards').innerText = data.user.shards;
-                    if(myId !== OWNER_ID) document.getElementById('owner-node').style.display = 'none';
-                } else { openW('reg'); }
-            }, 500);
-        }, 2000);
-    }
-
-    function openW(id) {
-        document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
-        document.getElementById('w-' + id).classList.add('active');
-        if(id === 'chars') loadChars();
-    }
-
-    function closeW() { document.querySelectorAll('.window').forEach(w => w.classList.remove('active')); }
-    function showHome() { closeW(); }
-
-    async function register() {
-        const name = document.getElementById('reg-name').value;
-        const gender = document.getElementById('reg-gender').value;
-        await fetch('/api/register', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ tgId: myId, name, gender })
-        });
-        location.reload();
-    }
-
-    async function addChar() {
-        const name = document.getElementById('c-name').value;
-        const age = document.getElementById('c-age').value;
-        const desc = document.getElementById('c-desc').value;
-        await fetch('/api/admin/add-char', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ name, age, desc, creatorId: myId })
-        });
-        alert('Персонаж создан!');
-        closeW();
-    }
-
-    async function loadChars() {
-        const res = await fetch('/api/chars');
-        const chars = await res.json();
-        document.getElementById('char-cont').innerHTML = chars.map(c => `
-            <div class="btn" style="margin-bottom:10px" onclick="startChat('${c._id}')">${c.name}, ${c.age}</div>
-        `).join('');
-    }
-</script>
+                document.getElementById('n').innerText = data.user.name;
+                document.getElementById('s').innerText = data.user.shards;
+                if(id !== OWNER_ID) document.getElementById('own-b').style.display = 'none';
+            }, 1500);
+        }
+        function openW(id) { document.getElementById('w-'+id).classList.add('active'); }
+        function closeW() { document.querySelectorAll('.window').forEach(w => w.classList.remove('active')); }
+    </script>
 </body>
 </html>
