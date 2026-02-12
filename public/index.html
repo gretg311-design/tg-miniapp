@@ -1,168 +1,72 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Anime AI 18+</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        /* Стилизуем всё под твой скриншот */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { 
-            background: #000 !important; 
-            margin: 0; padding: 0; 
-            width: 100%; height: 100%; 
-            overflow: hidden; 
-            color: #fff; 
-            font-family: sans-serif; 
-        }
-
-        /* ТВОЯ ЛУНА - ПОЯВИТСЯ СРАЗУ */
-        #splash {
-            position: fixed; inset: 0;
-            background: #000;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 10000;
-        }
-        .moon-loader {
-            width: 100px; height: 100px;
-            background: radial-gradient(circle at 30% 30%, #fff, #8a2be2 70%);
-            border-radius: 50%;
-            box-shadow: 0 0 50px #8a2be2;
-            animation: moonPulse 2s infinite ease-in-out;
-        }
-        @keyframes moonPulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 80px #8a2be2; }
-        }
-
-        /* ГЛАВНЫЙ ЭКРАН */
-        #app { display: none; flex-direction: column; height: 100vh; padding: 10px; }
-        
-        .header { display: flex; justify-content: space-between; padding: 15px 10px; align-items: center; }
-        .owner-name { color: #b026ff; font-weight: bold; font-size: 18px; }
-        .shards-count { display: flex; align-items: center; font-size: 18px; font-weight: bold; }
-
-        .grid-menu {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: repeat(5, 1fr);
-            gap: 15px;
-            flex-grow: 1;
-            padding: 10px 5px;
-        }
-
-        .item-btn {
-            background: rgba(35, 10, 50, 0.8);
-            border: 1px solid rgba(138, 43, 226, 0.4);
-            border-radius: 20px;
-            display: flex; justify-content: center; align-items: center;
-            font-weight: bold; font-size: 13px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .item-btn:active { transform: scale(0.95); background: rgba(138, 43, 226, 0.3); }
-        .console-red { border: 1px solid #f00; color: #f00; }
-
-        .footer {
-            display: flex; justify-content: space-around;
-            padding: 20px 10px;
-            border-top: 1px solid #222;
-        }
-        .foot-item { font-size: 14px; opacity: 0.8; font-weight: bold; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
+        .moon { font-size: 60px; animation: pulse 2s infinite; text-align: center; margin-top: 40vh; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .btn { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .hidden { display: none; }
+        .gender-screen { text-align: center; padding: 50px 20px; }
     </style>
 </head>
 <body>
+    <div id="loading" class="moon">🌙</div>
 
-<div id="splash"><div class="moon-loader"></div></div>
-
-<div id="app">
-    <div class="header">
-        <div class="owner-name" id="userName">ЗАГРУЗКА...</div>
-        <div class="shards-count">🌙 <span id="userShards">0</span></div>
+    <div id="gender-select" class="gender-screen hidden">
+        <h2>КТО ТЫ?</h2>
+        <button class="btn" style="width:100%; margin-bottom:10px;" onclick="reg('Парень')">ПАРЕНЬ</button>
+        <button class="btn" style="width:100%;" onclick="reg('Девушка')">ДЕВУШКА</button>
     </div>
 
-    <div class="grid-menu">
-        <div class="item-btn">Чаты</div>
-        <div class="item-btn">Персонажи</div>
-        <div class="item-btn">Ежедневка</div>
-        <div class="item-btn">Задания</div>
-        <div class="item-btn">Магазин</div>
-        <div class="item-btn">Промокоды</div>
-        <div class="item-btn">Профиль</div>
-        <div class="item-btn">Настройки</div>
-        <div class="item-btn">Админка</div>
-        <div class="item-btn console-red" id="consoleBtn">Консоль</div>
+    <div id="main" class="hidden">
+        <div style="padding:15px; background:#111; display:flex; justify-content:space-between;">
+            <span id="u-sub">FREE</span>
+            <span id="u-shards">100 🌙</span>
+        </div>
+        <div class="grid">
+            <div class="btn" onclick="go('chats')">ЧАТЫ</div>
+            <div class="btn" onclick="go('chars')">ПЕРСОНАЖИ</div>
+            <div class="btn" onclick="go('daily')">ЕЖЕДНЕВКА</div>
+            <div class="btn" onclick="go('tasks')">ЗАДАНИЯ</div>
+            <div class="btn" onclick="go('shop')">МАГАЗИН</div>
+            <div class="btn" onclick="go('promo')">ПРОМОКОДЫ</div>
+            <div class="btn" onclick="go('profile')">ПРОФИЛЬ</div>
+            <div class="btn" onclick="go('settings')">НАСТРОЙКИ</div>
+            <div id="adm" class="btn hidden">АДМИН</div>
+            <div id="own" class="btn hidden" style="color:red; border-color:red;">КОНСОЛЬ</div>
+        </div>
     </div>
 
-    <div class="footer">
-        <div class="foot-item">◀ НАЗАД</div>
-        <div class="foot-item">🏠 ДОМОЙ</div>
-    </div>
-</div>
+    <script>
+        // Защита от свайпа вниз (pull-down)
+        window.onscroll = () => window.scrollTo(0, 0);
 
-<script>
-    // 1. СРАЗУ ГОВОРИМ ТЕЛЕГРАМУ, ЧТО МЫ ТУТ
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-    tg.headerColor = '#000000';
-    tg.backgroundColor = '#000000';
+        const MY_ID = 8287041036;
 
-    const OWNER_ID = "8287041036";
-
-    async function start() {
-        // Берем ID юзера
-        const myId = tg.initDataUnsafe?.user?.id?.toString() || new URLSearchParams(window.location.search).get('tgId') || "guest";
-
-        try {
-            // Пытаемся получить данные, но не ждем вечно
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-            const response = await fetch('/api/get-user?tgId=' + myId, { signal: controller.signal });
-            const data = await response.json();
-            
-            updateUI(myId, data.user);
-        } catch (e) {
-            console.log("Загрузка без сервера...");
-            updateUI(myId, null);
-        }
-
-        // Прячем луну
         setTimeout(() => {
-            document.getElementById('splash').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
-        }, 1000);
-    }
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('gender-select').classList.remove('hidden');
+        }, 2000);
 
-    function updateUI(id, user) {
-        const nameEl = document.getElementById('userName');
-        const shardsEl = document.getElementById('userShards');
-        const conBtn = document.getElementById('consoleBtn');
-
-        if (id === OWNER_ID) {
-            nameEl.innerText = "Азуми Ай (BOSS)";
-            shardsEl.innerText = "99999999";
-        } else if (user) {
-            nameEl.innerText = user.name.toUpperCase();
-            shardsEl.innerText = user.shards;
-            conBtn.style.display = 'none'; // Скрываем консоль для не-овнеров
-        } else {
-            nameEl.innerText = "GUEST";
-            conBtn.style.display = 'none';
+        function reg(g) {
+            document.getElementById('gender-select').classList.add('hidden');
+            document.getElementById('main').classList.remove('hidden');
+            if (MY_ID === 8287041036) {
+                document.getElementById('own').classList.remove('hidden');
+                document.getElementById('adm').classList.remove('hidden');
+                document.getElementById('u-sub').innerText = 'OWNER';
+                document.getElementById('u-shards').innerText = '∞ 🌙';
+            }
         }
-    }
 
-    // Запуск
-    start();
-
-    // Фикс свайпа
-    window.addEventListener('touchstart', (e) => {
-        if (e.pageY < 10) e.preventDefault();
-    }, { passive: false });
-</script>
-
+        function go(sec) {
+            // Если чаты пустые - показать "+" (Логика кнопки 1)
+            if (sec === 'chats') alert('Пока чатов нет. Нажми +');
+        }
+    </script>
 </body>
 </html>
