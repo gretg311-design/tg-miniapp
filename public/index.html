@@ -7,8 +7,9 @@
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
         .moon { font-size: 60px; animation: pulse 2s infinite; text-align: center; margin-top: 40vh; }
         @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .header { display: flex; justify-content: space-between; padding: 15px; background: #111; border-bottom: 2px solid #333; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .btn { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .btn { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
         .hidden { display: none; }
         .gender-screen { text-align: center; padding: 50px 20px; }
     </style>
@@ -17,55 +18,52 @@
     <div id="loading" class="moon">🌙</div>
 
     <div id="gender-select" class="gender-screen hidden">
-        <h2>КТО ТЫ?</h2>
-        <button class="btn" style="width:100%; margin-bottom:10px;" onclick="reg('Парень')">ПАРЕНЬ</button>
-        <button class="btn" style="width:100%;" onclick="reg('Девушка')">ДЕВУШКА</button>
+        <h2 style="margin-bottom:30px;">КТО ТЫ?</h2>
+        <div class="btn" style="margin-bottom:15px;" onclick="reg('Парень')">ПАРЕНЬ</div>
+        <div class="btn" onclick="reg('Девушка')">ДЕВУШКА</div>
     </div>
 
-    <div id="main" class="hidden">
-        <div style="padding:15px; background:#111; display:flex; justify-content:space-between;">
-            <span id="u-sub">FREE</span>
-            <span id="u-shards">100 🌙</span>
+    <div id="app" class="hidden">
+        <div class="header">
+            <div id="u-sub">FREE</div>
+            <div id="u-balance">100 🌙</div>
         </div>
         <div class="grid">
-            <div class="btn" onclick="go('chats')">ЧАТЫ</div>
-            <div class="btn" onclick="go('chars')">ПЕРСОНАЖИ</div>
-            <div class="btn" onclick="go('daily')">ЕЖЕДНЕВКА</div>
-            <div class="btn" onclick="go('tasks')">ЗАДАНИЯ</div>
-            <div class="btn" onclick="go('shop')">МАГАЗИН</div>
-            <div class="btn" onclick="go('promo')">ПРОМОКОДЫ</div>
-            <div class="btn" onclick="go('profile')">ПРОФИЛЬ</div>
-            <div class="btn" onclick="go('settings')">НАСТРОЙКИ</div>
-            <div id="adm" class="btn hidden">АДМИН</div>
-            <div id="own" class="btn hidden" style="color:red; border-color:red;">КОНСОЛЬ</div>
+            <div class="btn" onclick="alert('Чаты')">ЧАТЫ</div>
+            <div class="btn" onclick="alert('Персонажи')">ПЕРСОНАЖИ</div>
+            <div class="btn" onclick="alert('Ежедневка')">ЕЖЕДНЕВКА</div>
+            <div class="btn" onclick="alert('Задания')">ЗАДАНИЯ</div>
+            <div class="btn" onclick="alert('Магазин')">МАГАЗИН</div>
+            <div class="btn" onclick="alert('Промо')">ПРОМОКОДЫ</div>
+            <div class="btn" onclick="alert('Профиль')">ПРОФИЛЬ</div>
+            <div class="btn" onclick="alert('Настройки')">НАСТРОЙКИ</div>
+            <div id="adm-btn" class="btn hidden">АДМИН</div>
+            <div id="own-btn" class="btn hidden" style="color:red; border-color:red;">КОНСОЛЬ</div>
         </div>
     </div>
 
     <script>
-        // Защита от свайпа вниз (pull-down)
-        window.onscroll = () => window.scrollTo(0, 0);
+        // Запрет свайпа вниз
+        window.addEventListener('touchstart', e => { if (e.pageY < 5) e.preventDefault(); }, {passive: false});
 
-        const MY_ID = 8287041036;
+        const OWNER_ID = 8287041036;
 
         setTimeout(() => {
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('gender-select').classList.remove('hidden');
-        }, 2000);
+        }, 2500);
 
         function reg(g) {
             document.getElementById('gender-select').classList.add('hidden');
-            document.getElementById('main').classList.remove('hidden');
-            if (MY_ID === 8287041036) {
-                document.getElementById('own').classList.remove('hidden');
-                document.getElementById('adm').classList.remove('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            
+            // Проверка на Овнера (Логика UI)
+            if (OWNER_ID === 8287041036) {
+                document.getElementById('own-btn').classList.remove('hidden');
+                document.getElementById('adm-btn').classList.remove('hidden');
                 document.getElementById('u-sub').innerText = 'OWNER';
-                document.getElementById('u-shards').innerText = '∞ 🌙';
+                document.getElementById('u-balance').innerText = '∞ 🌙';
             }
-        }
-
-        function go(sec) {
-            // Если чаты пустые - показать "+" (Логика кнопки 1)
-            if (sec === 'chats') alert('Пока чатов нет. Нажми +');
         }
     </script>
 </body>
