@@ -2,41 +2,55 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
-const path = require('path');
-const cors = require('cors');
 const app = express();
-
-app.use(cors());
 app.use(express.json());
 
-const OWNER_ID = "8287041036";
+const OWNER_ID = 8287041036;
 
 mongoose.connect(process.env.MONGO_URI);
 
-const userSchema = new mongoose.Schema({
-    tgId: String, name: String, gender: String, shards: { type: Number, default: 10 },
-    settings: { vulgarity: { type: Number, default: 1 }, msgLength: { type: Number, default: 45 } }
+const UserSchema = new mongoose.Schema({
+    tg_id: { type: Number, unique: true },
+    gender: String, // Парень или Девушка
+    shards: { type: Number, default: 100 },
+    sub: { type: String, default: 'free' },
+    sub_expire: Date,
+    streak: { type: Number, default: 0 },
+    last_daily: Date
 });
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', UserSchema);
 
-// API
-app.get('/api/get-user', async (req, res) => {
-    const { tgId } = req.query;
-    if (tgId === OWNER_ID) return res.json({ exists: true, user: { name: "Азуми Ай (BOSS)", shards: "∞" } });
-    const user = await User.findOne({ tgId });
-    res.json({ exists: !!user, user });
+// Авторизация + выбор пола
+app.post('/api/auth', async (req, res) => {
+    const { tg_id, gender } = req.body;
+    let user = await User.findOne({ tg_id });
+    if (!user) {
+        user = await User.create({ tg_id, gender, shards: 100 });
+    }
+    // Овнеру всегда безлимит (логика на фронте и бэке)
+    if (tg_id === OWNER_ID) {
+        user.shards = 999999;
+        user.sub = 'Ultra';
+    }
+    res.json(user);
 });
 
-app.post('/api/register', async (req, res) => {
-    const { tgId, name, gender } = req.body;
-    await User.findOneAndUpdate({ tgId }, { name, gender, shards: 10 }, { upsert: true });
-    res.json({ success: true });
-});
+// Ежедневка (Твои цифры: 50, 100, 250, 500 + x2 за 7 дней)
+app.post('/api/daily', async (req, res) => {
+    const { tg_id } = req.body;
+    const user = await User.findOne({ tg_id });
+    let reward = 15; // Базовая
+    if (user.sub === 'Premium') reward = 50;
+    else if (user.sub === 'Pro') reward = 100;
+    else if (user.sub === 'VIP') reward = 250;
+    else if (user.sub === 'Ultra') reward = 500;
 
-// Отдача фронтенда
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    if (user.streak >= 7) reward *= 2;
+
+    user.shards += reward;
+    user.last_daily = new Date();
+    await user.save();
+    res.json({ new_balance: user.shards });
 });
 
 module.exports = app;
