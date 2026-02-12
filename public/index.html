@@ -3,223 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>A-Z Project</title>
     <style>
-        /* БАЗОВЫЕ СТИЛИ - ЧЕРНЫЙ ФОН СРАЗУ */
-        body, html {
-            background-color: #000 !important;
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            overflow: hidden;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap');
+        body, html { background: #000; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; color: #fff; font-family: 'Inter', sans-serif; }
+        
+        /* ЛУНА СРАЗУ */
+        #splash { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .moon { width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #fff, #8a2be2 75%); border-radius: 50%; box-shadow: 0 0 50px #8a2be2; animation: p 2s infinite ease-in-out; }
+        @keyframes p { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        /* ТА САМАЯ ЛУНА - ПОЯВЛЯЕТСЯ ПЕРВОЙ */
-        #splash {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
+        #app { display: none; flex-direction: column; height: 100vh; }
+        .header { display: flex; justify-content: space-between; padding: 40px 20px 10px; }
+        .u-name { color: #b026ff; font-weight: 800; font-size: 19px; }
+        .balance { color: #ffa500; font-weight: 700; font-size: 18px; }
 
-        .moon {
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle at 30% 30%, #ffffff, #8a2be2 70%);
-            border-radius: 50%;
-            box-shadow: 0 0 60px rgba(138, 43, 226, 0.8);
-            animation: moon-pulse 2s infinite ease-in-out;
-        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(5, 1fr); gap: 12px; padding: 15px; flex-grow: 1; }
+        .btn { background: rgba(30, 5, 50, 0.6); border: 1px solid rgba(138, 43, 226, 0.3); backdrop-filter: blur(15px); border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; height: 100%; }
+        .console { border: 1px solid #f33; color: #f33; }
 
-        @keyframes moon-pulse {
-            0%, 100% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.1); filter: brightness(1.3); box-shadow: 0 0 90px rgba(138, 43, 226, 1); }
-        }
-
-        /* ИНТЕРФЕЙС - СКРЫТ ДО ЗАГРУЗКИ */
-        #app {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 40px 20px 10px;
-        }
-
-        .user-name {
-            color: #b026ff;
-            font-weight: 800;
-            font-size: 20px;
-            text-transform: uppercase;
-        }
-
-        .balance {
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffa500;
-        }
-
-        /* СЕТКА КНОПОК 2x5 */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: repeat(5, 1fr);
-            gap: 12px;
-            padding: 15px;
-            flex-grow: 1;
-        }
-
-        .menu-btn {
-            background: rgba(30, 5, 50, 0.6);
-            border: 1px solid rgba(138, 43, 226, 0.3);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            text-align: center;
-            color: #fff;
-            transition: 0.2s;
-        }
-
-        .menu-btn:active { transform: scale(0.95); background: rgba(138, 43, 226, 0.4); }
-
-        .console-btn {
-            border: 1px solid #ff3b3b !important;
-            color: #ff3b3b;
-        }
-
-        /* ОКНА */
-        .window {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 1000;
-            padding: 20px;
-            padding-top: 50px;
-        }
-
-        .window.active { display: block; }
-
-        .footer {
-            display: flex;
-            justify-content: space-around;
-            padding: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .hidden { display: none !important; }
+        .window { display: none; position: fixed; inset: 0; background: #000; z-index: 1000; padding: 20px; }
+        .active { display: block; }
+        .footer { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid #222; }
     </style>
 </head>
-<body>
-
-    <div id="splash">
-        <div class="moon"></div>
-        <p style="margin-top: 30px; color: #8a2be2; font-weight: 800; letter-spacing: 3px;">LOADING...</p>
-    </div>
-
+<body onload="init()">
+    <div id="splash"><div class="moon"></div></div>
     <div id="app">
         <div class="header">
-            <div class="user-name" id="display-name">BOSS</div>
-            <div class="balance">🌙 <span id="display-shards">∞</span></div>
+            <div class="u-name" id="un">...</div>
+            <div class="balance">🌙 <span id="sh">0</span></div>
         </div>
-
         <div class="grid">
-            <div class="menu-btn" onclick="openTab('chats')">ЧАТЫ</div>
-            <div class="menu-btn" onclick="openTab('chars')">ПЕРСОНАЖИ</div>
-            <div class="menu-btn" onclick="openTab('daily')">ЕЖЕДНЕВКА</div>
-            <div class="menu-btn" onclick="openTab('tasks')">ЗАДАНИЯ</div>
-            <div class="menu-btn" onclick="openTab('shop')">МАГАЗИН</div>
-            <div class="menu-btn" onclick="openTab('promo')">ПРОМОКОДЫ</div>
-            <div class="menu-btn" onclick="openTab('profile')">ПРОФИЛЬ</div>
-            <div class="menu-btn" onclick="openTab('settings')">НАСТРОЙКИ</div>
-            <div class="menu-btn" onclick="openTab('admin')">АДМИНКА</div>
-            <div class="menu-btn console-btn" id="console-node" onclick="openTab('console')">КОНСОЛЬ</div>
+            <div class="btn" onclick="openW('chats')">ЧАТЫ</div>
+            <div class="btn" onclick="openW('chars')">ПЕРСОНАЖИ</div>
+            <div class="btn" onclick="openW('daily')">ЕЖЕДНЕВКА</div>
+            <div class="btn" onclick="openW('tasks')">ЗАДАНИЯ</div>
+            <div class="btn" onclick="openW('shop')">МАГАЗИН</div>
+            <div class="btn" onclick="openW('promo')">ПРОМОКОДЫ</div>
+            <div class="btn" onclick="openW('profile')">ПРОФИЛЬ</div>
+            <div class="btn" onclick="openW('settings')">НАСТРОЙКИ</div>
+            <div class="btn" id="adm" onclick="openW('admin')">АДМИНКА</div>
+            <div class="btn console" id="con" onclick="openW('console')">КОНСОЛЬ</div>
         </div>
-
-        <div class="footer">
-            <div onclick="closeTab()">◀ НАЗАД</div>
-            <div onclick="closeTab()">🏠 ДОМОЙ</div>
-        </div>
+        <div class="footer"><div onclick="closeW()">◀ НАЗАД</div><div onclick="closeW()">🏠 ДОМОЙ</div></div>
     </div>
 
-    <div id="win-reg" class="window">
-        <h2 style="color:#b026ff">РЕГИСТРАЦИЯ</h2>
-        <input type="text" id="reg-name" placeholder="Твое имя" style="width:100%; padding:15px; margin:10px 0; background:#1a0033; border:1px solid #8a2be2; color:#fff; border-radius:10px;">
-        <div class="menu-btn" style="height:60px" onclick="saveReg()">НАЧАТЬ</div>
+    <div id="w-reg" class="window">
+        <h2>РЕГИСТРАЦИЯ</h2>
+        <input type="text" id="rn" placeholder="Имя" style="width:100%; padding:15px; margin-bottom:10px; background:#1a0033; border:1px solid #8a2be2; color:#fff; border-radius:10px;">
+        <select id="rg" style="width:100%; padding:15px; background:#1a0033; border:1px solid #8a2be2; color:#fff; border-radius:10px;">
+            <option value="male">Мужчина</option><option value="female">Женщина</option>
+        </select>
+        <div class="btn" style="height:60px; margin-top:20px" onclick="reg()">НАЧАТЬ</div>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const OWNER_ID = "8287041036";
+        let myId = "";
+        const tg = window.Telegram.WebApp;
 
-        function init() {
-            const tg = window.Telegram.WebApp;
-            tg.ready();
-            tg.expand();
-            tg.backgroundColor = "#000000";
-            tg.headerColor = "#000000";
-
-            const myId = tg.initDataUnsafe?.user?.id?.toString() || new URLSearchParams(window.location.search).get('tgId') || OWNER_ID;
-
-            // Имитация загрузки данных
-            fetch(`/api/get-user?tgId=${myId}`)
-                .then(res => res.json())
-                .then(data => {
-                    setTimeout(() => {
-                        document.getElementById('splash').style.display = 'none';
-                        document.getElementById('app').style.display = 'flex';
-
-                        if (myId === OWNER_ID) {
-                            document.getElementById('display-name').innerText = "Азуми Ай (BOSS)";
-                            document.getElementById('display-shards').innerText = "∞";
-                        } else if (data.exists) {
-                            document.getElementById('display-name').innerText = data.user.name.toUpperCase();
-                            document.getElementById('display-shards').innerText = data.user.shards;
-                            document.getElementById('console-node').classList.add('hidden');
-                        } else {
-                            document.getElementById('win-reg').classList.add('active');
-                        }
-                    }, 1500); // 1.5 сек любуемся луной
-                })
-                .catch(err => {
-                    // Если сервер не ответил, всё равно показываем меню через 2 сек
-                    setTimeout(() => {
-                        document.getElementById('splash').style.display = 'none';
-                        document.getElementById('app').style.display = 'flex';
-                    }, 2000);
-                });
+        async function init() {
+            tg.ready(); tg.expand();
+            myId = tg.initDataUnsafe?.user?.id?.toString() || new URLSearchParams(window.location.search).get('tgId') || OWNER_ID;
+            
+            try {
+                const res = await fetch(`/api/get-user?tgId=${myId}`);
+                const data = await res.json();
+                setTimeout(() => {
+                    document.getElementById('splash').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                    if (data.exists) {
+                        document.getElementById('un').innerText = data.user.name;
+                        document.getElementById('sh').innerText = data.user.shards;
+                        if (myId !== OWNER_ID) document.getElementById('con').style.display = 'none';
+                    } else { document.getElementById('w-reg').classList.add('active'); }
+                }, 1500);
+            } catch (e) { document.getElementById('splash').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }
         }
 
-        function openTab(id) {
-            alert("Открываю: " + id);
+        function openW(id) { document.querySelectorAll('.window').forEach(w => w.classList.remove('active')); document.getElementById('w-'+id)?.classList.add('active'); }
+        function closeW() { document.querySelectorAll('.window').forEach(w => w.classList.remove('active')); }
+        async function reg() {
+            const name = document.getElementById('rn').value;
+            const gender = document.getElementById('rg').value;
+            await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tgId: myId, name, gender }) });
+            location.reload();
         }
-
-        function closeTab() {
-            document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
-        }
-
-        // Блокировка закрытия при свайпе вниз
-        window.addEventListener('touchstart', e => {
-            if (e.pageY < 10) e.preventDefault();
-        }, {passive: false});
-
-        window.onload = init;
     </script>
 </body>
 </html>
