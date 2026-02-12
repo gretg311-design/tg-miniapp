@@ -3,93 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap');
-        body, html { background: #000; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; color: #fff; font-family: 'Inter', sans-serif; }
-        
-        /* ЛУНА СРАЗУ */
-        #splash { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .moon { width: 90px; height: 90px; background: radial-gradient(circle at 30% 30%, #fff, #8a2be2 75%); border-radius: 50%; box-shadow: 0 0 50px #8a2be2; animation: p 2s infinite ease-in-out; }
-        @keyframes p { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+        /* ЧЕРНЫЙ ФОН СРАЗУ */
+        html, body {
+            background: #000 !important;
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-        #app { display: none; flex-direction: column; height: 100vh; }
-        .header { display: flex; justify-content: space-between; padding: 40px 20px 10px; }
-        .u-name { color: #b026ff; font-weight: 800; font-size: 19px; }
+        /* ЛУНА (Splash Screen) */
+        #splash {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .moon {
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #8a2be2 75%);
+            border-radius: 50%;
+            box-shadow: 0 0 50px #8a2be2;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 70px #8a2be2; }
+        }
+
+        /* ОСНОВНОЙ КОНТЕНТ (Скрыт) */
+        #app {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            background: #000;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            padding: 40px 20px 10px;
+            align-items: center;
+        }
+
+        .user-name { color: #b026ff; font-weight: 800; font-size: 19px; }
         .balance { color: #ffa500; font-weight: 700; font-size: 18px; }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(5, 1fr); gap: 12px; padding: 15px; flex-grow: 1; }
-        .btn { background: rgba(30, 5, 50, 0.6); border: 1px solid rgba(138, 43, 226, 0.3); backdrop-filter: blur(15px); border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; height: 100%; }
-        .console { border: 1px solid #f33; color: #f33; }
+        /* СЕТКА 2x5 КАК НА СКРИНЕ */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(5, 1fr);
+            gap: 12px;
+            padding: 15px;
+            flex-grow: 1;
+        }
 
-        .window { display: none; position: fixed; inset: 0; background: #000; z-index: 1000; padding: 20px; }
-        .active { display: block; }
-        .footer { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid #222; }
+        .btn {
+            background: rgba(30, 5, 50, 0.6);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+            height: 100%;
+        }
+
+        .btn:active { transform: scale(0.95); background: rgba(138, 43, 226, 0.4); }
+        .console-btn { border: 1px solid #ff3b3b; color: #ff3b3b; }
+
+        .footer {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            border-top: 1px solid #222;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
-<body onload="init()">
-    <div id="splash"><div class="moon"></div></div>
+<body>
+
+    <div id="splash">
+        <div class="moon"></div>
+    </div>
+
     <div id="app">
         <div class="header">
-            <div class="u-name" id="un">...</div>
+            <div class="user-name" id="un">...</div>
             <div class="balance">🌙 <span id="sh">0</span></div>
         </div>
+
         <div class="grid">
-            <div class="btn" onclick="openW('chats')">ЧАТЫ</div>
-            <div class="btn" onclick="openW('chars')">ПЕРСОНАЖИ</div>
-            <div class="btn" onclick="openW('daily')">ЕЖЕДНЕВКА</div>
-            <div class="btn" onclick="openW('tasks')">ЗАДАНИЯ</div>
-            <div class="btn" onclick="openW('shop')">МАГАЗИН</div>
-            <div class="btn" onclick="openW('promo')">ПРОМОКОДЫ</div>
-            <div class="btn" onclick="openW('profile')">ПРОФИЛЬ</div>
-            <div class="btn" onclick="openW('settings')">НАСТРОЙКИ</div>
-            <div class="btn" id="adm" onclick="openW('admin')">АДМИНКА</div>
-            <div class="btn console" id="con" onclick="openW('console')">КОНСОЛЬ</div>
+            <div class="btn">ЧАТЫ</div>
+            <div class="btn">ПЕРСОНАЖИ</div>
+            <div class="btn">ЕЖЕДНЕВКА</div>
+            <div class="btn">ЗАДАНИЯ</div>
+            <div class="btn">МАГАЗИН</div>
+            <div class="btn">ПРОМОКОДЫ</div>
+            <div class="btn">ПРОФИЛЬ</div>
+            <div class="btn">НАСТРОЙКИ</div>
+            <div class="btn" id="adm-btn">АДМИНКА</div>
+            <div class="btn console-btn" id="con-btn">КОНСОЛЬ</div>
         </div>
-        <div class="footer"><div onclick="closeW()">◀ НАЗАД</div><div onclick="closeW()">🏠 ДОМОЙ</div></div>
+
+        <div class="footer">
+            <div>◀ НАЗАД</div>
+            <div>🏠 ДОМОЙ</div>
+        </div>
     </div>
 
-    <div id="w-reg" class="window">
-        <h2>РЕГИСТРАЦИЯ</h2>
-        <input type="text" id="rn" placeholder="Имя" style="width:100%; padding:15px; margin-bottom:10px; background:#1a0033; border:1px solid #8a2be2; color:#fff; border-radius:10px;">
-        <select id="rg" style="width:100%; padding:15px; background:#1a0033; border:1px solid #8a2be2; color:#fff; border-radius:10px;">
-            <option value="male">Мужчина</option><option value="female">Женщина</option>
-        </select>
-        <div class="btn" style="height:60px; margin-top:20px" onclick="reg()">НАЧАТЬ</div>
-    </div>
-
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        const OWNER_ID = "8287041036";
-        let myId = "";
+        // Инициализация Telegram SDK моментально
         const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.enableClosingConfirmation();
+        tg.headerColor = '#000000';
+        tg.backgroundColor = '#000000';
 
-        async function init() {
-            tg.ready(); tg.expand();
-            myId = tg.initDataUnsafe?.user?.id?.toString() || new URLSearchParams(window.location.search).get('tgId') || OWNER_ID;
-            
+        const OWNER_ID = "8287041036";
+
+        async function loadData() {
+            const myId = tg.initDataUnsafe?.user?.id?.toString() || new URLSearchParams(window.location.search).get('tgId') || OWNER_ID;
+
             try {
+                // Запрос данных
                 const res = await fetch(`/api/get-user?tgId=${myId}`);
                 const data = await res.json();
+
+                // Даем 1.5 сек на анимацию луны
                 setTimeout(() => {
                     document.getElementById('splash').style.display = 'none';
                     document.getElementById('app').style.display = 'flex';
-                    if (data.exists) {
-                        document.getElementById('un').innerText = data.user.name;
+
+                    if (myId === OWNER_ID) {
+                        document.getElementById('un').innerText = "Азуми Ай (BOSS)";
+                        document.getElementById('sh').innerText = "∞";
+                    } else if (data.exists) {
+                        document.getElementById('un').innerText = data.user.name.toUpperCase();
                         document.getElementById('sh').innerText = data.user.shards;
-                        if (myId !== OWNER_ID) document.getElementById('con').style.display = 'none';
-                    } else { document.getElementById('w-reg').classList.add('active'); }
+                        document.getElementById('con-btn').classList.add('hidden');
+                    } else {
+                        // Если нет в базе - просто показываем BOSS для теста
+                        document.getElementById('un').innerText = "NEW USER";
+                    }
                 }, 1500);
-            } catch (e) { document.getElementById('splash').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }
+            } catch (e) {
+                // Даже если сервер упал, показываем интерфейс
+                setTimeout(() => {
+                    document.getElementById('splash').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                }, 1500);
+            }
         }
 
-        function openW(id) { document.querySelectorAll('.window').forEach(w => w.classList.remove('active')); document.getElementById('w-'+id)?.classList.add('active'); }
-        function closeW() { document.querySelectorAll('.window').forEach(w => w.classList.remove('active')); }
-        async function reg() {
-            const name = document.getElementById('rn').value;
-            const gender = document.getElementById('rg').value;
-            await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tgId: myId, name, gender }) });
-            location.reload();
-        }
+        // Запуск
+        loadData();
+
+        // Запрет свайпа вниз
+        window.addEventListener('touchstart', e => {
+            if (e.pageY < 10) e.preventDefault();
+        }, {passive: false});
     </script>
 </body>
 </html>
