@@ -1,69 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Anime AI 18+</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
-        .moon { font-size: 60px; animation: pulse 2s infinite; text-align: center; margin-top: 40vh; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-        .header { display: flex; justify-content: space-between; padding: 15px; background: #111; border-bottom: 2px solid #333; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .btn { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
-        .hidden { display: none; }
-        .gender-screen { text-align: center; padding: 50px 20px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #05000a; color: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; overflow: hidden; touch-action: none; }
+        
+        /* Экран загрузки как на скрине */
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #1a1a2e 0%, #05000a 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; }
+        .loader-circle { width: 120px; height: 120px; background: #e0e0e0; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 0 30px rgba(255,255,255,0.2); animation: pulse 2s infinite; }
+        .loading-text { font-size: 18px; margin-bottom: 5px; color: #fff; }
+        .loading-sub { font-size: 12px; color: #7a82ff; }
+
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
+
+        /* Главное меню */
+        #app { display: none; padding: 15px; height: 100vh; flex-direction: column; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-top: 10px; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; }
+        .user-id { color: #888; font-size: 13px; margin-top: 4px; }
+        .balance { display: flex; align-items: center; font-size: 18px; font-weight: bold; }
+        .moon-icon { margin-right: 8px; font-size: 20px; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex-grow: 1; margin-bottom: 60px; }
+        .menu-btn { background: #150025; border: 1px solid #3d0066; border-radius: 15px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-size: 12px; font-weight: bold; color: #fff; letter-spacing: 1px; transition: 0.2s; }
+        .menu-btn:active { background: #3d0066; transform: scale(0.98); }
+        .btn-console { border-color: #ff0000; color: #ff0000; }
+
+        /* Нижняя панель */
+        .footer-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #0c001a; border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { color: #fff; font-size: 12px; text-decoration: none; display: flex; align-items: center; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
     </style>
 </head>
 <body>
-    <div id="loading" class="moon">🌙</div>
 
-    <div id="gender-select" class="gender-screen hidden">
-        <h2 style="margin-bottom:30px;">КТО ТЫ?</h2>
-        <div class="btn" style="margin-bottom:15px;" onclick="reg('Парень')">ПАРЕНЬ</div>
-        <div class="btn" onclick="reg('Девушка')">ДЕВУШКА</div>
+    <div id="loading-screen">
+        <div class="loader-circle"></div>
+        <div class="loading-text">Подключаемся к миру...</div>
+        <div class="loading-sub">Если загрузка дольше минуты — перезайди 💙</div>
     </div>
 
-    <div id="app" class="hidden">
+    <div id="app">
         <div class="header">
-            <div id="u-sub">FREE</div>
-            <div id="u-balance">100 🌙</div>
+            <div class="user-info">
+                <div class="user-name" id="display-name">Азуми Ай (BOSS)</div>
+                <div class="user-id" id="display-id">ID: 8287041036</div>
+            </div>
+            <div class="balance">
+                <span class="moon-icon">🌙</span> <span id="display-shards">99999999</span>
+            </div>
         </div>
+
         <div class="grid">
-            <div class="btn" onclick="alert('Чаты')">ЧАТЫ</div>
-            <div class="btn" onclick="alert('Персонажи')">ПЕРСОНАЖИ</div>
-            <div class="btn" onclick="alert('Ежедневка')">ЕЖЕДНЕВКА</div>
-            <div class="btn" onclick="alert('Задания')">ЗАДАНИЯ</div>
-            <div class="btn" onclick="alert('Магазин')">МАГАЗИН</div>
-            <div class="btn" onclick="alert('Промо')">ПРОМОКОДЫ</div>
-            <div class="btn" onclick="alert('Профиль')">ПРОФИЛЬ</div>
-            <div class="btn" onclick="alert('Настройки')">НАСТРОЙКИ</div>
-            <div id="adm-btn" class="btn hidden">АДМИН</div>
-            <div id="own-btn" class="btn hidden" style="color:red; border-color:red;">КОНСОЛЬ</div>
+            <div class="menu-btn" onclick="openPage('chats')">Чаты</div>
+            <div class="menu-btn" onclick="openPage('chars')">Персонажи</div>
+            <div class="menu-btn" onclick="openPage('daily')">Ежедневка</div>
+            <div class="menu-btn" onclick="openPage('tasks')">Задания</div>
+            <div class="menu-btn" onclick="openPage('shop')">Магазин</div>
+            <div class="menu-btn" onclick="openPage('promo')">Промокоды</div>
+            <div class="menu-btn" onclick="openPage('profile')">Профиль</div>
+            <div class="menu-btn" onclick="openPage('settings')">Настройки</div>
+            <div class="menu-btn" id="btn-admin">Админка</div>
+            <div class="menu-btn btn-console" id="btn-owner">Консоль</div>
+        </div>
+
+        <div class="footer-nav">
+            <div class="nav-item">◀ Назад</div>
+            <div class="nav-item">🏠 Домой</div>
         </div>
     </div>
 
     <script>
-        // Запрет свайпа вниз
-        window.addEventListener('touchstart', e => { if (e.pageY < 5) e.preventDefault(); }, {passive: false});
+        const MY_ID = 8287041036;
 
-        const OWNER_ID = 8287041036;
+        // Эмуляция загрузки как на скрине
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+                
+                // Проверка прав Овнера для UI
+                if(MY_ID === 8287041036) {
+                    document.getElementById('btn-owner').style.display = 'flex';
+                    document.getElementById('btn-admin').style.display = 'flex';
+                }
+            }, 3000); // 3 секунды на загрузку
+        });
 
-        setTimeout(() => {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('gender-select').classList.remove('hidden');
-        }, 2500);
+        // Защита от pull-to-refresh
+        window.addEventListener('touchstart', e => {
+            if (e.touches[0].pageY < 10) e.preventDefault();
+        }, {passive: false});
 
-        function reg(g) {
-            document.getElementById('gender-select').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            
-            // Проверка на Овнера (Логика UI)
-            if (OWNER_ID === 8287041036) {
-                document.getElementById('own-btn').classList.remove('hidden');
-                document.getElementById('adm-btn').classList.remove('hidden');
-                document.getElementById('u-sub').innerText = 'OWNER';
-                document.getElementById('u-balance').innerText = '∞ 🌙';
-            }
+        function openPage(page) {
+            console.log("Переход на " + page);
         }
     </script>
 </body>
