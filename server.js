@@ -1,56 +1,56 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const axios = require('axios');
+const cors = require('cors');
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 const OWNER_ID = 8287041036;
 
-mongoose.connect(process.env.MONGO_URI);
+// Подключение с коротким таймаутом, чтобы не вешать сервер
+mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 5000 
+}).then(() => console.log("✅ База на связи"))
+  .catch(err => console.error("❌ Ошибка базы:", err.message));
 
 const UserSchema = new mongoose.Schema({
     tg_id: { type: Number, unique: true },
-    gender: String, // Парень или Девушка
+    gender: String,
     shards: { type: Number, default: 100 },
     sub: { type: String, default: 'free' },
-    sub_expire: Date,
     streak: { type: Number, default: 0 },
     last_daily: Date
 });
 const User = mongoose.model('User', UserSchema);
 
-// Авторизация + выбор пола
 app.post('/api/auth', async (req, res) => {
-    const { tg_id, gender } = req.body;
-    let user = await User.findOne({ tg_id });
-    if (!user) {
-        user = await User.create({ tg_id, gender, shards: 100 });
+    try {
+        const { tg_id, gender } = req.body;
+        if (!tg_id) return res.status(400).send("No ID");
+
+        // Если база не подключена, выдаем ошибку сразу, а не ждем 30 сек
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(500).json({ error: "DB_DISCONNECTED" });
+        }
+
+        let user = await User.findOne({ tg_id });
+        if (!user) {
+            user = await User.create({ tg_id, gender: gender || 'Парень', shards: 100 });
+        }
+        
+        // Твои условия как Овнера
+        if (tg_id === OWNER_ID) {
+            user.shards = 999999; 
+            user.sub = 'Ultra';
+        }
+        
+        res.json(user);
+    } catch (e) {
+        console.error("Ошибка Auth:", e.message);
+        res.status(500).json({ error: e.message });
     }
-    // Овнеру всегда безлимит (логика на фронте и бэке)
-    if (tg_id === OWNER_ID) {
-        user.shards = 999999;
-        user.sub = 'Ultra';
-    }
-    res.json(user);
-});
-
-// Ежедневка (Твои цифры: 50, 100, 250, 500 + x2 за 7 дней)
-app.post('/api/daily', async (req, res) => {
-    const { tg_id } = req.body;
-    const user = await User.findOne({ tg_id });
-    let reward = 15; // Базовая
-    if (user.sub === 'Premium') reward = 50;
-    else if (user.sub === 'Pro') reward = 100;
-    else if (user.sub === 'VIP') reward = 250;
-    else if (user.sub === 'Ultra') reward = 500;
-
-    if (user.streak >= 7) reward *= 2;
-
-    user.shards += reward;
-    user.last_daily = new Date();
-    await user.save();
-    res.json({ new_balance: user.shards });
 });
 
 module.exports = app;
