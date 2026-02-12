@@ -1,12 +1,12 @@
 {
-  "name": "project-a-z",
+  "name": "project-a-to-z",
   "version": "1.1.0",
   "main": "server.js",
   "dependencies": {
     "express": "^4.18.2",
     "mongoose": "^7.0.0",
     "axios": "^1.3.4",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "cors": "^2.8.5"
   }
 }
