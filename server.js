@@ -1,35 +1,39 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const path = require('path'); // 1. Добавили путь
+const path = require('path');
 const cors = require('cors');
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-
-// 2. ЭТО РЕШАЕТ ПРОБЛЕМУ "Cannot GET /"
-// Мы говорим серверу: "Все файлы бери из папки public"
 app.use(express.static(path.join(__dirname, 'public')));
-
-// 3. Если зашли на главную - отдай index.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 
 const OWNER_ID = 8287041036;
 
-mongoose.connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 5000
-}).catch(err => console.log("DB ERROR: ", err.message));
+mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
+    .catch(err => console.log("DB ERROR:", err.message));
 
-// Твои закрепленные правила
+const UserSchema = new mongoose.Schema({
+    tg_id: { type: Number, unique: true },
+    name: String,
+    shards: { type: Number, default: 100 },
+    sub: { type: String, default: 'free' },
+    streak: { type: Number, default: 0 },
+    last_daily: Date
+});
+const User = mongoose.model('User', UserSchema);
+
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
+
 app.post('/api/auth', async (req, res) => {
     try {
-        const { tg_id, gender } = req.body;
-        // Тут твоя логика овнера и подписок...
-        res.json({ ok: true, owner: tg_id === OWNER_ID });
-    } catch (e) { res.status(500).send(e.message); }
+        const { tg_id, name } = req.body;
+        let user = await User.findOne({ tg_id });
+        if (!user) user = await User.create({ tg_id, name, shards: 100 });
+        if (tg_id === OWNER_ID) { user.shards = 999999999; user.sub = 'Ultra'; }
+        res.json(user);
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = app;
