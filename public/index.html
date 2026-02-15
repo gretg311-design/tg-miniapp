@@ -4,72 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #05000a; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; }
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        #app { display: none; padding: 15px; flex-direction: column; height: 100vh; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background: #05000a; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        
+        #app { display: none; padding: 15px; flex-direction: column; height: 100vh; position: relative; }
+        
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-transform: uppercase; text-align: center; }
-        #console-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:1100; flex-direction:column; align-items:center; justify-content:center; }
-        .c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; }
-        .c-btn { background: #220000; border: 1px solid red; padding: 20px; border-radius: 10px; text-align: center; font-size: 12px; font-weight: bold; }
+        .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; text-shadow: 0 0 10px rgba(188, 19, 254, 0.5); }
+        .shards-display { background: rgba(188, 19, 254, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid #bc13fe; font-weight: bold; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 80px; }
+        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-transform: uppercase; text-align: center; color: #eee; }
+        
+        /* Кнопки Овнера/Админа */
+        #own-btn { border-color: #ff0000; color: #ff0000; display: none; }
+        #adm-btn { border-color: #00f2ff; color: #00f2ff; display: none; }
+
+        /* Консоль 2x4 */
+        #console-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(5,0,10,0.98); z-index:2000; flex-direction:column; align-items:center; justify-content:center; }
+        .c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 90%; }
+        .c-btn { background: #1a0000; border: 1px solid #ff0000; padding: 18px; border-radius: 10px; text-align: center; font-size: 10px; font-weight: bold; color: #fff; text-transform: uppercase; }
+        .c-close { margin-top: 30px; color: #888; font-size: 12px; letter-spacing: 2px; }
+
+        /* Нижняя панель */
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: #0c001a; border-top: 1px solid #220044; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #888; font-weight: bold; }
+        .nav-item.active { color: #bc13fe; }
+        .nav-icon { font-size: 20px; margin-bottom: 3px; }
     </style>
 </head>
 <body>
-    <div id="loading">Загрузка системы...</div>
+
     <div id="app">
         <div class="header">
-            <div><div class="user-name" id="u-name">...</div><div id="u-id" style="font-size:10px; color:gray;"></div></div>
-            <div style="font-size: 20px;">🌙 <span id="u-shards">0</span></div>
+            <div>
+                <div class="user-name" id="u-name">...</div>
+                <div id="u-id" style="font-size:10px; color:gray;">ID: ...</div>
+            </div>
+            <div class="shards-display">🌙 <span id="u-shards">0</span></div>
         </div>
+
         <div class="grid">
             <div class="btn">Чаты</div><div class="btn">Персонажи</div>
             <div class="btn">Ежедневка</div><div class="btn">Задания</div>
             <div class="btn">Магазин</div><div class="btn">Промокоды</div>
             <div class="btn">Профиль</div><div class="btn">Настройки</div>
-            <div class="btn" id="adm-btn" style="display:none; color:cyan;">Админка</div>
-            <div class="btn" id="own-btn" style="display:none; border-color:red; color:red;" onclick="toggleC(true)">Консоль</div>
+            <div class="btn" id="adm-btn">Админка</div>
+            <div class="btn" id="own-btn" onclick="toggleC(true)">Консоль</div>
+        </div>
+
+        <div class="nav-bar">
+            <div class="nav-item">
+                <div class="nav-icon">◀</div><div>НАЗАД</div>
+            </div>
+            <div class="nav-item active">
+                <div class="nav-icon">🏠</div><div>ГЛАВНАЯ</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">👤</div><div>АККАУНТ</div>
+            </div>
         </div>
     </div>
 
     <div id="console-modal">
-        <h2 style="color:red">OWNER CONSOLE</h2>
+        <h2 style="color:red; margin-bottom: 25px; font-size: 18px;">OWNER SYSTEM</h2>
         <div class="c-grid">
-            <div class="c-btn" onclick="giveS()">ОСКОЛКИ</div>
-            <div class="c-btn" onclick="toggleC(false)">ЗАКРЫТЬ</div>
+            <div class="c-btn" onclick="giveS()">Осколки</div>
+            <div class="c-btn" onclick="alert('Подписка')">Подписка</div>
+            <div class="c-btn" onclick="alert('Промокод')">Промокод</div>
+            <div class="c-btn" onclick="alert('Задание')">Задание</div>
+            <div class="c-btn" onclick="alert('Персонажи')">Персонажи</div>
+            <div class="c-btn" onclick="alert('Цены')">Цены в магазине</div>
+            <div class="c-btn" onclick="alert('Добавить админа')" style="border-color:#0f0; color:#0f0">Добавить админа</div>
+            <div class="c-btn" onclick="toggleC(false)" style="border-color:#fff">Выход</div>
         </div>
+        <div class="c-close" onclick="toggleC(false)">ЗАКРЫТЬ МЕНЮ</div>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        const tg = window.Telegram.WebApp; tg.expand();
+        const tg = window.Telegram.WebApp;
         const OWNER_ID = 8287041036;
         const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 8287041036;
-        const curName = tg.initDataUnsafe?.user?.first_name || "Admin";
+        const curName = tg.initDataUnsafe?.user?.first_name || "Owner";
 
         function toggleC(s) { document.getElementById('console-modal').style.display = s?'flex':'none'; }
 
         async function giveS() {
-            const target = prompt("Telegram ID цели:");
-            const amount = prompt("Количество осколков:");
-            if(!target || !amount) return;
-            
-            try {
-                const res = await fetch('/api/admin/give-shards', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ admin_id: curId, target_id: Number(target), amount: Number(amount) })
-                });
-                const data = await res.json();
-                if(data.status === "success") {
-                    alert("Успешно выдано!");
-                    if(Number(target) === curId) document.getElementById('u-shards').innerText = data.new_balance;
-                } else {
-                    alert("Ошибка: " + (data.msg || "Доступ запрещен"));
-                }
-            } catch(e) { alert("Ошибка сети"); }
+            const t = prompt("ID юзера:");
+            const a = prompt("Количество:");
+            if(!t || !a) return;
+            const res = await fetch('/api/admin/give-shards', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ admin_id: curId, target_id: Number(t), amount: Number(a) })
+            });
+            const d = await res.json();
+            if(d.status === "success") {
+                alert("Успешно!");
+                if(Number(t) === curId) document.getElementById('u-shards').innerText = d.new_balance;
+            } else alert("Ошибка");
         }
 
         async function init() {
@@ -87,7 +121,6 @@
                 if(curId === OWNER_ID) document.getElementById('own-btn').style.display = 'flex';
                 if(data.role === 'admin' || curId === OWNER_ID) document.getElementById('adm-btn').style.display = 'flex';
                 
-                document.getElementById('loading').style.display = 'none';
                 document.getElementById('app').style.display = 'flex';
             } catch(e) { console.error(e); }
         }
