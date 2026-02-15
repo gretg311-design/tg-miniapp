@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
+const { Pool } = require('pg');
 const path = require('path');
 const cors = require('cors');
 const app = express();
@@ -11,64 +11,64 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const OWNER_ID = 8287041036;
 
-// Принудительное подключение с логами в реальном времени
-const connectDB = async () => {
+// Подключение к Supabase Postgres
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
+
+// Инициализация таблицы при запуске
+const initDB = async () => {
     try {
-        if (mongoose.connection.readyState === 0) {
-            await mongoose.connect(process.env.MONGO_URI, {
-                serverSelectionTimeoutMS: 5000,
-                socketTimeoutMS: 45000,
-            });
-            console.log("✅ База подключена успешно");
-        }
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                tg_id BIGINT PRIMARY KEY,
+                name TEXT,
+                moon_shards BIGINT DEFAULT 100,
+                sub TEXT DEFAULT 'free',
+                role TEXT DEFAULT 'user'
+            )
+        `);
+        console.log("✅ Таблица в Supabase готова");
     } catch (err) {
-        console.error("❌ Ошибка подключения:", err.message);
+        console.error("❌ Ошибка инициализации таблицы:", err.message);
     }
 };
-
-connectDB();
-
-const User = mongoose.model('User', new mongoose.Schema({
-    tg_id: { type: Number, unique: true },
-    name: { type: String, default: "User" },
-    moon_shards: { type: Number, default: 100 },
-    sub: { type: String, default: 'free' },
-    role: { type: String, default: 'user' }
-}));
+initDB();
 
 app.post('/api/auth', async (req, res) => {
-    // Если всё еще подключаемся, пробуем еще раз
-    if (mongoose.connection.readyState !== 1) {
-        await connectDB();
-    }
-
-    const state = mongoose.connection.readyState;
-    if (state !== 1) {
-        return res.status(500).json({ 
-            error: "База не ответила вовремя", 
-            status: state,
-            hint: "Проверь Network Access -> 0.0.0.0/0 в Atlas"
-        });
-    }
-
     try {
         const tid = Number(req.body.tg_id);
-        let user = await User.findOne({ tg_id: tid });
-        
-        if (!user) {
-            user = new User({ tg_id: tid, name: req.body.name || "User" });
+        const name = req.body.name || "User";
+
+        // Проверяем/создаем юзера одной командой (UPSERT)
+        const query = `
+            INSERT INTO users (tg_id, name)
+            VALUES ($1, $2)
+            ON CONFLICT (tg_id) DO UPDATE SET name = $2
+            RETURNING *
+        `;
+        const result = await pool.query(query, [tid, name]);
+        let user = result.rows[0];
+
+        // Жесткая проверка на Овнера
+        if (Number(tid) === OWNER_ID) {
+            const ownerResult = await pool.query(
+                "UPDATE users SET role = 'owner', moon_shards = 999999999, sub = 'Ultra' WHERE tg_id = $1 RETURNING *",
+                [tid]
+            );
+            user = ownerResult.rows[0];
         }
 
-        if (tid === OWNER_ID) {
-            user.role = 'owner';
-            user.moon_shards = 999999999;
-            user.sub = 'Ultra';
-        }
-
-        await user.save();
-        res.json(user);
+        // Приводим типы к числу для фронтенда
+        res.json({
+            ...user,
+            tg_id: Number(user.tg_id),
+            moon_shards: Number(user.moon_shards)
+        });
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        console.error(e);
+        res.status(500).json({ error: "Ошибка Supabase: " + e.message });
     }
 });
 
