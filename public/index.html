@@ -68,8 +68,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
+        // Если WebApp не передал ID, берем твой ID по умолчанию для тестов
         const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 8287041036;
-        const curName = tg.initDataUnsafe?.user?.first_name || "Admin";
+        const curName = tg.initDataUnsafe?.user?.first_name || "User";
 
         function openConsole() { document.getElementById('console-modal').style.display = 'flex'; }
         function openShards() { 
@@ -93,10 +94,10 @@
             });
             const d = await res.json();
             if(d.status === "success") {
-                alert("Начислено!");
+                alert("Успешно!");
                 if(Number(target) === curId) document.getElementById('u-shards').innerText = d.new_balance;
                 closeAll();
-            } else alert("Ошибка");
+            } else alert("Ошибка доступа");
         }
 
         async function init() {
@@ -108,10 +109,12 @@
                 });
                 const data = await res.json();
                 
+                // ЗАПОЛНЕНИЕ ДАННЫХ
                 document.getElementById('u-name').innerText = data.name;
                 document.getElementById('u-id').innerText = "ID: " + data.tg_id;
                 document.getElementById('u-shards').innerText = data.moon_shards;
                 
+                // ПРОВЕРКА РОЛЕЙ ДЛЯ КНОПОК
                 if(data.role === 'owner') {
                     document.getElementById('own-btn').style.display = 'flex';
                 }
@@ -121,7 +124,10 @@
                 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('app').style.display = 'flex';
-            } catch(e) { alert("Критическая ошибка загрузки"); }
+            } catch(e) { 
+                console.error(e);
+                alert("Ошибка соединения с сервером");
+            }
         }
         init();
     </script>
