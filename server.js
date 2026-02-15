@@ -11,34 +11,40 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const OWNER_ID = 8287041036;
 
-// Подключение с обработкой ошибок
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB Connected"))
-    .catch(err => console.error("MongoDB Connection Error:", err));
+// Жесткие настройки подключения, чтобы не висело по 10 секунд
+const connectionOptions = {
+    serverSelectionTimeoutMS: 5000, // Ждать базу не больше 5 сек
+    connectTimeoutMS: 10000,
+};
 
-const userSchema = new mongoose.Schema({
-    tg_id: { type: Number, unique: true, required: true },
+mongoose.connect(process.env.MONGO_URI, connectionOptions)
+    .then(() => console.log("DB Connected"))
+    .catch(err => console.error("DB connection error:", err));
+
+const User = mongoose.model('User', new mongoose.Schema({
+    tg_id: { type: Number, unique: true },
     name: { type: String, default: "User" },
     moon_shards: { type: Number, default: 100 },
     sub: { type: String, default: 'free' },
     role: { type: String, default: 'user' }
-});
-
-const User = mongoose.model('User', userSchema);
+}));
 
 app.post('/api/auth', async (req, res) => {
     try {
-        const tid = Number(req.body.tg_id);
-        if (!tid) return res.status(400).json({ error: "No TG ID provided" });
+        // Проверка: подключена ли база вообще?
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(500).json({ error: "База данных не подключена. Проверь Network Access в MongoDB!" });
+        }
 
-        // Ищем юзера. Если нет — создаем.
+        const tid = Number(req.body.tg_id);
+        if (!tid) return res.status(400).json({ error: "No ID" });
+
         let user = await User.findOne({ tg_id: tid });
         
         if (!user) {
             user = new User({ tg_id: tid, name: req.body.name || "User" });
         }
 
-        // ЖЕСТКАЯ ПЕРЕЗАПИСЬ ДЛЯ ОВНЕРА
         if (tid === OWNER_ID) {
             user.role = 'owner';
             user.moon_shards = 999999999;
@@ -55,12 +61,11 @@ app.post('/api/auth', async (req, res) => {
             sub: String(user.sub)
         });
     } catch (e) {
-        console.error("AUTH ERROR:", e);
-        res.status(500).json({ error: e.message, stack: e.stack });
+        res.status(500).json({ error: "Ошибка БД: " + e.message });
     }
 });
 
-// Роут для выдачи
+// Роут для осколков
 app.post('/api/admin/give-shards', async (req, res) => {
     try {
         const { target_id, amount } = req.body;
@@ -70,9 +75,7 @@ app.post('/api/admin/give-shards', async (req, res) => {
             { new: true, upsert: true }
         );
         res.json({ status: "success", new_balance: user.moon_shards });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
