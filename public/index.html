@@ -5,29 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background: #05000a; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        body { background: #05000a; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         
-        /* Твоя Луна в загрузке */
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 4000; }
         .moon-loader { width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 0 20px #fff; animation: pulse 2s infinite; margin-bottom: 20px; }
         @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.6; } 50% { transform: scale(1); opacity: 1; box-shadow: 0 0 40px #fff; } 100% { transform: scale(0.9); opacity: 0.6; } }
 
         #app { display: none; padding: 15px; flex-direction: column; height: 100vh; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; }
+        .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; text-shadow: 0 0 10px #bc13fe; }
         
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 80px; }
-        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-transform: uppercase; text-align: center; }
+        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-transform: uppercase; text-align: center; color: #eee; }
         
-        #own-btn { border-color: red; color: red; display: none; }
-        #adm-btn { border-color: cyan; color: cyan; display: none; }
+        #own-btn { border-color: #ff0055; color: #ff0055; display: none; box-shadow: inset 0 0 10px rgba(255,0,85,0.2); }
+        #adm-btn { border-color: #00f2ff; color: #00f2ff; display: none; }
 
         /* Консоль */
-        #console-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; flex-direction:column; align-items:center; justify-content:center; }
+        #console-modal, #shards-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(5,0,10,0.98); z-index:2000; flex-direction:column; align-items:center; justify-content:center; }
         .c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 90%; }
-        .c-btn { background: #1a0000; border: 1px solid red; padding: 18px; border-radius: 10px; text-align: center; font-size: 10px; font-weight: bold; color: #fff; }
+        .c-btn { background: #1a0000; border: 1px solid #ff0055; padding: 18px; border-radius: 10px; text-align: center; font-size: 10px; font-weight: bold; color: #fff; }
         
-        /* Нижняя панель - 2 кнопки */
+        /* Красивое поле ввода */
+        .modal-content { width: 85%; background: #150025; border: 1px solid #bc13fe; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 0 30px rgba(188, 19, 254, 0.3); }
+        .modal-content h3 { margin-top: 0; color: #bc13fe; letter-spacing: 2px; }
+        .input-group { width: 100%; margin: 10px 0; }
+        .input-group label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .modal-input { width: 100%; background: #0c001a; border: 1px solid #3d0066; border-radius: 10px; padding: 12px; color: #fff; font-size: 16px; text-align: center; }
+        .modal-input:focus { border-color: #bc13fe; box-shadow: 0 0 10px rgba(188, 19, 254, 0.5); }
+        .action-btn { width: 100%; background: #bc13fe; color: #fff; border: none; padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .cancel-link { margin-top: 15px; color: #888; font-size: 12px; text-decoration: underline; }
+
+        /* Нижняя панель */
         .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: #0c001a; border-top: 1px solid #222; display: flex; z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; font-weight: bold; }
         .nav-item:first-child { border-right: 1px solid #222; }
@@ -37,7 +46,7 @@
 <body>
     <div id="loading">
         <div class="moon-loader"></div>
-        <div style="letter-spacing: 3px; font-size: 12px;">ЗАГРУЗКА...</div>
+        <div style="letter-spacing: 3px; font-size: 12px;">SYSTEM BOOTING...</div>
     </div>
 
     <div id="app">
@@ -51,9 +60,8 @@
             <div class="btn">Магазин</div><div class="btn">Промокоды</div>
             <div class="btn">Профиль</div><div class="btn">Настройки</div>
             <div class="btn" id="adm-btn">Админка</div>
-            <div class="btn" id="own-btn" onclick="toggleC(true)">Консоль</div>
+            <div class="btn" id="own-btn" onclick="openConsole()">Консоль</div>
         </div>
-
         <div class="nav-bar">
             <div class="nav-item">
                 <div class="nav-icon">◀</div><div>НАЗАД</div>
@@ -65,16 +73,32 @@
     </div>
 
     <div id="console-modal">
-        <h2 style="color:red; margin-bottom: 20px;">OWNER MENU</h2>
+        <h2 style="color:#ff0055; margin-bottom: 20px; letter-spacing: 3px;">OWNER MENU</h2>
         <div class="c-grid">
-            <div class="c-btn" onclick="giveS()">Осколки</div>
-            <div class="c-btn" onclick="alert('В разработке')">Подписка</div>
-            <div class="c-btn" onclick="alert('В разработке')">Промокод</div>
-            <div class="c-btn" onclick="alert('В разработке')">Задание</div>
-            <div class="c-btn" onclick="alert('В разработке')">Персонажи</div>
-            <div class="c-btn" onclick="alert('В разработке')">Цены</div>
-            <div class="c-btn" onclick="addA()" style="color:#0f0; border-color:#0f0">Админ</div>
-            <div class="c-btn" onclick="toggleC(false)" style="border-color:#fff">ВЫХОД</div>
+            <div class="c-btn" onclick="openShards()">Осколки</div>
+            <div class="c-btn">Подписка</div>
+            <div class="c-btn">Промокод</div>
+            <div class="c-btn">Задание</div>
+            <div class="c-btn">Персонажи</div>
+            <div class="c-btn">Цены</div>
+            <div class="c-btn" style="color:#0f0; border-color:#0f0">Админ</div>
+            <div class="c-btn" onclick="closeAll()" style="border-color:#fff">ВЫХОД</div>
+        </div>
+    </div>
+
+    <div id="shards-modal">
+        <div class="modal-content">
+            <h3>🌙 ADD SHARDS</h3>
+            <div class="input-group">
+                <label>Telegram ID юзера</label>
+                <input type="number" id="target-id" class="modal-input" placeholder="Напр: 8287041036">
+            </div>
+            <div class="input-group">
+                <label>Количество осколков</label>
+                <input type="number" id="shards-amount" class="modal-input" placeholder="Напр: 500">
+            </div>
+            <button class="action-btn" onclick="sendShards()">Начислить</button>
+            <div class="cancel-link" onclick="closeAll()">ОТМЕНА</div>
         </div>
     </div>
 
@@ -85,35 +109,34 @@
         const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 8287041036;
         const curName = tg.initDataUnsafe?.user?.first_name || "Admin";
 
-        function toggleC(s) { document.getElementById('console-modal').style.display = s?'flex':'none'; }
-
-        async function giveS() {
-            const t = prompt("ID юзера:");
-            const a = prompt("Количество:");
-            if(!t || !a) return;
-            const res = await fetch('/api/admin/give-shards', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ admin_id: curId, target_id: Number(t), amount: Number(a) })
-            });
-            const d = await res.json();
-            if(d.status === "success") {
-                alert("Успешно!");
-                if(Number(t) === curId) document.getElementById('u-shards').innerText = d.new_balance;
-            } else alert("Ошибка");
+        function openConsole() { document.getElementById('console-modal').style.display = 'flex'; }
+        function openShards() { 
+            document.getElementById('console-modal').style.display = 'none';
+            document.getElementById('shards-modal').style.display = 'flex'; 
+        }
+        function closeAll() {
+            document.getElementById('console-modal').style.display = 'none';
+            document.getElementById('shards-modal').style.display = 'none';
         }
 
-        async function addA() {
-            const t = prompt("ID будущего админа:");
-            if(!t) return;
-            const res = await fetch('/api/admin/add', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ owner_id: curId, target_id: Number(t) })
-            });
-            const d = await res.json();
-            if(d.status === "success") alert("Админ назначен!");
-            else alert("Ошибка");
+        async function sendShards() {
+            const target = document.getElementById('target-id').value;
+            const amount = document.getElementById('shards-amount').value;
+            if(!target || !amount) return alert("Заполни все поля!");
+
+            try {
+                const res = await fetch('/api/admin/give-shards', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ admin_id: curId, target_id: Number(target), amount: Number(amount) })
+                });
+                const d = await res.json();
+                if(d.status === "success") {
+                    alert("Успешно начислено! Баланс цели обновлен.");
+                    if(Number(target) === curId) document.getElementById('u-shards').innerText = d.new_balance;
+                    closeAll();
+                } else alert("Ошибка доступа");
+            } catch(e) { alert("Ошибка сети"); }
         }
 
         async function init() {
@@ -124,7 +147,6 @@
                     body: JSON.stringify({ tg_id: curId, name: curName })
                 });
                 const data = await res.json();
-                
                 document.getElementById('u-name').innerText = curName;
                 document.getElementById('u-id').innerText = "ID: " + curId;
                 document.getElementById('u-shards').innerText = data.moon_shards || 0;
