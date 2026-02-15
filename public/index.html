@@ -9,27 +9,21 @@
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
         .circle { width: 100px; height: 100px; background: #fff; border-radius: 50%; margin-bottom: 20px; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-        
         #app { display: none; padding: 15px; flex-direction: column; height: 100vh; }
-        .header { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: flex-start; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; }
         .user-id { color: #888; font-size: 12px; margin-top: 4px; }
-        
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn { background: #150025; border: 1px solid #3d0066; border-radius: 15px; height: 75px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; text-transform: uppercase; text-align: center; }
         .btn-own { border-color: #ff0000; color: #ff0000; display: none; }
-        
         #console-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; padding: 20px; flex-direction: column; justify-content: center; }
         .console-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .console-btn { background: #1a0000; border: 1px solid #ff0000; color: #fff; border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; text-transform: uppercase; text-align: center; padding: 5px; }
-        .close-console { text-align: center; margin-top: 30px; color: #ff0000; font-weight: bold; font-size: 14px; }
-
+        .console-btn { background: #1a0000; border: 1px solid #ff0000; color: #fff; border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; text-transform: uppercase; text-align: center; }
         .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #0c001a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
     </style>
 </head>
 <body>
     <div id="loading"><div class="circle"></div><div>Подключаемся к миру...</div></div>
-
     <div id="app">
         <div class="header">
             <div><div class="user-name" id="u-name">...</div><div class="user-id" id="u-id">...</div></div>
@@ -49,16 +43,16 @@
     <div id="console-modal">
         <h2 style="text-align: center; color: #ff0000; margin-bottom: 20px;">OWNER CONSOLE</h2>
         <div class="console-grid">
-            <div class="console-btn" onclick="promptAction('shards')">Осколки</div>
-            <div class="console-btn" onclick="promptAction('sub')">Подписка</div>
-            <div class="console-btn" onclick="promptAction('promo')">Промокод</div>
-            <div class="console-btn" onclick="promptAction('task')">Задание</div>
-            <div class="console-btn" onclick="promptAction('chars')">Персонажи</div>
-            <div class="console-btn" onclick="promptAction('prices')">Цены в магазине</div>
+            <div class="console-btn" onclick="giveShards()">Осколки</div>
+            <div class="console-btn" onclick="alert('В разработке')">Подписка</div>
+            <div class="console-btn" onclick="alert('В разработке')">Промокод</div>
+            <div class="console-btn" onclick="alert('В разработке')">Задание</div>
+            <div class="console-btn" onclick="alert('В разработке')">Персонажи</div>
+            <div class="console-btn" onclick="alert('В разработке')">Цены</div>
             <div class="console-btn" onclick="addAdmin()" style="border-color: #00ff00; color: #00ff00;">Добавить админа</div>
-            <div class="console-btn" onclick="alert('Логи')">Логи системы</div>
+            <div class="console-btn" onclick="alert('В разработке')">Логи</div>
         </div>
-        <div class="close-console" onclick="toggleConsole(false)">[ ЗАКРЫТЬ ]</div>
+        <p style="text-align: center; color: #ff0000;" onclick="toggleConsole(false)">[ ЗАКРЫТЬ ]</p>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -70,41 +64,47 @@
 
         function toggleConsole(show) { document.getElementById('console-modal').style.display = show ? 'flex' : 'none'; }
 
-        async function addAdmin() {
-            const id = prompt("Введите Telegram ID нового админа:");
-            if (id) {
-                const res = await fetch('/api/admin/add', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ owner_id: curId, target_id: Number(id) })
-                });
-                if (res.ok) alert("Админ назначен!");
-            }
+        async function giveShards() {
+            const tid = prompt("Введите ID юзера:");
+            const amt = prompt("Сколько начислить?");
+            if (!tid || !amt) return;
+            const res = await fetch('/api/admin/give-shards', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ admin_id: curId, target_id: Number(tid), amount: Number(amt) })
+            });
+            if (res.ok) alert("Готово!");
         }
 
-        function promptAction(type) { alert("Выбрано: " + type + ". Логика в разработке."); }
+        async function addAdmin() {
+            const tid = prompt("Введите ID нового админа:");
+            if (!tid) return;
+            const res = await fetch('/api/admin/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ owner_id: curId, target_id: Number(tid) })
+            });
+            if (res.ok) alert("Админ добавлен!");
+        }
 
         async function init() {
-            try {
-                const res = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ tg_id: curId, name: curName })
-                });
-                const data = await res.json();
-                document.getElementById('u-name').innerText = curName + (curId === OWNER_ID ? " (BOSS)" : "");
-                document.getElementById('u-id').innerText = "ID: " + curId;
-                document.getElementById('u-shards').innerText = data.moon_shards || 0;
-
-                if (curId === OWNER_ID) {
-                    document.getElementById('own-btn').style.display = 'flex';
-                    document.getElementById('adm-btn').style.display = 'flex';
-                } else if (data.role === 'admin') {
-                    document.getElementById('adm-btn').style.display = 'flex';
-                }
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
-            } catch (e) { console.log(e); }
+            const res = await fetch('/api/auth', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tg_id: curId, name: curName })
+            });
+            const data = await res.json();
+            document.getElementById('u-name').innerText = curName + (curId === OWNER_ID ? " (BOSS)" : "");
+            document.getElementById('u-id').innerText = "ID: " + curId;
+            document.getElementById('u-shards').innerText = data.moon_shards || 0;
+            if (curId === OWNER_ID) {
+                document.getElementById('own-btn').style.display = 'flex';
+                document.getElementById('adm-btn').style.display = 'flex';
+            } else if (data.role === 'admin') {
+                document.getElementById('adm-btn').style.display = 'flex';
+            }
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
         }
         setTimeout(init, 2000);
     </script>
