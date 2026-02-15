@@ -23,8 +23,6 @@ const User = mongoose.model('User', new mongoose.Schema({
     role: { type: String, default: 'user' }
 }));
 
-app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
-
 app.post('/api/auth', async (req, res) => {
     try {
         const { tg_id, name } = req.body;
@@ -45,9 +43,17 @@ app.post('/api/admin/give-shards', async (req, res) => {
         const { admin_id, target_id, amount } = req.body;
         const admin = await User.findOne({ tg_id: Number(admin_id) });
         if (!admin || (admin.role !== 'admin' && admin.role !== 'owner')) return res.status(403).json({status:"error"});
-        const user = await User.findOneAndUpdate({ tg_id: Number(target_id) }, { $inc: { moon_shards: Number(amount) } }, { new: true, upsert: true });
+        const user = await User.findOneAndUpdate(
+            { tg_id: Number(target_id) }, 
+            { $inc: { moon_shards: Number(amount) } }, 
+            { new: true, upsert: true }
+        );
         res.json({ status: "success", new_balance: user.moon_shards });
     } catch (e) { res.status(500).json({status:"error"}); }
+});
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 module.exports = app;
