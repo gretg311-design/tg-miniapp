@@ -23,33 +23,65 @@ const User = mongoose.model('User', new mongoose.Schema({
     role: { type: String, default: 'user' }
 }));
 
+// API: Вход и создание юзера
 app.post('/api/auth', async (req, res) => {
     try {
         const { tg_id, name } = req.body;
+        if (!tg_id) return res.status(400).json({ error: "No ID" });
+
         let user = await User.findOne({ tg_id: Number(tg_id) });
-        if (!user) user = await User.create({ tg_id: Number(tg_id), name: name || "User" });
+        if (!user) {
+            user = await User.create({ tg_id: Number(tg_id), name: name || "User", moon_shards: 100 });
+        }
+
         if (Number(tg_id) === OWNER_ID) {
             user.role = 'owner';
             user.moon_shards = 999999999;
             user.sub = 'Ultra';
             await user.save();
         }
-        res.json(user);
-    } catch (e) { res.status(500).json({ error: e.message }); }
+
+        res.json({
+            tg_id: Number(user.tg_id),
+            name: user.name,
+            moon_shards: Number(user.moon_shards),
+            role: user.role,
+            sub: user.sub
+        });
+    } catch (e) {
+        res.status(500).json({ moon_shards: 0, error: e.message });
+    }
 });
 
+// API: Выдача осколков
 app.post('/api/admin/give-shards', async (req, res) => {
     try {
         const { admin_id, target_id, amount } = req.body;
         const admin = await User.findOne({ tg_id: Number(admin_id) });
-        if (!admin || (admin.role !== 'admin' && admin.role !== 'owner')) return res.status(403).json({status:"error"});
+        if (!admin || (admin.role !== 'admin' && admin.role !== 'owner')) return res.status(403).json({ status: "error" });
+
         const user = await User.findOneAndUpdate(
-            { tg_id: Number(target_id) }, 
-            { $inc: { moon_shards: Number(amount) } }, 
+            { tg_id: Number(target_id) },
+            { $inc: { moon_shards: Number(amount) } },
             { new: true, upsert: true }
         );
-        res.json({ status: "success", new_balance: user.moon_shards });
-    } catch (e) { res.status(500).json({status:"error"}); }
+        res.json({ status: "success", new_balance: Number(user.moon_shards) });
+    } catch (e) {
+        res.status(500).json({ status: "error" });
+    }
+});
+
+// API: Назначение админа
+app.post('/api/admin/add', async (req, res) => {
+    try {
+        const { owner_id, target_id } = req.body;
+        if (Number(owner_id) !== OWNER_ID) return res.status(403).json({ status: "error" });
+
+        await User.findOneAndUpdate({ tg_id: Number(target_id) }, { role: 'admin' }, { upsert: true });
+        res.json({ status: "success" });
+    } catch (e) {
+        res.status(500).json({ status: "error" });
+    }
 });
 
 app.get('*', (req, res) => {
