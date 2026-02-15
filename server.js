@@ -11,13 +11,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const OWNER_ID = 8287041036;
 
-// Подключение к Supabase Postgres
+// ПРЯМОЕ ПОДКЛЮЧЕНИЕ ЧЕРЕЗ ТВОЮ ССЫЛКУ (с портом 6543 для надежности)
+const connectionString = "postgresql://postgres:MoonAdmin2026@db.mvzuegcsrqzdibtmzcus.supabase.co:6543/postgres?sslmode=require";
+
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    connectionString: connectionString,
+    connectionTimeoutMillis: 10000,
 });
 
-// Инициализация таблицы при запуске
+// Создание таблицы
 const initDB = async () => {
     try {
         await pool.query(`
@@ -29,9 +31,9 @@ const initDB = async () => {
                 role TEXT DEFAULT 'user'
             )
         `);
-        console.log("✅ Таблица в Supabase готова");
+        console.log("✅ DB Connected & Table Ready");
     } catch (err) {
-        console.error("❌ Ошибка инициализации таблицы:", err.message);
+        console.error("❌ DB Init Error:", err.message);
     }
 };
 initDB();
@@ -41,7 +43,7 @@ app.post('/api/auth', async (req, res) => {
         const tid = Number(req.body.tg_id);
         const name = req.body.name || "User";
 
-        // Проверяем/создаем юзера одной командой (UPSERT)
+        // Поиск или создание пользователя
         const query = `
             INSERT INTO users (tg_id, name)
             VALUES ($1, $2)
@@ -51,24 +53,23 @@ app.post('/api/auth', async (req, res) => {
         const result = await pool.query(query, [tid, name]);
         let user = result.rows[0];
 
-        // Жесткая проверка на Овнера
+        // Авто-выдача прав тебе как Овнеру
         if (Number(tid) === OWNER_ID) {
-            const ownerResult = await pool.query(
+            const ownerUpdate = await pool.query(
                 "UPDATE users SET role = 'owner', moon_shards = 999999999, sub = 'Ultra' WHERE tg_id = $1 RETURNING *",
                 [tid]
             );
-            user = ownerResult.rows[0];
+            user = ownerUpdate.rows[0];
         }
 
-        // Приводим типы к числу для фронтенда
+        // Возвращаем данные (числа приводим из BigInt в Number)
         res.json({
             ...user,
             tg_id: Number(user.tg_id),
             moon_shards: Number(user.moon_shards)
         });
     } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: "Ошибка Supabase: " + e.message });
+        res.status(500).json({ error: "DB Error", message: e.message });
     }
 });
 
