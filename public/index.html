@@ -6,16 +6,25 @@
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #05000a; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; }
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
         .circle { width: 100px; height: 100px; background: #fff; border-radius: 50%; margin-bottom: 20px; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        
         #app { display: none; padding: 15px; flex-direction: column; height: 100vh; }
         .header { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: flex-start; }
         .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; }
         .user-id { color: #888; font-size: 12px; margin-top: 4px; }
+        
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn { background: #150025; border: 1px solid #3d0066; border-radius: 15px; height: 75px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; text-transform: uppercase; text-align: center; }
         .btn-own { border-color: #ff0000; color: #ff0000; display: none; }
+        
+        /* Модальное окно консоли */
+        #console-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; padding: 20px; flex-direction: column; justify-content: center; }
+        .console-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .console-btn { background: #1a0000; border: 1px solid #ff0000; color: #fff; border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .close-console { text-align: center; margin-top: 30px; color: #ff0000; font-weight: bold; }
+
         .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #0c001a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
         .nav-item { font-size: 12px; font-weight: bold; opacity: 0.8; }
     </style>
@@ -25,6 +34,7 @@
         <div class="circle"></div>
         <div style="font-size: 18px;">Подключаемся к миру...</div>
     </div>
+
     <div id="app">
         <div class="header">
             <div>
@@ -39,16 +49,36 @@
             <div class="btn">Магазин</div><div class="btn">Промокоды</div>
             <div class="btn">Профиль</div><div class="btn">Настройки</div>
             <div class="btn" id="adm-btn" style="display:none;">Админка</div>
-            <div class="btn btn-own" id="own-btn">Консоль</div>
+            <div class="btn btn-own" id="own-btn" onclick="toggleConsole(true)">Консоль</div>
         </div>
         <div class="nav"><div class="nav-item">◀ НАЗАД</div><div class="nav-item">🏠 ДОМОЙ</div></div>
     </div>
+
+    <div id="console-modal">
+        <h2 style="text-align: center; color: #ff0000;">OWNER CONSOLE</h2>
+        <div class="console-grid">
+            <div class="console-btn" onclick="alert('Осколки')">Осколки</div>
+            <div class="console-btn" onclick="alert('Подписка')">Подписка</div>
+            <div class="console-btn" onclick="alert('Промокод')">Промокод</div>
+            <div class="console-btn" onclick="alert('Задание')">Задание</div>
+            <div class="console-btn" onclick="alert('Персонажи')">Персонажи</div>
+            <div class="console-btn" onclick="alert('Цены')">Цены в магазине</div>
+            <div class="console-btn" style="opacity: 0.5;">---</div>
+            <div class="console-btn" style="opacity: 0.5;">---</div>
+        </div>
+        <div class="close-console" onclick="toggleConsole(false)">[ ЗАКРЫТЬ ]</div>
+    </div>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         const OWNER_ID = 8287041036;
         const curId = tg.initDataUnsafe?.user?.id || 123456789;
-        const curName = tg.initDataUnsafe?.user?.first_name || "Пользователь";
+        const curName = tg.initDataUnsafe?.user?.first_name || "User";
+
+        function toggleConsole(show) {
+            document.getElementById('console-modal').style.display = show ? 'flex' : 'none';
+        }
 
         async function init() {
             try {
@@ -61,7 +91,6 @@
                 
                 document.getElementById('u-name').innerText = curName + (curId === OWNER_ID ? " (BOSS)" : "");
                 document.getElementById('u-id').innerText = "ID: " + curId;
-                // Привязка к moon_shards
                 document.getElementById('u-shards').innerText = data.moon_shards !== undefined ? data.moon_shards : 0;
 
                 if (curId === OWNER_ID) {
