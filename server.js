@@ -23,40 +23,39 @@ const User = mongoose.model('User', new mongoose.Schema({
     role: { type: String, default: 'user' }
 }));
 
-// API: Вход (Жесткая проверка Овнера)
+// API: Авторизация - ЖЕСТКО возвращаем плоский объект
 app.post('/api/auth', async (req, res) => {
     try {
         const tid = Number(req.body.tg_id);
         const name = req.body.name || "User";
         
-        let role = 'user';
-        let shards_to_set = 100;
-
-        if (tid === OWNER_ID) {
-            role = 'owner';
-            shards_to_set = 999999999;
+        let user = await User.findOne({ tg_id: tid });
+        
+        if (!user) {
+            user = await User.create({ tg_id: tid, name: name, moon_shards: 100 });
         }
 
-        const user = await User.findOneAndUpdate(
-            { tg_id: tid },
-            { 
-                $set: { name: name, role: role },
-                $setOnInsert: { moon_shards: shards_to_set, sub: tid === OWNER_ID ? 'Ultra' : 'free' }
-            },
-            { new: true, upsert: true }
-        );
-
-        // Если ты овнер, но в базе старые данные - форсим баланс
-        if (tid === OWNER_ID && user.moon_shards < 999999999) {
+        // Если зашел Овнер - обновляем статус при каждом входе
+        if (tid === OWNER_ID) {
+            user.role = 'owner';
             user.moon_shards = 999999999;
+            user.sub = 'Ultra';
             await user.save();
         }
 
-        res.json(user);
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        // Возвращаем данные БЕЗ лишних оберток
+        res.json({
+            tg_id: Number(user.tg_id),
+            name: String(user.name),
+            moon_shards: Number(user.moon_shards),
+            role: String(user.role),
+            sub: String(user.sub)
+        });
+    } catch (e) {
+        res.status(500).json({ error: "Server Error", details: e.message });
+    }
 });
 
-// API: Выдача осколков
 app.post('/api/admin/give-shards', async (req, res) => {
     try {
         const { admin_id, target_id, amount } = req.body;
@@ -72,7 +71,7 @@ app.post('/api/admin/give-shards', async (req, res) => {
             { $inc: { moon_shards: Number(amount) } },
             { new: true, upsert: true }
         );
-        res.json({ status: "success", new_balance: user.moon_shards });
+        res.json({ status: "success", new_balance: Number(user.moon_shards) });
     } catch (e) { res.status(500).json({ status: "error" }); }
 });
 
