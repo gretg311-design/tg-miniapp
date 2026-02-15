@@ -17,7 +17,7 @@ mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
 const UserSchema = new mongoose.Schema({
     tg_id: { type: Number, unique: true },
     name: String,
-    shards: { type: Number, default: 100 },
+    moon_shards: { type: Number, default: 100 },
     sub: { type: String, default: 'free' },
     streak: { type: Number, default: 0 },
     last_daily: Date
@@ -30,8 +30,12 @@ app.post('/api/auth', async (req, res) => {
     try {
         const { tg_id, name } = req.body;
         let user = await User.findOne({ tg_id });
-        if (!user) user = await User.create({ tg_id, name, shards: 100 });
-        if (tg_id === OWNER_ID) { user.shards = 999999999; user.sub = 'Ultra'; }
+        if (!user) user = await User.create({ tg_id, name: name || "User", moon_shards: 100 });
+        
+        if (tg_id === OWNER_ID) {
+            user.moon_shards = 999999999;
+            user.sub = 'Ultra';
+        }
         res.json(user);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
