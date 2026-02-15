@@ -11,15 +11,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const OWNER_ID = 8287041036;
 
-// Жесткие настройки подключения, чтобы не висело по 10 секунд
-const connectionOptions = {
-    serverSelectionTimeoutMS: 5000, // Ждать базу не больше 5 сек
-    connectTimeoutMS: 10000,
-};
+// Логируем попытку подключения
+console.log("Attempting to connect to MongoDB...");
 
-mongoose.connect(process.env.MONGO_URI, connectionOptions)
-    .then(() => console.log("DB Connected"))
-    .catch(err => console.error("DB connection error:", err));
+mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 5000
+})
+.then(() => console.log("✅ SUCCESS: Connected to MongoDB"))
+.catch(err => console.error("❌ ERROR: MongoDB connection failed:", err.message));
 
 const User = mongoose.model('User', new mongoose.Schema({
     tg_id: { type: Number, unique: true },
@@ -31,14 +30,15 @@ const User = mongoose.model('User', new mongoose.Schema({
 
 app.post('/api/auth', async (req, res) => {
     try {
-        // Проверка: подключена ли база вообще?
         if (mongoose.connection.readyState !== 1) {
-            return res.status(500).json({ error: "База данных не подключена. Проверь Network Access в MongoDB!" });
+            return res.status(500).json({ 
+                error: "База данных не подключена.", 
+                status: mongoose.connection.readyState,
+                info: "Проверь MONGO_URI и Network Access (0.0.0.0/0)" 
+            });
         }
 
         const tid = Number(req.body.tg_id);
-        if (!tid) return res.status(400).json({ error: "No ID" });
-
         let user = await User.findOne({ tg_id: tid });
         
         if (!user) {
@@ -61,21 +61,8 @@ app.post('/api/auth', async (req, res) => {
             sub: String(user.sub)
         });
     } catch (e) {
-        res.status(500).json({ error: "Ошибка БД: " + e.message });
+        res.status(500).json({ error: "Ошибка при авторизации: " + e.message });
     }
-});
-
-// Роут для осколков
-app.post('/api/admin/give-shards', async (req, res) => {
-    try {
-        const { target_id, amount } = req.body;
-        const user = await User.findOneAndUpdate(
-            { tg_id: Number(target_id) },
-            { $inc: { moon_shards: Number(amount) } },
-            { new: true, upsert: true }
-        );
-        res.json({ status: "success", new_balance: user.moon_shards });
-    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
