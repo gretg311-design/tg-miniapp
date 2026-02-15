@@ -31,7 +31,6 @@ app.post('/api/auth', async (req, res) => {
         const { tg_id, name } = req.body;
         let user = await User.findOne({ tg_id });
         if (!user) user = await User.create({ tg_id, name: name || "User", moon_shards: 100 });
-        
         if (tg_id === OWNER_ID) {
             user.moon_shards = 999999999;
             user.sub = 'Ultra';
