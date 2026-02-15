@@ -8,21 +8,21 @@
         body { background: #05000a; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; }
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; align-items: center; justify-content: center; z-index: 1000; }
         #app { display: none; padding: 15px; flex-direction: column; height: 100vh; }
-        .header { display: flex; justify-content: space-between; align-items: center; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-transform: uppercase; text-align: center; }
         #console-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:1100; flex-direction:column; align-items:center; justify-content:center; }
-        .c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 90%; }
-        .c-btn { background: #220000; border: 1px solid red; padding: 15px; border-radius: 10px; text-align: center; font-size: 10px; }
+        .c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; }
+        .c-btn { background: #220000; border: 1px solid red; padding: 20px; border-radius: 10px; text-align: center; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div id="loading">Загрузка...</div>
+    <div id="loading">Загрузка системы...</div>
     <div id="app">
         <div class="header">
             <div><div class="user-name" id="u-name">...</div><div id="u-id" style="font-size:10px; color:gray;"></div></div>
-            <div style="font-size: 18px;">🌙 <span id="u-shards">0</span></div>
+            <div style="font-size: 20px;">🌙 <span id="u-shards">0</span></div>
         </div>
         <div class="grid">
             <div class="btn">Чаты</div><div class="btn">Персонажи</div>
@@ -30,20 +30,21 @@
             <div class="btn">Магазин</div><div class="btn">Промокоды</div>
             <div class="btn">Профиль</div><div class="btn">Настройки</div>
             <div class="btn" id="adm-btn" style="display:none; color:cyan;">Админка</div>
-            <div class="btn" id="own-btn" style="display:none; color:red;" onclick="toggleC(true)">Консоль</div>
+            <div class="btn" id="own-btn" style="display:none; border-color:red; color:red;" onclick="toggleC(true)">Консоль</div>
         </div>
     </div>
 
     <div id="console-modal">
+        <h2 style="color:red">OWNER CONSOLE</h2>
         <div class="c-grid">
-            <div class="c-btn" onclick="giveS()">Осколки</div>
+            <div class="c-btn" onclick="giveS()">ОСКОЛКИ</div>
             <div class="c-btn" onclick="toggleC(false)">ЗАКРЫТЬ</div>
         </div>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        const tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp; tg.expand();
         const OWNER_ID = 8287041036;
         const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 8287041036;
         const curName = tg.initDataUnsafe?.user?.first_name || "Admin";
@@ -51,18 +52,23 @@
         function toggleC(s) { document.getElementById('console-modal').style.display = s?'flex':'none'; }
 
         async function giveS() {
-            const t = prompt("ID юзера:");
-            const a = prompt("Сколько?");
-            if(!t || !a) return;
+            const target = prompt("Telegram ID цели:");
+            const amount = prompt("Количество осколков:");
+            if(!target || !amount) return;
+            
             try {
                 const res = await fetch('/api/admin/give-shards', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ admin_id: curId, target_id: Number(t), amount: Number(a) })
+                    body: JSON.stringify({ admin_id: curId, target_id: Number(target), amount: Number(amount) })
                 });
                 const data = await res.json();
-                if(data.status === "success") alert("Выдано! Баланс: " + data.new_balance);
-                else alert("Ошибка сервера: " + data.message);
+                if(data.status === "success") {
+                    alert("Успешно выдано!");
+                    if(Number(target) === curId) document.getElementById('u-shards').innerText = data.new_balance;
+                } else {
+                    alert("Ошибка: " + (data.msg || "Доступ запрещен"));
+                }
             } catch(e) { alert("Ошибка сети"); }
         }
 
@@ -77,11 +83,13 @@
                 document.getElementById('u-name').innerText = curName;
                 document.getElementById('u-id').innerText = "ID: " + curId;
                 document.getElementById('u-shards').innerText = data.moon_shards || 0;
+                
                 if(curId === OWNER_ID) document.getElementById('own-btn').style.display = 'flex';
                 if(data.role === 'admin' || curId === OWNER_ID) document.getElementById('adm-btn').style.display = 'flex';
+                
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('app').style.display = 'flex';
-            } catch(e) { alert("Ошибка инициализации"); }
+            } catch(e) { console.error(e); }
         }
         init();
     </script>
