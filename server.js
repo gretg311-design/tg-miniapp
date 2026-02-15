@@ -23,21 +23,32 @@ const User = mongoose.model('User', new mongoose.Schema({
     role: { type: String, default: 'user' }
 }));
 
-// API: Вход
+// API: Вход (Жесткая проверка Овнера)
 app.post('/api/auth', async (req, res) => {
     try {
         const tid = Number(req.body.tg_id);
-        let user = await User.findOne({ tg_id: tid });
+        const name = req.body.name || "User";
         
-        if (!user) {
-            user = await User.create({ tg_id: tid, name: req.body.name || "User", moon_shards: 100 });
+        let role = 'user';
+        let shards_to_set = 100;
+
+        if (tid === OWNER_ID) {
+            role = 'owner';
+            shards_to_set = 999999999;
         }
 
-        // Если это ты - даем права Бога
-        if (tid === OWNER_ID) {
-            user.role = 'owner';
+        const user = await User.findOneAndUpdate(
+            { tg_id: tid },
+            { 
+                $set: { name: name, role: role },
+                $setOnInsert: { moon_shards: shards_to_set, sub: tid === OWNER_ID ? 'Ultra' : 'free' }
+            },
+            { new: true, upsert: true }
+        );
+
+        // Если ты овнер, но в базе старые данные - форсим баланс
+        if (tid === OWNER_ID && user.moon_shards < 999999999) {
             user.moon_shards = 999999999;
-            user.sub = 'Ultra';
             await user.save();
         }
 
@@ -50,27 +61,19 @@ app.post('/api/admin/give-shards', async (req, res) => {
     try {
         const { admin_id, target_id, amount } = req.body;
         const a_id = Number(admin_id);
-        const t_id = Number(target_id);
-        const amt = Number(amount);
-
-        // Проверка прав: либо Овнер по ID, либо Админ по базе
+        
         if (a_id !== OWNER_ID) {
             const admin = await User.findOne({ tg_id: a_id });
-            if (!admin || admin.role !== 'admin') {
-                return res.status(403).json({ status: "error", message: "Access Denied" });
-            }
+            if (!admin || admin.role !== 'admin') return res.status(403).json({ status: "error" });
         }
 
         const user = await User.findOneAndUpdate(
-            { tg_id: t_id },
-            { $inc: { moon_shards: amt } },
-            { new: true, upsert: true, setDefaultsOnInsert: true }
+            { tg_id: Number(target_id) },
+            { $inc: { moon_shards: Number(amount) } },
+            { new: true, upsert: true }
         );
-
         res.json({ status: "success", new_balance: user.moon_shards });
-    } catch (e) {
-        res.status(500).json({ status: "error", message: e.message });
-    }
+    } catch (e) { res.status(500).json({ status: "error" }); }
 });
 
 app.get('*', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
