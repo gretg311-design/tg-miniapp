@@ -7,23 +7,23 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #05000a; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
-        .circle { width: 80px; height: 80px; background: #fff; border-radius: 50%; margin-bottom: 20px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .circle { width: 60px; height: 60px; border: 4px solid #fff; border-top: 4px solid #bc13fe; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #app { display: none; padding: 15px; flex-direction: column; height: 100vh; }
-        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
         .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; }
-        .user-id { color: #888; font-size: 12px; margin-top: 4px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 15px; height: 75px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-transform: uppercase; text-align: center; }
-        .btn-own { border-color: #ff0000; color: #ff0000; display: none; }
-        #console-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; padding: 20px; flex-direction: column; justify-content: center; }
-        .console-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .console-btn { background: #1a0000; border: 1px solid #ff0000; color: #fff; border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #0c001a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        .user-id { color: #888; font-size: 11px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-transform: uppercase; text-align: center; }
+        .btn-own { border: 1px solid #ff0000; color: #ff0000; display: none; }
+        #console-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:1100; flex-direction:column; align-items:center; justify-content:center; }
+        .c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 90%; }
+        .c-btn { background: #220000; border: 1px solid #ff0000; padding: 15px; border-radius: 10px; text-align: center; font-size: 10px; font-weight: bold; color: #fff; }
+        .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 55px; background: #0c001a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
     </style>
 </head>
 <body>
-    <div id="loading"><div class="circle"></div><div>Загрузка...</div></div>
+    <div id="loading"><div class="circle"></div><p>Загрузка...</p></div>
     <div id="app">
         <div class="header">
             <div><div class="user-name" id="u-name">...</div><div class="user-id" id="u-id">...</div></div>
@@ -35,22 +35,22 @@
             <div class="btn">Магазин</div><div class="btn">Промокоды</div>
             <div class="btn">Профиль</div><div class="btn">Настройки</div>
             <div class="btn" id="adm-btn" style="display:none;">Админка</div>
-            <div class="btn btn-own" id="own-btn" onclick="toggleConsole(true)">Консоль</div>
+            <div class="btn btn-own" id="own-btn" onclick="toggleC(true)">Консоль</div>
         </div>
-        <div class="nav"><div>◀ НАЗАД</div><div>🏠 ДОМОЙ</div></div>
+        <div class="nav"><div>◀</div><div>🏠</div></div>
     </div>
 
     <div id="console-modal">
-        <h2 style="text-align: center; color: #ff0000;">OWNER CONSOLE</h2>
-        <div class="console-grid">
-            <div class="console-btn" onclick="giveShards()">Осколки</div>
-            <div class="console-btn">Подписка</div>
-            <div class="console-btn">Промокод</div>
-            <div class="console-btn">Задание</div>
-            <div class="console-btn">Персонажи</div>
-            <div class="console-btn">Цены</div>
-            <div class="console-btn" onclick="addAdmin()" style="border-color: #00ff00; color: #00ff00;">Добавить админа</div>
-            <div class="console-btn" onclick="toggleConsole(false)">ЗАКРЫТЬ</div>
+        <h3 style="color:red">OWNER CONSOLE</h3>
+        <div class="c-grid">
+            <div class="c-btn" onclick="giveS()">Осколки</div>
+            <div class="c-btn">Подписка</div>
+            <div class="c-btn">Промокод</div>
+            <div class="c-btn">Задание</div>
+            <div class="c-btn">Персонажи</div>
+            <div class="c-btn">Цены</div>
+            <div class="c-btn" onclick="addA()" style="color:#0f0; border-color:#0f0">+ АДМИН</div>
+            <div class="c-btn" onclick="toggleC(false)" style="grid-column: span 2; border-color: #fff">ЗАКРЫТЬ</div>
         </div>
     </div>
 
@@ -58,68 +58,69 @@
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         const OWNER_ID = 8287041036;
-        
-        // Получаем реальный ID юзера
-        const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 12345;
+        const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 123;
         const curName = tg.initDataUnsafe?.user?.first_name || "User";
 
-        function toggleConsole(show) { document.getElementById('console-modal').style.display = show ? 'flex' : 'none'; }
+        function toggleC(s) { document.getElementById('console-modal').style.display = s?'flex':'none'; }
 
-        async function giveShards() {
-            const tid = prompt("Введите ID юзера:");
-            const amt = prompt("Сколько начислить?");
-            if(!tid || !amt) return;
-            const res = await fetch('/api/admin/give-shards', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ admin_id: curId, target_id: Number(tid), amount: Number(amt) })
-            });
-            const result = await res.json();
-            if(res.ok) {
-                alert("Успех! Баланс обновлен.");
-                if(Number(tid) === curId) document.getElementById('u-shards').innerText = result.new_balance;
-            } else { alert("Ошибка: " + result.error); }
+        async function giveS() {
+            const t = prompt("Введите Telegram ID юзера:");
+            const a = prompt("Сколько начислить осколков?");
+            if(!t || !a) return;
+            try {
+                const res = await fetch('/api/admin/give-shards', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ admin_id: curId, target_id: Number(t), amount: Number(a) })
+                });
+                const data = await res.json();
+                if(data.status === "success") {
+                    alert("Успешно! Новый баланс: " + data.new_balance);
+                    if(Number(t) === curId) document.getElementById('u-shards').innerText = data.new_balance;
+                } else {
+                    alert("Ошибка: " + data.message);
+                }
+            } catch(e) { alert("Ошибка запроса"); }
         }
 
-        async function addAdmin() {
-            const tid = prompt("Введите ID нового админа:");
-            if(!tid) return;
-            const res = await fetch('/api/admin/add', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ owner_id: curId, target_id: Number(tid) })
-            });
-            if(res.ok) alert("Админ добавлен!");
-            else alert("Ошибка!");
+        async function addA() {
+            const t = prompt("ID будущего админа:");
+            if(!t) return;
+            try {
+                const res = await fetch('/api/admin/add', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ owner_id: curId, target_id: Number(t) })
+                });
+                const data = await res.json();
+                if(data.status === "success") alert("Админ добавлен!");
+                else alert("Ошибка: " + data.message);
+            } catch(e) { alert("Ошибка запроса"); }
         }
 
         async function init() {
             try {
-                const response = await fetch('/api/auth', {
+                const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ tg_id: curId, name: curName })
                 });
-                const data = await response.json();
-                
+                const data = await res.json();
                 document.getElementById('u-name').innerText = curName + (curId === OWNER_ID ? " (BOSS)" : "");
                 document.getElementById('u-id').innerText = "ID: " + curId;
                 document.getElementById('u-shards').innerText = data.moon_shards || 0;
                 
-                if (curId === OWNER_ID) {
+                if(curId === OWNER_ID) {
                     document.getElementById('own-btn').style.display = 'flex';
                     document.getElementById('adm-btn').style.display = 'flex';
-                } else if (data.role === 'admin') {
+                } else if(data.role === 'admin') {
                     document.getElementById('adm-btn').style.display = 'flex';
                 }
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
-            } catch (e) {
-                document.getElementById('loading').innerText = "Ошибка подключения к серверу";
-            }
+            } catch(e) { console.error(e); }
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
         }
-        setTimeout(init, 500);
+        init();
     </script>
 </body>
 </html>
