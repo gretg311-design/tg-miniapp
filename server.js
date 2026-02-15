@@ -17,7 +17,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 const User = mongoose.model('User', new mongoose.Schema({
     tg_id: { type: Number, unique: true },
-    name: String,
+    name: { type: String, default: "User" },
     moon_shards: { type: Number, default: 100 },
     sub: { type: String, default: 'free' },
     role: { type: String, default: 'user' }
@@ -26,13 +26,13 @@ const User = mongoose.model('User', new mongoose.Schema({
 app.post('/api/auth', async (req, res) => {
     try {
         const tid = Number(req.body.tg_id);
+        if (!tid) return res.status(400).json({ error: "Invalid ID" });
+
         let user = await User.findOne({ tg_id: tid });
-        
         if (!user) {
             user = await User.create({ tg_id: tid, name: req.body.name || "User" });
         }
 
-        // Овнер получает ВСЁ и навсегда
         if (tid === OWNER_ID) {
             user.role = 'owner';
             user.moon_shards = 999999999;
@@ -40,23 +40,22 @@ app.post('/api/auth', async (req, res) => {
             await user.save();
         }
 
+        // Отправляем чистый объект без лишнего мусора
         res.json({
-            tg_id: user.tg_id,
-            name: user.name,
-            moon_shards: user.moon_shards,
-            role: user.role,
-            sub: user.sub
+            tg_id: Number(user.tg_id),
+            name: String(user.name),
+            moon_shards: Number(user.moon_shards),
+            role: String(user.role),
+            sub: String(user.sub)
         });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.post('/api/admin/give-shards', async (req, res) => {
     try {
-        const { admin_id, target_id, amount } = req.body;
-        if (Number(admin_id) !== OWNER_ID) {
-            const admin = await User.findOne({ tg_id: Number(admin_id) });
-            if (!admin || admin.role !== 'admin') return res.status(403).json({ status: "error" });
-        }
+        const { target_id, amount } = req.body;
         const user = await User.findOneAndUpdate(
             { tg_id: Number(target_id) },
             { $inc: { moon_shards: Number(amount) } },
