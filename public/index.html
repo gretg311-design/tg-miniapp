@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: #05000a; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         
         /* Твоя Луна в загрузке */
@@ -25,9 +25,9 @@
         /* Консоль */
         #console-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; flex-direction:column; align-items:center; justify-content:center; }
         .c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 90%; }
-        .c-btn { background: #1a0000; border: 1px solid red; padding: 18px; border-radius: 10px; text-align: center; font-size: 10px; font-weight: bold; }
+        .c-btn { background: #1a0000; border: 1px solid red; padding: 18px; border-radius: 10px; text-align: center; font-size: 10px; font-weight: bold; color: #fff; }
         
-        /* Нижняя панель - ТОЛЬКО 2 КНОПКИ */
+        /* Нижняя панель - 2 кнопки */
         .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: #0c001a; border-top: 1px solid #222; display: flex; z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; font-weight: bold; }
         .nav-item:first-child { border-right: 1px solid #222; }
@@ -68,12 +68,12 @@
         <h2 style="color:red; margin-bottom: 20px;">OWNER MENU</h2>
         <div class="c-grid">
             <div class="c-btn" onclick="giveS()">Осколки</div>
-            <div class="c-btn">Подписка</div>
-            <div class="c-btn">Промокод</div>
-            <div class="c-btn">Задание</div>
-            <div class="c-btn">Персонажи</div>
-            <div class="c-btn">Цены</div>
-            <div class="c-btn" style="color:#0f0; border-color:#0f0">Админ</div>
+            <div class="c-btn" onclick="alert('В разработке')">Подписка</div>
+            <div class="c-btn" onclick="alert('В разработке')">Промокод</div>
+            <div class="c-btn" onclick="alert('В разработке')">Задание</div>
+            <div class="c-btn" onclick="alert('В разработке')">Персонажи</div>
+            <div class="c-btn" onclick="alert('В разработке')">Цены</div>
+            <div class="c-btn" onclick="addA()" style="color:#0f0; border-color:#0f0">Админ</div>
             <div class="c-btn" onclick="toggleC(false)" style="border-color:#fff">ВЫХОД</div>
         </div>
     </div>
@@ -82,8 +82,8 @@
     <script>
         const tg = window.Telegram.WebApp;
         const OWNER_ID = 8287041036;
-        const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 123;
-        const curName = tg.initDataUnsafe?.user?.first_name || "User";
+        const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 8287041036;
+        const curName = tg.initDataUnsafe?.user?.first_name || "Admin";
 
         function toggleC(s) { document.getElementById('console-modal').style.display = s?'flex':'none'; }
 
@@ -103,6 +103,19 @@
             } else alert("Ошибка");
         }
 
+        async function addA() {
+            const t = prompt("ID будущего админа:");
+            if(!t) return;
+            const res = await fetch('/api/admin/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ owner_id: curId, target_id: Number(t) })
+            });
+            const d = await res.json();
+            if(d.status === "success") alert("Админ назначен!");
+            else alert("Ошибка");
+        }
+
         async function init() {
             try {
                 const res = await fetch('/api/auth', {
@@ -111,9 +124,10 @@
                     body: JSON.stringify({ tg_id: curId, name: curName })
                 });
                 const data = await res.json();
+                
                 document.getElementById('u-name').innerText = curName;
                 document.getElementById('u-id').innerText = "ID: " + curId;
-                document.getElementById('u-shards').innerText = data.moon_shards;
+                document.getElementById('u-shards').innerText = data.moon_shards || 0;
                 
                 if(curId === OWNER_ID) document.getElementById('own-btn').style.display = 'flex';
                 if(data.role === 'admin' || curId === OWNER_ID) document.getElementById('adm-btn').style.display = 'flex';
