@@ -4,29 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #05000a; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; }
         .circle { width: 100px; height: 100px; background: #fff; border-radius: 50%; margin-bottom: 20px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
         #app { display: none; padding: 15px; flex-direction: column; height: 100vh; }
-        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: flex-start; }
         .user-name { color: #bc13fe; font-weight: bold; font-size: 18px; }
-        .user-id { color: #888; font-size: 12px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        .user-id { color: #888; font-size: 12px; margin-top: 4px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 15px; height: 75px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; text-transform: uppercase; text-align: center; }
         .btn-own { border-color: #ff0000; color: #ff0000; display: none; }
-        .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 50px; background: #0c001a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #0c001a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        .nav-item { font-size: 12px; font-weight: bold; opacity: 0.8; }
     </style>
 </head>
 <body>
     <div id="loading">
         <div class="circle"></div>
-        <div>Подключаемся к миру...</div>
+        <div style="font-size: 18px;">Подключаемся к миру...</div>
     </div>
     <div id="app">
         <div class="header">
-            <div><div class="user-name" id="u-name">...</div><div class="user-id" id="u-id">...</div></div>
-            <div style="font-size: 18px;">🌙 <span id="u-shards">0</span></div>
+            <div>
+                <div class="user-name" id="u-name">Загрузка...</div>
+                <div class="user-id" id="u-id">ID: ...</div>
+            </div>
+            <div style="font-size: 18px; font-weight: bold;">🌙 <span id="u-shards">0</span></div>
         </div>
         <div class="grid">
             <div class="btn">Чаты</div><div class="btn">Персонажи</div>
@@ -36,31 +41,40 @@
             <div class="btn" id="adm-btn" style="display:none;">Админка</div>
             <div class="btn btn-own" id="own-btn">Консоль</div>
         </div>
-        <div class="nav"><div>◀ НАЗАД</div><div>🏠 ДОМОЙ</div></div>
+        <div class="nav"><div class="nav-item">◀ НАЗАД</div><div class="nav-item">🏠 ДОМОЙ</div></div>
     </div>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         const OWNER_ID = 8287041036;
-        const curId = tg.initDataUnsafe?.user?.id || 12345;
-        const curName = tg.initDataUnsafe?.user?.first_name || "User";
+        const curId = tg.initDataUnsafe?.user?.id || 123456789;
+        const curName = tg.initDataUnsafe?.user?.first_name || "Пользователь";
 
         async function init() {
-            const res = await fetch('/api/auth', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ tg_id: curId, name: curName })
-            });
-            const data = await res.json();
-            document.getElementById('u-name').innerText = curName + (curId === OWNER_ID ? " (BOSS)" : "");
-            document.getElementById('u-id').innerText = "ID: " + curId;
-            document.getElementById('u-shards').innerText = data.shards;
-            if (curId === OWNER_ID) {
-                document.getElementById('own-btn').style.display = 'flex';
-                document.getElementById('adm-btn').style.display = 'flex';
-            }
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ tg_id: curId, name: curName })
+                });
+                const data = await res.json();
+                
+                document.getElementById('u-name').innerText = curName + (curId === OWNER_ID ? " (BOSS)" : "");
+                document.getElementById('u-id').innerText = "ID: " + curId;
+                // Привязка к moon_shards
+                document.getElementById('u-shards').innerText = data.moon_shards !== undefined ? data.moon_shards : 0;
+
+                if (curId === OWNER_ID) {
+                    document.getElementById('own-btn').style.display = 'flex';
+                    document.getElementById('adm-btn').style.display = 'flex';
+                } else {
+                    document.getElementById('own-btn').remove();
+                    document.getElementById('adm-btn').remove();
+                }
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+            } catch (e) { console.log(e); }
         }
         window.addEventListener('touchstart', e => { if (e.touches[0].pageY < 10) e.preventDefault(); }, {passive: false});
         setTimeout(init, 2000);
