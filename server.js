@@ -19,6 +19,7 @@ const UserSchema = new mongoose.Schema({
     name: String,
     moon_shards: { type: Number, default: 100 },
     sub: { type: String, default: 'free' },
+    role: { type: String, default: 'user' }, // 'user', 'admin', 'owner'
     streak: { type: Number, default: 0 },
     last_daily: Date
 });
@@ -31,12 +32,25 @@ app.post('/api/auth', async (req, res) => {
         const { tg_id, name } = req.body;
         let user = await User.findOne({ tg_id });
         if (!user) user = await User.create({ tg_id, name: name || "User", moon_shards: 100 });
+        
+        // Жесткая проверка ролей
         if (tg_id === OWNER_ID) {
+            user.role = 'owner';
             user.moon_shards = 999999999;
             user.sub = 'Ultra';
         }
+        
         res.json(user);
     } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Роут для добавления админа (только для Овнера)
+app.post('/api/admin/add', async (req, res) => {
+    const { owner_id, target_id } = req.body;
+    if (owner_id !== OWNER_ID) return res.status(403).send("Access denied");
+    
+    await User.findOneAndUpdate({ tg_id: target_id }, { role: 'admin' });
+    res.json({ success: true });
 });
 
 module.exports = app;
