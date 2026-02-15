@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-    <div id="loading"><div class="circle"></div><div>Подключаемся...</div></div>
+    <div id="loading"><div class="circle"></div><div>Загрузка...</div></div>
     <div id="app">
         <div class="header">
             <div><div class="user-name" id="u-name">...</div><div class="user-id" id="u-id">...</div></div>
@@ -58,25 +58,27 @@
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         const OWNER_ID = 8287041036;
-        const curId = tg.initDataUnsafe?.user?.id || 12345;
+        
+        // Получаем реальный ID юзера
+        const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 12345;
         const curName = tg.initDataUnsafe?.user?.first_name || "User";
 
         function toggleConsole(show) { document.getElementById('console-modal').style.display = show ? 'flex' : 'none'; }
 
         async function giveShards() {
-            const tid = prompt("Введите ID:");
-            const amt = prompt("Количество:");
+            const tid = prompt("Введите ID юзера:");
+            const amt = prompt("Сколько начислить?");
             if(!tid || !amt) return;
             const res = await fetch('/api/admin/give-shards', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ admin_id: curId, target_id: Number(tid), amount: Number(amt) })
             });
+            const result = await res.json();
             if(res.ok) {
-                const d = await res.json();
-                alert("Выдано! Новый баланс: " + d.new_balance);
-                if(Number(tid) === curId) document.getElementById('u-shards').innerText = d.new_balance;
-            } else { alert("Ошибка!"); }
+                alert("Успех! Баланс обновлен.");
+                if(Number(tid) === curId) document.getElementById('u-shards').innerText = result.new_balance;
+            } else { alert("Ошибка: " + result.error); }
         }
 
         async function addAdmin() {
@@ -88,17 +90,18 @@
                 body: JSON.stringify({ owner_id: curId, target_id: Number(tid) })
             });
             if(res.ok) alert("Админ добавлен!");
-            else alert("Ошибка! Только Owner может добавлять.");
+            else alert("Ошибка!");
         }
 
         async function init() {
             try {
-                const res = await fetch('/api/auth', {
+                const response = await fetch('/api/auth', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ tg_id: curId, name: curName })
                 });
-                const data = await res.json();
+                const data = await response.json();
+                
                 document.getElementById('u-name').innerText = curName + (curId === OWNER_ID ? " (BOSS)" : "");
                 document.getElementById('u-id').innerText = "ID: " + curId;
                 document.getElementById('u-shards').innerText = data.moon_shards || 0;
@@ -109,11 +112,14 @@
                 } else if (data.role === 'admin') {
                     document.getElementById('adm-btn').style.display = 'flex';
                 }
+                
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('app').style.display = 'flex';
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                document.getElementById('loading').innerText = "Ошибка подключения к серверу";
+            }
         }
-        setTimeout(init, 1000);
+        setTimeout(init, 500);
     </script>
 </body>
 </html>
