@@ -49,7 +49,7 @@
         .menu-item {
             background: #120520; border: 1px solid #2d1b4d; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            text-transform: uppercase; font-weight: bold; font-size: 12px; height: 70px;
+            text-transform: uppercase; font-weight: bold; font-size: 11px; height: 70px; text-align: center;
         }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; display: none; }
         .btn-con { border-color: #e91e63; color: #e91e63; display: none; }
@@ -70,9 +70,9 @@
         #shard-manager { display: none; flex-direction: column; gap: 15px; width: 100%; }
         .console-input {
             background: #120520; border: 1px solid #e91e63; border-radius: 8px;
-            padding: 15px; color: white; font-size: 14px; outline: none;
+            padding: 15px; color: white; font-size: 14px; outline: none; width: 100%; box-sizing: border-box;
         }
-        .close-label { margin-top: 40px; color: #555; text-transform: uppercase; font-size: 12px; }
+        .close-label { margin-top: 40px; color: #555; text-transform: uppercase; font-size: 12px; cursor: pointer; }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
@@ -123,54 +123,4 @@
             <div class="balance">🌙 <span id="u-shards">0</span></div>
         </div>
         <div class="menu-grid">
-            <div class="menu-item">Чаты</div><div class="menu-item">Персонажи</div>
-            <div class="menu-item">Ежедневка</div><div class="menu-item">Задания</div>
-            <div class="menu-item">Магазин</div><div class="menu-item">Промокоды</div>
-            <div class="menu-item">Профиль</div><div class="menu-item">Настройки</div>
-            <div id="btn-adm" class="menu-item btn-adm">Админка</div>
-            <div id="btn-con" class="menu-item btn-con" onclick="toggleConsole(true)">Консоль</div>
-        </div>
-        <div class="bottom-nav"><div class="nav-btn" style="border-right: 1px solid #1a0b35;">◀ Назад</div><div class="nav-btn">🏠 Домой</div></div>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-        const OWNER_ID = 8287041036;
-
-        function toggleConsole(s) { document.getElementById('console-modal').style.display = s ? 'flex' : 'none'; }
-        function openShards() { document.getElementById('console-main-grid').style.display = 'none'; document.getElementById('shard-manager').style.display = 'flex'; document.getElementById('console-exit').style.display = 'none'; }
-        function closeShards() { document.getElementById('console-main-grid').style.display = 'grid'; document.getElementById('shard-manager').style.display = 'none'; document.getElementById('console-exit').style.display = 'block'; }
-
-        async function sendShards(action) {
-            const tid = document.getElementById('target-id').value;
-            const amt = document.getElementById('shard-count').value;
-            if(!tid || !amt) return alert("Заполни поля!");
-            
-            const res = await fetch('/api/admin/manage-shards', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ owner_id: OWNER_ID, target_id: tid, amount: amt, action: action })
-            });
-            const data = await res.json();
-            alert(data.message || data.error);
-        }
-
-        async function init() {
-            const user = tg.initDataUnsafe?.user || { id: 0, first_name: "Guest" };
-            document.getElementById('u-name').innerText = user.first_name;
-            document.getElementById('u-id').innerText = "ID: " + user.id;
-
-            if (user.id === OWNER_ID) {
-                document.getElementById('u-name').className = "ultra-nick";
-                document.getElementById('u-shards').innerText = "∞";
-                document.getElementById('btn-adm').style.display = "flex";
-                document.getElementById('btn-con').style.display = "flex";
-            }
-            setTimeout(() => { document.getElementById('loading-screen').style.display = "none"; document.getElementById('app-content').style.display = "flex"; }, 1500);
-        }
-        init();
-    </script>
-</body>
-</html>
+            <div class="
