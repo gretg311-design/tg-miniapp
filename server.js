@@ -10,8 +10,8 @@ const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
 mongoose.connect(MONGO_URI)
-    .then(() => console.log('--- MOON DATABASE CONNECTED ---'))
-    .catch(err => console.error('DATABASE ERROR:', err));
+    .then(() => console.log('--- [SUCCESS] MOON DB CONNECTED ---'))
+    .catch(err => console.error('--- [ERROR] DB CONNECTION FAILED:', err));
 
 const userSchema = new mongoose.Schema({
     tg_id: { type: Number, unique: true },
@@ -21,46 +21,59 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-const characterSchema = new mongoose.Schema({
-    name: String, age: Number, description: String, image: String,
-    createdAt: { type: Date, default: Date.now }
-});
-const Character = mongoose.model('Character', characterSchema);
-
+// ПОЛУЧЕНИЕ ДАННЫХ (С проверкой Овнера)
 app.post('/api/user/get-data', async (req, res) => {
     try {
-        let user = await User.findOne({ tg_id: Number(req.body.tg_id) });
-        if (!user) { user = new User({ tg_id: Number(req.body.tg_id) }); await user.save(); }
+        const uid = Number(req.body.tg_id);
+        console.log(`Запрос данных для ID: ${uid}`); // Лог в терминале
+        
+        let user = await User.findOne({ tg_id: uid });
+        if (!user) {
+            user = new User({ tg_id: uid });
+            // Если это ты, сразу даем Ультру в базе на всякий случай
+            if (uid === OWNER_ID) {
+                user.subscription = "Ultra";
+            }
+            await user.save();
+        }
         res.json(user);
-    } catch (err) { res.status(500).send("Error"); }
+    } catch (err) { 
+        console.error("Ошибка get-data:", err);
+        res.status(500).json({ error: "Server Error" }); 
+    }
 });
 
+// АДМИНКА: ОСКОЛКИ
 app.post('/api/admin/manage-shards', async (req, res) => {
-    if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).send("No Access");
-    const { target_id, amount, action } = req.body;
-    const user = await User.findOneAndUpdate(
-        { tg_id: Number(target_id) },
-        { $inc: { shards: action === 'add' ? Number(amount) : -Number(amount) } },
-        { upsert: true, new: true }
-    );
-    res.json({ message: `Баланс ID ${target_id} обновлен: ${user.shards}` });
+    const { owner_id, target_id, amount, action } = req.body;
+    if (Number(owner_id) !== OWNER_ID) return res.status(403).send("Forbidden");
+    
+    try {
+        const val = Number(amount);
+        const user = await User.findOneAndUpdate(
+            { tg_id: Number(target_id) },
+            { $inc: { shards: action === 'add' ? val : -val } },
+            { upsert: true, new: true }
+        );
+        res.json({ message: `Успешно! Баланс ID ${target_id}: ${user.shards}` });
+    } catch (e) { res.status(500).send("Error"); }
 });
 
+// АДМИНКА: ПОДПИСКИ
 app.post('/api/admin/manage-sub', async (req, res) => {
-    if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).send("No Access");
-    const { target_id, sub_type } = req.body;
-    const expire = sub_type === "None" ? null : new Date(Date.now() + 30*24*60*60*1000);
-    await User.findOneAndUpdate({ tg_id: target_id }, { subscription: sub_type, sub_expire: expire }, { upsert: true });
-    res.json({ message: "Статус подписки изменен!" });
+    const { owner_id, target_id, sub_type } = req.body;
+    if (Number(owner_id) !== OWNER_ID) return res.status(403).send("Forbidden");
+    
+    try {
+        const expire = sub_type === "None" ? null : new Date(Date.now() + 30*24*60*60*1000);
+        await User.findOneAndUpdate(
+            { tg_id: Number(target_id) },
+            { subscription: sub_type, sub_expire: expire },
+            { upsert: true }
+        );
+        res.json({ message: `ID ${target_id}: Статус ${sub_type} обновлен` });
+    } catch (e) { res.status(500).send("Error"); }
 });
 
-app.post('/api/admin/create-character', async (req, res) => {
-    if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).send("No Access");
-    const { name, age, description, image } = req.body;
-    if (description.length < 30 || description.length > 4000) return res.status(400).json({ error: "Лимит описания: 30-4000 символов!" });
-    const nC = new Character({ name, age, description, image });
-    await nC.save();
-    res.json({ message: "Персонаж успешно создан!" });
-});
-
-app.listen(3000, () => console.log('Moon Engine Started on Port 3000'));
+const PORT = 3000;
+app.listen(PORT, () => console.log(`--- [SYSTEM] MOON RUNNING ON PORT ${PORT} ---`));
