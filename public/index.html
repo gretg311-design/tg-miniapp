@@ -2,98 +2,184 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Moon Console Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { background: #05000a; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; display: flex; align-items: center; justify-content: center; z-index: 5000; }
-        .moon-loader { width: 70px; height: 70px; background: #fff; border-radius: 50%; box-shadow: 0 0 25px #fff; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(0.9); opacity: 0.6; } 50% { transform: scale(1); opacity: 1; } }
-        #app { display: none; padding: 15px; height: 100vh; flex-direction: column; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .user-name { font-weight: bold; font-size: 18px; color: #bc13fe; }
-        .ultra-nick {
-            background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
+        :root { --gold: #ffcc00; --bg: #0d0d0d; --card: #1a1a1a; }
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Главная сетка консоли */
+        .console-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
         }
-        @keyframes shine { to { background-position: 200% center; } }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { background: #150025; border: 1px solid #3d0066; border-radius: 12px; height: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-transform: uppercase; }
-        #own-btn, #adm-btn { display: none; }
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: #0c001a; border-top: 1px solid #222; display: flex; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #888; border-right: 1px solid #222; }
+
+        .console-item {
+            background: var(--card);
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .console-item:active { transform: scale(0.95); border-color: var(--gold); }
+        .console-item i { display: block; font-size: 24px; margin-bottom: 8px; }
+
+        /* Окна модулей */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 450px;
+            margin: 40px auto;
+            border: 1px solid var(--gold);
+        }
+
+        input, select, textarea {
+            width: 100%; padding: 12px; margin: 10px 0;
+            background: #2a2a2a; border: 1px solid #444;
+            color: white; border-radius: 10px; box-sizing: border-box;
+        }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button { 
+            flex: 1; padding: 12px; border-radius: 10px; border: none; 
+            font-weight: bold; cursor: pointer; 
+        }
+        .btn-apply { background: var(--gold); color: black; }
+        .btn-cancel { background: #444; color: white; }
+        .btn-sub { background: #333; color: var(--gold); border: 1px solid var(--gold); font-size: 12px; }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div id="loading"><div class="moon-loader"></div></div>
-    <div id="app">
-        <div class="header">
-            <div>
-                <div id="u-name" class="user-name">Загрузка...</div>
-                <div id="u-id" style="font-size:10px; color:gray;">ID: ...</div>
+
+    <h2>🌙 Moon App</h2>
+    <div id="user-stats">Загрузка...</div>
+
+    <button id="main-admin-btn" class="hidden" onclick="openMainConsole()" style="margin-top:20px; background: var(--gold); padding: 15px 30px; border-radius: 15px; border:none; font-weight:bold;">🛠 ОТКРЫТЬ КОНСОЛЬ</button>
+
+    <div id="main-console" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--gold); margin-top:0;">Консоль Овнера</h2>
+            <div class="console-grid">
+                <div class="console-item" onclick="openModule('mod-shards')">🌙 Осколки</div>
+                <div class="console-item" onclick="openModule('mod-subs')">✨ Подписка</div>
+                <div class="console-item" onclick="openModule('mod-tasks')">📋 Задания</div>
+                <div class="console-item" onclick="openModule('mod-promos')">🎟 Промокоды</div>
+                <div class="console-item" onclick="openModule('mod-char')">👤 Персонаж</div>
+                <div class="console-item" onclick="openModule('mod-prices')">💰 Цены</div>
             </div>
-            <div style="font-size: 18px; font-weight: bold;">🌙 <span id="u-shards">0</span></div>
-        </div>
-        <div class="grid">
-            <div class="btn">Чаты</div><div class="btn">Персонажи</div>
-            <div class="btn">Ежедневка</div><div class="btn">Задания</div>
-            <div class="btn">Магазин</div><div class="btn">Промокоды</div>
-            <div class="btn">Профиль</div><div class="btn">Настройки</div>
-            <div class="btn" id="adm-btn" style="border-color:#00f2ff; color:#00f2ff">Админка</div>
-            <div class="btn" id="own-btn" style="border-color:#ff0055; color:#ff0055" onclick="alert('Открываю консоль...')">Консоль</div>
-        </div>
-        <div class="nav-bar">
-            <div class="nav-item">◀ НАЗАД</div>
-            <div class="nav-item" style="border-right:none">🏠 ДОМОЙ</div>
+            <button onclick="closeMainConsole()" class="btn-cancel" style="width:100%; margin-top:20px;">Выйти</button>
         </div>
     </div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <div id="mod-shards" class="modal">
+        <div class="modal-content">
+            <h3>Управление 🌙</h3>
+            <input type="number" id="shard-target-id" placeholder="Telegram ID">
+            <input type="number" id="shard-amount" placeholder="Количество">
+            <div class="btn-group">
+                <button class="btn-apply" onclick="adminAction('give-shards')">Выдать</button>
+                <button style="background: #dc3545; color:white;" onclick="adminAction('take-shards')">Отобрать</button>
+            </div>
+            <button onclick="closeModule('mod-shards')" class="btn-cancel" style="width:100%; margin-top:10px;">Назад</button>
+        </div>
+    </div>
+
+    <div id="mod-subs" class="modal">
+        <div class="modal-content">
+            <h3>Выдача подписки</h3>
+            <input type="number" id="sub-target-id" placeholder="Telegram ID">
+            <div class="btn-group">
+                <button class="btn-sub" onclick="setSub('Premium')">Premium</button>
+                <button class="btn-sub" onclick="setSub('Pro')">Pro</button>
+                <button class="btn-sub" onclick="setSub('VIP')">VIP</button>
+                <button class="btn-sub" onclick="setSub('Ultra')">Ultra</button>
+            </div>
+            <select id="sub-duration">
+                <option value="7">1 неделя</option>
+                <option value="30">1 месяц</option>
+                <option value="90">3 месяца</option>
+                <option value="365">12 месяцев</option>
+            </select>
+            <button class="btn-apply" style="width:100%;" onclick="adminAction('give-sub')">Активировать</button>
+            <button onclick="closeModule('mod-subs')" class="btn-cancel" style="width:100%; margin-top:10px;">Назад</button>
+        </div>
+    </div>
+
+    <div id="mod-tasks" class="modal">
+        <div class="modal-content">
+            <h3>Задания</h3>
+            <input type="text" id="task-title" placeholder="Название (напр. Подпишись на канал)">
+            <input type="text" id="task-link" placeholder="Ссылка (https://t.me/...)">
+            <select id="task-type">
+                <option value="channel">Вступить в канал</option>
+                <option value="bot">Запустить бота</option>
+                <option value="chat">Вступить в чат</option>
+            </select>
+            <input type="number" id="task-reward" placeholder="Награда 🌙">
+            <button class="btn-apply" style="width:100%;" onclick="adminAction('add-task')">Создать задание</button>
+            <div id="tasks-list" style="margin-top:15px; border-top:1px solid #333; padding-top:10px;">
+                </div>
+            <button onclick="closeModule('mod-tasks')" class="btn-cancel" style="width:100%; margin-top:10px;">Назад</button>
+        </div>
+    </div>
+
     <script>
         const tg = window.Telegram.WebApp;
-        const curId = tg.initDataUnsafe?.user?.id ? Number(tg.initDataUnsafe.user.id) : 8287041036;
-        const curName = tg.initDataUnsafe?.user?.first_name || "Owner";
+        let currentUser = null;
+        let selectedSub = "";
 
         async function init() {
-            try {
-                const res = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ tg_id: curId, name: curName })
-                });
-
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(JSON.stringify(errorData));
-                }
-
-                const data = await res.json();
-                
-                const nameEl = document.getElementById('u-name');
-                nameEl.innerText = data.name;
-                if(data.sub === 'Ultra') nameEl.classList.add('ultra-nick');
-
-                document.getElementById('u-id').innerText = "ID: " + data.tg_id;
-                document.getElementById('u-shards').innerText = data.moon_shards > 1000000 ? "∞" : data.moon_shards;
-                
-                if(data.role === 'owner') {
-                    document.getElementById('own-btn').style.display = 'flex';
-                    document.getElementById('adm-btn').style.display = 'flex';
-                }
-
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
-            } catch(e) {
-                document.body.innerHTML = `<div style="padding:20px; color:red; word-break:break-all;">
-                    <h2>ОШИБКА СЕРВЕРА (500)</h2>
-                    <p>${e.message}</p>
-                    <button onclick="location.reload()" style="padding:10px; background:white; border:none; border-radius:5px;">Перезагрузить</button>
-                </div>`;
+            const user = tg.initDataUnsafe?.user || { id: 8287041036, first_name: "Owner" };
+            const res = await fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tg_id: user.id, name: user.first_name })
+            });
+            currentUser = await res.json();
+            
+            document.getElementById('user-stats').innerHTML = `Привет, ${currentUser.name}! 🌙: ${currentUser.moon_shards}`;
+            
+            if (currentUser.role === 'owner' || currentUser.role === 'admin') {
+                document.getElementById('main-admin-btn').classList.remove('hidden');
             }
         }
+
+        function openMainConsole() { document.getElementById('main-console').style.display = 'block'; }
+        function closeMainConsole() { document.getElementById('main-console').style.display = 'none'; }
+        
+        function openModule(id) { document.getElementById(id).style.display = 'block'; }
+        function closeModule(id) { document.getElementById(id).style.display = 'none'; }
+
+        function setSub(type) { 
+            selectedSub = type; 
+            alert("Выбрано: " + type);
+        }
+
+        async function adminAction(type) {
+            // Здесь будет fetch к твоему API (give, take, add-task и т.д.)
+            alert("Действие " + type + " отправлено на сервер!");
+        }
+
         init();
     </script>
 </body>
