@@ -1,68 +1,83 @@
 const express = require('express');
-const { createClient } = require('@supabase/supabase-js');
+const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
 
 const app = express();
-
-// ДАННЫЕ ПОДКЛЮЧЕНИЯ (УЖЕ ВСТАВЛЕНЫ)
-const SUPABASE_URL = "https://mvzuegcsrqzdibtmzcus.supabase.co";
-const SUPABASE_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12enVlZ2NzcnF6ZGlidG16Y3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNTg1MDMsImV4cCI6MjA4NjczNDUwM30.3WYxZkowNm9lMAEQCO7zY-A_4nMGAFD2uazdaz5hJPg";
-const OWNER_ID = 8287041036;
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ТВОЙ ID
+const OWNER_ID = 8287041036;
+
+// ВСТАВЬ СВОЮ ССЫЛКУ ИЗ MONGODB ATLAS НИЖЕ
+const MONGO_URI = "ВСТАВЬ_СЮДА_СВОЮ_MONGO_URL";
+
+// Схема пользователя (автоматически создает структуру в базе)
+const userSchema = new mongoose.Schema({
+    tg_id: { type: Number, unique: true, required: true },
+    name: { type: String, default: "User" },
+    moon_shards: { type: Number, default: 100 },
+    sub: { type: String, default: 'free' },
+    role: { type: String, default: 'user' },
+    last_checkin: { type: Date, default: Date.now },
+    streak: { type: Number, default: 0 }
+});
+
+const User = mongoose.model('User', userSchema);
+
+// Подключение к MongoDB с настройками стабильности
+mongoose.connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 5000, // ждем 5 секунд и выдаем ошибку, если база не ответила
+})
+.then(() => console.log("✅ MongoDB Atlas: Соединение установлено!"))
+.catch(err => console.error("❌ MongoDB Atlas: Ошибка подключения:", err.message));
+
+// API Авторизации и Регистрации
 app.post('/api/auth', async (req, res) => {
     try {
         const tid = Number(req.body.tg_id);
         const name = req.body.name || "User";
 
-        if (!tid) return res.status(400).json({ error: "No ID" });
+        if (!tid) return res.status(400).json({ error: "Missing Telegram ID" });
 
-        // Проверяем, есть ли юзер
-        let { data: user, error: fError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('tg_id', tid)
-            .single();
+        // 1. Пытаемся найти пользователя
+        let user = await User.findOne({ tg_id: tid });
 
-        // Если нет — создаем
+        // 2. Если нет — РЕГИСТРИРУЕМ (Автоматически запомнит его)
         if (!user) {
-            const isOwner = tid === OWNER_ID;
-            const { data: newUser, error: iError } = await supabase
-                .from('users')
-                .insert([{ 
-                    tg_id: tid, 
-                    name: name, 
-                    moon_shards: isOwner ? 999999999 : 100, 
-                    sub: isOwner ? 'Ultra' : 'free',
-                    role: isOwner ? 'owner' : 'user'
-                }])
-                .select()
-                .single();
-            user = newUser;
+            console.log(`Регистрация нового игрока [ID: ${tid}]`);
+            user = new User({ 
+                tg_id: tid, 
+                name: name,
+                moon_shards: (tid === OWNER_ID) ? 999999999 : 100,
+                role: (tid === OWNER_ID) ? 'owner' : 'user',
+                sub: (tid === OWNER_ID) ? 'Ultra' : 'free'
+            });
+            await user.save();
         }
 
-        // Принудительное обновление для тебя (Овнера)
-        if (tid === OWNER_ID) {
+        // 3. Если это ты — проверяем права (на случай, если зашел с другого акка или база обновилась)
+        if (tid === OWNER_ID && (user.role !== 'owner' || user.moon_shards < 1000000)) {
             user.role = 'owner';
             user.moon_shards = 999999999;
             user.sub = 'Ultra';
+            await user.save();
         }
 
+        // Отправляем чистый JSON пользователю
         res.json(user);
     } catch (e) {
-        res.status(500).json({ error: "API_ERROR", message: e.message });
+        console.error("Критическая ошибка сервера:", e.message);
+        res.status(500).json({ error: "DATABASE_ERROR", message: e.message });
     }
 });
 
+// Раздача фронтенда
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Сервер на порту ${PORT}`));
 
 module.exports = app;
