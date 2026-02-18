@@ -3,145 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Moon Project</title>
+    <title>Anime AI 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --purple-dark: #05010a;
-            --purple-card: #120520;
-            --purple-border: #2d1b4d;
-            --accent-blue: #00bcd4;
-            --accent-pink: #e91e63;
-            --gold: #ffcc00;
-        }
-
         body {
-            background-color: var(--purple-dark);
+            background-color: #05010a;
             color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: sans-serif;
             margin: 0;
-            padding: 15px;
-            padding-bottom: 90px; /* Место под нижнюю панель */
+            padding: 20px;
             display: flex;
             flex-direction: column;
-        }
-
-        /* ВЕРХНЯЯ ПАНЕЛЬ */
-        .top-panel {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            background: var(--purple-card);
-            padding: 12px 15px;
-            border-radius: 16px;
-            border: 1px solid var(--purple-border);
-            margin-bottom: 20px;
+            height: 100vh;
             box-sizing: border-box;
         }
 
-        .avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            border: 2px solid var(--accent-blue);
-            margin-right: 12px;
-            background: #222;
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
         }
 
-        .user-meta { flex-grow: 1; }
-        .user-name { font-weight: bold; font-size: 16px; margin: 0; display: block; }
-        .user-sub-label { font-size: 10px; color: var(--accent-blue); text-transform: uppercase; font-weight: 800; }
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
 
-        .balance-box { text-align: right; }
-        .balance-val { color: var(--gold); font-size: 18px; font-weight: 900; }
+        .owner-name {
+            color: #bc42f5;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0;
+        }
 
-        /* СЕТКА 2x6 */
+        .user-id {
+            color: #555;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .balance {
+            display: flex;
+            align-items: center;
+            font-size: 26px;
+            gap: 8px;
+        }
+
+        .moon-icon { color: #ffcc00; }
+
+        /* СЕТКА КНОПОК 2x5 */
         .menu-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            width: 100%;
+            gap: 15px;
+            flex-grow: 1;
         }
 
         .menu-item {
-            background: var(--purple-card);
-            border: 1px solid var(--purple-border);
-            border-radius: 14px;
-            padding: 22px 10px;
-            text-align: center;
+            background: #120520;
+            border: 1px solid #2d1b4d;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-transform: uppercase;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 13px;
+            letter-spacing: 1px;
             cursor: pointer;
-            letter-spacing: 0.5px;
+            height: 70px; /* Фиксированная высота как на скрине */
         }
-        .menu-item:active { background: #1a0b35; transform: scale(0.98); }
 
-        .item-admin { color: var(--accent-blue); border-color: var(--accent-blue); }
-        .item-console { color: var(--accent-pink); border-color: var(--accent-pink); }
+        .btn-adm { border: 1px solid #00bcd4; color: #00bcd4; }
+        .btn-con { border: 1px solid #e91e63; color: #e91e63; }
 
-        /* НИЖНЯЯ ПАНЕЛЬ (TAB BAR) */
+        /* НИЖНЯЯ ПАНЕЛЬ */
         .bottom-nav {
             position: fixed;
-            bottom: 15px;
-            left: 15px;
-            right: 15px;
-            height: 65px;
-            background: rgba(18, 5, 32, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--purple-border);
-            border-radius: 20px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
             display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
+            border-top: 1px solid #1a0b35;
+            background: #05010a;
         }
 
-        .nav-item {
+        .nav-btn {
+            flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            color: #666;
-            font-size: 10px;
-            text-decoration: none;
+            justify-content: center;
+            color: #aaa;
+            text-transform: uppercase;
+            font-size: 14px;
             font-weight: bold;
-        }
-        .nav-item.active { color: var(--accent-blue); }
-        .nav-icon { font-size: 20px; margin-bottom: 4px; }
-
-        /* СЕКЦИИ И МОДУЛИ КОНСОЛИ */
-        .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .console-header { color: var(--accent-pink); text-align: center; text-transform: uppercase; margin-bottom: 15px; }
-
-        input, select, textarea {
-            width: 100%; padding: 14px; margin: 10px 0;
-            background: var(--purple-card); border: 1px solid var(--purple-border);
-            color: white; border-radius: 12px; box-sizing: border-box; font-size: 14px;
+            gap: 8px;
+            cursor: pointer;
         }
 
-        .btn-action { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-green { background: #28a745; color: white; }
-        .btn-gray { background: #333; color: white; margin-top: 15px; }
+        .nav-btn:first-child { border-right: 1px solid #1a0b35; }
+
+        /* СЕКЦИИ КОНСОЛИ (СКРЫТЫ) */
+        .view-section { display: none; width: 100%; }
+        .active { display: block; }
+        .flex-active { display: grid; }
     </style>
 </head>
 <body>
 
-    <div class="top-panel">
-        <img id="u-avatar" class="avatar" src="https://via.placeholder.com/50">
-        <div class="user-meta">
-            <span id="u-name" class="user-name">Loading...</span>
-            <span id="u-sub" class="user-sub-label">FREE</span>
+    <div id="main-screen" class="view-section active">
+        <div class="header">
+            <div class="user-info">
+                <span class="owner-name">Owner</span>
+                <span class="user-id">ID: 8287041036</span>
+            </div>
+            <div class="balance">
+                <span class="moon-icon">🌙</span>
+                <span>∞</span>
+            </div>
         </div>
-        <div class="balance-box">
-            <div class="balance-val">🌙 <span id="u-shards">0</span></div>
-        </div>
-    </div>
 
-    <div id="view-main" class="view-section active">
         <div class="menu-grid">
             <div class="menu-item">Чаты</div>
             <div class="menu-item">Персонажи</div>
@@ -151,88 +135,65 @@
             <div class="menu-item">Промокоды</div>
             <div class="menu-item">Профиль</div>
             <div class="menu-item">Настройки</div>
-            <div class="menu-item item-admin">Админка</div>
-            <div class="menu-item item-console" onclick="showView('view-console')">Консоль</div>
+            <div class="menu-item btn-adm">Админка</div>
+            <div class="menu-item btn-con" onclick="showConsole()">Консоль</div>
         </div>
     </div>
 
-    <div id="view-console" class="view-section">
-        <h3 class="console-header">Консоль Управления</h3>
-        <div class="menu-grid">
-            <div class="menu-item" onclick="showView('mod-shards')">🌙 Осколки</div>
-            <div class="menu-item" onclick="showView('mod-subs')">✨ Подписка</div>
-            <div class="menu-item">📋 Задания</div>
-            <div class="menu-item">🎟 Промокоды</div>
-            <div class="menu-item">👤 Персонаж</div>
-            <div class="menu-item">💰 Цены</div>
+    <div id="console-screen" class="view-section">
+        <div class="header">
+            <span class="owner-name" style="color:#e91e63">Консоль</span>
         </div>
-        <button class="btn-action btn-gray" onclick="showView('view-main')">ВЕРНУТЬСЯ</button>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="showModule('mod-shards')">Осколки</div>
+            <div class="menu-item">Подписка</div>
+            <div class="menu-item">Задания</div>
+            <div class="menu-item">Промокоды</div>
+            <div class="menu-item">Персонаж</div>
+            <div class="menu-item">Цены</div>
+        </div>
     </div>
 
     <div id="mod-shards" class="view-section">
-        <h3 style="color: var(--gold)">Управление 🌙</h3>
-        <input type="number" id="target-id" placeholder="Telegram ID">
-        <input type="number" id="amount" placeholder="Количество">
-        <button class="btn-action btn-green" onclick="alert('Выдано!')">ВЫДАТЬ</button>
-        <button class="btn-action btn-gray" onclick="showView('view-console')">НАЗАД</button>
+         <h3 style="color:#ffcc00; text-align:center;">УПРАВЛЕНИЕ 🌙</h3>
+         <input type="number" id="tid" placeholder="ID" style="width:100%; padding:15px; background:#120520; border:1px solid #2d1b4d; color:white; margin-bottom:10px; border-radius:10px;">
+         <input type="number" id="amt" placeholder="Кол-во" style="width:100%; padding:15px; background:#120520; border:1px solid #2d1b4d; color:white; margin-bottom:10px; border-radius:10px;">
+         <button style="width:100%; padding:15px; background:#28a745; border:none; color:white; font-weight:bold; border-radius:10px;">ВЫДАТЬ</button>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="showView('view-main')">
-            <div class="nav-icon">🏠</div>
-            <span>ГЛАВНАЯ</span>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">🎁</div>
-            <span>БОНУСЫ</span>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">🛒</div>
-            <span>МАРКЕТ</span>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">👤</div>
-            <span>АККАУНТ</span>
-        </div>
+        <div class="nav-btn" onclick="goBack()"><span>◀</span> Назад</div>
+        <div class="nav-btn" onclick="goHome()"><span>🏠</span> Домой</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        const OWNER_ID = 8287041036;
 
-        async function init() {
-            const user = tg.initDataUnsafe?.user || { id: OWNER_ID, first_name: "Owner" };
-            
-            // Быстрая настройка для Овнера
-            if (user.id === OWNER_ID) {
-                document.getElementById('u-shards').innerText = "∞";
-                document.getElementById('u-name').innerText = user.first_name;
-                document.getElementById('u-sub').innerText = "ULTRA OWNER";
-            }
-
-            try {
-                const res = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tg_id: user.id, name: user.first_name })
-                });
-                const data = await res.json();
-                
-                if (user.id !== OWNER_ID) {
-                    document.getElementById('u-shards').innerText = data.moon_shards;
-                    document.getElementById('u-name').innerText = data.name;
-                    document.getElementById('u-sub').innerText = data.sub;
-                }
-            } catch (e) { console.log("Login skip"); }
+        function showConsole() {
+            document.getElementById('main-screen').classList.remove('active');
+            document.getElementById('console-screen').classList.add('active');
         }
 
-        function showView(id) {
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        function showModule(id) {
+            document.getElementById('console-screen').classList.remove('active');
             document.getElementById(id).classList.add('active');
         }
 
-        init();
+        function goHome() {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('main-screen').classList.add('active');
+        }
+
+        function goBack() {
+            // Простая логика назад: если мы в модуле, идем в консоль, если в консоли - домой
+            if (document.getElementById('mod-shards').classList.contains('active')) {
+                document.getElementById('mod-shards').classList.remove('active');
+                document.getElementById('console-screen').classList.add('active');
+            } else {
+                goHome();
+            }
+        }
     </script>
 </body>
 </html>
