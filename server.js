@@ -1,64 +1,33 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const path = require('path');
-const cors = require('cors');
-
+const fs = require('fs');
 const app = express();
-app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
 const OWNER_ID = 8287041036;
-const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
+const DB_FILE = './users.json';
 
-// Схема
-const User = mongoose.models.User || mongoose.model('User', new mongoose.Schema({
-    tg_id: { type: Number, unique: true },
-    name: String,
-    moon_shards: { type: Number, default: 100 },
-    sub: { type: String, default: 'free' },
-    role: { type: String, default: 'user' }
-}));
+// Загрузка базы
+function getDB() {
+    if (!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify({}));
+    return JSON.parse(fs.readFileSync(DB_FILE));
+}
 
-// Функция подключения (специально для Serverless)
-const connectDB = async () => {
-    if (mongoose.connection.readyState >= 1) return;
-    return mongoose.connect(MONGO_URI);
-};
+// Ручка управления осколками
+app.post('/api/admin/manage-shards', (req, res) => {
+    const { owner_id, target_id, amount, action } = req.body;
+    
+    if (owner_id != OWNER_ID) return res.status(403).json({ error: "Нет прав!" });
 
-app.post('/api/auth', async (req, res) => {
-    try {
-        await connectDB();
-        const tid = Number(req.body.tg_id);
-        const name = req.body.name || "User";
+    let db = getDB();
+    if (!db[target_id]) db[target_id] = { shards: 0, subscription: null };
 
-        if (!tid) return res.status(400).json({ error: "No ID" });
+    const val = parseInt(amount);
+    if (action === 'add') db[target_id].shards += val;
+    else db[target_id].shards = Math.max(0, db[target_id].shards - val);
 
-        let user = await User.findOne({ tg_id: tid });
-
-        if (!user) {
-            user = await User.create({ 
-                tg_id: tid, 
-                name: name,
-                moon_shards: (tid === OWNER_ID) ? 999999999 : 100,
-                role: (tid === OWNER_ID) ? 'owner' : 'user',
-                sub: (tid === OWNER_ID) ? 'Ultra' : 'free'
-            });
-        } else if (tid === OWNER_ID && user.role !== 'owner') {
-            user.role = 'owner';
-            user.moon_shards = 999999999;
-            user.sub = 'Ultra';
-            await user.save();
-        }
-
-        res.json(user);
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: "SERVER_CRASH", details: e.message });
-    }
+    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+    res.json({ message: `Осколки юзера ${target_id} обновлены. Баланс: ${db[target_id].shards}` });
 });
 
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-
-// Важно для Vercel
-module.exports = app;
+app.listen(3000, () => console.log('Сервер запущен на порту 3000'));
