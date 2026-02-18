@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Moon Project</title>
+    <title>Anime AI 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -19,15 +19,17 @@
             overflow: hidden;
         }
 
-        /* HEADER */
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        /* ПЕРЕЛИВАЮЩИЙСЯ НИК ULTRA */
+        .user-info { display: flex; flex-direction: column; }
+
+        /* Переливающийся ник для Ultra/Owner */
         .ultra-nick {
             font-size: 22px;
             font-weight: bold;
@@ -40,28 +42,16 @@
 
         @keyframes shine { to { background-position: 200% center; } }
 
-        .user-id { color: #555; font-size: 12px; margin-top: 2px; }
+        .regular-nick { font-size: 22px; font-weight: bold; color: white; }
+        .user-id { color: #555; font-size: 12px; margin-top: 4px; }
         .balance { display: flex; align-items: center; font-size: 26px; gap: 8px; }
         .moon-icon { color: #ffcc00; }
 
-        /* КАРТОЧКА БОССА */
-        .boss-card {
-            background: linear-gradient(135deg, #1a0520 0%, #0d0d0d 100%);
-            border: 1px solid #e91e63;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .boss-name { color: #e91e63; font-weight: bold; text-transform: uppercase; font-size: 14px; }
-        .boss-hp-bar { width: 100%; height: 8px; background: #222; border-radius: 4px; margin: 8px 0; overflow: hidden; }
-        .boss-hp-fill { width: 80%; height: 100%; background: #e91e63; box-shadow: 0 0 10px #e91e63; }
-
-        /* GRID 2x6 */
+        /* СЕТКА КНОПОК */
         .menu-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 15px;
             flex-grow: 1;
         }
 
@@ -75,24 +65,26 @@
             text-transform: uppercase;
             font-weight: bold;
             font-size: 13px;
+            letter-spacing: 1px;
             cursor: pointer;
-            height: 65px;
+            height: 70px;
         }
 
-        /* Кнопки управления (скрыты по умолчанию) */
-        .admin-only { display: none; }
+        /* Кнопки управления */
+        .btn-hidden { display: none; }
         .btn-adm { border: 1px solid #00bcd4; color: #00bcd4; }
         .btn-con { border: 1px solid #e91e63; color: #e91e63; }
 
-        /* BOTTOM NAV */
+        /* НИЖНЯЯ НАВИГАЦИЯ */
         .bottom-nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            height: 75px;
+            height: 80px;
             display: flex;
             border-top: 1px solid #1a0b35;
             background: #05010a;
         }
+
         .nav-btn {
             flex: 1;
             display: flex;
@@ -100,34 +92,26 @@
             justify-content: center;
             color: #aaa;
             text-transform: uppercase;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
+            gap: 8px;
             cursor: pointer;
         }
         .nav-btn:first-child { border-right: 1px solid #1a0b35; }
-
-        /* СЕКЦИИ */
-        .view-section { display: none; width: 100%; height: 100%; }
-        .active { display: block; }
     </style>
 </head>
 <body>
 
-    <div id="main-screen" class="view-section active">
+    <div id="main-screen">
         <div class="header">
             <div class="user-info">
-                <span id="u-name" class="">Загрузка...</span>
+                <span id="u-name" class="regular-nick">Загрузка...</span>
                 <span id="u-id" class="user-id">ID: ---</span>
             </div>
             <div class="balance">
                 <span class="moon-icon">🌙</span>
                 <span id="u-shards">0</span>
             </div>
-        </div>
-
-        <div class="boss-card">
-            <div class="boss-name">Лунная Тень (BOSS)</div>
-            <div class="boss-hp-bar"><div class="boss-hp-fill"></div></div>
         </div>
 
         <div class="menu-grid">
@@ -139,64 +123,65 @@
             <div class="menu-item">Промокоды</div>
             <div class="menu-item">Профиль</div>
             <div class="menu-item">Настройки</div>
-            <div id="btn-admin" class="menu-item btn-adm admin-only">Админка</div>
-            <div id="btn-console" class="menu-item btn-con admin-only" onclick="showView('console-screen')">Консоль</div>
-        </div>
-    </div>
-
-    <div id="console-screen" class="view-section">
-        <h3 style="color:#e91e63; text-align:center;">КОНСОЛЬ УПРАВЛЕНИЯ</h3>
-        <div class="menu-grid">
-            <div class="menu-item">🌙 Осколки</div>
-            <div class="menu-item">✨ Подписка</div>
-            <div class="menu-item">📋 Задания</div>
-            <div class="menu-item">🎟 Промокоды</div>
-            <div class="menu-item">👤 Персонаж</div>
-            <div class="menu-item">💰 Цены</div>
+            
+            <div id="btn-admin" class="menu-item btn-adm btn-hidden">Админка</div>
+            <div id="btn-console" class="menu-item btn-con btn-hidden">Консоль</div>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-btn" onclick="goBack()"><span>◀</span> Назад</div>
-        <div class="nav-btn" onclick="showView('main-screen')"><span>🏠</span> Домой</div>
+        <div class="nav-btn"><span>◀</span> Назад</div>
+        <div class="nav-btn"><span>🏠</span> Домой</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+
         const OWNER_ID = 8287041036;
 
-        async function init() {
+        async function initApp() {
             const user = tg.initDataUnsafe?.user || { id: 0, first_name: "User" };
-            const uName = document.getElementById('u-name');
-            const uId = document.getElementById('u-id');
-            const uShards = document.getElementById('u-shards');
+            const nameElem = document.getElementById('u-name');
+            const idElem = document.getElementById('u-id');
+            const shardsElem = document.getElementById('u-shards');
 
-            // 1. Проверка на Овнера
-            if (user.id === OWNER_ID) {
-                uName.innerText = "Owner";
-                uName.className = "ultra-nick"; // Включаем перелив
-                uId.innerText = "ID: " + OWNER_ID;
-                uShards.innerText = "∞";
-                
-                // ПОКАЗЫВАЕМ 9 и 10 КНОПКИ
-                document.getElementById('btn-admin').style.display = 'flex';
-                document.getElementById('btn-console').style.display = 'flex';
-            } else {
-                uName.innerText = user.first_name;
-                uId.innerText = "ID: " + user.id;
-                // Тут будет логика загрузки из базы для обычных юзеров
+            nameElem.innerText = user.first_name;
+            idElem.innerText = "ID: " + user.id;
+
+            // Запрос к серверу для получения роли (админ или нет)
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tg_id: user.id, name: user.first_name })
+                });
+                const userData = await res.json();
+
+                // 1. ЛОГИКА ОВНЕРА (Видит всё)
+                if (user.id === OWNER_ID) {
+                    nameElem.className = "ultra-nick";
+                    shardsElem.innerText = "∞";
+                    document.getElementById('btn-admin').style.display = 'flex';
+                    document.getElementById('btn-console').style.display = 'flex';
+                } 
+                // 2. ЛОГИКА АДМИНА (Видит только Админку)
+                else if (userData.role === 'admin') {
+                    shardsElem.innerText = userData.moon_shards;
+                    document.getElementById('btn-admin').style.display = 'flex';
+                    // Консоль (btn-console) остается скрытой
+                } 
+                // 3. ОБЫЧНЫЙ ЮЗЕР
+                else {
+                    shardsElem.innerText = userData.moon_shards;
+                }
+
+            } catch (e) {
+                console.error("Auth error");
             }
         }
 
-        function showView(id) {
-            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function goBack() { showView('main-screen'); }
-
-        init();
+        initApp();
     </script>
 </body>
 </html>
