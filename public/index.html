@@ -3,43 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Moon Project</title>
+    <title>Anime AI 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background-color: #05010a; color: white; font-family: sans-serif; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+        body {
+            background-color: #05010a;
+            color: white;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
         /* ЭКРАН ЗАГРУЗКИ */
         #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #05010a;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; }
-        .version { position: absolute; bottom: 30px; font-size: 12px; color: #333; letter-spacing: 2px; }
+        .disclaimer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 10px;
+            color: #444;
+            text-transform: uppercase;
+        }
 
-        /* ТА САМАЯ ЛУНА С ПУЛЬСАЦИЕЙ */
-        .moon-img {
-            width: 130px; height: 130px;
+        .version {
+            position: absolute;
+            bottom: 30px;
+            font-size: 12px;
+            color: #333;
+            letter-spacing: 1px;
+        }
+
+        /* ПУЛЬСИРУЮЩАЯ ЛУНА */
+        .pulse-moon {
+            width: 120px;
+            height: 120px;
             background: url('https://w7.pngwing.com/pngs/311/847/png-transparent-moon-moon-astronomical-object-full-moon-sphere.png') no-repeat center;
             background-size: contain;
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
-            animation: pulse 2s infinite ease-in-out;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+            animation: moon-pulse 2s infinite ease-in-out;
             margin-bottom: 20px;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); }
-            50% { transform: scale(1.1); filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.5)); }
-            100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); }
+        @keyframes moon-pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.5)); }
+            100% { transform: scale(1); opacity: 0.8; }
         }
 
-        .load-text { font-size: 14px; color: #aaa; letter-spacing: 3px; text-transform: uppercase; }
+        .loading-text {
+            font-size: 14px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
 
-        /* ИНТЕРФЕЙС (СКРЫТ) */
-        #main-app { display: none; padding: 20px; height: 100vh; box-sizing: border-box; }
+        /* ИНТЕРФЕЙС ПРИЛОЖЕНИЯ */
+        #app-content {
+            display: none;
+            padding: 20px;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
         .header { display: flex; justify-content: space-between; margin-bottom: 25px; }
         
-        /* НИК ULTRA */
         .ultra-nick {
             font-size: 22px; font-weight: bold;
             background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5);
@@ -47,102 +89,107 @@
             animation: shine 3s linear infinite;
         }
         @keyframes shine { to { background-position: 200% center; } }
-        
-        .regular-nick { font-size: 22px; font-weight: bold; }
-        .user-id { color: #555; font-size: 12px; }
-        .balance { font-size: 26px; display: flex; align-items: center; gap: 8px; }
 
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .item { background: #120520; border: 1px solid #2d1b4d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 13px; }
-        
-        /* КНОПКИ ПРАВ */
+        .regular-nick { font-size: 22px; font-weight: bold; }
+        .user-id { color: #555; font-size: 12px; margin-top: 4px; }
+        .balance { display: flex; align-items: center; font-size: 26px; gap: 8px; color: #ffcc00; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex-grow: 1; }
+        .menu-item {
+            background: #120520; border: 1px solid #2d1b4d; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            text-transform: uppercase; font-weight: bold; font-size: 13px;
+            cursor: pointer; height: 70px;
+        }
+
         .btn-adm { border-color: #00bcd4; color: #00bcd4; display: none; }
         .btn-con { border-color: #e91e63; color: #e91e63; display: none; }
 
-        .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; display: flex; border-top: 1px solid #1a0b35; background: #05010a; }
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
+            display: flex; border-top: 1px solid #1a0b35; background: #05010a;
+        }
         .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; color: #aaa; font-weight: bold; text-transform: uppercase; }
+        .nav-btn:first-child { border-right: 1px solid #1a0b35; }
     </style>
 </head>
 <body>
 
     <div id="loading-screen">
         <div class="disclaimer">все персонажи вымышлены</div>
-        <div class="moon-img"></div>
-        <div class="load-text">загрузка мира....</div>
+        <div class="pulse-moon"></div>
+        <div class="loading-text">загрузка мира....</div>
         <div class="version">версия обновления 1.0.1</div>
     </div>
 
-    <div id="main-app">
+    <div id="app-content">
         <div class="header">
             <div>
-                <div id="user-name" class="regular-nick">---</div>
-                <div id="user-id-disp" class="user-id">ID: ---</div>
+                <div id="u-name" class="regular-nick">---</div>
+                <div id="u-id" class="user-id">ID: ---</div>
             </div>
-            <div class="balance">🌙 <span id="user-shards">0</span></div>
+            <div class="balance">🌙 <span id="u-shards">0</span></div>
         </div>
 
         <div class="menu-grid">
-            <div class="item">Чаты</div>
-            <div class="item">Персонажи</div>
-            <div class="item">Ежедневка</div>
-            <div class="item">Задания</div>
-            <div class="item">Магазин</div>
-            <div class="item">Промокоды</div>
-            <div class="item">Профиль</div>
-            <div class="item">Настройки</div>
-            <div id="adm-btn" class="item btn-adm">Админка</div>
-            <div id="con-btn" class="item btn-con">Консоль</div>
+            <div class="menu-item">Чаты</div>
+            <div class="menu-item">Персонажи</div>
+            <div class="menu-item">Ежедневка</div>
+            <div class="menu-item">Задания</div>
+            <div class="menu-item">Магазин</div>
+            <div class="menu-item">Промокоды</div>
+            <div class="menu-item">Профиль</div>
+            <div class="menu-item">Настройки</div>
+            <div id="btn-adm" class="menu-item btn-adm">Админка</div>
+            <div id="btn-con" class="menu-item btn-con">Консоль</div>
         </div>
 
-        <div class="nav">
-            <div class="nav-btn" style="border-right: 1px solid #1a0b35;">◀ Назад</div>
+        <div class="bottom-nav">
+            <div class="nav-btn">◀ Назад</div>
             <div class="nav-btn">🏠 Домой</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const OWNER_ID = 8287041036;
         tg.expand();
+        const OWNER_ID = 8287041036;
 
         async function init() {
             const user = tg.initDataUnsafe?.user || { id: 0, first_name: "User" };
             
             try {
                 // Имитация поиска в базе
-                const response = await fetch('/api/auth', {
+                const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ tg_id: user.id })
                 });
-                const data = await response.json();
+                const data = await res.json();
 
-                // Применяем данные
-                const nameDisplay = document.getElementById('user-name');
+                const nameDisplay = document.getElementById('u-name');
                 nameDisplay.innerText = user.first_name;
-                document.getElementById('user-id-disp').innerText = "ID: " + user.id;
+                document.getElementById('u-id').innerText = "ID: " + user.id;
 
                 if (user.id === OWNER_ID) {
                     nameDisplay.className = "ultra-nick";
-                    document.getElementById('user-shards').innerText = "∞";
-                    document.getElementById('adm-btn').style.display = "flex";
-                    document.getElementById('con-btn').style.display = "flex";
+                    document.getElementById('u-shards').innerText = "∞";
+                    document.getElementById('btn-adm').style.display = "flex";
+                    document.getElementById('btn-con').style.display = "flex";
                 } else {
-                    document.getElementById('user-shards').innerText = data.shards || 0;
-                    if (data.role === 'admin') {
-                        document.getElementById('adm-btn').style.display = "flex";
-                    }
+                    document.getElementById('u-shards').innerText = data.shards || 0;
+                    if (data.role === 'admin') document.getElementById('btn-adm').style.display = "flex";
                 }
 
-                // Скрываем загрузку только после того, как "база ответила"
+                // Убираем загрузку после ответа базы
                 document.getElementById('loading-screen').style.display = "none";
-                document.getElementById('main-app').style.display = "block";
+                document.getElementById('app-content').style.display = "flex";
 
             } catch (e) {
-                // Если база лежит, всё равно пускаем через секунду
+                // Если база не ответила - пускаем через задержку
                 setTimeout(() => {
                     document.getElementById('loading-screen').style.display = "none";
-                    document.getElementById('main-app').style.display = "block";
+                    document.getElementById('app-content').style.display = "flex";
                 }, 1500);
             }
         }
