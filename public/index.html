@@ -2,20 +2,21 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Anime AI 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
+        /* ЗАЩИТА ОТ СВАЙПА И БАЗОВЫЕ НАСТРОЙКИ */
+        html, body {
             background-color: #05010a;
             color: white;
             font-family: sans-serif;
             margin: 0;
             padding: 0;
             height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            width: 100vw;
+            overflow: hidden; /* Защита от скролла */
+            touch-action: none; /* Защита от свайпа вниз (pull-to-refresh) */
         }
 
         /* ЭКРАН ЗАГРУЗКИ */
@@ -23,7 +24,7 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #05010a;
-            z-index: 9999;
+            z-index: 10000;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -31,27 +32,19 @@
         }
 
         .disclaimer {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 10px;
-            color: #444;
-            text-transform: uppercase;
+            position: absolute; top: 20px; right: 20px;
+            font-size: 10px; color: #444; text-transform: uppercase;
         }
 
         .version {
-            position: absolute;
-            bottom: 30px;
-            font-size: 12px;
-            color: #333;
-            letter-spacing: 1px;
+            position: absolute; bottom: 30px;
+            font-size: 12px; color: #333; letter-spacing: 2px;
         }
 
         /* ПУЛЬСИРУЮЩАЯ ЛУНА */
         .pulse-moon {
-            width: 120px;
-            height: 120px;
-            background: url('https://w7.pngwing.com/pngs/311/847/png-transparent-moon-moon-astronomical-object-full-moon-sphere.png') no-repeat center;
+            width: 120px; height: 120px;
+            background: url('https://i.postimg.cc/9F4Pz787/moon-full.png') no-repeat center;
             background-size: contain;
             filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
             animation: moon-pulse 2s infinite ease-in-out;
@@ -59,29 +52,27 @@
         }
 
         @keyframes moon-pulse {
-            0% { transform: scale(1); opacity: 0.8; }
+            0% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); }
             50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.5)); }
-            100% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); }
         }
 
         .loading-text {
-            font-size: 14px;
-            color: #aaa;
-            text-transform: uppercase;
-            letter-spacing: 3px;
+            font-size: 14px; color: #aaa; text-transform: uppercase; letter-spacing: 4px;
         }
 
         /* ИНТЕРФЕЙС ПРИЛОЖЕНИЯ */
         #app-content {
             display: none;
             padding: 20px;
-            flex-direction: column;
-            height: 100vh;
             box-sizing: border-box;
+            height: 100vh;
+            flex-direction: column;
         }
 
         .header { display: flex; justify-content: space-between; margin-bottom: 25px; }
-        
+
+        /* ULTRA НИК (ДЛЯ ТЕБЯ) */
         .ultra-nick {
             font-size: 22px; font-weight: bold;
             background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5);
@@ -99,7 +90,7 @@
             background: #120520; border: 1px solid #2d1b4d; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             text-transform: uppercase; font-weight: bold; font-size: 13px;
-            cursor: pointer; height: 70px;
+            height: 70px;
         }
 
         .btn-adm { border-color: #00bcd4; color: #00bcd4; display: none; }
@@ -110,7 +101,6 @@
             display: flex; border-top: 1px solid #1a0b35; background: #05010a;
         }
         .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; color: #aaa; font-weight: bold; text-transform: uppercase; }
-        .nav-btn:first-child { border-right: 1px solid #1a0b35; }
     </style>
 </head>
 <body>
@@ -145,7 +135,7 @@
         </div>
 
         <div class="bottom-nav">
-            <div class="nav-btn">◀ Назад</div>
+            <div class="nav-btn" style="border-right: 1px solid #1a0b35;">◀ Назад</div>
             <div class="nav-btn">🏠 Домой</div>
         </div>
     </div>
@@ -153,13 +143,16 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        // Твоя защита от закрытия свайпом
+        tg.enableClosingConfirmation();
+
         const OWNER_ID = 8287041036;
 
         async function init() {
             const user = tg.initDataUnsafe?.user || { id: 0, first_name: "User" };
             
             try {
-                // Имитация поиска в базе
+                // Имитация поиска в базе данных
                 const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -181,16 +174,17 @@
                     if (data.role === 'admin') document.getElementById('btn-adm').style.display = "flex";
                 }
 
-                // Убираем загрузку после ответа базы
-                document.getElementById('loading-screen').style.display = "none";
-                document.getElementById('app-content').style.display = "flex";
-
-            } catch (e) {
-                // Если база не ответила - пускаем через задержку
+                // Скрываем луну только после получения ответа
                 setTimeout(() => {
                     document.getElementById('loading-screen').style.display = "none";
                     document.getElementById('app-content').style.display = "flex";
-                }, 1500);
+                }, 1000);
+
+            } catch (e) {
+                setTimeout(() => {
+                    document.getElementById('loading-screen').style.display = "none";
+                    document.getElementById('app-content').style.display = "flex";
+                }, 1000);
             }
         }
 
