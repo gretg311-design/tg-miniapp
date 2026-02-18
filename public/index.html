@@ -1,97 +1,8 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Moon Project - Console</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        /* БАЗОВАЯ ЗАЩИТА И СТИЛЬ */
-        html, body {
-            background-color: #05010a; color: white; font-family: sans-serif;
-            margin: 0; padding: 0; height: 100vh; width: 100vw;
-            overflow: hidden; touch-action: none;
-        }
-
-        /* ЭКРАН ЗАГРУЗКИ */
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; }
-        .version { position: absolute; bottom: 30px; font-size: 12px; color: #333; letter-spacing: 2px; }
-        .moon-box {
-            width: 100px; height: 100px; border-radius: 50%;
-            background: radial-gradient(circle, #fff 0%, #ddd 70%, #888 100%);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-            animation: moon-pulse 2s infinite ease-in-out; margin-bottom: 25px;
-        }
-        @keyframes moon-pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
-            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 255, 255, 0.7); }
-        }
-        .loading-text { font-size: 14px; color: #aaa; text-transform: uppercase; letter-spacing: 4px; }
-
-        /* ИНТЕРФЕЙС ПРИЛОЖЕНИЯ */
-        #app-content { display: none; padding: 20px; height: 100vh; box-sizing: border-box; flex-direction: column; }
-        .header { display: flex; justify-content: space-between; margin-bottom: 25px; }
-        .ultra-nick {
-            font-size: 22px; font-weight: bold;
-            background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5);
-            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
-        }
-        @keyframes shine { to { background-position: 200% center; } }
-        .user-id { color: #555; font-size: 12px; margin-top: 4px; }
-        .balance { font-size: 26px; color: #ffcc00; display: flex; align-items: center; gap: 8px; }
-
-        /* СЕТКА МЕНЮ */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .menu-item {
-            background: #120520; border: 1px solid #2d1b4d; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            text-transform: uppercase; font-weight: bold; font-size: 12px; height: 70px;
-            cursor: pointer; transition: 0.2s;
-        }
-        .btn-adm { border-color: #00bcd4; color: #00bcd4; display: none; }
-        .btn-con { border-color: #e91e63; color: #e91e63; display: none; }
-
-        /* МОДАЛЬНОЕ ОКНО КОНСОЛИ */
-        #console-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 1, 10, 0.95); z-index: 10001; padding: 20px; box-sizing: border-box;
-            flex-direction: column;
-        }
-        .modal-title { font-size: 20px; font-weight: bold; color: #e91e63; text-transform: uppercase; margin-bottom: 30px; text-align: center; }
-        .console-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .console-btn {
-            background: #1a0b35; border: 1px solid #e91e63; border-radius: 10px;
-            height: 60px; display: flex; align-items: center; justify-content: center;
-            font-size: 11px; text-transform: uppercase; font-weight: bold; color: white;
-        }
-        .close-console { margin-top: auto; text-align: center; color: #555; text-transform: uppercase; font-size: 12px; padding: 20px; }
-
-        /* НАВИГАЦИЯ */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
-            display: flex; border-top: 1px solid #1a0b35; background: #05010a;
-        }
-        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; color: #aaa; font-weight: bold; text-transform: uppercase; }
-    </style>
-</head>
-<body>
-
-    <div id="loading-screen">
-        <div class="disclaimer">все персонажи вымышлены</div>
-        <div class="moon-box"></div>
-        <div class="loading-text">загрузка мира....</div>
-        <div class="version">версия обновления 1.0.1</div>
-    </div>
-
     <div id="console-modal">
         <div class="modal-title">Панель Создателя</div>
-        <div class="console-grid">
-            <div class="console-btn" onclick="alert('Осколки')">Осколки</div>
+        
+        <div id="console-main-grid" class="console-grid">
+            <div class="console-btn" onclick="showShardManager()">Осколки</div>
             <div class="console-btn" onclick="alert('Подписки')">Подписки</div>
             <div class="console-btn" onclick="alert('Персонаж')">Персонаж</div>
             <div class="console-btn" onclick="alert('Цены')">Цены</div>
@@ -99,70 +10,17 @@
             <div class="console-btn" onclick="alert('Промокоды')">Промокоды</div>
             <div class="console-btn" onclick="alert('Задания')">Задания</div>
         </div>
-        <div class="close-console" onclick="closeConsole()">[ Назад в меню ]</div>
-    </div>
 
-    <div id="app-content">
-        <div class="header">
-            <div>
-                <div id="u-name" class="regular-nick">---</div>
-                <div id="u-id" class="user-id">ID: ---</div>
-            </div>
-            <div class="balance">🌙 <span id="u-shards">0</span></div>
-        </div>
-
-        <div class="menu-grid">
-            <div class="menu-item">Чаты</div>
-            <div class="menu-item">Персонажи</div>
-            <div class="menu-item">Ежедневка</div>
-            <div class="menu-item">Задания</div>
-            <div class="menu-item">Магазин</div>
-            <div class="menu-item">Промокоды</div>
-            <div class="menu-item">Профиль</div>
-            <div class="menu-item">Настройки</div>
-            <div id="btn-adm" class="menu-item btn-adm">Админка</div>
-            <div id="btn-con" class="menu-item btn-con" onclick="openConsole()">Консоль</div>
-        </div>
-
-        <div class="bottom-nav">
-            <div class="nav-btn" style="border-right: 1px solid #1a0b35;">◀ Назад</div>
-            <div class="nav-btn">🏠 Домой</div>
-        </div>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-
-        const OWNER_ID = 8287041036;
-
-        function openConsole() { document.getElementById('console-modal').style.display = 'flex'; }
-        function closeConsole() { document.getElementById('console-modal').style.display = 'none'; }
-
-        async function init() {
-            const user = tg.initDataUnsafe?.user || { id: 0, first_name: "User" };
+        <div id="shard-manager" style="display: none; flex-direction: column; gap: 15px;">
+            <input type="number" id="target-id" placeholder="Введите Telegram ID" class="console-input">
+            <input type="number" id="shard-amount" placeholder="Количество осколков" class="console-input">
             
-            // Настройка данных
-            const nameDisp = document.getElementById('u-name');
-            nameDisp.innerText = user.first_name;
-            document.getElementById('u-id').innerText = "ID: " + user.id;
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="console-btn action-btn" onclick="manageShards('add')" style="border-color: #4caf50; color: #4caf50;">Выдать</div>
+                <div class="console-btn action-btn" onclick="manageShards('take')" style="border-color: #f44336; color: #f44336;">Забрать</div>
+            </div>
+            <div class="console-btn" onclick="backToConsole()" style="border-color: #555; margin-top: 10px;">Назад</div>
+        </div>
 
-            if (user.id === OWNER_ID) {
-                nameDisp.className = "ultra-nick";
-                document.getElementById('u-shards').innerText = "∞";
-                document.getElementById('btn-adm').style.display = "flex";
-                document.getElementById('btn-con').style.display = "flex";
-            }
-
-            // Имитация загрузки из базы
-            setTimeout(() => {
-                document.getElementById('loading-screen').style.display = "none";
-                document.getElementById('app-content').style.display = "flex";
-            }, 1200);
-        }
-
-        init();
-    </script>
-</body>
-</html>
+        <div id="console-close-label" class="close-console" onclick="closeConsole()">[ Закрыть консоль ]</div>
+    </div>
