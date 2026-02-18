@@ -3,77 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Moon Project</title>
+    <title>Moon Project - Console</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ПОЛНАЯ ЗАЩИТА ОТ СВАЙПА */
+        /* БАЗОВАЯ ЗАЩИТА И СТИЛЬ */
         html, body {
-            background-color: #05010a;
-            color: white;
-            font-family: sans-serif;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            touch-action: none;
+            background-color: #05010a; color: white; font-family: sans-serif;
+            margin: 0; padding: 0; height: 100vh; width: 100vw;
+            overflow: hidden; touch-action: none;
         }
 
         /* ЭКРАН ЗАГРУЗКИ */
         #loading-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #05010a;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-
-        .disclaimer {
-            position: absolute; top: 20px; right: 20px;
-            font-size: 10px; color: #444; text-transform: uppercase;
-        }
-
-        .version {
-            position: absolute; bottom: 30px;
-            font-size: 12px; color: #333; letter-spacing: 2px;
-        }
-
-        /* ПУЛЬСИРУЮЩАЯ ЛУНА (SVG КОДОМ - ВСЕГДА РАБОТАЕТ) */
+        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; }
+        .version { position: absolute; bottom: 30px; font-size: 12px; color: #333; letter-spacing: 2px; }
         .moon-box {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
+            width: 100px; height: 100px; border-radius: 50%;
             background: radial-gradient(circle, #fff 0%, #ddd 70%, #888 100%);
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-            animation: moon-pulse 2s infinite ease-in-out;
-            margin-bottom: 25px;
+            animation: moon-pulse 2s infinite ease-in-out; margin-bottom: 25px;
         }
-
         @keyframes moon-pulse {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
-            50% { transform: scale(1.15); box-shadow: 0 0 50px rgba(255, 255, 255, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
+            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 255, 255, 0.7); }
         }
-
-        .loading-text {
-            font-size: 14px; color: #aaa; text-transform: uppercase; letter-spacing: 4px;
-        }
+        .loading-text { font-size: 14px; color: #aaa; text-transform: uppercase; letter-spacing: 4px; }
 
         /* ИНТЕРФЕЙС ПРИЛОЖЕНИЯ */
-        #app-content {
-            display: none;
-            padding: 20px;
-            box-sizing: border-box;
-            height: 100vh;
-            flex-direction: column;
-        }
-
+        #app-content { display: none; padding: 20px; height: 100vh; box-sizing: border-box; flex-direction: column; }
         .header { display: flex; justify-content: space-between; margin-bottom: 25px; }
-
-        /* ULTRA НИК */
         .ultra-nick {
             font-size: 22px; font-weight: bold;
             background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5);
@@ -81,22 +42,36 @@
             animation: shine 3s linear infinite;
         }
         @keyframes shine { to { background-position: 200% center; } }
-
-        .regular-nick { font-size: 22px; font-weight: bold; }
         .user-id { color: #555; font-size: 12px; margin-top: 4px; }
-        .balance { display: flex; align-items: center; font-size: 26px; gap: 8px; color: #ffcc00; }
+        .balance { font-size: 26px; color: #ffcc00; display: flex; align-items: center; gap: 8px; }
 
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex-grow: 1; }
+        /* СЕТКА МЕНЮ */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .menu-item {
             background: #120520; border: 1px solid #2d1b4d; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            text-transform: uppercase; font-weight: bold; font-size: 13px;
-            height: 70px;
+            text-transform: uppercase; font-weight: bold; font-size: 12px; height: 70px;
+            cursor: pointer; transition: 0.2s;
         }
-
         .btn-adm { border-color: #00bcd4; color: #00bcd4; display: none; }
         .btn-con { border-color: #e91e63; color: #e91e63; display: none; }
 
+        /* МОДАЛЬНОЕ ОКНО КОНСОЛИ */
+        #console-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 1, 10, 0.95); z-index: 10001; padding: 20px; box-sizing: border-box;
+            flex-direction: column;
+        }
+        .modal-title { font-size: 20px; font-weight: bold; color: #e91e63; text-transform: uppercase; margin-bottom: 30px; text-align: center; }
+        .console-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .console-btn {
+            background: #1a0b35; border: 1px solid #e91e63; border-radius: 10px;
+            height: 60px; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; text-transform: uppercase; font-weight: bold; color: white;
+        }
+        .close-console { margin-top: auto; text-align: center; color: #555; text-transform: uppercase; font-size: 12px; padding: 20px; }
+
+        /* НАВИГАЦИЯ */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
             display: flex; border-top: 1px solid #1a0b35; background: #05010a;
@@ -113,6 +88,20 @@
         <div class="version">версия обновления 1.0.1</div>
     </div>
 
+    <div id="console-modal">
+        <div class="modal-title">Панель Создателя</div>
+        <div class="console-grid">
+            <div class="console-btn" onclick="alert('Осколки')">Осколки</div>
+            <div class="console-btn" onclick="alert('Подписки')">Подписки</div>
+            <div class="console-btn" onclick="alert('Персонаж')">Персонаж</div>
+            <div class="console-btn" onclick="alert('Цены')">Цены</div>
+            <div class="console-btn" onclick="alert('Назначить админа')">Назначить админа</div>
+            <div class="console-btn" onclick="alert('Промокоды')">Промокоды</div>
+            <div class="console-btn" onclick="alert('Задания')">Задания</div>
+        </div>
+        <div class="close-console" onclick="closeConsole()">[ Назад в меню ]</div>
+    </div>
+
     <div id="app-content">
         <div class="header">
             <div>
@@ -123,16 +112,16 @@
         </div>
 
         <div class="menu-grid">
-            <div class="item menu-item">Чаты</div>
-            <div class="item menu-item">Персонажи</div>
-            <div class="item menu-item">Ежедневка</div>
-            <div class="item menu-item">Задания</div>
-            <div class="item menu-item">Магазин</div>
-            <div class="item menu-item">Промокоды</div>
-            <div class="item menu-item">Профиль</div>
-            <div class="item menu-item">Настройки</div>
+            <div class="menu-item">Чаты</div>
+            <div class="menu-item">Персонажи</div>
+            <div class="menu-item">Ежедневка</div>
+            <div class="menu-item">Задания</div>
+            <div class="menu-item">Магазин</div>
+            <div class="menu-item">Промокоды</div>
+            <div class="menu-item">Профиль</div>
+            <div class="menu-item">Настройки</div>
             <div id="btn-adm" class="menu-item btn-adm">Админка</div>
-            <div id="btn-con" class="menu-item btn-con">Консоль</div>
+            <div id="btn-con" class="menu-item btn-con" onclick="openConsole()">Консоль</div>
         </div>
 
         <div class="bottom-nav">
@@ -144,49 +133,33 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.enableClosingConfirmation(); // Защита от случайного закрытия свайпом
+        tg.enableClosingConfirmation();
 
         const OWNER_ID = 8287041036;
+
+        function openConsole() { document.getElementById('console-modal').style.display = 'flex'; }
+        function closeConsole() { document.getElementById('console-modal').style.display = 'none'; }
 
         async function init() {
             const user = tg.initDataUnsafe?.user || { id: 0, first_name: "User" };
             
-            try {
-                // Пытаемся найти юзера в базе
-                const res = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ tg_id: user.id })
-                });
-                const data = await res.json();
+            // Настройка данных
+            const nameDisp = document.getElementById('u-name');
+            nameDisp.innerText = user.first_name;
+            document.getElementById('u-id').innerText = "ID: " + user.id;
 
-                const nameDisplay = document.getElementById('u-name');
-                nameDisplay.innerText = user.first_name;
-                document.getElementById('u-id').innerText = "ID: " + user.id;
-
-                if (user.id === OWNER_ID) {
-                    nameDisplay.className = "ultra-nick";
-                    document.getElementById('u-shards').innerText = "∞";
-                    document.getElementById('btn-adm').style.display = "flex";
-                    document.getElementById('btn-con').style.display = "flex";
-                } else {
-                    document.getElementById('u-shards').innerText = data.shards || 0;
-                    if (data.role === 'admin') document.getElementById('btn-adm').style.display = "flex";
-                }
-
-                // Скрываем загрузку
-                setTimeout(() => {
-                    document.getElementById('loading-screen').style.display = "none";
-                    document.getElementById('app-content').style.display = "flex";
-                }, 1200);
-
-            } catch (e) {
-                // Если база не отвечает, всё равно пускаем через задержку
-                setTimeout(() => {
-                    document.getElementById('loading-screen').style.display = "none";
-                    document.getElementById('app-content').style.display = "flex";
-                }, 1500);
+            if (user.id === OWNER_ID) {
+                nameDisp.className = "ultra-nick";
+                document.getElementById('u-shards').innerText = "∞";
+                document.getElementById('btn-adm').style.display = "flex";
+                document.getElementById('btn-con').style.display = "flex";
             }
+
+            // Имитация загрузки из базы
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = "none";
+                document.getElementById('app-content').style.display = "flex";
+            }, 1200);
         }
 
         init();
