@@ -12,7 +12,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 
 // ВСТАВЬ СВОЮ ССЫЛКУ ИЗ MONGODB ATLAS НИЖЕ
-const MONGO_URI = "ВСТАВЬ_СЮДА_СВОЮ_MONGO_URL";
+const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
 // Схема пользователя (автоматически создает структуру в базе)
 const userSchema = new mongoose.Schema({
