@@ -6,14 +6,14 @@
     <title>Moon Project</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* БАЗА И ЗАЩИТА */
+        /* БАЗА */
         html, body {
             background-color: #05010a; color: white; font-family: sans-serif;
             margin: 0; padding: 0; height: 100vh; width: 100vw;
             overflow: hidden; touch-action: none;
         }
 
-        /* ЭКРАН ЗАГРУЗКИ */
+        /* ЗАГРУЗКА */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -31,37 +31,25 @@
 
         /* ИНТЕРФЕЙС */
         #app-content { display: none; padding: 20px; box-sizing: border-box; height: 100vh; flex-direction: column; }
-        
         .user-block { display: flex; align-items: center; gap: 10px; }
-        .user-info-text { display: flex; flex-direction: column; }
-
-        /* НЕОНОВЫЕ НИКИ И ТЕГИ */
-        .nick-default { font-size: 20px; font-weight: bold; color: white; }
         
-        /* Цвета подписок */
-        .sub-tag {
-            font-size: 9px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;
-            font-weight: 800; letter-spacing: 1px; margin-left: 5px; vertical-align: middle;
-        }
+        /* КРАСИВЫЕ НИКИ */
+        .nick-default { font-size: 20px; font-weight: bold; color: white; }
+        .sub-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 800; margin-left: 8px; }
 
-        /* PREMIUM - Синий неон */
-        .nick-premium { color: #00d2ff; text-shadow: 0 0 10px #00d2ff; font-weight: bold; font-size: 20px; }
+        .nick-premium { color: #00d2ff; text-shadow: 0 0 10px #00d2ff; }
         .tag-premium { background: #00d2ff; color: black; box-shadow: 0 0 10px #00d2ff; }
 
-        /* PRO - Зеленый неон */
-        .nick-pro { color: #39ff14; text-shadow: 0 0 10px #39ff14; font-weight: bold; font-size: 20px; }
+        .nick-pro { color: #39ff14; text-shadow: 0 0 10px #39ff14; }
         .tag-pro { background: #39ff14; color: black; box-shadow: 0 0 10px #39ff14; }
 
-        /* VIP - Золотой неон */
-        .nick-vip { color: #ffcc00; text-shadow: 0 0 10px #ffcc00; font-weight: bold; font-size: 20px; }
+        .nick-vip { color: #ffcc00; text-shadow: 0 0 10px #ffcc00; }
         .tag-vip { background: #ffcc00; color: black; box-shadow: 0 0 10px #ffcc00; }
 
-        /* ULTRA / OWNER - Фиолетовый градиент */
         .nick-ultra {
-            font-size: 22px; font-weight: 900;
             background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5);
             background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite; filter: drop-shadow(0 0 5px rgba(188, 66, 245, 0.5));
+            animation: shine 3s linear infinite; font-weight: 900; font-size: 22px;
         }
         .tag-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4); color: white; box-shadow: 0 0 15px #bc42f5; }
 
@@ -69,7 +57,6 @@
 
         .balance { font-size: 26px; color: #ffcc00; display: flex; align-items: center; gap: 8px; }
 
-        /* СЕТКА */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
         .menu-item { background: #120520; border: 1px solid #2d1b4d; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 11px; height: 65px; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; display: none; }
@@ -82,7 +69,6 @@
         .console-input { background: #120520; border: 1px solid #e91e63; border-radius: 8px; padding: 15px; color: white; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
         #shard-manager, #sub-manager { display: none; width: 100%; flex-direction: column; gap: 10px; }
 
-        /* НАВИГАЦИЯ */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; display: flex; border-top: 1px solid #1a0b35; background: #05010a; }
         .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; color: #aaa; font-weight: bold; text-transform: uppercase; font-size: 11px; }
     </style>
@@ -97,7 +83,7 @@
     </div>
 
     <div id="console-modal">
-        <h2 style="color:#e91e63; margin-bottom: 20px;">CONSOLE</h2>
+        <h2 style="color:#e91e63; margin-bottom: 20px;">SYSTEM CONSOLE</h2>
         <div id="con-main" class="console-grid">
             <div class="console-btn" onclick="openMenu('shard-manager')">Осколки</div>
             <div class="console-btn" onclick="openMenu('sub-manager')">Подписки</div>
@@ -107,13 +93,140 @@
             <div class="console-btn" onclick="alert('Промокоды')">Промокоды</div>
             <div class="console-btn" onclick="alert('Задания')">Задания</div>
         </div>
+
         <div id="shard-manager">
             <input type="number" id="sid" placeholder="TG ID" class="console-input">
             <input type="number" id="samt" placeholder="Количество" class="console-input">
             <div class="console-grid">
-                <div class="console-btn" onclick="manageShards('add')" style="border-color:#4caf50;">Выдать</div>
-                <div class="console-btn" onclick="manageShards('take')" style="border-color:#f44336;">Забрать</div>
+                <div class="console-btn" onclick="manageShards('add')" style="border-color:#4caf50; color:#4caf50;">Выдать</div>
+                <div class="console-btn" onclick="manageShards('take')" style="border-color:#f44336; color:#f44336;">Забрать</div>
             </div>
             <div class="console-btn" onclick="backToMain()" style="margin-top:10px; border-color:#555;">Назад</div>
         </div>
+
         <div id="sub-manager">
+            <input type="number" id="subid" placeholder="TG ID" class="console-input">
+            <div class="console-grid">
+                <div class="console-btn" onclick="giveSub('Premium')">Premium</div>
+                <div class="console-btn" onclick="giveSub('Pro')">Pro</div>
+                <div class="console-btn" onclick="giveSub('VIP')">VIP</div>
+                <div class="console-btn" onclick="giveSub('Ultra')">Ultra</div>
+            </div>
+            <div class="console-btn" onclick="giveSub('None')" style="margin-top:10px; border-color:#f44336; color:#f44336; width:100%;">Снять подписку</div>
+            <div class="console-btn" onclick="backToMain()" style="margin-top:10px; border-color:#555;">Назад</div>
+        </div>
+        <div onclick="toggleC(false)" style="margin-top:30px; color:#555;">[ ЗАКРЫТЬ ]</div>
+    </div>
+
+    <div id="app-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="user-block">
+                <div style="display:flex; flex-direction:column;">
+                    <div style="display:flex; align-items:center;">
+                        <span id="un" class="nick-default">---</span>
+                        <span id="sub-badge" style="display:none;"></span>
+                    </div>
+                    <div id="ui" style="font-size:10px; color:#555; margin-top:2px;">ID: ---</div>
+                </div>
+            </div>
+            <div class="balance">🌙 <span id="us">0</span></div>
+        </div>
+
+        <div class="menu-grid">
+            <div class="menu-item">Чаты</div><div class="menu-item">Персонажи</div>
+            <div class="menu-item">Ежедневка</div><div class="menu-item">Задания</div>
+            <div class="menu-item">Магазин</div><div class="menu-item">Промокоды</div>
+            <div class="menu-item">Профиль</div><div class="menu-item">Настройки</div>
+            <div id="btn-adm" class="menu-item btn-adm">Админка</div>
+            <div id="btn-con" class="menu-item btn-con" onclick="toggleC(true)">Консоль</div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-btn" style="border-right:1px solid #1a0b35;">◀ Назад</div>
+            <div class="nav-btn">🏠 Домой</div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        const OID = 8287041036;
+
+        function toggleC(s) { document.getElementById('console-modal').style.display = s ? 'flex' : 'none'; }
+        function openMenu(id) { document.getElementById('con-main').style.display = 'none'; document.getElementById(id).style.display = 'flex'; }
+        function backToMain() { document.getElementById('shard-manager').style.display = 'none'; document.getElementById('sub-manager').style.display = 'none'; document.getElementById('con-main').style.display = 'grid'; }
+
+        async function manageShards(act) {
+            const id = document.getElementById('sid').value;
+            const amt = document.getElementById('samt').value;
+            if(!id || !amt) return alert("Введите данные!");
+            const r = await fetch('/api/admin/manage-shards', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ owner_id: OID, target_id: id, amount: amt, action: act })
+            });
+            const d = await r.json(); alert(d.message);
+            if(id == tg.initDataUnsafe?.user?.id || id == OID) location.reload();
+        }
+
+        async function giveSub(type) {
+            const id = document.getElementById('subid').value;
+            if(!id) return alert("Введите ID!");
+            const r = await fetch('/api/admin/manage-sub', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ owner_id: OID, target_id: id, sub_type: type })
+            });
+            const d = await r.json(); alert(d.message);
+            if(id == tg.initDataUnsafe?.user?.id || id == OID) location.reload();
+        }
+
+        function showApp() {
+            document.getElementById('loading-screen').style.display = "none";
+            document.getElementById('app-content').style.display = "flex";
+        }
+
+        async function loadData(uid) {
+            try {
+                const r = await fetch('/api/user/get-data', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ tg_id: uid })
+                });
+                const d = await r.json();
+                
+                // Баланс
+                document.getElementById('us').innerText = (uid == OID) ? "∞" : (d.shards || 0);
+                
+                // Визуал ника
+                const nameElem = document.getElementById('un');
+                const badge = document.getElementById('sub-badge');
+                let sub = (uid == OID) ? "Ultra" : d.subscription;
+
+                if (sub && sub !== "None") {
+                    nameElem.className = "nick-" + sub.toLowerCase();
+                    badge.innerText = sub;
+                    badge.className = "sub-tag tag-" + sub.toLowerCase();
+                    badge.style.display = "inline-block";
+                }
+            } catch(e) { console.error("Load error"); }
+        }
+
+        window.onload = async () => {
+            // Аварийный таймер 2 секунды - луна уйдет в любом случае
+            setTimeout(showApp, 2000);
+
+            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
+            document.getElementById('un').innerText = user.first_name;
+            document.getElementById('ui').innerText = "ID: " + user.id;
+
+            await loadData(user.id);
+
+            if (user.id == OID) {
+                document.getElementById('btn-adm').style.display = "flex";
+                document.getElementById('btn-con').style.display = "flex";
+            }
+        };
+
+        document.addEventListener('touchmove', (e) => { if(window.scrollY === 0) e.preventDefault(); }, { passive: false });
+    </script>
+</body>
+</html>
