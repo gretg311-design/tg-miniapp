@@ -6,40 +6,35 @@
     <title>Moon Project</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
         
-        /* ЗАГРУЗКА - ВСЁ ВЕРНУЛ */
+        /* ЗАГРУЗКА */
         #loading-screen { position: fixed; inset: 0; background: #05010a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; }
         .version-label { position: absolute; bottom: 30px; font-size: 12px; color: #333; letter-spacing: 3px; text-transform: uppercase; }
-        .moon { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #ddd, #888); box-shadow: 0 0 30px rgba(255,255,255,0.4); animation: pulse 2s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+        .moon { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #ddd, #888); box-shadow: 0 0 30px rgba(255,255,255,0.4); animation: p 2s infinite ease-in-out; }
+        @keyframes p { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
 
         /* ИНТЕРФЕЙС */
         #app { display: none; padding: 20px; height: 100vh; flex-direction: column; }
-        .nick-default { font-size: 20px; font-weight: bold; }
+        .nick-default { font-size: 20px; font-weight: bold; transition: 0.3s; }
         .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; font-weight: 900; font-size: 22px; filter: drop-shadow(0 0 5px #bc42f5); }
         @keyframes shine { to { background-position: 200%; } }
-        .sub-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #bc42f5; margin-left: 8px; font-weight: 800; text-transform: uppercase; }
+        .sub-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #bc42f5; margin-left: 8px; font-weight: 800; text-transform: uppercase; color: white; }
 
-        /* СЕТКА МЕНЮ - ВЕРНУЛ ВСЕ КНОПКИ */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
-        .menu-item { background: #120520; border: 1px solid #2d1b4d; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 11px; height: 65px; }
+        .menu-item { background: #120520; border: 1px solid #2d1b4d; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 11px; height: 65px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .btn-console { border-color: #e91e63; color: #e91e63; display: none; }
 
         /* КОНСОЛЬ */
         #console { display: none; position: fixed; inset: 0; background: rgba(5, 1, 10, 0.98); z-index: 10000; flex-direction: column; padding: 20px; overflow-y: auto; }
-        .console-header { color: #e91e63; text-align: center; letter-spacing: 4px; margin-bottom: 20px; }
         .in { background: #120520; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: white; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
         .btn { background: #1a0b35; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
         
-        #char-prev { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; display: none; margin-bottom: 10px; border: 1px solid #e91e63; }
-        .counter { font-size: 10px; color: #555; text-align: right; margin-top: -8px; margin-bottom: 10px; }
-
         /* НАВИГАЦИЯ */
         .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; display: flex; border-top: 1px solid #1a0b35; background: #05010a; }
-        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase; }
+        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #333; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -55,7 +50,7 @@
         <div style="display:flex; justify-content:space-between; align-items: center;">
             <div>
                 <div style="display:flex; align-items: center;">
-                    <span id="name" class="nick-default">User</span>
+                    <span id="name" class="nick-default">Загрузка...</span>
                     <span id="badge" class="sub-tag" style="display:none;"></span>
                 </div>
                 <div id="id-display" style="font-size:10px; color:#444; margin-top:4px;">ID: ---</div>
@@ -68,7 +63,7 @@
             <div class="menu-item">Ежедневка</div><div class="menu-item">Задания</div>
             <div class="menu-item">Магазин</div><div class="menu-item">Промокоды</div>
             <div class="menu-item">Профиль</div><div class="menu-item">Настройки</div>
-            <div class="menu-item btn-console" id="con-open" onclick="openC()">Консоль</div>
+            <div class="menu-item btn-console" id="con-open" onclick="document.getElementById('console').style.display='flex'">Консоль</div>
         </div>
 
         <div class="nav">
@@ -78,143 +73,95 @@
     </div>
 
     <div id="console">
-        <h2 class="console-header">SYSTEM TERMINAL</h2>
-        
-        <div id="m-main">
-            <div class="btn" onclick="v('m-shard')">Осколки</div>
-            <div class="btn" onclick="v('m-sub')">Подписки</div>
-            <div class="btn" onclick="v('m-char')">Персонаж</div>
-            <div class="btn" onclick="alert('Soon')" style="opacity: 0.5;">Цены</div>
-            <div class="btn" onclick="alert('Soon')" style="opacity: 0.5;">Админы</div>
-            <div class="btn" onclick="closeC()" style="border-color:#555; margin-top: 20px;">Выход</div>
+        <h2 style="color:#e91e63; text-align:center; letter-spacing:4px;">SYSTEM TERMINAL</h2>
+        <div id="c-list">
+            <div class="btn" onclick="openS('s-shards')">Осколки</div>
+            <div class="btn" onclick="openS('s-subs')">Подписки</div>
+            <div class="btn" onclick="openS('s-char')">Персонаж</div>
+            <div class="btn" onclick="document.getElementById('console').style.display='none'" style="border-color:#555; margin-top:20px;">Закрыть</div>
         </div>
 
-        <div id="m-shard" style="display:none;">
-            <input type="number" id="s-id" placeholder="Telegram ID" class="in">
-            <input type="number" id="s-val" placeholder="Количество" class="in">
+        <div id="s-shards" style="display:none;">
+            <input type="number" id="target-s" placeholder="Telegram ID" class="in">
+            <input type="number" id="amount-s" placeholder="Количество" class="in">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div class="btn" onclick="doShards('add')" style="border-color: #4caf50;">Дать</div>
-                <div class="btn" onclick="doShards('take')" style="border-color: #f44336;">Снять</div>
+                <div class="btn" onclick="admAction('shards', 'add')" style="border-color:green;">Дать</div>
+                <div class="btn" onclick="admAction('shards', 'take')" style="border-color:red;">Снять</div>
             </div>
-            <div class="btn" onclick="v('m-main')">Назад</div>
+            <div class="btn" onclick="openS('c-list')">Назад</div>
         </div>
 
-        <div id="m-sub" style="display:none;">
-            <input type="number" id="sub-id" placeholder="Telegram ID" class="in">
+        <div id="s-subs" style="display:none;">
+            <input type="number" id="target-sub" placeholder="Telegram ID" class="in">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                <div class="btn" onclick="doSub('Premium')">Premium</div>
-                <div class="btn" onclick="doSub('Pro')">Pro</div>
-                <div class="btn" onclick="doSub('VIP')">VIP</div>
-                <div class="btn" onclick="doSub('Ultra')">Ultra</div>
+                <div class="btn" onclick="admAction('sub', 'Premium')">Premium</div>
+                <div class="btn" onclick="admAction('sub', 'Ultra')">Ultra</div>
             </div>
-            <div class="btn" onclick="doSub('None')" style="border-color:red; color:red;">Снять подписку</div>
-            <div class="btn" onclick="v('m-main')">Назад</div>
-        </div>
-
-        <div id="m-char" style="display:none;">
-            <img id="char-prev">
-            <input type="file" id="f-char" accept="image/*" style="display:none;" onchange="preview(this)">
-            <div class="btn" onclick="document.getElementById('f-char').click()">📁 Загрузить фото</div>
-            <input type="text" id="c-name" placeholder="Имя персонажа" class="in">
-            <input type="number" id="c-age" placeholder="Возраст (18+)" class="in">
-            <textarea id="c-desc" placeholder="Описание (30 - 4000 симв.)" class="in" style="height:120px; resize:none;" oninput="countChar()"></textarea>
-            <div id="c-count" class="counter">0 / 4000</div>
-            <div class="btn" onclick="saveChar()" style="border-color: #4caf50;">Создать персонажа</div>
-            <div class="btn" onclick="v('m-main')">Назад</div>
+            <div class="btn" onclick="admAction('sub', 'None')" style="border-color:red;">Снять подписку</div>
+            <div class="btn" onclick="openS('c-list')">Назад</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const OID = 8287041036;
-        let charImg = "";
 
-        // ФИКС ЛУНЫ
-        setTimeout(() => {
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
-        }, 2500);
-
-        function openC() { document.getElementById('console').style.display = 'flex'; }
-        function closeC() { document.getElementById('console').style.display = 'none'; }
-        function v(id) {
-            ['m-main', 'm-shard', 'm-sub', 'm-char'].forEach(d => document.getElementById(d).style.display = 'none');
+        function openS(id) {
+            ['c-list', 's-shards', 's-subs'].forEach(el => document.getElementById(el).style.display = 'none');
             document.getElementById(id).style.display = 'block';
         }
 
-        function countChar() {
-            const l = document.getElementById('c-desc').value.length;
-            document.getElementById('c-count').innerText = l + " / 4000";
-            document.getElementById('c-count').style.color = l < 30 ? "red" : "#555";
-        }
+        async function admAction(type, val) {
+            const tid = (type === 'shards') ? document.getElementById('target-s').value : document.getElementById('target-sub').value;
+            const amt = document.getElementById('amount-s').value;
+            const route = (type === 'shards') ? '/api/admin/manage-shards' : '/api/admin/manage-sub';
+            const body = (type === 'shards') ? { owner_id: OID, target_id: tid, amount: amt, action: val } : { owner_id: OID, target_id: tid, sub_type: val };
 
-        function preview(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    charImg = e.target.result;
-                    document.getElementById('char-prev').src = charImg;
-                    document.getElementById('char-prev').style.display = 'block';
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        async function doShards(act) {
-            const tid = document.getElementById('s-id').value;
-            const amt = document.getElementById('s-val').value;
-            const r = await fetch('/api/admin/manage-shards', {
-                method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ owner_id: OID, target_id: tid, amount: amt, action: act })
-            });
-            const d = await r.json(); alert(d.message);
-            if(tid == OID || tid == tg.initDataUnsafe?.user?.id) location.reload();
-        }
-
-        async function doSub(type) {
-            const tid = document.getElementById('sub-id').value;
-            await fetch('/api/admin/manage-sub', {
-                method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ owner_id: OID, target_id: tid, sub_type: type })
-            });
-            alert("Статус обновлен");
-            if(tid == OID || tid == tg.initDataUnsafe?.user?.id) location.reload();
-        }
-
-        async function saveChar() {
-            const name = document.getElementById('c-name').value;
-            const age = document.getElementById('c-age').value;
-            const desc = document.getElementById('c-desc').value;
-            if(desc.length < 30) return alert("Описание слишком короткое!");
-            const r = await fetch('/api/admin/create-character', {
-                method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ owner_id: OID, name, age, description: desc, image: charImg })
-            });
-            const d = await r.json(); alert(d.message || d.error);
-            if(!d.error) v('m-main');
+            const r = await fetch(route, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+            const d = await r.json();
+            alert(d.message);
+            location.reload();
         }
 
         window.onload = async () => {
-            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
-            document.getElementById('id-display').innerText = "ID: " + user.id;
-            document.getElementById('name').innerText = user.first_name;
+            // Исчезновение луны
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+            }, 2000);
 
-            const res = await fetch('/api/user/get-data', {
-                method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ tg_id: user.id })
-            });
-            const data = await res.json();
-            
-            document.getElementById('shards').innerText = (user.id == OID) ? "∞" : data.shards;
-            
-            let s = (user.id == OID) ? "Ultra" : data.subscription;
-            if (s && s !== "None") {
-                document.getElementById('name').className = "nick-ultra";
-                document.getElementById('badge').innerText = s;
+            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
+            const uid = Number(user.id);
+
+            document.getElementById('name').innerText = user.first_name;
+            document.getElementById('id-display').innerText = "ID: " + uid;
+
+            // Если ты Овнер — показываем всё сразу, не дожидаясь базы
+            if (uid === OID) {
+                document.getElementById('con-open').style.display = 'flex';
+                document.getElementById('name').className = 'nick-ultra';
+                document.getElementById('badge').innerText = 'ULTRA';
                 document.getElementById('badge').style.display = 'inline-block';
+                document.getElementById('shards').innerText = '∞';
             }
 
-            if (user.id == OID) document.getElementById('con-open').style.display = 'flex';
+            try {
+                const r = await fetch('/api/user/get-data', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ tg_id: uid })
+                });
+                const d = await r.json();
+
+                if (uid !== OID) {
+                    document.getElementById('shards').innerText = d.shards || 0;
+                    if (d.subscription && d.subscription !== "None") {
+                        document.getElementById('name').className = 'nick-' + d.subscription.toLowerCase();
+                        document.getElementById('badge').innerText = d.subscription;
+                        document.getElementById('badge').style.display = 'inline-block';
+                    }
+                }
+            } catch (e) { console.error("Ошибка загрузки данных"); }
         };
 
         tg.expand();
