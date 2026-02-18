@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anime AI 18+</title>
+    <title>Moon Project</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ЗАЩИТА ОТ СВАЙПА И БАЗОВЫЕ НАСТРОЙКИ */
+        /* ПОЛНАЯ ЗАЩИТА ОТ СВАЙПА */
         html, body {
             background-color: #05010a;
             color: white;
@@ -15,8 +15,8 @@
             padding: 0;
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* Защита от скролла */
-            touch-action: none; /* Защита от свайпа вниз (pull-to-refresh) */
+            overflow: hidden;
+            touch-action: none;
         }
 
         /* ЭКРАН ЗАГРУЗКИ */
@@ -41,20 +41,21 @@
             font-size: 12px; color: #333; letter-spacing: 2px;
         }
 
-        /* ПУЛЬСИРУЮЩАЯ ЛУНА */
-        .pulse-moon {
-            width: 120px; height: 120px;
-            background: url('https://i.postimg.cc/9F4Pz787/moon-full.png') no-repeat center;
-            background-size: contain;
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+        /* ПУЛЬСИРУЮЩАЯ ЛУНА (SVG КОДОМ - ВСЕГДА РАБОТАЕТ) */
+        .moon-box {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, #ddd 70%, #888 100%);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
             animation: moon-pulse 2s infinite ease-in-out;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         @keyframes moon-pulse {
-            0% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); }
-            50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.5)); }
-            100% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); }
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
+            50% { transform: scale(1.15); box-shadow: 0 0 50px rgba(255, 255, 255, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
         }
 
         .loading-text {
@@ -72,7 +73,7 @@
 
         .header { display: flex; justify-content: space-between; margin-bottom: 25px; }
 
-        /* ULTRA НИК (ДЛЯ ТЕБЯ) */
+        /* ULTRA НИК */
         .ultra-nick {
             font-size: 22px; font-weight: bold;
             background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5);
@@ -107,7 +108,7 @@
 
     <div id="loading-screen">
         <div class="disclaimer">все персонажи вымышлены</div>
-        <div class="pulse-moon"></div>
+        <div class="moon-box"></div>
         <div class="loading-text">загрузка мира....</div>
         <div class="version">версия обновления 1.0.1</div>
     </div>
@@ -122,14 +123,14 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item">Чаты</div>
-            <div class="menu-item">Персонажи</div>
-            <div class="menu-item">Ежедневка</div>
-            <div class="menu-item">Задания</div>
-            <div class="menu-item">Магазин</div>
-            <div class="menu-item">Промокоды</div>
-            <div class="menu-item">Профиль</div>
-            <div class="menu-item">Настройки</div>
+            <div class="item menu-item">Чаты</div>
+            <div class="item menu-item">Персонажи</div>
+            <div class="item menu-item">Ежедневка</div>
+            <div class="item menu-item">Задания</div>
+            <div class="item menu-item">Магазин</div>
+            <div class="item menu-item">Промокоды</div>
+            <div class="item menu-item">Профиль</div>
+            <div class="item menu-item">Настройки</div>
             <div id="btn-adm" class="menu-item btn-adm">Админка</div>
             <div id="btn-con" class="menu-item btn-con">Консоль</div>
         </div>
@@ -143,8 +144,7 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        // Твоя защита от закрытия свайпом
-        tg.enableClosingConfirmation();
+        tg.enableClosingConfirmation(); // Защита от случайного закрытия свайпом
 
         const OWNER_ID = 8287041036;
 
@@ -152,7 +152,7 @@
             const user = tg.initDataUnsafe?.user || { id: 0, first_name: "User" };
             
             try {
-                // Имитация поиска в базе данных
+                // Пытаемся найти юзера в базе
                 const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -174,17 +174,18 @@
                     if (data.role === 'admin') document.getElementById('btn-adm').style.display = "flex";
                 }
 
-                // Скрываем луну только после получения ответа
+                // Скрываем загрузку
                 setTimeout(() => {
                     document.getElementById('loading-screen').style.display = "none";
                     document.getElementById('app-content').style.display = "flex";
-                }, 1000);
+                }, 1200);
 
             } catch (e) {
+                // Если база не отвечает, всё равно пускаем через задержку
                 setTimeout(() => {
                     document.getElementById('loading-screen').style.display = "none";
                     document.getElementById('app-content').style.display = "flex";
-                }, 1000);
+                }, 1500);
             }
         }
 
