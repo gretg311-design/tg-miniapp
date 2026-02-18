@@ -6,182 +6,102 @@
     <title>Anime AI 18+</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            background-color: #05010a;
-            color: white;
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            box-sizing: border-box;
-            overflow: hidden;
+        body { background-color: #05010a; color: white; font-family: sans-serif; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+        
+        /* Твой экран загрузки */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #05010a; z-index: 10000; text-align: center; display: flex; flex-direction: column; justify-content: center;
         }
+        .disc { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; }
+        .vers { position: absolute; bottom: 30px; width: 100%; font-size: 12px; color: #333; text-align: center; }
+        .moon { font-size: 80px; margin-bottom: 20px; display: block; }
+        .load-t { font-size: 14px; color: #aaa; letter-spacing: 3px; text-transform: uppercase; }
 
-        /* ВЕРХНЯЯ ПАНЕЛЬ */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 25px;
-        }
-
-        .user-info { display: flex; flex-direction: column; }
-
-        /* Переливающийся ник для Ultra/Owner */
-        .ultra-nick {
-            font-size: 22px;
-            font-weight: bold;
-            background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
-        }
-
+        /* Интерфейс */
+        #main-ui { display: none; padding: 20px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 25px; }
+        .ultra-nick { font-size: 22px; font-weight: bold; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; }
         @keyframes shine { to { background-position: 200% center; } }
+        .regular-nick { font-size: 22px; font-weight: bold; }
+        .user-id { color: #555; font-size: 12px; }
+        .balance { font-size: 26px; color: #ffcc00; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .item { background: #120520; border: 1px solid #2d1b4d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-adm { border-color: #00bcd4; color: #00bcd4; display: none; }
+        .btn-con { border-color: #e91e63; color: #e91e63; display: none; }
 
-        .regular-nick { font-size: 22px; font-weight: bold; color: white; }
-        .user-id { color: #555; font-size: 12px; margin-top: 4px; }
-        .balance { display: flex; align-items: center; font-size: 26px; gap: 8px; }
-        .moon-icon { color: #ffcc00; }
-
-        /* СЕТКА КНОПОК */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            flex-grow: 1;
-        }
-
-        .menu-item {
-            background: #120520;
-            border: 1px solid #2d1b4d;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-transform: uppercase;
-            font-weight: bold;
-            font-size: 13px;
-            letter-spacing: 1px;
-            cursor: pointer;
-            height: 70px;
-        }
-
-        /* Кнопки управления */
-        .btn-hidden { display: none; }
-        .btn-adm { border: 1px solid #00bcd4; color: #00bcd4; }
-        .btn-con { border: 1px solid #e91e63; color: #e91e63; }
-
-        /* НИЖНЯЯ НАВИГАЦИЯ */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: 80px;
-            display: flex;
-            border-top: 1px solid #1a0b35;
-            background: #05010a;
-        }
-
-        .nav-btn {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #aaa;
-            text-transform: uppercase;
-            font-size: 14px;
-            font-weight: bold;
-            gap: 8px;
-            cursor: pointer;
-        }
-        .nav-btn:first-child { border-right: 1px solid #1a0b35; }
+        .nav { position: fixed; bottom: 0; width: 100%; height: 80px; display: flex; border-top: 1px solid #1a0b35; background: #05010a; }
+        .nav-b { flex: 1; display: flex; align-items: center; justify-content: center; color: #aaa; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <div id="main-screen">
-        <div class="header">
-            <div class="user-info">
-                <span id="u-name" class="regular-nick">Загрузка...</span>
-                <span id="u-id" class="user-id">ID: ---</span>
-            </div>
-            <div class="balance">
-                <span class="moon-icon">🌙</span>
-                <span id="u-shards">0</span>
-            </div>
-        </div>
-
-        <div class="menu-grid">
-            <div class="menu-item">Чаты</div>
-            <div class="menu-item">Персонажи</div>
-            <div class="menu-item">Ежедневка</div>
-            <div class="menu-item">Задания</div>
-            <div class="menu-item">Магазин</div>
-            <div class="menu-item">Промокоды</div>
-            <div class="menu-item">Профиль</div>
-            <div class="menu-item">Настройки</div>
-            
-            <div id="btn-admin" class="menu-item btn-adm btn-hidden">Админка</div>
-            <div id="btn-console" class="menu-item btn-con btn-hidden">Консоль</div>
-        </div>
+    <div id="loading-screen">
+        <div class="disc">все персонажи вымышлены</div>
+        <div class="moon">🌕</div>
+        <div class="load-t">загрузка мира....</div>
+        <div class="vers">версия обновления 1.0.1</div>
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-btn"><span>◀</span> Назад</div>
-        <div class="nav-btn"><span>🏠</span> Домой</div>
+    <div id="main-ui">
+        <div class="header">
+            <div>
+                <div id="n" class="regular-nick">---</div>
+                <div id="i" class="user-id">ID: ---</div>
+            </div>
+            <div class="balance">🌙 <span id="s">0</span></div>
+        </div>
+
+        <div class="grid">
+            <div class="item">Чаты</div>
+            <div class="item">Персонажи</div>
+            <div class="item">Ежедневка</div>
+            <div class="item">Задания</div>
+            <div class="item">Магазин</div>
+            <div class="item">Промокоды</div>
+            <div class="item">Профиль</div>
+            <div class="item">Настройки</div>
+            <div id="a" class="item btn-adm">Админка</div>
+            <div id="c" class="item btn-con">Консоль</div>
+        </div>
+
+        <div class="nav">
+            <div class="nav-b" style="border-right: 1px solid #1a0b35;">◀ Назад</div>
+            <div class="nav-b">🏠 Домой</div>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
+        const MY_ID = 8287041036;
         tg.expand();
 
-        const OWNER_ID = 8287041036;
-
-        async function initApp() {
+        async function init() {
             const user = tg.initDataUnsafe?.user || { id: 0, first_name: "User" };
-            const nameElem = document.getElementById('u-name');
-            const idElem = document.getElementById('u-id');
-            const shardsElem = document.getElementById('u-shards');
-
-            nameElem.innerText = user.first_name;
-            idElem.innerText = "ID: " + user.id;
-
-            // Запрос к серверу для получения роли (админ или нет)
-            try {
-                const res = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tg_id: user.id, name: user.first_name })
-                });
-                const userData = await res.json();
-
-                // 1. ЛОГИКА ОВНЕРА (Видит всё)
-                if (user.id === OWNER_ID) {
-                    nameElem.className = "ultra-nick";
-                    shardsElem.innerText = "∞";
-                    document.getElementById('btn-admin').style.display = 'flex';
-                    document.getElementById('btn-console').style.display = 'flex';
-                } 
-                // 2. ЛОГИКА АДМИНА (Видит только Админку)
-                else if (userData.role === 'admin') {
-                    shardsElem.innerText = userData.moon_shards;
-                    document.getElementById('btn-admin').style.display = 'flex';
-                    // Консоль (btn-console) остается скрытой
-                } 
-                // 3. ОБЫЧНЫЙ ЮЗЕР
-                else {
-                    shardsElem.innerText = userData.moon_shards;
-                }
-
-            } catch (e) {
-                console.error("Auth error");
+            
+            // Настройка под тебя
+            if (user.id === MY_ID) {
+                document.getElementById('n').innerText = user.first_name;
+                document.getElementById('n').className = "ultra-nick";
+                document.getElementById('s').innerText = "∞";
+                document.getElementById('a').style.display = "flex";
+                document.getElementById('c').style.display = "flex";
+            } else {
+                document.getElementById('n').innerText = user.first_name;
+                document.getElementById('i').innerText = "ID: " + user.id;
+                // Сюда добавишь проверку на админа из базы
             }
+
+            // Убираем загрузку
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = "none";
+                document.getElementById('main-ui').style.display = "block";
+            }, 1000);
         }
 
-        initApp();
+        init();
     </script>
 </body>
 </html>
