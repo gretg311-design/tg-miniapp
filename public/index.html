@@ -6,159 +6,159 @@
     <title>Moon Project</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        html, body { background-color: #05010a; color: white; font-family: sans-serif; margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; touch-action: none; }
+        body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: none; }
         
-        /* ЗАГРУЗКА */
-        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; }
-        .version-label { position: absolute; bottom: 30px; font-size: 12px; color: #333; letter-spacing: 3px; text-transform: uppercase; }
-        .moon-box { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #ddd 70%, #888 100%); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); animation: moon-pulse 2s infinite ease-in-out; }
-        @keyframes moon-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        /* ЛОАДЕР */
+        #loading-screen { position: fixed; inset: 0; background: #05010a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .moon { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 30px #fff; animation: p 2s infinite ease-in-out; }
+        @keyframes p { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        /* ИНТЕРФЕЙС */
-        #app-content { display: none; padding: 20px; box-sizing: border-box; height: 100vh; flex-direction: column; }
-        .nick-default { font-size: 20px; font-weight: bold; }
-        .sub-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 800; margin-left: 8px; }
+        /* ОСНОВНОЕ */
+        #app { display: none; padding: 20px; height: 100vh; flex-direction: column; }
+        .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: s 3s linear infinite; font-weight: 900; font-size: 22px; }
+        @keyframes s { to { background-position: 200%; } }
+        .sub-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #bc42f5; margin-left: 8px; vertical-align: middle; color: white; }
 
-        /* НЕОНОВЫЕ СТИЛИ */
-        .nick-premium { color: #00d2ff; text-shadow: 0 0 10px #00d2ff; }
-        .tag-premium { background: #00d2ff; color: black; }
-        .nick-pro { color: #39ff14; text-shadow: 0 0 10px #39ff14; }
-        .tag-pro { background: #39ff14; color: black; }
-        .nick-vip { color: #ffcc00; text-shadow: 0 0 10px #ffcc00; }
-        .tag-vip { background: #ffcc00; color: black; }
-        .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; font-weight: 900; font-size: 22px; filter: drop-shadow(0 0 5px #bc42f5); }
-        .tag-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4); color: white; box-shadow: 0 0 15px #bc42f5; }
-        @keyframes shine { to { background-position: 200% center; } }
-
-        .balance { font-size: 26px; color: #ffcc00; display: flex; align-items: center; gap: 8px; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
-        .menu-item { background: #120520; border: 1px solid #2d1b4d; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 11px; height: 65px; }
-        .btn-adm { border-color: #00bcd4; color: #00bcd4; display: none; }
-        .btn-con { border-color: #e91e63; color: #e91e63; display: none; }
-
+        .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .item { background: #120520; border: 1px solid #2d1b4d; border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        
         /* КОНСОЛЬ */
-        #console-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 1, 10, 0.98); z-index: 10005; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .console-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .console-btn { background: #1a0b35; border: 1px solid #e91e63; border-radius: 10px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 10px; text-transform: uppercase; font-weight: bold; color: white; cursor: pointer; }
-        .console-input { background: #120520; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: white; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; }
-        #shard-manager, #sub-manager, #char-manager { display: none; width: 100%; flex-direction: column; gap: 5px; }
-
-        /* ПЕРСОНАЖ */
-        .file-label { background: #1a0b35; border: 1px dashed #e91e63; padding: 15px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 11px; margin-bottom: 10px; text-transform: uppercase; }
-        #char-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; display: none; margin-bottom: 10px; border: 1px solid #e91e63; }
-        .char-counter { font-size: 10px; color: #555; text-align: right; margin-top: -8px; margin-bottom: 10px; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; display: flex; border-top: 1px solid #1a0b35; background: #05010a; }
-        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; color: #aaa; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+        #console { display: none; position: fixed; inset: 0; background: rgba(5, 1, 10, 0.98); z-index: 10000; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .in { background: #120520; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: white; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        .btn { background: #1a0b35; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+        
+        #char-prev { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; display: none; margin-bottom: 10px; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
     <div id="loading-screen">
-        <div class="disclaimer">все персонажи вымышлены</div>
-        <div class="moon-box"></div>
-        <div class="version-label">версия обновления 1.0.1</div>
+        <div class="moon"></div>
+        <p style="letter-spacing: 3px; margin-top: 20px; font-size: 12px; color: #555;">ЗАГРУЗКА МИРА...</p>
     </div>
 
-    <div id="console-modal">
-        <h2 style="color:#e91e63; margin-bottom: 20px;">TERMINAL</h2>
-        <div id="con-main" class="console-grid">
-            <div class="console-btn" onclick="openMenu('shard-manager')">Осколки</div>
-            <div class="console-btn" onclick="openMenu('sub-manager')">Подписки</div>
-            <div class="console-btn" onclick="openMenu('char-manager')">Персонаж</div>
-            <div class="console-btn" onclick="alert('Soon')">Цены</div>
-            <div class="console-btn" onclick="alert('Soon')">Админы</div>
-        </div>
-
-        <div id="shard-manager">
-            <input type="number" id="sid" placeholder="TG ID" class="console-input">
-            <input type="number" id="samt" placeholder="Количество" class="console-input">
-            <div class="console-grid">
-                <div class="console-btn" onclick="manageShards('add')" style="border-color:#4caf50;">Выдать</div>
-                <div class="console-btn" onclick="manageShards('take')" style="border-color:#f44336;">Забрать</div>
+    <div id="app">
+        <div style="display:flex; justify-content:space-between;">
+            <div>
+                <span id="name" class="nick-default">User</span>
+                <span id="badge" class="sub-tag" style="display:none;"></span>
+                <div id="id-display" style="font-size:10px; color:#444;">ID: ---</div>
             </div>
-            <div class="console-btn" onclick="backToMain()" style="margin-top:10px; border-color:#555;">Назад</div>
+            <div style="color:#ffcc00; font-size:24px;">🌙 <span id="shards">0</span></div>
         </div>
 
-        <div id="sub-manager">
-            <input type="number" id="subid" placeholder="TG ID" class="console-input">
-            <div class="console-grid">
-                <div class="console-btn" onclick="giveSub('Premium')">Premium</div>
-                <div class="console-btn" onclick="giveSub('Pro')">Pro</div>
-                <div class="console-btn" onclick="giveSub('VIP')">VIP</div>
-                <div class="console-btn" onclick="giveSub('Ultra')">Ultra</div>
-            </div>
-            <div class="console-btn" onclick="giveSub('None')" style="margin-top:10px; border-color:#ff4444; color:#ff4444;">Снять подписку</div>
-            <div class="console-btn" onclick="backToMain()" style="margin-top:10px; border-color:#555;">Назад</div>
+        <div class="menu">
+            <div class="item">Чаты</div><div class="item">Персонажи</div>
+            <div class="item" style="border-color:#e91e63; color:#e91e63;" id="con-btn" onclick="openConsole()">КОНСОЛЬ</div>
         </div>
-
-        <div id="char-manager">
-            <img id="char-preview">
-            <label class="file-label" for="char-file">📁 Загрузить фото</label>
-            <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
-            
-            <input type="text" id="char-name" placeholder="Имя (Обязательно)" class="console-input">
-            <input type="number" id="char-age" placeholder="Возраст (18+)" class="console-input">
-            
-            <textarea id="char-desc" placeholder="Описание (минимум 30 симв.)" class="console-input" maxlength="4000" style="height:120px; resize:none;" oninput="updateCharCount()"></textarea>
-            <div id="char-counter" class="char-counter">0 / 4000</div>
-
-            <div class="console-btn" onclick="createChar()" style="border-color:#4caf50; color:#4caf50;">Создать персонажа</div>
-            <div class="console-btn" onclick="backToMain()" style="margin-top:10px; border-color:#555;">Назад</div>
-        </div>
-
-        <div onclick="toggleC(false)" style="margin-top:30px; color:#555;">[ ЗАКРЫТЬ ]</div>
     </div>
 
-    <div id="app-content">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div class="user-block">
-                <div style="display:flex; flex-direction:column;">
-                    <div style="display:flex; align-items:center;">
-                        <span id="un" class="nick-default">---</span>
-                        <span id="sub-badge" style="display:none;"></span>
-                    </div>
-                    <div id="ui" style="font-size:10px; color:#555;">ID: ---</div>
-                </div>
+    <div id="console">
+        <h3 style="color:#e91e63; text-align:center;">SYSTEM TERMINAL</h3>
+        
+        <div id="c-main">
+            <div class="btn" onclick="c_view('c-sub')">ПОДПИСКИ</div>
+            <div class="btn" onclick="c_view('c-char')">ПЕРСОНАЖ</div>
+            <div class="btn" onclick="closeConsole()" style="border-color:#555;">ЗАКРЫТЬ</div>
+        </div>
+
+        <div id="c-sub" style="display:none;">
+            <input type="number" id="sub-id" placeholder="Telegram ID" class="in">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                <div class="btn" onclick="setSub('Premium')">PREMIUM</div>
+                <div class="btn" onclick="setSub('Ultra')">ULTRA</div>
             </div>
-            <div class="balance">🌙 <span id="us">0</span></div>
+            <div class="btn" onclick="setSub('None')" style="border-color:red;">СНЯТЬ ВСЁ</div>
+            <div class="btn" onclick="c_view('c-main')">НАЗАД</div>
         </div>
 
-        <div class="menu-grid">
-            <div class="menu-item">Чаты</div><div class="menu-item">Персонажи</div>
-            <div class="menu-item">Ежедневка</div><div class="menu-item">Задания</div>
-            <div class="menu-item">Магазин</div><div class="menu-item">Промокоды</div>
-            <div class="menu-item">Профиль</div><div class="menu-item">Настройки</div>
-            <div id="btn-adm" class="menu-item btn-adm">Админка</div>
-            <div id="btn-con" class="menu-item btn-con" onclick="toggleC(true)">Консоль</div>
+        <div id="c-char" style="display:none;">
+            <img id="char-prev">
+            <input type="file" id="f" accept="image/*" style="display:none;" onchange="pv(this)">
+            <div class="btn" onclick="document.getElementById('f').click()">📁 ВЫБРАТЬ ФОТО</div>
+            <input type="text" id="cn" placeholder="ИМЯ" class="in">
+            <input type="number" id="ca" placeholder="ВОЗРАСТ (18+)" class="in">
+            <textarea id="cd" placeholder="ОПИСАНИЕ (ОТ 30 СИМВ.)" class="in" style="height:100px;"></textarea>
+            <div class="btn" onclick="saveChar()" style="border-color:green;">СОЗДАТЬ</div>
+            <div class="btn" onclick="c_view('c-main')">НАЗАД</div>
         </div>
-
-        <div class="bottom-nav"><div class="nav-btn" style="border-right:1px solid #1a0b35;">◀ Назад</div><div class="nav-btn">🏠 Домой</div></div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
         const OID = 8287041036;
-        let selectedImageData = "";
+        let imgData = "";
 
-        function toggleC(s) { document.getElementById('console-modal').style.display = s ? 'flex' : 'none'; }
-        function openMenu(id) { 
-            document.getElementById('con-main').style.display = 'none'; 
-            document.getElementById('shard-manager').style.display = 'none';
-            document.getElementById('sub-manager').style.display = 'none';
-            document.getElementById('char-manager').style.display = 'none';
-            document.getElementById(id).style.display = 'flex'; 
-        }
-        function backToMain() { 
-            document.getElementById('shard-manager').style.display = 'none'; 
-            document.getElementById('sub-manager').style.display = 'none'; 
-            document.getElementById('char-manager').style.display = 'none'; 
-            document.getElementById('con-main').style.display = 'grid'; 
+        // ЖЕСТКИЙ ТАЙМЕР ЛУНЫ (2.5 сек и она исчезнет по-любому)
+        setTimeout(() => {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+        }, 2500);
+
+        function openConsole() { document.getElementById('console').style.display = 'flex'; }
+        function closeConsole() { document.getElementById('console').style.display = 'none'; }
+        function c_view(id) {
+            ['c-main', 'c-sub', 'c-char'].forEach(v => document.getElementById(v).style.display = 'none');
+            document.getElementById(id).style.display = 'block';
         }
 
-        function updateCharCount() {
-            const len = document.getElementById('char-desc').value.length;
-            document.getElementById('char-counter').innerText = len + "
+        function pv(input) {
+            if (input.files && input.files[0]) {
+                let r = new FileReader();
+                r.onload = e => { 
+                    imgData = e.target.result;
+                    document.getElementById('char-prev').src = imgData;
+                    document.getElementById('char-prev').style.display = 'block';
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function setSub(type) {
+            const tid = document.getElementById('sub-id').value;
+            await fetch('/api/admin/manage-sub', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ owner_id: OID, target_id: tid, sub_type: type })
+            });
+            alert("Готово!"); location.reload();
+        }
+
+        async function saveChar() {
+            const name = document.getElementById('cn').value;
+            const age = document.getElementById('ca').value;
+            const desc = document.getElementById('cd').value;
+            if (desc.length < 30) return alert("Описание слишком короткое!");
+            const r = await fetch('/api/admin/create-character', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ owner_id: OID, name, age, description: desc, image: imgData })
+            });
+            const d = await r.json(); alert(d.message || d.error);
+            if(!d.error) location.reload();
+        }
+
+        window.onload = async () => {
+            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
+            document.getElementById('id-display').innerText = "ID: " + user.id;
+            document.getElementById('name').innerText = user.first_name;
+
+            const res = await fetch('/api/user/get-data', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ tg_id: user.id })
+            });
+            const data = await res.json();
+            
+            document.getElementById('shards').innerText = (user.id == OID) ? "∞" : data.shards;
+            
+            let s = (user.id == OID) ? "Ultra" : data.subscription;
+            if (s !== "None") {
+                document.getElementById('name').className = "nick-ultra";
+                document.getElementById('badge').innerText = s;
+                document.getElementById('badge').style.display = 'inline-block';
+            }
+        };
+
+        tg.expand();
+        document.addEventListener('touchmove', (e) => e.preventDefault(), {passive: false});
+    </script>
+</body>
+</html>
