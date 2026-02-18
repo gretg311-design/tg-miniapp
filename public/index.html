@@ -6,94 +6,142 @@
     <title>Moon Project</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --purple-dark: #05010a;
+            --purple-card: #120520;
+            --purple-border: #2d1b4d;
+            --accent-blue: #00bcd4;
+            --accent-pink: #e91e63;
+            --gold: #ffcc00;
+        }
+
         body {
-            background-color: #05010a;
+            background-color: var(--purple-dark);
             color: white;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
+            padding-bottom: 90px; /* Место под нижнюю панель */
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
-        /* Шапка профиля */
-        .header {
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
+        .top-panel {
             width: 100%;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            background: var(--purple-card);
+            padding: 12px 15px;
+            border-radius: 16px;
+            border: 1px solid var(--purple-border);
             margin-bottom: 20px;
-        }
-        .shards-display {
-            font-size: 28px;
-            color: #ffcc00;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+            box-sizing: border-box;
         }
 
-        /* Сетка 2x6 */
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-blue);
+            margin-right: 12px;
+            background: #222;
+        }
+
+        .user-meta { flex-grow: 1; }
+        .user-name { font-weight: bold; font-size: 16px; margin: 0; display: block; }
+        .user-sub-label { font-size: 10px; color: var(--accent-blue); text-transform: uppercase; font-weight: 800; }
+
+        .balance-box { text-align: right; }
+        .balance-val { color: var(--gold); font-size: 18px; font-weight: 900; }
+
+        /* СЕТКА 2x6 */
         .menu-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             width: 100%;
-            max-width: 400px;
         }
 
         .menu-item {
-            background: #120520;
-            border: 1px solid #2d1b4d;
-            border-radius: 12px;
-            padding: 20px 10px;
+            background: var(--purple-card);
+            border: 1px solid var(--purple-border);
+            border-radius: 14px;
+            padding: 22px 10px;
             text-align: center;
             text-transform: uppercase;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
-            transition: 0.2s;
+            letter-spacing: 0.5px;
         }
-        .menu-item:active { transform: scale(0.95); background: #1a0830; }
+        .menu-item:active { background: #1a0b35; transform: scale(0.98); }
 
-        /* Кнопки управления (внизу сетки) */
-        .btn-admin { border-color: #00bcd4; color: #00bcd4; }
-        .btn-console { border-color: #e91e63; color: #e91e63; }
+        .item-admin { color: var(--accent-blue); border-color: var(--accent-blue); }
+        .item-console { color: var(--accent-pink); border-color: var(--accent-pink); }
 
-        /* Секция управления (скрыта по дефолту) */
-        .view-section { display: none; width: 100%; max-width: 400px; }
-        .active { display: block; }
-
-        /* Поля ввода */
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            background: #1a0830;
-            border: 1px solid #2d1b4d;
-            color: white;
-            border-radius: 8px;
-            box-sizing: border-box;
+        /* НИЖНЯЯ ПАНЕЛЬ (TAB BAR) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            height: 65px;
+            background: rgba(18, 5, 32, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--purple-border);
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .action-btn {
-            width: 100%;
-            padding: 15px;
-            border-radius: 8px;
-            border: none;
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            font-size: 10px;
+            text-decoration: none;
             font-weight: bold;
-            margin-top: 10px;
-            cursor: pointer;
         }
-        .btn-save { background: #28a745; color: white; }
-        .btn-back { background: #444; color: white; margin-top: 5px; }
+        .nav-item.active { color: var(--accent-blue); }
+        .nav-icon { font-size: 20px; margin-bottom: 4px; }
+
+        /* СЕКЦИИ И МОДУЛИ КОНСОЛИ */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .console-header { color: var(--accent-pink); text-align: center; text-transform: uppercase; margin-bottom: 15px; }
+
+        input, select, textarea {
+            width: 100%; padding: 14px; margin: 10px 0;
+            background: var(--purple-card); border: 1px solid var(--purple-border);
+            color: white; border-radius: 12px; box-sizing: border-box; font-size: 14px;
+        }
+
+        .btn-action { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-green { background: #28a745; color: white; }
+        .btn-gray { background: #333; color: white; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2 id="user-display-name">Загрузка...</h2>
-        <div class="shards-display">🌙 <span id="shard-val">0</span></div>
+    <div class="top-panel">
+        <img id="u-avatar" class="avatar" src="https://via.placeholder.com/50">
+        <div class="user-meta">
+            <span id="u-name" class="user-name">Loading...</span>
+            <span id="u-sub" class="user-sub-label">FREE</span>
+        </div>
+        <div class="balance-box">
+            <div class="balance-val">🌙 <span id="u-shards">0</span></div>
+        </div>
     </div>
 
-    <div id="main-menu" class="view-section active">
+    <div id="view-main" class="view-section active">
         <div class="menu-grid">
             <div class="menu-item">Чаты</div>
             <div class="menu-item">Персонажи</div>
@@ -103,78 +151,64 @@
             <div class="menu-item">Промокоды</div>
             <div class="menu-item">Профиль</div>
             <div class="menu-item">Настройки</div>
-            <div class="menu-item btn-admin">Админка</div>
-            <div class="menu-item btn-console" onclick="showView('console-menu')">Консоль</div>
+            <div class="menu-item item-admin">Админка</div>
+            <div class="menu-item item-console" onclick="showView('view-console')">Консоль</div>
         </div>
     </div>
 
-    <div id="console-menu" class="view-section">
-        <h3 style="color:#e91e63; text-align:center;">КОНСОЛЬ УПРАВЛЕНИЯ</h3>
+    <div id="view-console" class="view-section">
+        <h3 class="console-header">Консоль Управления</h3>
         <div class="menu-grid">
             <div class="menu-item" onclick="showView('mod-shards')">🌙 Осколки</div>
             <div class="menu-item" onclick="showView('mod-subs')">✨ Подписка</div>
-            <div class="menu-item" onclick="showView('mod-tasks')">📋 Задания</div>
-            <div class="menu-item" onclick="showView('mod-promos')">🎟 Промокоды</div>
-            <div class="menu-item" onclick="showView('mod-char')">👤 Персонаж</div>
-            <div class="menu-item" onclick="showView('mod-prices')">💰 Цены</div>
+            <div class="menu-item">📋 Задания</div>
+            <div class="menu-item">🎟 Промокоды</div>
+            <div class="menu-item">👤 Персонаж</div>
+            <div class="menu-item">💰 Цены</div>
         </div>
-        <button class="action-btn btn-back" onclick="showView('main-menu')">НАЗАД В МЕНЮ</button>
+        <button class="btn-action btn-gray" onclick="showView('view-main')">ВЕРНУТЬСЯ</button>
     </div>
 
     <div id="mod-shards" class="view-section">
-        <h3 style="color:#ffcc00">🌙 УПРАВЛЕНИЕ ОСКОЛКАМИ</h3>
-        <input type="number" id="shard-tid" placeholder="Введите Telegram ID">
-        <input type="number" id="shard-count" placeholder="Количество">
-        <button class="action-btn btn-save" onclick="adminAction('give-shards')">ВЫДАТЬ</button>
-        <button class="action-btn" style="background:#dc3545;" onclick="adminAction('take-shards')">ОТОБРАТЬ</button>
-        <button class="action-btn btn-back" onclick="showView('console-menu')">НАЗАД</button>
+        <h3 style="color: var(--gold)">Управление 🌙</h3>
+        <input type="number" id="target-id" placeholder="Telegram ID">
+        <input type="number" id="amount" placeholder="Количество">
+        <button class="btn-action btn-green" onclick="alert('Выдано!')">ВЫДАТЬ</button>
+        <button class="btn-action btn-gray" onclick="showView('view-console')">НАЗАД</button>
     </div>
 
-    <div id="mod-subs" class="view-section">
-        <h3 style="color:#00bcd4">✨ ВЫДАЧА ПОДПИСКИ</h3>
-        <input type="number" id="sub-tid" placeholder="Введите Telegram ID">
-        <div class="menu-grid">
-            <button class="menu-item" onclick="setSub('Premium')">Premium</button>
-            <button class="menu-item" onclick="setSub('Pro')">Pro</button>
-            <button class="menu-item" onclick="setSub('VIP')">VIP</button>
-            <button class="menu-item" onclick="setSub('Ultra')">Ultra</button>
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="showView('view-main')">
+            <div class="nav-icon">🏠</div>
+            <span>ГЛАВНАЯ</span>
         </div>
-        <select id="sub-weeks">
-            <option value="1">1 неделя</option>
-            <option value="4">1 месяц</option>
-            <option value="12">3 месяца</option>
-            <option value="48">12 месяцев</option>
-        </select>
-        <button class="action-btn btn-save" onclick="adminAction('give-sub')">АКТИВИРОВАТЬ</button>
-        <button class="action-btn btn-back" onclick="showView('console-menu')">НАЗАД</button>
-    </div>
-
-    <div id="mod-char" class="view-section">
-        <h3 style="color:#ffcc00">👤 СОЗДАНИЕ ПЕРСОНАЖА</h3>
-        <input type="file" accept="image/*">
-        <input type="text" placeholder="Имя персонажа">
-        <input type="number" placeholder="Возраст">
-        <input type="text" placeholder="Характеристики">
-        <textarea placeholder="Описание (до 2000 символов)" rows="5"></textarea>
-        <button class="action-btn btn-save">СОХРАНИТЬ ПЕРСОНАЖА</button>
-        <button class="action-btn btn-back" onclick="showView('console-menu')">НАЗАД</button>
+        <div class="nav-item">
+            <div class="nav-icon">🎁</div>
+            <span>БОНУСЫ</span>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">🛒</div>
+            <span>МАРКЕТ</span>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">👤</div>
+            <span>АККАУНТ</span>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
         const OWNER_ID = 8287041036;
-        let userData = { tg_id: 0, role: 'user' };
-        let tempSub = "";
 
-        async function login() {
+        async function init() {
             const user = tg.initDataUnsafe?.user || { id: OWNER_ID, first_name: "Owner" };
             
-            // Если это ты - ставим бесконечность сразу
+            // Быстрая настройка для Овнера
             if (user.id === OWNER_ID) {
-                document.getElementById('shard-val').innerText = "∞";
-                document.getElementById('user-display-name').innerText = user.first_name;
+                document.getElementById('u-shards').innerText = "∞";
+                document.getElementById('u-name').innerText = user.first_name;
+                document.getElementById('u-sub').innerText = "ULTRA OWNER";
             }
 
             try {
@@ -183,31 +217,22 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tg_id: user.id, name: user.first_name })
                 });
-                userData = await res.json();
+                const data = await res.json();
                 
                 if (user.id !== OWNER_ID) {
-                    document.getElementById('shard-val').innerText = userData.moon_shards;
-                    document.getElementById('user-display-name').innerText = userData.name;
+                    document.getElementById('u-shards').innerText = data.moon_shards;
+                    document.getElementById('u-name').innerText = data.name;
+                    document.getElementById('u-sub').innerText = data.sub;
                 }
-            } catch (e) { console.error("Ошибка входа"); }
+            } catch (e) { console.log("Login skip"); }
         }
 
         function showView(id) {
-            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
-        function setSub(type) {
-            tempSub = type;
-            alert("Выбран тип: " + type);
-        }
-
-        async function adminAction(action) {
-            alert("Запрос на " + action + " отправлен!");
-            // Тут будет fetch к твоим API эндпоинтам
-        }
-
-        login();
+        init();
     </script>
 </body>
 </html>
