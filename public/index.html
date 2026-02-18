@@ -6,83 +6,28 @@
     <title>Moon Project</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        html, body {
-            background-color: #05010a; color: white; font-family: sans-serif;
-            margin: 0; padding: 0; height: 100vh; width: 100vw;
-            overflow: hidden; touch-action: none;
-        }
-
-        /* ЭКРАН ЗАГРУЗКИ */
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #05010a; z-index: 10000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
+        html, body { background-color: #05010a; color: white; font-family: sans-serif; margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; touch-action: none; }
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; }
         .version { position: absolute; bottom: 30px; font-size: 12px; color: #333; letter-spacing: 2px; }
-        .moon-box {
-            width: 100px; height: 100px; border-radius: 50%;
-            background: radial-gradient(circle, #fff 0%, #ddd 70%, #888 100%);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-            animation: moon-pulse 2s infinite ease-in-out; margin-bottom: 25px;
-        }
-        @keyframes moon-pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
-            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 255, 255, 0.7); }
-        }
+        .moon-box { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #ddd 70%, #888 100%); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); animation: moon-pulse 2s infinite ease-in-out; margin-bottom: 25px; }
+        @keyframes moon-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); } 50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 255, 255, 0.7); } }
         .loading-text { font-size: 14px; color: #aaa; text-transform: uppercase; letter-spacing: 4px; }
-
-        /* ИНТЕРФЕЙС */
         #app-content { display: none; padding: 20px; box-sizing: border-box; height: 100vh; flex-direction: column; }
         .header { display: flex; justify-content: space-between; margin-bottom: 25px; }
-        .ultra-nick {
-            font-size: 22px; font-weight: bold;
-            background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5);
-            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
-        }
+        .ultra-nick { font-size: 22px; font-weight: bold; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; }
         @keyframes shine { to { background-position: 200% center; } }
-        .user-id { color: #555; font-size: 12px; margin-top: 4px; }
-        .balance { display: flex; align-items: center; font-size: 26px; gap: 8px; color: #ffcc00; }
-
+        .user-id { color: #555; font-size: 12px; }
+        .balance { font-size: 26px; color: #ffcc00; display: flex; align-items: center; gap: 8px; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .menu-item {
-            background: #120520; border: 1px solid #2d1b4d; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            text-transform: uppercase; font-weight: bold; font-size: 11px; height: 70px; text-align: center;
-        }
-        .btn-adm { border-color: #00bcd4; color: #00bcd4; display: none; }
+        .menu-item { background: #120520; border: 1px solid #2d1b4d; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 11px; height: 70px; }
         .btn-con { border-color: #e91e63; color: #e91e63; display: none; }
-
-        /* КОНСОЛЬ */
-        #console-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 1, 10, 0.98); z-index: 10001; padding: 20px; box-sizing: border-box;
-            flex-direction: column; align-items: center; justify-content: center;
-        }
-        .modal-title { font-size: 20px; font-weight: bold; color: #e91e63; text-transform: uppercase; margin-bottom: 30px; }
-        .console-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
-        .console-btn {
-            background: #1a0b35; border: 1px solid #e91e63; border-radius: 10px;
-            height: 60px; display: flex; align-items: center; justify-content: center;
-            font-size: 11px; text-transform: uppercase; font-weight: bold; color: white; text-align: center;
-        }
-        #shard-manager { display: none; flex-direction: column; gap: 15px; width: 100%; }
-        .console-input {
-            background: #120520; border: 1px solid #e91e63; border-radius: 8px;
-            padding: 15px; color: white; font-size: 14px; outline: none; width: 100%; box-sizing: border-box;
-        }
-        .close-label { margin-top: 40px; color: #555; text-transform: uppercase; font-size: 12px; cursor: pointer; }
-
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
-            display: flex; border-top: 1px solid #1a0b35; background: #05010a;
-        }
-        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; color: #aaa; font-weight: bold; text-transform: uppercase; }
+        #console-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 1, 10, 0.98); z-index: 10001; padding: 20px; box-sizing: border-box; flex-direction: column; align-items: center; justify-content: center; }
+        .console-btn { background: #1a0b35; border: 1px solid #e91e63; border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 11px; text-transform: uppercase; font-weight: bold; width: 100%; margin-bottom: 10px; }
+        .console-input { background: #120520; border: 1px solid #e91e63; border-radius: 8px; padding: 15px; color: white; font-size: 14px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-
     <div id="loading-screen">
         <div class="disclaimer">все персонажи вымышлены</div>
         <div class="moon-box"></div>
@@ -91,36 +36,70 @@
     </div>
 
     <div id="console-modal">
-        <div class="modal-title">Панель Создателя</div>
-        <div id="console-main-grid" class="console-grid">
-            <div class="console-btn" onclick="openShards()">Осколки</div>
-            <div class="console-btn" onclick="alert('Скоро')">Подписки</div>
-            <div class="console-btn" onclick="alert('Скоро')">Персонаж</div>
-            <div class="console-btn" onclick="alert('Скоро')">Цены</div>
-            <div class="console-btn" onclick="alert('Скоро')">Назначить админа</div>
-            <div class="console-btn" onclick="alert('Скоро')">Промокоды</div>
-            <div class="console-btn" onclick="alert('Скоро')">Задания</div>
+        <h2 style="color:#e91e63">КОНСОЛЬ</h2>
+        <div id="con-main">
+            <div class="console-btn" onclick="openS()">Осколки</div>
+            <div class="console-btn" onclick="location.reload()">Перезагрузить</div>
         </div>
-
-        <div id="shard-manager">
-            <input type="number" id="target-id" placeholder="Telegram ID" class="console-input">
-            <input type="number" id="shard-count" placeholder="Количество" class="console-input">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="console-btn" onclick="sendShards('add')" style="border-color: #4caf50; color: #4caf50;">Выдать</div>
-                <div class="console-btn" onclick="sendShards('take')" style="border-color: #f44336; color: #f44336;">Забрать</div>
-            </div>
-            <div class="console-btn" onclick="closeShards()" style="border-color: #555; margin-top: 10px;">Назад</div>
+        <div id="con-shards" style="display:none; width: 100%;">
+            <input type="number" id="tid" placeholder="Telegram ID" class="console-input">
+            <input type="number" id="amt" placeholder="Количество" class="console-input">
+            <button class="console-btn" onclick="send('add')" style="color:#4caf50">Выдать</button>
+            <button class="console-btn" onclick="send('take')" style="color:#f44336">Забрать</button>
+            <div onclick="closeS()" style="color:#555; text-align:center">Назад</div>
         </div>
-        <div id="console-exit" class="close-label" onclick="toggleConsole(false)">[ Закрыть ]</div>
+        <br><div onclick="toggleC(false)">[ ЗАКРЫТЬ ]</div>
     </div>
 
     <div id="app-content">
         <div class="header">
-            <div>
-                <div id="u-name" class="regular-nick">---</div>
-                <div id="u-id" class="user-id">---</div>
-            </div>
-            <div class="balance">🌙 <span id="u-shards">0</span></div>
+            <div><div id="un" class="ultra-nick">---</div><div id="ui" class="user-id">---</div></div>
+            <div class="balance">🌙 <span id="us">0</span></div>
         </div>
         <div class="menu-grid">
-            <div class="
+            <div class="menu-item">Чаты</div><div class="menu-item">Персонажи</div>
+            <div class="menu-item">Ежедневка</div><div class="menu-item">Задания</div>
+            <div class="menu-item">Магазин</div><div class="menu-item">Промокоды</div>
+            <div class="menu-item">Профиль</div><div class="menu-item">Настройки</div>
+            <div id="bc" class="menu-item btn-con" onclick="toggleC(true)">Консоль</div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const OID = 8287041036;
+
+        function toggleC(s){ document.getElementById('console-modal').style.display = s?'flex':'none'; }
+        function openS(){ document.getElementById('con-main').style.display='none'; document.getElementById('con-shards').style.display='block'; }
+        function closeS(){ document.getElementById('con-main').style.display='block'; document.getElementById('con-shards').style.display='none'; }
+
+        async function send(act) {
+            const id = document.getElementById('tid').value;
+            const a = document.getElementById('amt').value;
+            const r = await fetch('/api/admin/manage-shards', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ owner_id: OID, target_id: id, amount: a, action: act })
+            });
+            const d = await r.json(); alert(d.message || d.error);
+        }
+
+        function finishLoad() {
+            document.getElementById('loading-screen').style.display = "none";
+            document.getElementById('app-content').style.display = "flex";
+        }
+
+        // Запуск
+        const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
+        document.getElementById('un').innerText = user.first_name;
+        document.getElementById('ui').innerText = "ID: " + user.id;
+        
+        if(user.id == OID) document.getElementById('bc').style.display = "flex";
+
+        // Если через 3 сек не загрузилось - форсим
+        setTimeout(finishLoad, 3000);
+        // А так - по готовности
+        window.onload = finishLoad;
+    </script>
+</body>
+</html>
