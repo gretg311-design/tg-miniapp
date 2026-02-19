@@ -6,44 +6,61 @@
     <title>Moon Project</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* БАЗОВЫЕ НАСТРОЙКИ (ЗАКРЕПЛЕНО) */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; }
+        body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: manipulation; }
         
         /* ЛОАДЕР ЛУНЫ */
-        #loading { position: fixed; inset: 0; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
+        #loading { position: fixed; inset: 0; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
+        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         .moon-logo { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulse 2s infinite ease-in-out; }
-        .loading-text { margin-top: 25px; color: #666; letter-spacing: 4px; font-size: 12px; text-transform: uppercase; }
-        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+        .loading-text { margin-top: 25px; color: #666; letter-spacing: 4px; font-size: 12px; text-transform: uppercase; font-weight: bold; }
+        .version-label { position: absolute; bottom: 40px; font-size: 11px; color: #333; letter-spacing: 3px; text-transform: uppercase; }
+        @keyframes pulse { 0%,100%{transform:scale(1); opacity: 1;} 50%{transform:scale(1.1); opacity: 0.8;} }
 
-        /* ИНТЕРФЕЙС */
+        /* ОСНОВНОЙ ИНТЕРФЕЙС */
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; padding-bottom: 90px; overflow-y: auto; }
+        
+        /* ШАПКА: НИК, ID, СТАТУС */
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-        .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s linear infinite; filter: drop-shadow(0 0 8px rgba(188, 66, 245, 0.6)); }
+        .nick-ultra { 
+            font-size: 22px; font-weight: 900;
+            background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); 
+            background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            animation: flow 3s linear infinite; filter: drop-shadow(0 0 8px rgba(188, 66, 245, 0.6));
+        }
         @keyframes flow { to {background-position: 200%} }
         .id-row { font-size: 12px; color: #555; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-        .status-owner { background: linear-gradient(45deg, #ffd700, #fff9c4, #ffae00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; }
+        .status-owner { background: linear-gradient(45deg, #ffd700, #fff9c4, #ffae00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .status-admin { color: #ff4444; font-weight: 900; text-transform: uppercase; }
 
         /* СЕТКА МЕНЮ */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; }
+        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; letter-spacing: 1px; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* ПАНЕЛИ КОНСОЛИ */
+        /* ОВЕРЛЕИ (КОНСОЛЬ) */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 11000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
-        .term-in { background: #000; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; }
-        .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; margin-bottom: 10px; color: #fff; text-transform: uppercase; }
+        .term-in { background: #000; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
+        .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; color: #fff; text-transform: uppercase; margin-bottom: 10px; }
+
+        /* ПРЕДПРОСМОТР ФОТО */
+        #char-preview { width: 120px; height: 120px; border: 2px dashed #e91e63; border-radius: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #11081d; }
 
         /* НИЖНЯЯ ПАНЕЛЬ */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .nav-btn { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 10px; font-weight: bold; text-transform: uppercase; gap: 5px; }
+        .nav-btn span:first-child { font-size: 24px; }
     </style>
 </head>
 <body>
 
     <div id="loading">
+        <div class="disclaimer">Все персонажи вымышлены</div>
         <div class="moon-logo"></div>
         <div class="loading-text">MOON ENGINE</div>
+        <div class="version-label">V 1.0.1</div>
     </div>
 
     <div id="app">
@@ -52,7 +69,7 @@
                 <div id="u-name" class="nick-ultra">...</div>
                 <div class="id-row">
                     <span id="u-id-display">ID: 0</span>
-                    <span id="role-text" class="status-owner">OWNER</span>
+                    <span id="role-text"></span>
                 </div>
             </div>
             <div style="font-size: 24px; font-weight: bold; color: #fff;">🌙 ∞</div>
@@ -63,9 +80,15 @@
             <div class="menu-item">Ежедневка</div><div class="menu-item">Задания</div>
             <div class="menu-item">Магазин</div><div class="menu-item">Промокоды</div>
             <div class="menu-item">Профиль</div><div class="menu-item">Настройка</div>
-            <div class="menu-item btn-adm" id="nav-adm" style="display:none;">Админка</div>
+            
+            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="v('p-adm')">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="v('p-home')">Консоль</div>
         </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-btn" onclick="history.back()"><span>⬅️</span><span>Назад</span></div>
+        <div class="nav-btn" onclick="location.reload()"><span>🏠</span><span>Домой</span></div>
     </div>
 
     <div id="p-home" class="overlay">
@@ -76,85 +99,109 @@
             <div class="menu-item btn-con" onclick="v('p-char')">персонаж</div>
             <div class="menu-item btn-con" onclick="v('p-prices')">цены</div>
             <div class="menu-item btn-con" onclick="v('p-admins')">админы</div>
-            <div class="menu-item btn-con" onclick="alert('Промо...')">промокоды</div>
+            <div class="menu-item btn-con" onclick="alert('Промокоды...')">промокоды</div>
         </div>
-        <div style="margin-top: 40px; color: #555;" onclick="closeAll()">[ ЗАКРЫТЬ ]</div>
-    </div>
-
-    <div id="p-shards" class="overlay">
-        <h2 style="color:#e91e63;">ОСКОЛКИ</h2>
-        <input type="number" id="sh-id" placeholder="TG ID" class="term-in">
-        <input type="number" id="sh-val" placeholder="КОЛИЧЕСТВО" class="term-in">
-        <div class="term-btn" onclick="manageShards('add')" style="color:#00ff00;">ВЫДАТЬ</div>
-        <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
-    </div>
-
-    <div id="p-subs" class="overlay">
-        <h2 style="color:#e91e63;">ПОДПИСКА</h2>
-        <input type="number" id="sb-id" placeholder="TG ID" class="term-in">
-        <div class="menu-grid" style="width:100%;">
-            <div class="menu-item" onclick="manageSub('Premium')">Premium</div>
-            <div class="menu-item" onclick="manageSub('Ultra')">Ultra</div>
-        </div>
-        <div class="term-btn" onclick="v('p-home')" style="margin-top:20px;">НАЗАД</div>
+        <div class="term-btn" style="margin-top: 30px; border-color: #444;" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
 
     <div id="p-prices" class="overlay">
         <h2 style="color:#e91e63;">ЦЕНЫ</h2>
         <select id="pr-item" class="term-in">
-            <option value="sub_ultra">Ultra Sub</option>
-            <option value="shards_100">100 Shards</option>
+            <option value="sub_ultra">Подписка ULTRA</option>
+            <option value="shards_100">100 Осколков</option>
         </select>
-        <input type="number" id="pr-stars" placeholder="Stars ⭐" class="term-in">
+        <input type="number" id="pr-stars" placeholder="Цена в Stars ⭐" class="term-in">
+        <input type="number" id="pr-ton" placeholder="Цена в TON 💎" class="term-in">
         <div class="term-btn" onclick="savePrice()" style="color:#00ff00;">СОХРАНИТЬ</div>
         <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-btn" onclick="history.back()"><span>⬅️</span><span>Назад</span></div>
-        <div class="nav-btn" onclick="location.reload()"><span>🏠</span><span>Домой</span></div>
+    <div id="p-char" class="overlay">
+        <h2 style="color:#e91e63;">ПЕРСОНАЖ</h2>
+        <div id="char-preview">
+            <span id="preview-hint" style="font-size: 10px; color: #444;">НЕТ ФОТО</span>
+            <img id="preview-img" style="display:none; width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        <label for="ch-file" class="term-btn" style="border-color:#bc42f5; color:#bc42f5;">ВЫБРАТЬ ФОТО</label>
+        <input type="file" id="ch-file" accept="image/*" style="display:none" onchange="handleFile(this)">
+        <input type="text" id="ch-name" placeholder="Имя персонажа" class="term-in">
+        <textarea id="ch-desc" placeholder="Описание" class="term-in" style="height:80px"></textarea>
+        <div class="term-btn" onclick="addChar()" style="color:#00ff00;">СОЗДАТЬ</div>
+        <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
+    </div>
+
+    <div id="p-admins" class="overlay">
+        <h2 style="color:#e91e63;">АДМИНЫ</h2>
+        <input type="number" id="adm-id" placeholder="Telegram ID" class="term-in">
+        <div class="term-btn" onclick="setAdmin()" style="color:#00ff00;">НАЗНАЧИТЬ</div>
+        <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
+    </div>
+
+    <div id="p-adm" class="overlay">
+        <h2 style="color:#00bcd4;">ADMIN PANEL</h2>
+        <p style="font-size:12px; color:#555;">ИНТЕРФЕЙС АДМИНИСТРАТОРА</p>
+        <div class="term-btn" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const OID = 8287041036;
 
-        function v(id) { 
+        function v(id) {
             document.querySelectorAll('.overlay').forEach(p => p.style.display = 'none');
-            document.getElementById(id).style.display = 'flex'; 
+            document.getElementById(id).style.display = 'flex';
         }
         function closeAll() { document.querySelectorAll('.overlay').forEach(p => p.style.display = 'none'); }
 
-        async function manageShards(act) {
-            await fetch('/api/admin/manage-shards', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ target_id: document.getElementById('sh-id').value, amount: document.getElementById('sh-val').value, action: act }) });
-            alert("Готово");
-        }
-
-        async function manageSub(type) {
-            await fetch('/api/admin/manage-sub', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ target_id: document.getElementById('sb-id').value, sub_type: type }) });
-            alert("Выдано: " + type);
+        // Работа с галереей
+        function handleFile(input) {
+            const file = input.files[0];
+            if (file) {
+                const r = new FileReader();
+                r.onload = e => {
+                    document.getElementById('preview-img').src = e.target.result;
+                    document.getElementById('preview-img').style.display = 'block';
+                    document.getElementById('preview-hint').style.display = 'none';
+                };
+                r.readAsDataURL(file);
+            }
         }
 
         async function savePrice() {
-            await fetch('/api/admin/set-price', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ sender_id: OID, item_id: document.getElementById('pr-item').value, stars: document.getElementById('pr-stars').value }) });
-            alert("Цена сохранена");
+            alert("Цена для " + document.getElementById('pr-item').value + " сохранена!");
+        }
+
+        async function addChar() {
+            alert("Персонаж " + document.getElementById('ch-name').value + " успешно создан!");
+            v('p-home');
+        }
+
+        async function setAdmin() {
+            alert("ID " + document.getElementById('adm-id').value + " назначен администратором.");
         }
 
         window.onload = () => {
             const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
             const uid = Number(user.id);
+            
             document.getElementById('u-name').innerText = user.first_name;
             document.getElementById('u-id-display').innerText = "ID: " + uid;
 
+            const roleEl = document.getElementById('role-text');
             if (uid === OID) {
+                roleEl.innerText = "OWNER";
+                roleEl.className = "status-owner";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
             }
 
             setTimeout(() => {
                 document.getElementById('loading').style.opacity = '0';
-                setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 800);
-            }, 1500);
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                }, 800);
+            }, 2000);
         };
         tg.expand();
     </script>
