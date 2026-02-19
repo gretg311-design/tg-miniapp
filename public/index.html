@@ -35,9 +35,6 @@
         .term-in { background: #000; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; color: #fff; text-transform: uppercase; margin-bottom: 10px; cursor: pointer; }
         
-        .price-section { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
-        .section-title { font-size: 12px; color: #e91e63; font-weight: 900; margin-bottom: 15px; text-align: center; }
-
         /* НАВИГАЦИЯ */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .nav-btn { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 10px; font-weight: bold; text-transform: uppercase; }
@@ -58,7 +55,7 @@
                 <div id="u-name" class="nick-ultra">...</div>
                 <div style="font-size:12px; color:#555; margin-top:4px;">ID: <span id="u-id">0</span> <span id="role-text"></span></div>
             </div>
-            <div style="font-size: 22px;">🌙 ∞</div>
+            <div style="font-size: 22px; font-weight: bold; color: #fff;">🌙 <span id="shards-balance">0</span></div>
         </div>
         <div class="menu-grid">
             <div class="menu-item">Чаты</div><div class="menu-item">Персонажи</div>
@@ -71,7 +68,7 @@
     </div>
 
     <div id="p-home" class="overlay">
-        <div style="color:#e91e63; font-size:24px; font-weight:900; margin:30px 0; letter-spacing:5px;">CONSOLE</div>
+        <div style="color:#e91e63; font-size:24px; font-weight:900; margin:30px 0;">CONSOLE</div>
         <div class="menu-grid" style="width:100%;">
             <div class="menu-item btn-con" onclick="v('p-shards')">осколки</div>
             <div class="menu-item btn-con" onclick="v('p-subs')">подписки</div>
@@ -89,65 +86,41 @@
         <div class="menu-grid" style="width:100%;">
             <div class="menu-item btn-adm" onclick="v('p-shards')">выдать осколки</div>
             <div class="menu-item btn-adm" onclick="v('p-subs')">выдать подписку</div>
-            <div class="menu-item btn-adm" onclick="v('p-char')">создать персонажа</div>
+            <div class="menu-item btn-adm" onclick="v('p-char')">создать героя</div>
             <div class="menu-item btn-adm" onclick="v('p-promo-manage')">создать промо</div>
             <div class="menu-item btn-adm" onclick="v('p-tasks-manage')" style="grid-column: span 2;">создать задание</div>
         </div>
         <div class="term-btn" style="border-color:#00bcd4; margin-top:20px;" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
 
-    <div id="p-admins" class="overlay">
-        <h2 style="color:#e91e63;">УПРАВЛЕНИЕ АДМИНАМИ</h2>
-        <div class="price-section">
-            <input type="number" id="new-adm-id" placeholder="Telegram ID нового админа" class="term-in">
-            <div class="term-btn" onclick="alert('Админ назначен!')" style="color:#00ff00; border-color:#00ff00;">НАЗНАЧИТЬ</div>
-        </div>
-        <div id="admins-list" style="width:100%;">
-             <div style="font-size:10px; color:#555; margin-bottom:10px;">СПИСОК АДМИНОВ</div>
-             <div style="background:#0d041a; padding:10px; border-radius:10px; display:flex; justify-content:space-between;">
-                 <span>ID: 12345678</span>
-                 <span style="color:#ff4444;">УДАЛИТЬ</span>
-             </div>
-        </div>
-        <div class="term-btn" onclick="goBackPanel()" style="margin-top:20px;">НАЗАД</div>
-    </div>
-
     <div id="p-subs" class="overlay">
         <h2 style="color:#e91e63;">ВЫДАЧА ПОДПИСКИ</h2>
         <input type="number" placeholder="Введите TG ID" class="term-in">
         <div class="menu-grid" style="width:100%;">
-            <div class="menu-item" onclick="alert('Premium выдан')" style="color:#cd7f32; border-color:#cd7f32;">Premium</div>
-            <div class="menu-item" onclick="alert('Pro выдан')" style="color:#c0c0c0; border-color:#c0c0c0;">Pro</div>
-            <div class="menu-item" onclick="alert('VIP выдан')" style="color:#ffd700; border-color:#ffd700;">VIP</div>
-            <div class="menu-item" onclick="alert('Ultra выдан')" style="color:#bc42f5; border-color:#bc42f5;">Ultra</div>
+            <div class="menu-item" style="color:#cd7f32;">Premium</div>
+            <div class="menu-item" style="color:#c0c0c0;">Pro</div>
+            <div class="menu-item" style="color:#ffd700;">VIP</div>
+            <div class="menu-item" style="color:#bc42f5;">Ultra</div>
         </div>
         <div class="term-btn" onclick="goBackPanel()" style="margin-top:20px;">НАЗАД</div>
     </div>
 
-    <div id="p-tasks-manage" class="overlay">
-        <h2 style="color:#e91e63;">ЗАДАНИЯ</h2>
-        <div class="price-section">
-            <input type="text" placeholder="Название задания" class="term-in">
-            <input type="text" placeholder="Ссылка (https://...)" class="term-in">
-            <div class="term-btn" onclick="alert('Создано')">СОЗДАТЬ</div>
-        </div>
+    <div id="p-admins" class="overlay">
+        <h2 style="color:#e91e63;">АДМИНЫ</h2>
+        <input type="number" placeholder="Telegram ID" class="term-in">
+        <div class="term-btn" style="color:#00ff00;">НАЗНАЧИТЬ</div>
         <div class="term-btn" onclick="goBackPanel()">НАЗАД</div>
     </div>
 
     <div id="p-prices" class="overlay">
         <h2 style="color:#e91e63;">ЦЕНЫ</h2>
-        <div class="price-section">
-            <div class="section-title">ПОДПИСКИ / ОСКОЛКИ</div>
-            <input type="number" placeholder="Цена Stars" class="term-in">
-            <input type="number" placeholder="Цена TON" class="term-in">
-            <div class="term-btn">СОХРАНИТЬ</div>
-        </div>
         <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
     </div>
 
-    <div id="p-shards" class="overlay"><h2 style="color:#e91e63;">ОСКОЛКИ</h2><input type="number" placeholder="ID" class="term-in"><input type="number" placeholder="Кол-во" class="term-in"><div class="term-btn">ВЫДАТЬ</div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
+    <div id="p-shards" class="overlay"><h2 style="color:#e91e63;">ОСКОЛКИ</h2><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
     <div id="p-promo-manage" class="overlay"><h2 style="color:#e91e63;">ПРОМО</h2><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
     <div id="p-char" class="overlay"><h2 style="color:#e91e63;">ГЕРОЙ</h2><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
+    <div id="p-tasks-manage" class="overlay"><h2 style="color:#e91e63;">ЗАДАНИЯ</h2><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
 
     <div class="bottom-nav">
         <div class="nav-btn" onclick="history.back()"><span>⬅️</span><span>Назад</span></div>
@@ -168,18 +141,22 @@
         function goBackPanel() { isOwner ? v('p-home') : v('p-adm-main'); }
 
         window.onload = () => {
-            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
+            const user = tg.initDataUnsafe?.user || { id: 0, first_name: "User" };
             const uid = Number(user.id);
             document.getElementById('u-name').innerText = user.first_name;
             document.getElementById('u-id').innerText = uid;
             
+            const balanceEl = document.getElementById('shards-balance');
+
             if(uid === OID) {
                 isOwner = true;
+                balanceEl.innerText = "∞"; // ТЕБЕ БЕСКОНЕЧНО
                 const r = document.getElementById('role-text');
                 r.innerText = "OWNER"; r.className = "status-owner";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
             } else {
+                balanceEl.innerText = "100"; // АДМИНАМ И ЮЗЕРАМ - ЧИСЛО
                 document.getElementById('nav-adm').style.display = 'flex';
             }
 
