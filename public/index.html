@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Moon Project Final</title>
+    <title>Moon Project 2026</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -21,7 +21,6 @@
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; padding-bottom: 90px; overflow-y: auto; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
         .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s linear infinite; }
-        @keyframes flow { to {background-position: 200%} }
         .status-owner { background: linear-gradient(45deg, #ffd700, #ffae00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; }
 
         /* МЕНЮ */
@@ -35,8 +34,11 @@
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; color: #fff; text-transform: uppercase; margin-bottom: 10px; cursor: pointer; }
         
-        .price-section { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
-        .sec-label { font-size: 10px; color: #e91e63; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+        /* СПЕЦИАЛЬНОЕ ДЛЯ ПЕРСОНАЖА */
+        .price-section { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; }
+        #char-preview-box { width: 120px; height: 120px; border: 2px dashed #e91e63; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; background: #000; position: relative; overflow: hidden; }
+        #char-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+        #char-preview-box span { font-size: 10px; color: #444; text-align: center; padding: 10px; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .nav-btn { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 10px; font-weight: bold; text-transform: uppercase; }
@@ -80,63 +82,30 @@
         <div class="term-btn" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
 
-    <div id="p-tasks-manage" class="overlay">
-        <h2 style="color:#e91e63;">ЗАДАНИЯ</h2>
-        <div class="price-section">
-            <input type="text" placeholder="Название (напр. Канал Луны)" class="term-in">
-            <input type="text" placeholder="Ссылка (https://t.me/...)" class="term-in">
-            <select class="term-in">
-                <option value="shards">Награда: Осколки</option>
-                <option value="Premium">Награда: Premium</option>
-                <option value="Ultra">Награда: Ultra</option>
-            </select>
-            <input type="number" placeholder="Количество награды" class="term-in">
-            <div class="term-btn" style="color:#00ff00; border-color:#00ff00;">ДОБАВИТЬ ЗАДАНИЕ</div>
-        </div>
-        <div class="term-btn" onclick="goBackPanel()">НАЗАД</div>
-    </div>
-
-    <div id="p-prices" class="overlay">
-        <h2 style="color:#e91e63;">ЦЕНЫ</h2>
-        <div class="price-section">
-            <div class="sec-label">Premium / Pro</div>
-            <div style="display:flex; gap:5px;"><input type="number" placeholder="Prem Stars" class="term-in"><input type="number" placeholder="Pro Stars" class="term-in"></div>
-            <div class="sec-label" style="margin-top:10px;">VIP / Ultra</div>
-            <div style="display:flex; gap:5px;"><input type="number" placeholder="VIP Stars" class="term-in"><input type="number" placeholder="Ultra Stars" class="term-in"></div>
-            <div class="sec-label" style="margin-top:10px;">Осколки</div>
-            <input type="number" placeholder="Цена за 100 штук (Stars)" class="term-in">
-            <div class="term-btn" style="color:#00ff00; margin-top:10px;">СОХРАНИТЬ</div>
-        </div>
-        <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
-    </div>
-
     <div id="p-char" class="overlay">
-        <h2 style="color:#e91e63;">ПЕРСОНАЖ</h2>
+        <h2 style="color:#e91e63;">СОЗДАНИЕ ГЕРОЯ</h2>
         <div class="price-section">
-            <input type="text" placeholder="Имя героя" class="term-in">
-            <textarea placeholder="Описание способностей" class="term-in" style="height:80px;"></textarea>
-            <div class="term-btn" style="font-size:10px;">ЗАГРУЗИТЬ ФОТО (URL)</div>
-            <div class="term-btn" style="color:#00ff00;">СОХРАНИТЬ</div>
+            <div id="char-preview-box" onclick="document.getElementById('file-input').click()">
+                <img id="char-img" style="display:none;">
+                <span id="char-placeholder">НАЖМИ, ЧТОБЫ ВЫБРАТЬ ФОТО ИЗ ГАЛЕРЕИ</span>
+            </div>
+            <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="previewFile(this)">
+            
+            <input type="text" placeholder="Имя персонажа" class="term-in">
+            <textarea placeholder="Описание способностей..." class="term-in" style="height:100px;"></textarea>
+            
+            <div class="term-btn" style="color:#00ff00; border-color:#00ff00;">СОХРАНИТЬ В БАЗУ</div>
         </div>
         <div class="term-btn" onclick="goBackPanel()">НАЗАД</div>
     </div>
 
-    <div id="p-promo-manage" class="overlay">
-        <h2 style="color:#e91e63;">ПРОМОКОДЫ</h2>
-        <div class="price-section">
-            <input type="text" placeholder="КОД" class="term-in">
-            <input type="number" placeholder="Лимит активаций" class="term-in">
-            <select class="term-in"><option>Награда: Осколки</option><option>Награда: Premium</option></select>
-            <input type="number" placeholder="Кол-во награды" class="term-in">
-            <div class="term-btn" style="color:#00ff00;">СОЗДАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="goBackPanel()">НАЗАД</div>
-    </div>
-
+    <div id="p-tasks-manage" class="overlay"><h2 style="color:#e91e63;">ЗАДАНИЯ</h2><div class="price-section"><input type="text" placeholder="Название" class="term-in"><input type="text" placeholder="Ссылка" class="term-in"><select class="term-in"><option>Награда: Осколки</option><option>Premium</option><option>Ultra</option></select><input type="number" placeholder="Кол-во" class="term-in"><div class="term-btn">ДОБАВИТЬ</div></div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
+    <div id="p-prices" class="overlay"><h2 style="color:#e91e63;">ЦЕНЫ</h2><div class="price-section"><input type="number" placeholder="Premium Stars" class="term-in"><input type="number" placeholder="Pro Stars" class="term-in"><input type="number" placeholder="VIP Stars" class="term-in"><input type="number" placeholder="Ultra Stars" class="term-in"><div class="term-btn">СОХРАНИТЬ</div></div><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
+    <div id="p-promo-manage" class="overlay"><h2 style="color:#e91e63;">ПРОМО</h2><div class="price-section"><input type="text" placeholder="КОД" class="term-in"><input type="number" placeholder="Лимит" class="term-in"><div class="term-btn">СОЗДАТЬ</div></div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
+    <div id="p-shards" class="overlay"><h2 style="color:#e91e63;">ОСКОЛКИ</h2><div class="price-section"><input type="number" placeholder="ID" class="term-in"><input type="number" placeholder="Кол-во" class="term-in"><div class="term-btn">ВЫДАТЬ</div></div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
+    <div id="p-subs" class="overlay"><h2 style="color:#e91e63;">ПОДПИСКИ</h2><input type="number" placeholder="ID" class="term-in"><div class="menu-grid" style="width:100%;"><div class="menu-item">Premium</div><div class="menu-item">Pro</div><div class="menu-item">VIP</div><div class="menu-item">Ultra</div></div><div class="term-btn" style="margin-top:20px;" onclick="goBackPanel()">НАЗАД</div></div>
+    <div id="p-admins" class="overlay"><h2 style="color:#e91e63;">АДМИНЫ</h2><div class="price-section"><input type="number" placeholder="ID" class="term-in"><div class="term-btn">НАЗНАЧИТЬ</div></div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
     <div id="p-adm-main" class="overlay"><div style="color:#00bcd4; font-size:24px; font-weight:900; margin:30px 0;">ADMIN PANEL</div><div class="menu-grid" style="width:100%;"><div class="menu-item btn-adm" onclick="v('p-shards')">выдать осколки</div><div class="menu-item btn-adm" onclick="v('p-subs')">выдать подписку</div><div class="menu-item btn-adm" onclick="v('p-char')">создать героя</div><div class="menu-item btn-adm" onclick="v('p-promo-manage')">создать промо</div><div class="menu-item btn-adm" onclick="v('p-tasks-manage')" style="grid-column: span 2;">создать задание</div></div><div class="term-btn" style="border-color:#00bcd4; margin-top:30px;" onclick="closeAll()">ЗАКРЫТЬ</div></div>
-    <div id="p-shards" class="overlay"><h2 style="color:#e91e63;">ОСКОЛКИ</h2><input type="number" placeholder="TG ID" class="term-in"><input type="number" placeholder="Кол-во" class="term-in"><div class="term-btn">ВЫДАТЬ</div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
-    <div id="p-subs" class="overlay"><h2 style="color:#e91e63;">ПОДПИСКИ</h2><input type="number" placeholder="TG ID" class="term-in"><div class="menu-grid" style="width:100%;"><div class="menu-item">Premium</div><div class="menu-item">Pro</div><div class="menu-item">VIP</div><div class="menu-item">Ultra</div></div><div class="term-btn" style="margin-top:20px;" onclick="goBackPanel()">НАЗАД</div></div>
-    <div id="p-admins" class="overlay"><h2 style="color:#e91e63;">АДМИНЫ</h2><input type="number" placeholder="TG ID" class="term-in"><div class="term-btn">НАЗНАЧИТЬ</div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
 
     <div class="bottom-nav">
         <div class="nav-btn" onclick="history.back()"><span>⬅️</span><span>Назад</span></div>
@@ -151,6 +120,22 @@
         function v(id) { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
         function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
         function goBackPanel() { isOwner ? v('p-home') : v('p-adm-main'); }
+
+        // ЗАГРУЗКА ФОТО
+        function previewFile(input) {
+            const file = input.files[0];
+            const preview = document.getElementById('char-img');
+            const placeholder = document.getElementById('char-placeholder');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
 
         window.onload = () => {
             const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
