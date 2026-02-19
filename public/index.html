@@ -6,12 +6,30 @@
     <title>Moon Project 2026</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Полная блокировка системных жестов и закрытия */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-touch-callout: none; -webkit-user-select: none; }
-        html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; }
+        html, body { 
+            background: #05010a; 
+            color: white; 
+            font-family: sans-serif; 
+            margin: 0; 
+            overflow: hidden; 
+            height: 100vh; 
+            width: 100vw; 
+            touch-action: none; 
+            overscroll-behavior: none; 
+        }
         
+        /* Загрузочный экран по твоим требованиям */
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
-        .moon-logo { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulse 2s infinite; }
-        .version-label { position: absolute; bottom: 40px; color: #333; font-size: 11px; letter-spacing: 2px; }
+        
+        .disclaimer { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.3); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulse 2s infinite; }
+        
+        .loading-text { margin-top: 25px; font-size: 16px; font-weight: 300; letter-spacing: 2px; color: #fff; opacity: 0.8; }
+        
+        .version-label { position: absolute; bottom: 30px; color: #333; font-size: 12px; letter-spacing: 1px; }
 
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; touch-action: pan-y; padding-bottom: 110px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
@@ -27,11 +45,10 @@
         
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
         .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #1a0b2e; }
-        .info-row:last-child { border: none; }
         .info-label { color: #555; font-size: 11px; text-transform: uppercase; font-weight: bold; }
         .info-val { color: #fff; font-size: 14px; font-weight: bold; }
 
-        .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; -webkit-user-select: text; }
+        .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; color: #fff; text-transform: uppercase; margin-bottom: 10px; cursor: pointer; }
         
         .settings-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
@@ -49,8 +66,10 @@
 <body oncontextmenu="return false">
 
     <div id="loading">
+        <div class="disclaimer">Все персонажи вымышлены</div>
         <div class="moon-logo"></div>
-        <div class="version-label">V 1.0.1</div>
+        <div class="loading-text">Загрузка мира...</div>
+        <div class="version-label">v 1.0.1</div>
     </div>
 
     <div id="app">
@@ -111,9 +130,8 @@
         <div class="menu-grid">
             <div class="menu-item btn-adm" onclick="openPanel('p-shards')">ВЫДАТЬ ОСКОЛКИ</div>
             <div class="menu-item btn-adm" onclick="openPanel('p-subs')">ВЫДАТЬ ПОДПИСКУ</div>
-            <div class="menu-item btn-adm" onclick="openPanel('p-char')">ДОБАВИТЬ ГЕРОЯ</div>
-            <div class="menu-item btn-adm" onclick="openPanel('p-promo-manage')">ПРОМОКОДЫ</div>
-            <div class="menu-item btn-adm" onclick="openPanel('p-tasks-manage')" style="grid-column: span 2;">ДОБАВИТЬ ЗАДАНИЕ</div>
+            <div class="menu-item btn-adm" id="adm-add-task">ДОБАВИТЬ ЗАДАНИЕ</div>
+            <div class="menu-item btn-adm" id="adm-add-promo">ДОБАВИТЬ ПРОМО</div>
         </div>
         <div class="term-btn" style="margin-top:20px;" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
@@ -123,11 +141,8 @@
         <div class="menu-grid">
             <div class="menu-item btn-con" onclick="openPanel('p-shards')">УПРАВЛЕНИЕ ОСКОЛКАМИ</div>
             <div class="menu-item btn-con" onclick="openPanel('p-subs')">УПРАВЛЕНИЕ ПОДПИСКАМИ</div>
-            <div class="menu-item btn-con" onclick="openPanel('p-char')">УПРАВЛЕНИЕ ГЕРОЯМИ</div>
-            <div class="menu-item btn-con" onclick="openPanel('p-prices')">ЦЕНЫ STARS</div>
             <div class="menu-item btn-con" onclick="openPanel('p-admins')">УПРАВЛЕНИЕ АДМИНАМИ</div>
-            <div class="menu-item btn-con" onclick="openPanel('p-promo-manage')">УПРАВЛЕНИЕ ПРОМО</div>
-            <div class="menu-item btn-con" onclick="openPanel('p-tasks-manage')" style="grid-column: span 2;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</div>
+            <div class="menu-item btn-con" onclick="openPanel('p-tasks-manage')">ЗАДАНИЯ</div>
         </div>
         <div class="term-btn" style="margin-top:20px;" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
@@ -141,59 +156,6 @@
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-subs" class="overlay">
-        <h2 style="color:#e91e63;">ПОДПИСКИ</h2>
-        <input type="number" id="sub-id" placeholder="TG ID" class="term-in">
-        <input type="number" id="sub-days" placeholder="Срок (дней)" class="term-in" value="30">
-        <div class="menu-grid">
-            <div class="menu-item" onclick="giveSub('Premium')">PREMIUM</div>
-            <div class="menu-item" onclick="giveSub('Pro')">PRO</div>
-            <div class="menu-item" onclick="giveSub('VIP')">VIP</div>
-            <div class="menu-item" onclick="giveSub('Ultra')">ULTRA</div>
-        </div>
-        <div class="term-btn" style="margin-top:15px; color:#ff4444; border-color:#ff4444;" onclick="giveSub('Free')">СНЯТЬ ПОДПИСКУ</div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-admins" class="overlay">
-        <h2 style="color:#e91e63;">АДМИНЫ</h2>
-        <input type="number" id="adm-id-input" placeholder="TG ID" class="term-in">
-        <div class="term-btn" style="border-color:#00ff00; color:#00ff00;" onclick="handleAdmin('add')">НАЗНАЧИТЬ</div>
-        <div class="term-btn" style="border-color:#ff0000; color:#ff0000;" onclick="handleAdmin('remove')">СНЯТЬ</div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-char" class="overlay">
-        <h2 style="color:#e91e63;">ГЕРОИ</h2>
-        <input type="file" id="fi" style="display:none;" onchange="prev(this)">
-        <div onclick="document.getElementById('fi').click()" style="width:100px; height:100px; border:1px solid #e91e63; display:flex; align-items:center; justify-content:center; cursor:pointer; margin-bottom:10px;"><img id="cp" style="width:100%; height:100%; object-fit:cover; display:none;"><span>ФОТО</span></div>
-        <input type="text" placeholder="Имя героя" class="term-in">
-        <textarea class="term-in" placeholder="Описание/Промпт" style="height:80px;"></textarea>
-        <div class="term-btn" style="color:#00ff00; border-color:#00ff00;">ДОБАВИТЬ</div>
-        <div class="term-btn" style="color:#ff4444; border-color:#ff4444;" id="btn-del-char">УДАЛИТЬ ГЕРОЯ (ПО ИМЕНИ)</div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-promo-manage" class="overlay">
-        <h2 style="color:#e91e63;">ПРОМОКОДЫ</h2>
-        <input type="text" placeholder="Название кода" class="term-in">
-        <input type="number" placeholder="Сумма осколков" class="term-in">
-        <input type="number" placeholder="Лимит активаций" class="term-in">
-        <div class="term-btn" style="color:#00ff00; border-color:#00ff00;">СОЗДАТЬ</div>
-        <div class="term-btn" style="color:#ff4444; border-color:#ff4444;">УДАЛИТЬ</div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-tasks-manage" class="overlay">
-        <h2 style="color:#e91e63;">ЗАДАНИЯ</h2>
-        <input type="text" placeholder="Текст задания" class="term-in">
-        <input type="text" placeholder="Ссылка (tg://...)" class="term-in">
-        <input type="number" placeholder="Награда" class="term-in">
-        <div class="term-btn" style="color:#00ff00; border-color:#00ff00;">ДОБАВИТЬ</div>
-        <div class="term-btn" style="color:#ff4444; border-color:#ff4444;" id="btn-del-task">УДАЛИТЬ (ПО ТЕКСТУ)</div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
     <div class="bottom-nav">
         <div class="nav-btn" onclick="back()"><span>⬅️</span><span>Назад</span></div>
         <div class="nav-btn" onclick="closeAll()"><span>🏠</span><span>Домой</span></div>
@@ -203,13 +165,23 @@
         const tg = window.Telegram.WebApp;
         const OID = 8287041036;
         let stack = [];
-        let curGender = localStorage.getItem('m_gen') || 'm';
-
-        const getDB = (k) => JSON.parse(localStorage.getItem(k) || "{}");
-        const setDB = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
         tg.enableClosingConfirmation();
         tg.expand();
+
+        // ЖЕСТКАЯ БЛОКИРОВКА ЗАКРЫТИЯ ПРИ СВАЙПЕ ВНИЗ
+        let startY = 0;
+        document.addEventListener('touchstart', (e) => { startY = e.touches[0].pageY; }, {passive: false});
+        document.addEventListener('touchmove', (e) => {
+            const y = e.touches[0].pageY;
+            const scrollTop = document.getElementById('app').scrollTop;
+            if (scrollTop <= 0 && y > startY) {
+                if (e.cancelable) e.preventDefault(); // Запрещаем тянуть вниз
+            }
+        }, {passive: false});
+
+        const getDB = (k) => JSON.parse(localStorage.getItem(k) || "{}");
+        const setDB = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
         function openPanel(id) {
             const current = document.querySelector('.overlay[style*="display: flex"]');
@@ -228,9 +200,10 @@
             } else { closeAll(); }
         }
 
-        // ЛОГИКА НАСТРОЕК
         function updateLen(v) { document.getElementById('len-val').innerText = v; }
         function updateSex(v) { document.getElementById('sex-val').innerText = v; }
+        
+        let curGender = localStorage.getItem('m_gen') || 'm';
         function setGender(g) {
             curGender = g;
             document.getElementById('g-m').classList.toggle('active', g === 'm');
@@ -242,11 +215,10 @@
             localStorage.setItem('m_gen', curGender);
             localStorage.setItem('m_len', document.getElementById('len-slider').value);
             localStorage.setItem('m_sex', document.getElementById('sex-slider').value);
-            tg.showAlert("Настройки сохранены!");
+            tg.showAlert("Готово!");
             initUI();
         }
 
-        // ОБНОВЛЕНИЕ ИНФОРМАЦИИ В ПРОФИЛЕ
         function updateInfo() {
             const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
             const uid = String(user.id);
@@ -264,88 +236,27 @@
             document.getElementById('i-role').innerText = (uid === String(OID)) ? 'Овнер' : (admins.includes(uid) ? 'Админ' : 'Юзер');
         }
 
-        // СИСТЕМНЫЕ ФУНКЦИИ (ВЫДАЧА)
-        function giveShards(mode) {
-            const id = document.getElementById('shard-id').value;
-            const amount = parseInt(document.getElementById('shard-amount').value);
-            if(!id || isNaN(amount)) return tg.showAlert("Заполни поля!");
-            let shardsDB = getDB('m_shards');
-            let current = shardsDB[id] || 0;
-            shardsDB[id] = (mode === 'add') ? current + amount : Math.max(0, current - amount);
-            setDB('m_shards', shardsDB);
-            tg.showAlert("Баланс обновлен!");
-            initUI();
-        }
-
-        function giveSub(type) {
-            const id = document.getElementById('sub-id').value;
-            if(!id) return tg.showAlert("Введи ID!");
-            let subsDB = getDB('m_subs');
-            subsDB[id] = type;
-            setDB('m_subs', subsDB);
-            tg.showAlert("Подписка выдана!");
-            initUI();
-        }
-
-        function handleAdmin(action) {
-            const id = document.getElementById('adm-id-input').value;
-            if(!id) return;
-            let admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            if(action === 'add') { if(!admins.includes(id)) admins.push(id); } 
-            else { admins = admins.filter(a => a !== id); }
-            localStorage.setItem('m_admins', JSON.stringify(admins));
-            tg.showAlert("Готово!");
-            initUI();
-        }
-
         function initUI() {
             const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
             const uid = String(user.id);
             const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            
-            document.getElementById('nav-adm').style.display = 'none';
-            document.getElementById('nav-con').style.display = 'none';
 
-            // Загрузка сохраненных настроек в инпуты
             document.getElementById('u-name').innerText = localStorage.getItem('m_nick') || user.first_name;
-            document.getElementById('set-nick').value = localStorage.getItem('m_nick') || user.first_name;
             document.getElementById('u-id').innerText = uid;
             
-            const savedLen = localStorage.getItem('m_len') || 45;
-            const savedSex = localStorage.getItem('m_sex') || 0;
-            document.getElementById('len-slider').value = savedLen;
-            document.getElementById('len-val').innerText = savedLen;
-            document.getElementById('sex-slider').value = savedSex;
-            document.getElementById('sex-val').innerText = savedSex;
-            setGender(localStorage.getItem('m_gen') || 'm');
-
+            // Права доступа
             if(uid === String(OID)) {
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('role-text').innerText = "OWNER";
                 document.getElementById('role-text').className = "status-owner";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
-                // Овнеру можно всё
-                document.getElementById('len-slider').max = 100;
-                document.getElementById('sex-slider').max = 6;
             } else if (admins.includes(uid)) {
                 document.getElementById('shards-balance').innerText = getDB('m_shards')[uid] || 0;
                 document.getElementById('role-text').innerText = "ADMIN";
                 document.getElementById('nav-adm').style.display = 'flex';
-                document.getElementById('btn-del-task').style.display = 'none';
-                document.getElementById('btn-del-char').style.display = 'none';
             } else {
                 document.getElementById('shards-balance').innerText = getDB('m_shards')[uid] || 0;
-                document.getElementById('role-text').innerText = "";
-            }
-        }
-
-        function prev(input) {
-            const f = input.files[0];
-            if (f) {
-                const r = new FileReader();
-                r.onload = e => { document.getElementById('cp').src = e.target.result; document.getElementById('cp').style.display='block'; };
-                r.readAsDataURL(f);
             }
         }
 
@@ -353,8 +264,11 @@
             initUI();
             setTimeout(() => {
                 document.getElementById('loading').style.opacity = '0';
-                setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 800);
-            }, 2500);
+                setTimeout(() => { 
+                    document.getElementById('loading').style.display = 'none'; 
+                    document.getElementById('app').style.display = 'flex'; 
+                }, 800);
+            }, 3000);
         };
     </script>
 </body>
