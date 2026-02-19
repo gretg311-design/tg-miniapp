@@ -9,7 +9,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: manipulation; }
         
-        /* КРАСИВАЯ ЛУНА */
+        /* КРАСИВАЯ ЛУНА (ЗАКРЕПЛЕНО) */
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
         .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         .moon-logo { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulse 2s infinite ease-in-out; }
@@ -20,13 +20,7 @@
         /* ИНТЕРФЕЙС */
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; padding-bottom: 90px; overflow-y: auto; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-        .nick-ultra { 
-            font-size: 22px; font-weight: 900;
-            background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); 
-            background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-            animation: flow 3s linear infinite; filter: drop-shadow(0 0 8px rgba(188, 66, 245, 0.6));
-        }
-        @keyframes flow { to {background-position: 200%} }
+        .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s linear infinite; }
         .status-owner { background: linear-gradient(45deg, #ffd700, #ffae00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; }
 
         /* МЕНЮ */
@@ -40,8 +34,8 @@
         .term-in { background: #000; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; color: #fff; text-transform: uppercase; margin-bottom: 10px; }
         
+        /* БЛОКИ */
         .price-section { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
-        .task-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 
         /* НАВИГАЦИЯ */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
@@ -70,13 +64,13 @@
             <div class="menu-item">Ежедневка</div><div class="menu-item">Задания</div>
             <div class="menu-item">Магазин</div><div class="menu-item">Промокоды</div>
             <div class="menu-item">Профиль</div><div class="menu-item">Настройка</div>
-            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="v('p-adm')">Админка</div>
+            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="v('p-adm-main')">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="v('p-home')">Консоль</div>
         </div>
     </div>
 
     <div id="p-home" class="overlay">
-        <div style="color:#e91e63; font-size:24px; font-weight:900; margin:30px 0; letter-spacing:5px;">CONSOLE</div>
+        <div style="color:#e91e63; font-size:24px; font-weight:900; margin:30px 0;">CONSOLE</div>
         <div class="menu-grid" style="width:100%;">
             <div class="menu-item btn-con" onclick="v('p-shards')">осколки</div>
             <div class="menu-item btn-con" onclick="v('p-subs')">подписки</div>
@@ -86,45 +80,53 @@
             <div class="menu-item btn-con" onclick="v('p-promo-manage')">промокоды</div>
             <div class="menu-item btn-con" onclick="v('p-tasks-manage')" style="grid-column: span 2;">задания</div>
         </div>
-        <div class="term-btn" style="margin-top:30px;" onclick="closeAll()">ЗАКРЫТЬ</div>
+        <div class="term-btn" onclick="closeAll()">ЗАКРЫТЬ</div>
+    </div>
+
+    <div id="p-adm-main" class="overlay">
+        <div style="color:#00bcd4; font-size:24px; font-weight:900; margin:30px 0;">ADMIN PANEL</div>
+        <div class="menu-grid" style="width:100%;">
+            <div class="menu-item btn-adm" onclick="v('p-shards')">выдать осколки</div>
+            <div class="menu-item btn-adm" onclick="v('p-subs')">выдать подписку</div>
+            <div class="menu-item btn-adm" onclick="v('p-char')">создать персонажа</div>
+            <div class="menu-item btn-adm" onclick="v('p-promo-manage')">создать промо</div>
+            <div class="menu-item btn-adm" onclick="v('p-tasks-manage')" style="grid-column: span 2;">создать задание</div>
+        </div>
+        <div style="margin-top:20px; font-size:9px; color:#444; text-align:center;">У ВАС НЕТ ПРАВ НА УДАЛЕНИЕ ИЛИ ИЗМЕНЕНИЕ ЦЕН</div>
+        <div class="term-btn" style="border-color:#00bcd4; margin-top:20px;" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
 
     <div id="p-tasks-manage" class="overlay">
-        <h2 style="color:#e91e63;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</h2>
+        <h2 style="color:#e91e63;">ЗАДАНИЯ</h2>
         <div class="price-section">
-            <input type="text" id="task-name" placeholder="Название (Подпишись на канал)" class="term-in">
-            <input type="text" id="task-link" placeholder="Ссылка (https://t.me/...)" class="term-in">
-            <select id="task-reward-type" class="term-in">
-                <option value="shards">Награда: Осколки</option>
-                <option value="Premium">Награда: Premium</option>
-                <option value="Pro">Награда: Pro</option>
-                <option value="VIP">Награда: VIP</option>
-                <option value="Ultra">Награда: Ultra</option>
+            <input type="text" id="task-name" placeholder="Название задания" class="term-in">
+            <input type="text" id="task-link" placeholder="Ссылка (https://...)" class="term-in">
+            <select id="task-reward" class="term-in">
+                <option value="shards">Осколки</option>
+                <option value="Premium">Premium</option>
+                <option value="Ultra">Ultra</option>
             </select>
-            <input type="number" id="task-reward-val" placeholder="Кол-во (если осколки)" class="term-in">
-            <div class="term-btn" onclick="alert('Задание создано!')" style="color:#00ff00; border-color:#00ff00;">ДОБАВИТЬ ЗАДАНИЕ</div>
+            <div class="term-btn" onclick="alert('Добавлено!')">СОЗДАТЬ</div>
         </div>
-        
-        <div id="tasks-list" style="width:100%;">
-            <div style="font-size:10px; color:#555; margin-bottom:10px;">АКТИВНЫЕ ЗАДАНИЯ</div>
-            <div class="task-card">
-                <div><b>Moon Channel</b><br><small>Reward: 50 Shards</small></div>
-                <div style="color:#ff4444;" onclick="alert('Удалено (Только Owner)')">🗑️</div>
+        <div id="tasks-list-container" style="width:100%;">
             </div>
-        </div>
-        <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
+        <div class="term-btn" onclick="goBackPanel()">НАЗАД</div>
     </div>
 
     <div id="p-promo-manage" class="overlay">
         <h2 style="color:#e91e63;">ПРОМОКОДЫ</h2>
-        <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
+        <div class="price-section">
+            <input type="text" placeholder="КОД" class="term-in">
+            <input type="number" placeholder="Лимит активаций" class="term-in">
+            <div class="term-btn" onclick="alert('Промо создан!')">СОЗДАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="goBackPanel()">НАЗАД</div>
     </div>
+
     <div id="p-prices" class="overlay"><h2 style="color:#e91e63;">ЦЕНЫ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
-    <div id="p-shards" class="overlay"><h2 style="color:#e91e63;">ОСКОЛКИ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
-    <div id="p-subs" class="overlay"><h2 style="color:#e91e63;">ПОДПИСКИ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
-    <div id="p-char" class="overlay"><h2 style="color:#e91e63;">ПЕРСОНАЖ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
-    <div id="p-admins" class="overlay"><h2 style="color:#e91e63;">АДМИНЫ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
-    <div id="p-adm" class="overlay"><h2 style="color:#00bcd4;">ADMIN PANEL</h2><div class="term-btn" onclick="closeAll()">ЗАКРЫТЬ</div></div>
+    <div id="p-shards" class="overlay"><h2 style="color:#e91e63;">ОСКОЛКИ</h2><input type="number" placeholder="ID" class="term-in"><input type="number" placeholder="Кол-во" class="term-in"><div class="term-btn" onclick="alert('Выдано!')">ВЫДАТЬ</div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
+    <div id="p-subs" class="overlay"><h2 style="color:#e91e63;">ПОДПИСКИ</h2><input type="number" placeholder="ID" class="term-in"><div class="menu-grid" style="width:100%;"><div class="menu-item" onclick="alert('OK')">Premium</div><div class="menu-item" onclick="alert('OK')">Ultra</div></div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
+    <div id="p-char" class="overlay"><h2 style="color:#e91e63;">НОВЫЙ ГЕРОЙ</h2><input type="text" placeholder="Имя" class="term-in"><div class="term-btn" onclick="alert('Создан!')">СОХРАНИТЬ</div><div class="term-btn" onclick="goBackPanel()">НАЗАД</div></div>
 
     <div class="bottom-nav">
         <div class="nav-btn" onclick="history.back()"><span>⬅️</span><span>Назад</span></div>
@@ -134,28 +136,33 @@
     <script>
         const tg = window.Telegram.WebApp;
         const OID = 8287041036;
+        let isOwner = false;
 
         function v(id) { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
         function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
+        function goBackPanel() { isOwner ? v('p-home') : v('p-adm-main'); }
 
         window.onload = () => {
-            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
+            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "User" };
             const uid = Number(user.id);
             document.getElementById('u-name').innerText = user.first_name;
             document.getElementById('u-id').innerText = uid;
             
             if(uid === OID) {
+                isOwner = true;
                 const r = document.getElementById('role-text');
                 r.innerText = "OWNER"; r.className = "status-owner";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
+            } else {
+                // Если зашел админ (не овнер)
+                document.getElementById('nav-adm').style.display = 'flex';
             }
 
             setTimeout(() => {
-                const loader = document.getElementById('loading');
-                loader.style.opacity = '0';
+                document.getElementById('loading').style.opacity = '0';
                 setTimeout(() => { 
-                    loader.style.display = 'none'; 
+                    document.getElementById('loading').style.display = 'none'; 
                     document.getElementById('app').style.display = 'flex'; 
                 }, 800);
             }, 2500);
