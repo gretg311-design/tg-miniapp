@@ -9,37 +9,76 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; }
         
-        /* ЛОАДЕР (Твои надписи на месте) */
+        /* ЛОАДЕР */
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; }
+        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #555; text-transform: uppercase; }
         .version { position: absolute; bottom: 30px; font-size: 12px; color: #333; letter-spacing: 3px; text-transform: uppercase; }
         .moon-logo { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 30px #fff; animation: p 2s infinite ease-in-out; }
         @keyframes p { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
 
-        /* ГЛАВНОЕ МЕНЮ */
+        /* ГЛАВНОЕ МЕНЮ - СДЕЛАЛ ЯРЧЕ */
         #app { display: none; padding: 20px; height: 100vh; flex-direction: column; }
-        .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: s 3s linear infinite; font-weight: 900; font-size: 22px; }
+        .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: s 3s linear infinite; font-weight: 900; font-size: 22px; filter: drop-shadow(0 0 8px #bc42f5); }
         @keyframes s { to {background-position: 200%} }
-        .sub-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 800; background: #bc42f5; color: white; }
+        .sub-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 800; background: #bc42f5; color: white; box-shadow: 0 0 10px #bc42f5; }
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
-        .menu-item { background: #0d0415; border: 1px solid #1a0b2e; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; height: 65px; color: #444; }
-        .btn-owner { border-color: #2d1b4d; color: #fff; display: none; } /* Обычные кнопки Овнера */
+        .menu-item { 
+            background: #1a0b2e; /* Сделал фон кнопок светлее */
+            border: 1px solid #3d2563; /* Ярче границы */
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-transform: uppercase; 
+            font-weight: bold; 
+            font-size: 11px; 
+            height: 65px; 
+            color: #eee; /* Ярче текст */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+        }
+        .menu-item:active { transform: scale(0.95); background: #2d1b4d; }
+        .btn-owner { border-color: #5d35b0; color: #fff; display: none; } 
 
-        /* КРАСИВАЯ КОНСОЛЬ (КАК НА СКРИНЕ) */
-        #console-overlay { display: none; position: fixed; inset: 0; background: rgba(5, 1, 10, 0.95); z-index: 10001; flex-direction: column; align-items: center; padding: 40px 20px; }
-        .console-title { color: #e91e63; font-size: 24px; font-weight: 900; letter-spacing: 4px; margin-bottom: 30px; text-transform: uppercase; }
+        /* КРАСИВАЯ КОНСОЛЬ */
+        #console-overlay { display: none; position: fixed; inset: 0; background: rgba(5, 1, 10, 0.98); z-index: 10001; flex-direction: column; align-items: center; padding: 40px 20px; overflow-y: auto; }
+        .console-title { color: #e91e63; font-size: 26px; font-weight: 900; letter-spacing: 6px; margin-bottom: 30px; text-transform: uppercase; text-shadow: 0 0 15px #e91e63; }
         .console-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .console-card { background: #130722; border: 1px solid #e91e63; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-size: 11px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 0 15px rgba(233, 30, 99, 0.1); }
-        .close-text { margin-top: 30px; color: #555; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
+        .console-card { 
+            background: #1a0731; 
+            border: 1px solid #e91e63; 
+            border-radius: 12px; 
+            height: 70px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-transform: uppercase; 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: white; 
+            box-shadow: 0 0 15px rgba(233, 30, 99, 0.2); 
+        }
+        .close-text { margin-top: 30px; color: #777; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; padding: 10px; }
 
-        /* ПОД-МЕНЮ ВНУТРИ КОНСОЛИ */
+        /* ПОД-МЕНЮ И ФОТО */
         .term-in { background: #000; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
-        .term-btn { background: #1a0b35; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; margin-bottom: 8px; color: white; width: 100%; }
+        .term-btn { background: #250d45; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; margin-bottom: 8px; color: white; width: 100%; box-shadow: 0 0 10px rgba(233, 30, 99, 0.1); }
         
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; display: flex; border-top: 1px solid #1a0b35; }
-        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #222; font-weight: bold; text-transform: uppercase; }
-        #char-img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; display: none; margin-bottom: 10px; border: 1px solid #e91e63; }
+        /* ПРЕВЬЮ ФОТО - ИСПРАВЛЕНО ЧТОБЫ НЕ ОБРЕЗАЛО */
+        #char-img-preview { 
+            width: 100%; 
+            max-height: 250px; /* Увеличил высоту */
+            object-fit: contain; /* Теперь фото не обрезается, а вписывается целиком */
+            background: #000;
+            border-radius: 8px; 
+            display: none; 
+            margin-bottom: 15px; 
+            border: 1px solid #e91e63; 
+        }
+
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; display: flex; border-top: 1px solid #1a0b35; background: #05010a; }
+        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #444; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -57,9 +96,9 @@
                     <span id="u-name" class="nick-default">User</span>
                     <span id="u-badge" class="sub-tag" style="display:none;"></span>
                 </div>
-                <div id="u-id" style="font-size:10px; color:#333; margin-top:4px;">ID: ---</div>
+                <div id="u-id" style="font-size:10px; color:#444; margin-top:4px;">ID: ---</div>
             </div>
-            <div style="color:#ffcc00; font-size:24px; font-weight: bold;">🌙 <span id="u-shards">0</span></div>
+            <div style="color:#ffcc00; font-size:24px; font-weight: bold; text-shadow: 0 0 10px rgba(255,204,0,0.3);">🌙 <span id="u-shards">0</span></div>
         </div>
 
         <div class="menu-grid">
@@ -68,7 +107,7 @@
             <div class="menu-item">Магазин</div><div class="menu-item">Промокоды</div>
             <div class="menu-item">Профиль</div><div class="menu-item">Настройки</div>
             <div class="menu-item btn-owner" id="nav-adm">Админка</div>
-            <div class="menu-item btn-owner" id="nav-con" onclick="openConsole()" style="border-color:#e91e63; color:#e91e63;">Консоль</div>
+            <div class="menu-item btn-owner" id="nav-con" onclick="openConsole()" style="border-color:#e91e63; color:#e91e63; box-shadow: 0 0 15px rgba(233,30,99,0.3);">Консоль</div>
         </div>
 
         <div class="nav">
@@ -94,19 +133,19 @@
             <input type="number" id="sh-count" placeholder="КОЛИЧЕСТВО" class="term-in">
             <div class="term-btn" onclick="sendShards('add')" style="color:#39ff14;">ВЫДАТЬ</div>
             <div class="term-btn" onclick="sendShards('take')" style="color:#ff4444;">ЗАБРАТЬ</div>
-            <div class="term-btn" onclick="showSubMenu('con-home')" style="border-color:#555;">НАЗАД</div>
+            <div class="term-btn" onclick="showSubMenu('con-home')">НАЗАД</div>
         </div>
 
         <div id="con-subs" style="display:none; width:100%;">
             <input type="number" id="sb-id" placeholder="ID ПОЛЬЗОВАТЕЛЯ" class="term-in">
             <div class="console-grid" style="margin-bottom:10px;">
-                <div class="console-card" onclick="sendSub('Premium')" style="height:50px; font-size:9px;">Premium</div>
-                <div class="console-card" onclick="sendSub('Pro')" style="height:50px; font-size:9px;">Pro</div>
-                <div class="console-card" onclick="sendSub('VIP')" style="height:50px; font-size:9px;">VIP</div>
-                <div class="console-card" onclick="sendSub('Ultra')" style="height:50px; font-size:9px;">Ultra</div>
+                <div class="console-card" onclick="sendSub('Premium')">Premium</div>
+                <div class="console-card" onclick="sendSub('Pro')">Pro</div>
+                <div class="console-card" onclick="sendSub('VIP')">VIP</div>
+                <div class="console-card" onclick="sendSub('Ultra')">Ultra</div>
             </div>
             <div class="term-btn" onclick="sendSub('None')" style="color:red;">СНЯТЬ ВСЁ</div>
-            <div class="term-btn" onclick="showSubMenu('con-home')" style="border-color:#555;">НАЗАД</div>
+            <div class="term-btn" onclick="showSubMenu('con-home')">НАЗАД</div>
         </div>
 
         <div id="con-char" style="display:none; width:100%;">
@@ -115,9 +154,9 @@
             <div class="term-btn" onclick="document.getElementById('char-input').click()">ВЫБРАТЬ ФОТО</div>
             <input type="text" id="char-n" placeholder="ИМЯ" class="term-in">
             <input type="number" id="char-a" placeholder="ВОЗРАСТ (18+)" class="term-in">
-            <textarea id="char-d" placeholder="ОПИСАНИЕ (30-4000 СИМВ.)" class="term-in" style="height:80px;"></textarea>
+            <textarea id="char-d" placeholder="ОПИСАНИЕ" class="term-in" style="height:100px;"></textarea>
             <div class="term-btn" onclick="saveChar()" style="color:#39ff14;">СОЗДАТЬ</div>
-            <div class="term-btn" onclick="showSubMenu('con-home')" style="border-color:#555;">НАЗАД</div>
+            <div class="term-btn" onclick="showSubMenu('con-home')">НАЗАД</div>
         </div>
 
         <div class="close-text" onclick="closeConsole()">[ ЗАКРЫТЬ ТЕРМИНАЛ ]</div>
@@ -128,30 +167,36 @@
         const OID = 8287041036;
         let base64Char = "";
 
-        setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 2500);
+        setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 2000);
 
         function openConsole() { document.getElementById('console-overlay').style.display = 'flex'; showSubMenu('con-home'); }
         function closeConsole() { document.getElementById('console-overlay').style.display = 'none'; }
         
         function showSubMenu(id) {
             ['con-home','con-shards','con-subs','con-char'].forEach(m => document.getElementById(m).style.display = 'none');
-            document.getElementById(id).style.display = (id==='con-home'?'grid':'block');
+            const el = document.getElementById(id);
+            el.style.display = (id==='con-home'?'grid':'block');
         }
 
         function prev(input) {
             if (input.files && input.files[0]) {
                 const r = new FileReader();
-                r.onload = e => { base64Char = e.target.result; document.getElementById('char-img-preview').src = base64Char; document.getElementById('char-img-preview').style.display = 'block'; };
+                r.onload = e => { 
+                    base64Char = e.target.result; 
+                    const p = document.getElementById('char-img-preview');
+                    p.src = base64Char; 
+                    p.style.display = 'block'; 
+                };
                 r.readAsDataURL(input.files[0]);
             }
         }
 
         async function sendShards(act) {
-            const r = await fetch('/api/admin/manage-shards', {
+            await fetch('/api/admin/manage-shards', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({ owner_id: OID, target_id: document.getElementById('sh-id').value, amount: document.getElementById('sh-count').value, action: act })
             });
-            alert("Выполнено!"); location.reload();
+            alert("Готово!"); location.reload();
         }
 
         async function sendSub(type) {
@@ -159,7 +204,7 @@
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({ owner_id: OID, target_id: document.getElementById('sb-id').value, sub_type: type })
             });
-            alert("Статус изменен!"); location.reload();
+            alert("Подписка выдана!"); location.reload();
         }
 
         async function saveChar() {
