@@ -39,18 +39,19 @@ app.post('/api/user/get-data', async (req, res) => {
     } catch (e) { res.status(500).send(e); }
 });
 
-// УПРАВЛЕНИЕ АДМИНАМИ (Только Овнер)
+// УПРАВЛЕНИЕ АДМИНАМИ (ТОЛЬКО OWNER_ID)
 app.post('/api/owner/set-admin', async (req, res) => {
-    if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).send("No");
+    if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).send("No Access");
     const { target_id, status } = req.body;
     await User.findOneAndUpdate({ tg_id: Number(target_id) }, { is_admin: status }, { upsert: true });
     res.json({ message: status ? `ID ${target_id} назначен админом` : `ID ${target_id} снят` });
 });
 
-// УПРАВЛЕНИЕ ОСКОЛКАМИ (Овнер и Админы)
+// УПРАВЛЕНИЕ ОСКОЛКАМИ (OWNER И ADMIN)
 app.post('/api/admin/manage-shards', async (req, res) => {
     const sender = await User.findOne({ tg_id: Number(req.body.sender_id) });
-    if (Number(req.body.sender_id) !== OWNER_ID && (!sender || !sender.is_admin)) return res.status(403).send("No");
+    const isOwner = Number(req.body.sender_id) === OWNER_ID;
+    if (!isOwner && (!sender || !sender.is_admin)) return res.status(403).send("No");
     
     const user = await User.findOneAndUpdate(
         { tg_id: Number(req.body.target_id) },
@@ -60,25 +61,15 @@ app.post('/api/admin/manage-shards', async (req, res) => {
     res.json({ message: `Баланс ID ${req.body.target_id}: ${user.shards}` });
 });
 
-// УПРАВЛЕНИЕ ПОДПИСКОЙ (Овнер и Админы)
+// УПРАВЛЕНИЕ ПОДПИСКОЙ (OWNER И ADMIN)
 app.post('/api/admin/manage-sub', async (req, res) => {
     const sender = await User.findOne({ tg_id: Number(req.body.sender_id) });
-    if (Number(req.body.sender_id) !== OWNER_ID && (!sender || !sender.is_admin)) return res.status(403).send("No");
+    const isOwner = Number(req.body.sender_id) === OWNER_ID;
+    if (!isOwner && (!sender || !sender.is_admin)) return res.status(403).send("No");
 
     const exp = req.body.sub_type === "None" ? null : new Date(Date.now() + 30*24*60*60*1000);
     await User.findOneAndUpdate({ tg_id: req.body.target_id }, { subscription: req.body.sub_type, sub_expire: exp }, { upsert: true });
     res.json({ message: "Статус обновлен" });
-});
-
-// СОЗДАНИЕ ПЕРСОНАЖА
-app.post('/api/admin/create-char', async (req, res) => {
-    const sender = await User.findOne({ tg_id: Number(req.body.sender_id) });
-    if (Number(req.body.sender_id) !== OWNER_ID && (!sender || !sender.is_admin)) return res.status(403).send("No");
-    
-    if (req.body.description.length < 30) return res.status(400).json({error: "Минимум 30 символов!"});
-    const c = new Character(req.body);
-    await c.save();
-    res.json({ message: "Персонаж создан" });
 });
 
 app.listen(3000, () => console.log('Moon Engine Started'));
