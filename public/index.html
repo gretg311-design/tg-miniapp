@@ -9,7 +9,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: manipulation; }
         
-        /* ТА САМАЯ КРАСИВАЯ ЛУНА */
+        /* КРАСИВАЯ ЛУНА */
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
         .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         .moon-logo { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulse 2s infinite ease-in-out; }
@@ -40,13 +40,8 @@
         .term-in { background: #000; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; color: #fff; text-transform: uppercase; margin-bottom: 10px; }
         
-        /* БЛОКИ */
         .price-section { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
-        .section-title { font-size: 12px; color: #e91e63; font-weight: 900; margin-bottom: 15px; text-align: center; }
-        .promo-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* ФОТО */
-        #char-preview { width: 120px; height: 120px; border: 2px dashed #e91e63; border-radius: 15px; margin-bottom: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #11081d; }
+        .task-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 
         /* НАВИГАЦИЯ */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
@@ -89,79 +84,47 @@
             <div class="menu-item btn-con" onclick="v('p-prices')">цены</div>
             <div class="menu-item btn-con" onclick="v('p-admins')">админы</div>
             <div class="menu-item btn-con" onclick="v('p-promo-manage')">промокоды</div>
+            <div class="menu-item btn-con" onclick="v('p-tasks-manage')" style="grid-column: span 2;">задания</div>
         </div>
         <div class="term-btn" style="margin-top:30px;" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
 
-    <div id="p-promo-manage" class="overlay">
-        <h2 style="color:#e91e63;">ПРОМОКОДЫ</h2>
+    <div id="p-tasks-manage" class="overlay">
+        <h2 style="color:#e91e63;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</h2>
         <div class="price-section">
-            <input type="text" id="promo-code" placeholder="Код" class="term-in">
-            <input type="number" id="promo-limit" placeholder="Лимит активаций" class="term-in">
-            <select id="promo-type" class="term-in">
+            <input type="text" id="task-name" placeholder="Название (Подпишись на канал)" class="term-in">
+            <input type="text" id="task-link" placeholder="Ссылка (https://t.me/...)" class="term-in">
+            <select id="task-reward-type" class="term-in">
                 <option value="shards">Награда: Осколки</option>
                 <option value="Premium">Награда: Premium</option>
+                <option value="Pro">Награда: Pro</option>
+                <option value="VIP">Награда: VIP</option>
                 <option value="Ultra">Награда: Ultra</option>
             </select>
-            <input type="number" id="promo-val" placeholder="Кол-во награды" class="term-in">
-            <div class="term-btn" onclick="alert('Промо создан!')" style="color:#00ff00; border-color:#00ff00;">СОЗДАТЬ</div>
+            <input type="number" id="task-reward-val" placeholder="Кол-во (если осколки)" class="term-in">
+            <div class="term-btn" onclick="alert('Задание создано!')" style="color:#00ff00; border-color:#00ff00;">ДОБАВИТЬ ЗАДАНИЕ</div>
         </div>
-        <div id="promo-list" style="width:100%;">
-            <div class="promo-card">
-                <div><b>MOON2026</b><br><small>Limit: 500</small></div>
-                <div style="color:#ff4444;" onclick="alert('Удалено')">🗑️</div>
+        
+        <div id="tasks-list" style="width:100%;">
+            <div style="font-size:10px; color:#555; margin-bottom:10px;">АКТИВНЫЕ ЗАДАНИЯ</div>
+            <div class="task-card">
+                <div><b>Moon Channel</b><br><small>Reward: 50 Shards</small></div>
+                <div style="color:#ff4444;" onclick="alert('Удалено (Только Owner)')">🗑️</div>
             </div>
         </div>
         <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
     </div>
 
-    <div id="p-prices" class="overlay">
-        <h2 style="color:#e91e63;">ЦЕНЫ</h2>
-        <div class="price-section">
-            <div class="section-title">ПОДПИСКИ</div>
-            <select class="term-in"><option>Premium</option><option>Pro</option><option>VIP</option><option>Ultra</option></select>
-            <input type="number" placeholder="Stars ⭐" class="term-in">
-            <input type="number" placeholder="TON 💎" class="term-in">
-            <div class="term-btn" style="padding:10px;">ОБНОВИТЬ</div>
-        </div>
-        <div class="price-section">
-            <div class="section-title">ОСКОЛКИ</div>
-            <input type="number" placeholder="Кол-во (напр. 100)" class="term-in">
-            <input type="number" placeholder="Stars ⭐" class="term-in">
-            <input type="number" placeholder="TON 💎" class="term-in">
-            <div class="term-btn" style="padding:10px;">ОБНОВИТЬ</div>
-        </div>
+    <div id="p-promo-manage" class="overlay">
+        <h2 style="color:#e91e63;">ПРОМОКОДЫ</h2>
         <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
     </div>
-
-    <div id="p-char" class="overlay">
-        <h2 style="color:#e91e63;">ПЕРСОНАЖ</h2>
-        <div id="char-preview"><img id="p-img" style="display:none; width:100%; height:100%; object-fit:cover;"><span id="p-hint">ФОТО</span></div>
-        <label for="f-in" class="term-btn" style="border-color:#bc42f5;">ГАЛЕРЕЯ</label>
-        <input type="file" id="f-in" accept="image/*" style="display:none;" onchange="loadFile(this)">
-        <input type="text" placeholder="Имя" class="term-in">
-        <textarea placeholder="Описание" class="term-in" style="height:60px;"></textarea>
-        <div class="term-btn" onclick="v('p-home')" style="color:#00ff00;">СОЗДАТЬ</div>
-        <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
-    </div>
-
-    <div id="p-subs" class="overlay">
-        <h2 style="color:#e91e63;">ВЫДАЧА</h2>
-        <input type="number" placeholder="TG ID" class="term-in">
-        <div class="menu-grid" style="width:100%;">
-            <div class="menu-item" onclick="alert('OK')">Premium</div>
-            <div class="menu-item" onclick="alert('OK')">Pro</div>
-            <div class="menu-item" onclick="alert('OK')">VIP</div>
-            <div class="menu-item" onclick="alert('OK')">Ultra</div>
-        </div>
-        <div class="term-btn" onclick="v('p-home')" style="margin-top:20px;">НАЗАД</div>
-    </div>
-
-    <div id="p-adm" class="overlay">
-        <h2 style="color:#00bcd4;">ADMIN PANEL</h2>
-        <div class="term-btn">Добавить задание</div>
-        <div class="term-btn" onclick="closeAll()">ЗАКРЫТЬ</div>
-    </div>
+    <div id="p-prices" class="overlay"><h2 style="color:#e91e63;">ЦЕНЫ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
+    <div id="p-shards" class="overlay"><h2 style="color:#e91e63;">ОСКОЛКИ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
+    <div id="p-subs" class="overlay"><h2 style="color:#e91e63;">ПОДПИСКИ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
+    <div id="p-char" class="overlay"><h2 style="color:#e91e63;">ПЕРСОНАЖ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
+    <div id="p-admins" class="overlay"><h2 style="color:#e91e63;">АДМИНЫ</h2><div class="term-btn" onclick="v('p-home')">НАЗАД</div></div>
+    <div id="p-adm" class="overlay"><h2 style="color:#00bcd4;">ADMIN PANEL</h2><div class="term-btn" onclick="closeAll()">ЗАКРЫТЬ</div></div>
 
     <div class="bottom-nav">
         <div class="nav-btn" onclick="history.back()"><span>⬅️</span><span>Назад</span></div>
@@ -174,20 +137,6 @@
 
         function v(id) { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
         function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
-
-        function loadFile(input) {
-            const file = input.files[0];
-            if(file) {
-                const r = new FileReader();
-                r.onload = e => {
-                    const img = document.getElementById('p-img');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    document.getElementById('p-hint').style.display = 'none';
-                };
-                r.readAsDataURL(file);
-            }
-        }
 
         window.onload = () => {
             const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
