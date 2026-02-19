@@ -9,26 +9,22 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-touch-callout: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; }
         
-        /* LOADING SCREEN */
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
         .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; font-weight: bold; }
         .moon-logo { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulse 2s infinite; }
         .version-label { position: absolute; bottom: 40px; color: #333; font-size: 11px; letter-spacing: 2px; }
 
-        /* APP MAIN */
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; touch-action: pan-y; padding-bottom: 110px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
         .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s linear infinite; }
         @keyframes flow { to {background-position: 200%} }
         .status-owner { background: linear-gradient(45deg, #ffd700, #ffae00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; }
 
-        /* GRID */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; padding: 5px; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* OVERLAYS */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; touch-action: pan-y; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; -webkit-user-select: text; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; color: #fff; text-transform: uppercase; margin-bottom: 10px; cursor: pointer; }
@@ -49,7 +45,6 @@
     <div id="loading">
         <div class="disclaimer">Все персонажи вымышлены</div>
         <div class="moon-logo"></div>
-        <div class="loading-text" style="margin-top:20px; color:#666; letter-spacing:3px;">MOON ENGINE</div>
         <div class="version-label">V 1.0.1</div>
     </div>
 
@@ -72,7 +67,6 @@
     <div id="p-settings" class="overlay">
         <h2 style="color:#bc42f5;">ПРОФИЛЬ</h2>
         <div class="settings-card">
-            <span style="font-size:10px; color:#555;">НИКНЕЙМ</span>
             <input type="text" id="set-nick" class="term-in" oninput="updateLiveNick(this.value)">
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <div class="gender-btn" id="g-m" onclick="setGender('m')">Мужчина</div>
@@ -110,20 +104,27 @@
             <div class="menu-item btn-con" onclick="openPanel('p-subs')">ПОДПИСКИ (ЛЮБЫЕ)</div>
             <div class="menu-item btn-con" onclick="openPanel('p-char')">ГЕРОИ (УДАЛ/ДОБ)</div>
             <div class="menu-item btn-con" onclick="openPanel('p-prices')">ЦЕНЫ В STARS</div>
-            <div class="menu-item btn-con" onclick="openPanel('p-admins')">НАЗНАЧИТЬ АДМИНА</div>
+            <div class="menu-item btn-con" onclick="openPanel('p-admins')">УПРАВЛЕНИЕ АДМИНАМИ</div>
             <div class="menu-item btn-con" onclick="openPanel('p-promo-manage')">УДАЛ/ДОБ ПРОМО</div>
             <div class="menu-item btn-con" onclick="openPanel('p-tasks-manage')" style="grid-column: span 2;">УДАЛ/ДОБ ЗАДАНИЯ</div>
         </div>
         <div class="term-btn" style="margin-top:20px;" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
 
-    <div id="p-shards" class="overlay"><h2 style="color:#e91e63;">УПРАВЛЕНИЕ ОСКОЛКАМИ</h2><input type="number" placeholder="TG ID" class="term-in"><input type="number" placeholder="Сумма" class="term-in"><div class="term-btn">ПОДТВЕРДИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-subs" class="overlay"><h2 style="color:#e91e63;">УПРАВЛЕНИЕ ПОДПИСКОЙ</h2><input type="number" placeholder="TG ID" class="term-in"><div class="menu-grid"><div class="menu-item">PREMIUM</div><div class="menu-item">ULTRA</div></div><div class="term-btn" style="margin-top:20px;" onclick="back()">НАЗАД</div></div>
-    <div id="p-prices" class="overlay"><h2 style="color:#e91e63;">ИЗМЕНЕНИЕ ЦЕН</h2><input type="number" placeholder="Новая цена Stars" class="term-in"><div class="term-btn">ОБНОВИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-admins" class="overlay"><h2 style="color:#e91e63;">НАЗНАЧИТЬ АДМИНА</h2><input type="number" placeholder="ВВЕДИТЕ TG ID" class="term-in"><div class="term-btn">ВЫДАТЬ ПРАВА</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-promo-manage" class="overlay"><h2 style="color:#e91e63;">ПРОМОКОДЫ</h2><input type="text" placeholder="КОД" class="term-in"><input type="number" placeholder="ЛИМИТ" class="term-in"><div class="term-btn">СОЗДАТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-tasks-manage" class="overlay"><h2 style="color:#e91e63;">ЗАДАНИЯ</h2><input type="text" placeholder="ТЕКСТ ЗАДАНИЯ" class="term-in"><input type="text" placeholder="ССЫЛКА" class="term-in"><div class="term-btn">ДОБАВИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-char" class="overlay"><h2 style="color:#e91e63;">ПЕРСОНАЖ</h2><input type="file" id="fi" style="display:none;" onchange="prev(this)"><div onclick="document.getElementById('fi').click()" style="width:120px; height:120px; border:2px dashed #e91e63; display:flex; align-items:center; justify-content:center; cursor:pointer;"><img id="cp" style="width:100%; height:100%; object-fit:cover; display:none;"><span>ФОТО</span></div><input type="text" placeholder="ИМЯ ГЕРОЯ" class="term-in" style="margin-top:15px;"><textarea class="term-in" placeholder="ОПИСАНИЕ"></textarea><div class="term-btn">СОХРАНИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-admins" class="overlay">
+        <h2 style="color:#e91e63;">АДМИНЫ</h2>
+        <input type="number" id="adm-id-input" placeholder="ВВЕДИТЕ TG ID" class="term-in">
+        <div class="term-btn" style="border-color:#00ff00; color:#00ff00;" onclick="handleAdmin('add')">НАЗНАЧИТЬ АДМИНА</div>
+        <div class="term-btn" style="border-color:#ff0000; color:#ff0000;" onclick="handleAdmin('remove')">СНЯТЬ АДМИНА</div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-shards" class="overlay"><h2 style="color:#e91e63;">ОСКОЛКИ</h2><input type="number" placeholder="TG ID" class="term-in"><input type="number" placeholder="Сумма" class="term-in"><div class="term-btn">ПОДТВЕРДИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-subs" class="overlay"><h2 style="color:#e91e63;">ПОДПИСКИ</h2><input type="number" placeholder="TG ID" class="term-in"><div class="term-btn">ВЫДАТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-prices" class="overlay"><h2 style="color:#e91e63;">ЦЕНЫ</h2><input type="number" placeholder="Цена Stars" class="term-in"><div class="term-btn">ОБНОВИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-promo-manage" class="overlay"><h2 style="color:#e91e63;">ПРОМО</h2><input type="text" placeholder="КОД" class="term-in"><div class="term-btn">СОЗДАТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-tasks-manage" class="overlay"><h2 style="color:#e91e63;">ЗАДАНИЯ</h2><input type="text" placeholder="ТЕКСТ" class="term-in"><div class="term-btn">ДОБАВИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-char" class="overlay"><h2 style="color:#e91e63;">ГЕРОЙ</h2><input type="file" id="fi" style="display:none;" onchange="prev(this)"><div onclick="document.getElementById('fi').click()" style="width:100px; height:100px; border:1px solid #e91e63; display:flex; align-items:center; justify-content:center; cursor:pointer;"><img id="cp" style="width:100%; height:100%; object-fit:cover; display:none;"><span>ФОТО</span></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
 
     <div class="bottom-nav">
         <div class="nav-btn" onclick="back()"><span>⬅️</span><span>Назад</span></div>
@@ -134,6 +135,7 @@
         const tg = window.Telegram.WebApp;
         const OID = 8287041036;
         let stack = [];
+        let admins = JSON.parse(localStorage.getItem('moon_admins') || "[]");
 
         tg.enableClosingConfirmation();
         tg.expand();
@@ -159,6 +161,20 @@
             } else {
                 closeAll();
             }
+        }
+
+        function handleAdmin(action) {
+            const id = document.getElementById('adm-id-input').value;
+            if(!id) return;
+            if(action === 'add') {
+                if(!admins.includes(id)) admins.push(id);
+                tg.showAlert("Админ назначен: " + id);
+            } else {
+                admins = admins.filter(a => a !== id);
+                tg.showAlert("Админ снят: " + id);
+            }
+            localStorage.setItem('moon_admins', JSON.stringify(admins));
+            document.getElementById('adm-id-input').value = '';
         }
 
         let curGender = 'm';
@@ -205,6 +221,8 @@
             document.getElementById('len-slider').value = sLen; updateLen(sLen);
             document.getElementById('sex-slider').value = sSex; updateSex(sSex);
 
+            // ПРОВЕРКА ПРАВ
+            const isAdmin = admins.includes(String(uid));
             if(uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('role-text').innerText = "OWNER";
@@ -213,8 +231,8 @@
                 document.getElementById('nav-con').style.display = 'flex';
                 document.getElementById('len-slider').max = 100;
                 document.getElementById('sex-slider').max = 6;
-            } else {
-                // Если не овнер, но админ (логика проверки админа по ID тут)
+            } else if (isAdmin) {
+                document.getElementById('role-text').innerText = "ADMIN";
                 document.getElementById('nav-adm').style.display = 'flex';
             }
 
