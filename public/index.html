@@ -25,7 +25,6 @@
 
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; touch-action: pan-y; }
         
-        /* Стили для нового окна инфо-профиля */
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
         .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #1a0b2e; }
         .info-row:last-child { border: none; }
@@ -135,8 +134,8 @@
         <h2 style="color:#e91e63;">ОСКОЛКИ</h2>
         <input type="number" id="shard-id" placeholder="TG ID" class="term-in">
         <input type="number" id="shard-amount" placeholder="Количество" class="term-in">
-        <div class="term-btn" style="color:#00ff00; border-color:#00ff00;" onclick="tg.showAlert('Выдано!')">ВЫДАТЬ</div>
-        <div class="term-btn" style="color:#ff4444; border-color:#ff4444;" onclick="tg.showAlert('Забрано!')">ЗАБРАТЬ</div>
+        <div class="term-btn" style="color:#00ff00; border-color:#00ff00;" onclick="giveShards('add')">ВЫДАТЬ</div>
+        <div class="term-btn" style="color:#ff4444; border-color:#ff4444;" onclick="giveShards('rem')">ЗАБРАТЬ</div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
@@ -145,12 +144,12 @@
         <input type="number" id="sub-id" placeholder="TG ID" class="term-in">
         <input type="number" id="sub-days" placeholder="Срок (дней)" class="term-in" value="30">
         <div class="menu-grid">
-            <div class="menu-item" onclick="tg.showAlert('Premium выдана')">PREMIUM</div>
-            <div class="menu-item" onclick="tg.showAlert('Pro выдана')">PRO</div>
-            <div class="menu-item" onclick="tg.showAlert('VIP выдана')">VIP</div>
-            <div class="menu-item" onclick="tg.showAlert('Ultra выдана')">ULTRA</div>
+            <div class="menu-item" onclick="giveSub('Premium')">PREMIUM</div>
+            <div class="menu-item" onclick="giveSub('Pro')">PRO</div>
+            <div class="menu-item" onclick="giveSub('VIP')">VIP</div>
+            <div class="menu-item" onclick="giveSub('Ultra')">ULTRA</div>
         </div>
-        <div class="term-btn" style="margin-top:15px; color:#ff4444; border-color:#ff4444;" onclick="tg.showAlert('Подписка аннулирована')">СНЯТЬ ПОДПИСКУ</div>
+        <div class="term-btn" style="margin-top:15px; color:#ff4444; border-color:#ff4444;" onclick="giveSub('Free')">СНЯТЬ ПОДПИСКУ</div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
@@ -170,16 +169,6 @@
         <input type="number" id="adm-id-input" placeholder="TG ID" class="term-in">
         <div class="term-btn" style="border-color:#00ff00; color:#00ff00;" onclick="handleAdmin('add')">НАЗНАЧИТЬ</div>
         <div class="term-btn" style="border-color:#ff0000; color:#ff0000;" onclick="handleAdmin('remove')">СНЯТЬ</div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-prices" class="overlay">
-        <h2 style="color:#e91e63;">ЦЕНЫ STARS</h2>
-        <input type="number" placeholder="Premium цена" class="term-in">
-        <input type="number" placeholder="Pro цена" class="term-in">
-        <input type="number" placeholder="VIP цена" class="term-in">
-        <input type="number" placeholder="Ultra цена" class="term-in">
-        <div class="term-btn" style="color:#00ff00; border-color:#00ff00;">ОБНОВИТЬ ЦЕНЫ</div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
@@ -212,11 +201,13 @@
         const tg = window.Telegram.WebApp;
         const OID = 8287041036;
         let stack = [];
-        let admins = JSON.parse(localStorage.getItem('moon_admins') || "[]");
+        
+        // БД в LocalStorage
+        const getDB = (k) => JSON.parse(localStorage.getItem(k) || "{}");
+        const setDB = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
         tg.enableClosingConfirmation();
         tg.expand();
-        if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
 
         function openPanel(id) {
             const current = document.querySelector('.overlay[style*="display: flex"]');
@@ -224,17 +215,6 @@
             document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
             document.getElementById(id).style.display = 'flex';
             if(id === 'p-profile-info') updateInfo();
-        }
-
-        function updateInfo() {
-            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
-            const uid = Number(user.id);
-            document.getElementById('i-nick').innerText = localStorage.getItem('m_nick') || user.first_name;
-            document.getElementById('i-sex').innerText = localStorage.getItem('m_gen') === 'f' ? 'Женщина' : 'Мужчина';
-            document.getElementById('i-id').innerText = uid;
-            document.getElementById('i-shards').innerText = (uid === OID) ? '∞' : '0';
-            document.getElementById('i-sub').innerText = (uid === OID) ? 'Ultra' : 'Free';
-            document.getElementById('i-role').innerText = (uid === OID) ? 'Овнер' : (admins.includes(String(uid)) ? 'Админ' : 'Юзер');
         }
 
         function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); stack = []; }
@@ -246,13 +226,92 @@
             } else { closeAll(); }
         }
 
+        // РЕАЛЬНАЯ ВЫДАЧА ОСКОЛКОВ
+        function giveShards(mode) {
+            const id = document.getElementById('shard-id').value;
+            const amount = parseInt(document.getElementById('shard-amount').value);
+            if(!id || isNaN(amount)) return tg.showAlert("Заполни поля!");
+            
+            let shardsDB = getDB('m_shards');
+            let current = shardsDB[id] || 0;
+            shardsDB[id] = (mode === 'add') ? current + amount : Math.max(0, current - amount);
+            setDB('m_shards', shardsDB);
+            tg.showAlert("Баланс ID " + id + " теперь: " + shardsDB[id]);
+            initUI();
+        }
+
+        // РЕАЛЬНАЯ ВЫДАЧА ПОДПИСКИ
+        function giveSub(type) {
+            const id = document.getElementById('sub-id').value;
+            if(!id) return tg.showAlert("Введи ID!");
+            let subsDB = getDB('m_subs');
+            subsDB[id] = type;
+            setDB('m_subs', subsDB);
+            tg.showAlert("Для " + id + " установлена подписка: " + type);
+            initUI();
+        }
+
         function handleAdmin(action) {
             const id = document.getElementById('adm-id-input').value;
             if(!id) return;
+            let admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
             if(action === 'add') { if(!admins.includes(id)) admins.push(id); } 
             else { admins = admins.filter(a => a !== id); }
-            localStorage.setItem('moon_admins', JSON.stringify(admins));
-            tg.showAlert("Выполнено!");
+            localStorage.setItem('m_admins', JSON.stringify(admins));
+            tg.showAlert("Готово!");
+            initUI();
+        }
+
+        function updateInfo() {
+            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
+            const uid = String(user.id);
+            const shards = getDB('m_shards')[uid] || 0;
+            const sub = getDB('m_subs')[uid] || "Free";
+            const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
+
+            document.getElementById('i-nick').innerText = localStorage.getItem('m_nick') || user.first_name;
+            document.getElementById('i-sex').innerText = localStorage.getItem('m_gen') === 'f' ? 'Женщина' : 'Мужчина';
+            document.getElementById('i-id').innerText = uid;
+            document.getElementById('i-shards').innerText = (uid === String(OID)) ? '∞' : shards;
+            document.getElementById('i-sub').innerText = (uid === String(OID)) ? 'Ultra' : sub;
+            document.getElementById('i-role').innerText = (uid === String(OID)) ? 'Овнер' : (admins.includes(uid) ? 'Админ' : 'Юзер');
+        }
+
+        function initUI() {
+            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
+            const uid = String(user.id);
+            const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
+            
+            // Сброс видимости кнопок (защита от багов)
+            document.getElementById('nav-adm').style.display = 'none';
+            document.getElementById('nav-con').style.display = 'none';
+
+            document.getElementById('u-name').innerText = localStorage.getItem('m_nick') || user.first_name;
+            document.getElementById('u-id').innerText = uid;
+
+            if(uid === String(OID)) {
+                document.getElementById('shards-balance').innerText = "∞";
+                document.getElementById('role-text').innerText = "OWNER";
+                document.getElementById('role-text').className = "status-owner";
+                document.getElementById('nav-adm').style.display = 'flex';
+                document.getElementById('nav-con').style.display = 'flex';
+            } else if (admins.includes(uid)) {
+                document.getElementById('shards-balance').innerText = getDB('m_shards')[uid] || 0;
+                document.getElementById('role-text').innerText = "ADMIN";
+                document.getElementById('nav-adm').style.display = 'flex';
+                document.getElementById('btn-del-task').style.display = 'none';
+                document.getElementById('btn-del-char').style.display = 'none';
+            } else {
+                document.getElementById('shards-balance').innerText = getDB('m_shards')[uid] || 0;
+                document.getElementById('role-text').innerText = "";
+            }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('m_nick', document.getElementById('set-nick').value);
+            localStorage.setItem('m_gen', curGender);
+            tg.showAlert("Сохранено!");
+            initUI();
         }
 
         let curGender = 'm';
@@ -262,46 +321,8 @@
             document.getElementById('g-f').classList.toggle('active', g === 'f');
         }
 
-        function updateLen(v) { document.getElementById('len-val').innerText = v; }
-        function updateSex(v) { document.getElementById('sex-val').innerText = v; }
-
-        function saveSettings() {
-            localStorage.setItem('m_nick', document.getElementById('set-nick').value);
-            localStorage.setItem('m_gen', curGender);
-            tg.showAlert("Профиль сохранен!");
-            document.getElementById('u-name').innerText = document.getElementById('set-nick').value || "User";
-        }
-
-        function prev(input) {
-            const f = input.files[0];
-            if (f) {
-                const r = new FileReader();
-                r.onload = e => { document.getElementById('cp').src = e.target.result; document.getElementById('cp').style.display='block'; };
-                r.readAsDataURL(f);
-            }
-        }
-
         window.onload = () => {
-            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
-            const uid = Number(user.id);
-            document.getElementById('u-name').innerText = localStorage.getItem('m_nick') || user.first_name;
-            document.getElementById('u-id').innerText = uid;
-            setGender(localStorage.getItem('m_gen') || 'm');
-
-            const isAdmin = admins.includes(String(uid));
-            if(uid === OID) {
-                document.getElementById('shards-balance').innerText = "∞";
-                document.getElementById('role-text').innerText = "OWNER";
-                document.getElementById('role-text').className = "status-owner";
-                document.getElementById('nav-adm').style.display = 'flex';
-                document.getElementById('nav-con').style.display = 'flex';
-            } else if (isAdmin) {
-                document.getElementById('role-text').innerText = "ADMIN";
-                document.getElementById('nav-adm').style.display = 'flex';
-                document.getElementById('btn-del-task').style.display = 'none';
-                document.getElementById('btn-del-char').style.display = 'none';
-            }
-
+            initUI();
             setTimeout(() => {
                 document.getElementById('loading').style.opacity = '0';
                 setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 800);
