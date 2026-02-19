@@ -9,13 +9,13 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; touch-action: manipulation; }
         
-        /* ПОЛНЫЙ ЛОАДЕР ЛУНЫ */
-        #loading { position: fixed; inset: 0; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
-        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+        /* ЛОАДЕР ЛУНЫ */
+        #loading { position: fixed; inset: 0; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
+        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; font-weight: bold; }
         .moon-logo { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulse 2s infinite ease-in-out; }
         .loading-text { margin-top: 25px; color: #666; letter-spacing: 4px; font-size: 12px; text-transform: uppercase; font-weight: bold; }
         .version-label { position: absolute; bottom: 40px; font-size: 11px; color: #333; letter-spacing: 3px; text-transform: uppercase; }
-        @keyframes pulse { 0%,100%{transform:scale(1); opacity: 1;} 50%{transform:scale(1.1); opacity: 0.8;} }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
 
         /* ИНТЕРФЕЙС */
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; padding-bottom: 90px; overflow-y: auto; }
@@ -35,12 +35,7 @@
         .term-in { background: #000; border: 1px solid #e91e63; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; color: #fff; text-transform: uppercase; margin-bottom: 10px; }
         
-        /* БЛОКИ ЦЕН */
-        .price-section { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
-        .section-title { font-size: 12px; color: #e91e63; font-weight: 900; margin-bottom: 15px; letter-spacing: 2px; text-align: center; }
-
-        /* ФОТО */
-        #char-preview { width: 100px; height: 100px; border: 2px dashed #e91e63; border-radius: 15px; margin-bottom: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .promo-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 
         /* НАВИГАЦИЯ */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
@@ -82,116 +77,38 @@
             <div class="menu-item btn-con" onclick="v('p-char')">персонаж</div>
             <div class="menu-item btn-con" onclick="v('p-prices')">цены</div>
             <div class="menu-item btn-con" onclick="v('p-admins')">админы</div>
-            <div class="menu-item btn-con" onclick="alert('Промо...')">промокоды</div>
+            <div class="menu-item btn-con" onclick="v('p-promo-manage')">промокоды</div>
         </div>
         <div class="term-btn" style="margin-top:30px;" onclick="closeAll()">ЗАКРЫТЬ</div>
     </div>
 
-    <div id="p-prices" class="overlay">
-        <h2 style="color:#e91e63;">НАСТРОЙКА ЦЕН</h2>
-
-        <div class="price-section">
-            <div class="section-title">ПОДПИСКИ</div>
-            <select id="pr-sub-type" class="term-in">
-                <option value="premium">PREMIUM</option>
-                <option value="pro">PRO</option>
-                <option value="vip">VIP</option>
-                <option value="ultra">ULTRA</option>
+    <div id="p-promo-manage" class="overlay">
+        <h2 style="color:#e91e63;">ПРОМОКОДЫ</h2>
+        
+        <div style="width:100%; border:1px solid #2d164d; padding:15px; border-radius:15px; margin-bottom:20px;">
+            <div style="font-size:10px; color:#e91e63; margin-bottom:10px;">СОЗДАТЬ НОВЫЙ</div>
+            <input type="text" id="promo-code" placeholder="Код (напр. MOON2026)" class="term-in">
+            <input type="number" id="promo-limit" placeholder="Лимит активаций" class="term-in">
+            <select id="promo-reward-type" class="term-in">
+                <option value="shards">Награда: Осколки</option>
+                <option value="Premium">Награда: Premium</option>
+                <option value="Ultra">Награда: Ultra</option>
             </select>
-            <input type="number" id="pr-sub-stars" placeholder="Цена Stars ⭐" class="term-in">
-            <input type="number" id="pr-sub-ton" placeholder="Цена TON 💎" class="term-in">
-            <div class="term-btn" onclick="savePrice('sub')" style="color:#00ff00; border-color:#00ff00; padding:10px;">ОБНОВИТЬ ПОДПИСКУ</div>
+            <input type="number" id="promo-reward-val" placeholder="Кол-во (для осколков)" class="term-in">
+            <div class="term-btn" onclick="createPromo()" style="color:#00ff00; border-color:#00ff00;">СОЗДАТЬ ПРОМО</div>
         </div>
 
-        <div class="price-section">
-            <div class="section-title">ОСКОЛКИ</div>
-            <input type="number" id="pr-sh-count" placeholder="Кол-во осколков (напр. 100)" class="term-in">
-            <input type="number" id="pr-sh-stars" placeholder="Цена Stars ⭐" class="term-in">
-            <input type="number" id="pr-sh-ton" placeholder="Цена TON 💎" class="term-in">
-            <div class="term-btn" onclick="savePrice('shards')" style="color:#00ff00; border-color:#00ff00; padding:10px;">ОБНОВИТЬ ПАКЕТ</div>
+        <div style="width:100%;">
+            <div style="font-size:10px; color:#555; margin-bottom:10px;">АКТИВНЫЕ (ТОЛЬКО ДЛЯ OWNER)</div>
+            <div id="promo-list">
+                <div class="promo-card">
+                    <div><b style="color:#00bcd4;">START2026</b> <br> <small>1000/1000</small></div>
+                    <div style="color:#ff4444; font-size:18px;" onclick="alert('Удалено (Только Owner)')">🗑️</div>
+                </div>
+            </div>
         </div>
 
-        <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
-    </div>
-
-    <div id="p-subs" class="overlay">
-        <h2 style="color:#e91e63;">ВЫДАЧА ПОДПИСКИ</h2>
-        <input type="number" id="sub-id" placeholder="Telegram ID" class="term-in">
-        <div class="menu-grid" style="width:100%;">
-            <div class="menu-item" onclick="giveS('Premium')" style="color:#cd7f32;">Premium</div>
-            <div class="menu-item" onclick="giveS('Pro')" style="color:#c0c0c0;">Pro</div>
-            <div class="menu-item" onclick="giveS('VIP')" style="color:#ffd700;">VIP</div>
-            <div class="menu-item" onclick="giveS('Ultra')" style="color:#bc42f5;">Ultra</div>
-        </div>
         <div class="term-btn" onclick="v('p-home')" style="margin-top:20px;">НАЗАД</div>
     </div>
 
-    <div id="p-char" class="overlay">
-        <h2 style="color:#e91e63;">ПЕРСОНАЖ</h2>
-        <div id="char-preview"><img id="p-img" style="display:none; width:100%; height:100%; object-fit:cover;"><span id="p-hint">ФОТО</span></div>
-        <label for="f-in" class="term-btn" style="border-color:#bc42f5;">ГАЛЕРЕЯ</label>
-        <input type="file" id="f-in" accept="image/*" style="display:none;" onchange="loadFile(this)">
-        <input type="text" id="c-name" placeholder="Имя" class="term-in">
-        <textarea id="c-desc" placeholder="Описание" class="term-in" style="height:60px;"></textarea>
-        <div class="term-btn" onclick="v('p-home')" style="color:#00ff00;">СОЗДАТЬ</div>
-        <div class="term-btn" onclick="v('p-home')">НАЗАД</div>
-    </div>
-
-    <div id="p-adm" class="overlay">
-        <h2 style="color:#00bcd4;">ADMIN PANEL</h2>
-        <div class="term-btn">Добавить задание</div>
-        <div class="term-btn">Удалить промо</div>
-        <div class="term-btn" onclick="closeAll()">ЗАКРЫТЬ</div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-btn" onclick="history.back()"><span>⬅️</span><span>Назад</span></div>
-        <div class="nav-btn" onclick="location.reload()"><span>🏠</span><span>Домой</span></div>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        const OID = 8287041036;
-
-        function v(id) { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
-        function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
-
-        function loadFile(input) {
-            const file = input.files[0];
-            if(file) {
-                const r = new FileReader();
-                r.onload = e => {
-                    document.getElementById('p-img').src = e.target.result;
-                    document.getElementById('p-img').style.display = 'block';
-                    document.getElementById('p-hint').style.display = 'none';
-                };
-                r.readAsDataURL(file);
-            }
-        }
-
-        function savePrice(type) {
-            alert(type === 'sub' ? "Цена подписки обновлена!" : "Цена пакета осколков обновлена!");
-        }
-
-        function giveS(t) { alert("Выдано: " + t + " на ID: " + document.getElementById('sub-id').value); }
-
-        window.onload = () => {
-            const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
-            const uid = Number(user.id);
-            document.getElementById('u-name').innerText = user.first_name;
-            document.getElementById('u-id').innerText = uid;
-            if(uid === OID) {
-                const r = document.getElementById('role-text');
-                r.innerText = "OWNER"; r.className = "status-owner";
-                document.getElementById('nav-adm').style.display = 'flex';
-                document.getElementById('nav-con').style.display = 'flex';
-            }
-            setTimeout(() => {
-                document.getElementById('loading').style.opacity = '0';
-                setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 800);
-            }, 2000);
-        };
-        tg.expand();
-    </script>
-</body>
-</html>
+    
