@@ -43,10 +43,10 @@ app.post('/api/owner/set-admin', async (req, res) => {
 app.post('/api/admin/manage-shards', async (req, res) => {
     const sender = await User.findOne({ tg_id: Number(req.body.sender_id) });
     if (Number(req.body.sender_id) !== OWNER_ID && (!sender || !sender.is_admin)) return res.status(403).send("No");
-    const user = await User.findOneAndUpdate(
+    await User.findOneAndUpdate(
         { tg_id: Number(req.body.target_id) },
         { $inc: { shards: req.body.action === 'add' ? Number(req.body.amount) : -Number(req.body.amount) } },
-        { upsert: true, new: true }
+        { upsert: true }
     );
     res.json({ message: `Баланс обновлен` });
 });
