@@ -9,78 +9,65 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; }
         
-        #app { 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            padding-bottom: 80px; /* Место под нижнюю панель */
-            overflow-y: auto;
-        }
+        /* ТОТ САМЫЙ ЛОАДЕР ЛУНЫ */
+        #loading { position: fixed; inset: 0; background: #05010a; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
+        .disclaimer { position: absolute; top: 20px; right: 20px; font-size: 10px; color: #444; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+        .moon-logo { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulse 2s infinite ease-in-out; }
+        .loading-text { margin-top: 25px; color: #666; letter-spacing: 4px; font-size: 12px; text-transform: uppercase; font-weight: bold; }
+        .version-label { position: absolute; bottom: 40px; font-size: 11px; color: #333; letter-spacing: 3px; text-transform: uppercase; }
+        @keyframes pulse { 0%,100%{transform:scale(1); opacity: 1;} 50%{transform:scale(1.1); opacity: 0.8;} }
 
-        /* ПРОФИЛЬ */
-        .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+        /* ИНТЕРФЕЙС */
+        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; padding-bottom: 90px; overflow-y: auto; }
+        
+        .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
         .nick-ultra { 
             font-size: 22px; font-weight: 900;
             background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); 
             background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-            animation: flow 3s linear infinite; filter: drop-shadow(0 0 8px #bc42f5);
+            animation: flow 3s linear infinite; filter: drop-shadow(0 0 8px rgba(188, 66, 245, 0.6));
         }
         @keyframes flow { to {background-position: 200%} }
+        
         .id-row { font-size: 12px; color: #555; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-        .status-owner { background: linear-gradient(45deg, #ffd700, #fff9c4, #ffae00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; }
+        .status-owner { background: linear-gradient(45deg, #ffd700, #fff9c4, #ffae00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .status-admin { color: #ff4444; font-weight: 900; text-transform: uppercase; }
 
-        /* СЕТКА */
+        /* МЕНЮ */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; text-align: center; }
-        
+        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; letter-spacing: 1px; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* НИЖНЯЯ ПАНЕЛЬ (НАЗАД И ДОМОЙ) */
-        .bottom-nav { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            height: 70px; 
-            background: #0d041a; 
-            border-top: 1px solid #2d164d; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            z-index: 1000;
-        }
-        .nav-btn { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            color: #888; 
-            font-size: 10px; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            text-decoration: none;
-        }
-        .nav-btn i { font-size: 20px; margin-bottom: 4px; color: #fff; }
-        .nav-btn:active { color: #bc42f5; }
+        /* НИЖНЯЯ ПАНЕЛЬ */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 10px; font-weight: bold; text-transform: uppercase; gap: 5px; }
+        .nav-btn span:first-child { font-size: 24px; }
+        .nav-btn:active { opacity: 0.6; }
 
         /* КОНСОЛЬ */
-        .console-overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 2000; flex-direction: column; align-items: center; padding: 20px; }
+        #console-overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 11000; flex-direction: column; align-items: center; padding: 20px; }
     </style>
 </head>
 <body>
 
+    <div id="loading">
+        <div class="disclaimer">Все персонажи вымышлены</div>
+        <div class="moon-logo"></div>
+        <div class="loading-text">MOON ENGINE</div>
+        <div class="version-label">V 1.0.1</div>
+    </div>
+
     <div id="app">
         <div class="u-header">
             <div>
-                <div id="u-name" class="nick-ultra">OWNER</div>
+                <div id="u-name" class="nick-ultra">...</div>
                 <div class="id-row">
-                    <span id="u-id-display">ID: 8287041036</span>
-                    <span id="role-text" class="status-owner">OWNER</span>
+                    <span id="u-id-display">ID: 0</span>
+                    <span id="role-text"></span>
                 </div>
             </div>
-            <div style="font-size: 22px; font-weight: bold;">🌙 ∞</div>
+            <div style="font-size: 24px; font-weight: bold; color: #fff;">🌙 ∞</div>
         </div>
 
         <div class="menu-grid">
@@ -95,17 +82,11 @@
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-btn" onclick="history.back()">
-            <span style="font-size: 24px;">⬅️</span>
-            <span>Назад</span>
-        </div>
-        <div class="nav-btn" onclick="location.reload()">
-            <span style="font-size: 24px;">🏠</span>
-            <span>Домой</span>
-        </div>
+        <div class="nav-btn" onclick="history.back()"><span>⬅️</span><span>Назад</span></div>
+        <div class="nav-btn" onclick="location.reload()"><span>🏠</span><span>Домой</span></div>
     </div>
 
-    <div id="console-overlay" class="console-overlay">
+    <div id="console-overlay">
         <div style="color: #e91e63; font-size: 24px; font-weight: 900; margin: 30px 0; letter-spacing: 5px;">CONSOLE</div>
         <div class="menu-grid" style="width:100%;">
             <div class="menu-item btn-con">осколки</div><div class="menu-item btn-con">подписки</div>
@@ -129,12 +110,22 @@
             document.getElementById('u-name').innerText = user.first_name;
             document.getElementById('u-id-display').innerText = "ID: " + uid;
 
+            const roleEl = document.getElementById('role-text');
             if (uid === OID) {
-                document.getElementById('role-text').innerText = "OWNER";
-                document.getElementById('role-text').className = "status-owner";
+                roleEl.innerText = "OWNER";
+                roleEl.className = "status-owner";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
             }
+
+            // Убираем лоадер через задержку
+            setTimeout(() => {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                }, 800);
+            }, 2000);
         };
         tg.expand();
     </script>
