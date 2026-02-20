@@ -41,7 +41,8 @@
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; text-transform: uppercase; font-weight: bold; cursor: pointer; }
         .con-title { color: #e91e63; font-size: 24px; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; }
 
-        .char-preview { width: 100%; height: 200px; border: 2px dashed #2d164d; border-radius: 15px; margin-bottom: 15px; background-size: contain; background-position: center; background-repeat: no-repeat; display: flex; align-items: center; justify-content: center; background-color: #000; overflow: hidden; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; font-size: 12px; }
+        .char-preview { width: 100%; height: 180px; border: 2px dashed #2d164d; border-radius: 15px; margin-bottom: 15px; background-size: contain; background-position: center; background-repeat: no-repeat; display: flex; align-items: center; justify-content: center; background-color: #000; }
     </style>
 </head>
 <body>
@@ -56,7 +57,6 @@
             <div><div id="u-name" class="nick-ultra">...</div><div style="font-size:12px; color:#555;">ID: <span id="u-id">0</span></div></div>
             <div style="font-size: 22px; font-weight: bold;">🌙 <span id="shards-balance">0</span></div>
         </div>
-
         <div class="menu-grid">
             <div class="menu-item" onclick="tg.showAlert('В разработке')">Чаты</div>
             <div class="menu-item" onclick="tg.showAlert('В разработке')">Персонажи</div>
@@ -77,11 +77,45 @@
             <div class="con-btn" onclick="openPanel('p-con-shards')">осколки</div>
             <div class="con-btn" onclick="openPanel('p-con-subs')">подписки</div>
             <div class="con-btn" onclick="openPanel('p-con-char')">ПЕРСОНАЖ</div>
-            <div class="con-btn" onclick="tg.showAlert('Цены: Premium-500, Pro-1000, VIP-2500, Ultra-5000')">ЦЕНЫ</div>
+            <div class="con-btn" onclick="openPanel('p-con-prices')">ЦЕНЫ</div>
             <div class="con-btn" onclick="openPanel('p-con-admins')">АДМИНЫ</div>
             <div class="con-btn" onclick="openPanel('p-con-promos')">ПРОМОКОДЫ</div>
+            <div class="con-btn" onclick="openPanel('p-con-tasks')" style="grid-column: span 2; border-color: #bc42f5; color: #bc42f5;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</div>
         </div>
         <div style="margin-top: 30px; color: rgba(255,255,255,0.4); font-size: 10px;" onclick="back()">[ ЗАКРЫТЬ ]</div>
+    </div>
+
+    <div id="p-con-prices" class="overlay">
+        <h2 style="color:#e91e63">УПРАВЛЕНИЕ ЦЕНАМИ</h2>
+        <div class="info-card">
+            <h4 style="margin:0 0 10px 0; color:#00bcd4">ОСКОЛКИ</h4>
+            <input type="number" id="pr-sh-stars" class="term-in" placeholder="Цена Stars">
+            <input type="number" id="pr-sh-ton" class="term-in" placeholder="Цена TON">
+            <div class="term-btn" style="border-color:#00ff00" onclick="savePrices('shards')">СОХРАНИТЬ ЦЕНУ ОСКОЛКОВ</div>
+        </div>
+        <div class="info-card">
+            <h4 style="margin:0 0 10px 0; color:#bc42f5">ПОДПИСКИ (30д)</h4>
+            <input type="number" id="pr-sub-stars" class="term-in" placeholder="Цена Stars">
+            <input type="number" id="pr-sub-ton" class="term-in" placeholder="Цена TON">
+            <div class="term-btn" style="border-color:#00ff00" onclick="savePrices('subs')">СОХРАНИТЬ ЦЕНУ ПОДПИСОК</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-con-tasks" class="overlay">
+        <h2 style="color:#bc42f5">ЗАДАНИЯ</h2>
+        <div class="info-card">
+            <input type="text" id="task-name" class="term-in" placeholder="Название задания">
+            <input type="text" id="task-link" class="term-in" placeholder="Ссылка (https://...)">
+            <select id="task-reward-type" class="term-in" onchange="toggleTaskInput()">
+                <option value="shards">Награда: Осколки</option>
+                <option value="sub7">Награда: Подписка (7 дней)</option>
+            </select>
+            <input type="number" id="task-reward-val" class="term-in" placeholder="Кол-во осколков">
+            <div class="term-btn" style="border-color:#00ff00" onclick="manageTask('add')">ДОБАВИТЬ ЗАДАНИЕ</div>
+        </div>
+        <div id="task-list-container" style="width:100%"></div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-adm" class="overlay">
@@ -91,6 +125,7 @@
             <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-con-subs-adm')">ВЫДАТЬ SUB</div>
             <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-con-char')">ДОБАВИТЬ ПЕРСА</div>
             <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-con-promos')">СОЗДАТЬ ПРОМО</div>
+            <div class="con-btn" style="border-color:#00bcd4; grid-column: span 2;" onclick="openPanel('p-con-tasks')">ДОБАВИТЬ ЗАДАНИЕ</div>
         </div>
         <div class="term-btn" style="margin-top:20px" onclick="back()">НАЗАД</div>
     </div>
@@ -105,23 +140,8 @@
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-con-subs-adm" class="overlay">
-        <h2 style="color:#00bcd4">ВЫДАЧА ПОДПИСКИ</h2>
-        <div class="info-card">
-            <input type="number" id="adm-sub-id" class="term-in" placeholder="TG ID">
-            <select id="adm-sub-type" class="term-in">
-                <option value="Premium">PREMIUM</option>
-                <option value="Pro">PRO</option>
-                <option value="VIP">VIP</option>
-                <option value="Ultra">ULTRA</option>
-            </select>
-            <div class="term-btn" style="border-color:#00ff00" onclick="manageFunds('sub', 'add', 'adm-sub-id', 'adm-sub-type')">ВЫДАТЬ (30д)</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
     <div id="p-con-shards" class="overlay">
-        <h2 style="color:#e91e63">УПРАВЛЕНИЕ ОСКОЛКАМИ</h2>
+        <h2 style="color:#e91e63">ОСКОЛКИ (OWNER)</h2>
         <div class="info-card">
             <input type="number" id="own-sh-id" class="term-in" placeholder="TG ID">
             <input type="number" id="own-sh-val" class="term-in" placeholder="ЧИСЛО">
@@ -131,16 +151,21 @@
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
+    <div id="p-con-subs-adm" class="overlay">
+        <h2 style="color:#00bcd4">ВЫДАЧА ПОДПИСКИ</h2>
+        <div class="info-card">
+            <input type="number" id="adm-sub-id" class="term-in" placeholder="TG ID">
+            <select id="adm-sub-type" class="term-in"><option value="Premium">PREMIUM</option><option value="Pro">PRO</option><option value="VIP">VIP</option><option value="Ultra">ULTRA</option></select>
+            <div class="term-btn" style="border-color:#00ff00" onclick="manageFunds('sub', 'add', 'adm-sub-id', 'adm-sub-type')">ВЫДАТЬ (30д)</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
     <div id="p-con-subs" class="overlay">
-        <h2 style="color:#e91e63">УПРАВЛЕНИЕ ПОДПИСКАМИ</h2>
+        <h2 style="color:#e91e63">ПОДПИСКИ (OWNER)</h2>
         <div class="info-card">
             <input type="number" id="own-sub-id" class="term-in" placeholder="TG ID">
-            <select id="own-sub-type" class="term-in">
-                <option value="Premium">PREMIUM</option>
-                <option value="Pro">PRO</option>
-                <option value="VIP">VIP</option>
-                <option value="Ultra">ULTRA</option>
-            </select>
+            <select id="own-sub-type" class="term-in"><option value="Premium">PREMIUM</option><option value="Pro">PRO</option><option value="VIP">VIP</option><option value="Ultra">ULTRA</option></select>
             <div class="term-btn" style="border-color:#00ff00" onclick="manageFunds('sub', 'add', 'own-sub-id', 'own-sub-type')">ВЫДАТЬ</div>
             <div class="term-btn" style="border-color:#ff4444" onclick="manageFunds('sub', 'rem', 'own-sub-id')">ЗАБРАТЬ</div>
         </div>
@@ -150,24 +175,21 @@
     <div id="p-con-char" class="overlay">
         <h2 style="color:#e91e63">НОВЫЙ ПЕРСОНАЖ</h2>
         <div class="info-card">
-            <div class="char-preview" id="char-img-preview" onclick="document.getElementById('char-upload').click()">
-                <span id="preview-hint">ЗАГРУЗИТЬ ФОТО</span>
-            </div>
+            <div class="char-preview" id="char-img-preview" onclick="document.getElementById('char-upload').click()"><span id="preview-hint">ФОТО</span></div>
             <input type="file" id="char-upload" hidden accept="image/*" onchange="previewChar(this)">
             <input type="text" id="char-name" class="term-in" placeholder="ИМЯ">
-            <input type="number" id="char-age" class="term-in" placeholder="ВОЗРАСТ">
-            <textarea id="char-desc" class="term-in" style="height:80px;" placeholder="ХАРАКТЕРИСТИКИ"></textarea>
-            <div class="term-btn" style="border-color:#bc42f5" onclick="conAddChar()">ДОБАВИТЬ В БАЗУ</div>
+            <textarea id="char-desc" class="term-in" placeholder="ОПИСАНИЕ"></textarea>
+            <div class="term-btn" style="border-color:#bc42f5" onclick="conAddChar()">В БАЗУ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-con-admins" class="overlay">
-        <h2 style="color:#e91e63">УПРАВЛЕНИЕ АДМИНАМИ</h2>
+        <h2 style="color:#e91e63">АДМИНЫ</h2>
         <div class="info-card">
             <input type="number" id="con-adm-id-val" class="term-in" placeholder="TG ID">
             <div class="term-btn" style="border-color:#00bcd4" onclick="conManageAdmin('add')">ДОБАВИТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="conManageAdmin('rem')">РАЗЖАЛОВАТЬ</div>
+            <div class="term-btn" style="border-color:#ff4444" onclick="conManageAdmin('rem')">УДАЛИТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -175,8 +197,8 @@
     <div id="p-con-promos" class="overlay">
         <h2 style="color:#e91e63">ПРОМОКОДЫ</h2>
         <div class="info-card">
-            <input type="text" id="con-pr-code" class="term-in" placeholder="ПРОМОКОД">
-            <input type="number" id="con-pr-val" class="term-in" placeholder="НАГРАДА">
+            <input type="text" id="con-pr-code" class="term-in" placeholder="КОД">
+            <input type="number" id="con-pr-val" class="term-in" placeholder="ОСКОЛКИ">
             <div class="term-btn" style="border-color:#bc42f5" onclick="conCreatePromo()">СОЗДАТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
@@ -202,7 +224,6 @@
                 document.getElementById('u-id').innerText = uid;
                 
                 const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
-                
                 if (uid === OID) {
                     document.getElementById('shards-balance').innerText = "∞";
                     document.getElementById('nav-adm').style.display = 'flex';
@@ -211,25 +232,67 @@
                     document.getElementById('shards-balance').innerText = localStorage.getItem('m_shards_' + uid) || 0;
                     if (admins.includes(uid)) document.getElementById('nav-adm').style.display = 'flex';
                 }
+                renderTasks();
                 updateProfile();
                 setTimeout(() => {
                     document.getElementById('loading').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('loading').style.display = 'none';
-                        document.getElementById('app').style.display = 'flex';
-                    }, 800);
+                    setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 800);
                 }, 1500);
-            } catch (e) {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
-            }
+            } catch (e) { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }
         }
 
+        // ЦЕНЫ
+        function savePrices(type) {
+            const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-';
+            const stars = document.getElementById(prefix + 'stars').value;
+            const ton = document.getElementById(prefix + 'ton').value;
+            localStorage.setItem('price_' + type + '_stars', stars);
+            localStorage.setItem('price_' + type + '_ton', ton);
+            tg.showAlert("Цены сохранены!");
+        }
+
+        // ЗАДАНИЯ
+        function toggleTaskInput() {
+            const type = document.getElementById('task-reward-type').value;
+            document.getElementById('task-reward-val').style.display = (type === 'shards') ? 'block' : 'none';
+        }
+
+        function manageTask(action, taskId = null) {
+            let tasks = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            if(action === 'add') {
+                const name = document.getElementById('task-name').value;
+                const link = document.getElementById('task-link').value;
+                const rType = document.getElementById('task-reward-type').value;
+                const rVal = document.getElementById('task-reward-val').value;
+                if(!name || !link) return tg.showAlert("Заполни поля!");
+                tasks.push({ id: Date.now(), name, link, rType, rVal: rType === 'sub7' ? 7 : rVal });
+                tg.showAlert("Задание добавлено");
+            } else if(action === 'rem' && String(tg.initDataUnsafe?.user?.id || OID) === OID) {
+                tasks = tasks.filter(t => t.id !== taskId);
+            } else if (action === 'rem') {
+                return tg.showAlert("Только Owner может удалять!");
+            }
+            localStorage.setItem('m_tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('task-list-container');
+            const tasks = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            const isOwner = String(tg.initDataUnsafe?.user?.id || OID) === OID;
+            container.innerHTML = tasks.map(t => `
+                <div class="task-item">
+                    <span>${t.name} (${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'})</span>
+                    ${isOwner ? `<button onclick="manageTask('rem', ${t.id})" style="background:red; color:white; border:none; border-radius:4px; padding:2px 8px">Удалить</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // ОСТАЛЬНАЯ ЛОГИКА (БЕЗ ИЗМЕНЕНИЙ)
         function manageFunds(type, action, idField, valField) {
             const id = document.getElementById(idField).value;
             const val = valField ? document.getElementById(valField).value : null;
             if(!id) return tg.showAlert("Введите ID");
-            
             if(type === 'shards') {
                 let b = parseInt(localStorage.getItem('m_shards_' + id) || 0);
                 b = (action === 'add') ? b + parseInt(val) : Math.max(0, b - parseInt(val));
@@ -238,8 +301,7 @@
                 if(action === 'add') localStorage.setItem('m_sub_' + id, val);
                 else localStorage.removeItem('m_sub_' + id);
             }
-            tg.showAlert("Выполнено!");
-            init();
+            tg.showAlert("Выполнено!"); init();
         }
 
         function previewChar(input) {
@@ -256,12 +318,11 @@
 
         function conAddChar() {
             const name = document.getElementById('char-name').value;
-            if(!name || !currentPhotoBase64) return tg.showAlert("Имя и фото!");
+            if(!name || !currentPhotoBase64) return tg.showAlert("Данные!");
             let db = JSON.parse(localStorage.getItem('m_characters') || "[]");
             db.push({ id: Date.now(), name, photo: currentPhotoBase64 });
             localStorage.setItem('m_characters', JSON.stringify(db));
-            tg.showAlert("Добавлен!");
-            back();
+            tg.showAlert("Добавлен!"); back();
         }
 
         function conManageAdmin(action) {
@@ -271,8 +332,7 @@
             if(action === 'add') { if(!a.includes(id)) a.push(id); }
             else { a = a.filter(i => i !== id); }
             localStorage.setItem('m_admins', JSON.stringify(a));
-            tg.showAlert("Ок");
-            init();
+            tg.showAlert("Ок"); init();
         }
 
         function conCreatePromo() {
