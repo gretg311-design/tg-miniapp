@@ -3,202 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project 2026</title>
+    <title>Moon Project - Железобетон</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-touch-callout: none; -webkit-user-select: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
+        
+        /* Загрузка */
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
-        .disclaimer { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.3); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulse 2s infinite; }
-        .loading-text { margin-top: 25px; font-size: 16px; font-weight: 300; letter-spacing: 2px; color: #fff; opacity: 0.8; }
-        .version-label { position: absolute; bottom: 30px; color: #333; font-size: 12px; letter-spacing: 1px; }
+        .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; }
+        .disclaimer { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.2); font-size: 10px; text-transform: uppercase; }
 
+        /* Контент */
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; touch-action: pan-y; padding-bottom: 110px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-        .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s linear infinite; }
-        .status-owner { background: linear-gradient(45deg, #ffd700, #ffae00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; }
-
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
-        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; padding: 5px; }
+        .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Сетка 10 кнопок */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
+        /* Оверлеи */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; touch-action: pan-y; }
-        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
-        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #1a0b2e; }
-        .info-label { color: #555; font-size: 11px; text-transform: uppercase; font-weight: bold; }
-        .info-val { color: #fff; font-size: 14px; font-weight: bold; }
-
+        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
-        .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: bold; width: 100%; color: #fff; text-transform: uppercase; margin-bottom: 10px; cursor: pointer; }
+        .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 16000; padding-bottom: 15px; }
-        .nav-btn { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 10px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
-        @keyframes flow { to {background-position: 200%} }
-        @keyframes pulse { 0%,100%{transform:scale(1); opacity: 1;} 50%{transform:scale(1.1); opacity: 0.8;} }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 16000; }
     </style>
 </head>
-<body oncontextmenu="return false">
-
+<body>
     <div id="loading">
         <div class="disclaimer">Все персонажи вымышлены</div>
         <div class="moon-logo"></div>
-        <div class="loading-text">Загрузка мира...</div>
-        <div class="version-label">v 1.0.1</div>
+        <div style="margin-top:20px; letter-spacing: 2px; font-size: 12px;">ЗАГРУЗКА...</div>
     </div>
 
     <div id="app">
         <div class="u-header">
-            <div><div id="u-name" class="nick-ultra">...</div><div style="font-size:12px; color:#555; margin-top:4px;">ID: <span id="u-id">0</span> <span id="role-text"></span></div></div>
+            <div><div id="u-name" class="nick-ultra">...</div><div style="font-size:12px; color:#555;">ID: <span id="u-id">0</span></div></div>
             <div style="font-size: 22px; font-weight: bold;">🌙 <span id="shards-balance">0</span></div>
         </div>
+
         <div class="menu-grid">
-            <div class="menu-item">Чаты</div><div class="menu-item">Персонажи</div>
-            <div class="menu-item">Ежедневка</div><div class="menu-item">Задания</div>
-            <div class="menu-item">Магазин</div>
-            <div class="menu-item" onclick="openPanel('p-promo-use')">Промокоды</div>
-            <div class="menu-item" onclick="openPanel('p-profile-info')">Профиль</div>
+            <div class="menu-item" onclick="tg.showAlert('В разработке')">Чаты</div>
+            <div class="menu-item" onclick="tg.showAlert('В разработке')">Персонажи</div>
+            <div class="menu-item" onclick="tg.showAlert('В разработке')">Ежедневка</div>
+            <div class="menu-item" onclick="tg.showAlert('В разработке')">Задания</div>
+            <div class="menu-item" onclick="tg.showAlert('В разработке')">Магазин</div>
+            <div class="menu-item" onclick="tg.showAlert('В разработке')">Промокоды</div>
+            <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
             <div class="menu-item" onclick="openPanel('p-settings')">Настройка</div>
-            
-            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm-main')">Админка</div>
-            <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-home')">Консоль</div>
+            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
+            <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
     </div>
 
-    <div id="p-promo-use" class="overlay">
-        <h2 style="color:#bc42f5;">ПРОМОКОД</h2>
+    <div id="p-profile" class="overlay">
+        <h2>ПРОФИЛЬ</h2>
+        <div class="info-card" id="profile-content"></div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-settings" class="overlay">
+        <h2>НАСТРОЙКИ</h2>
         <div class="info-card">
-            <input type="text" id="promo-input" class="term-in" placeholder="Введите код...">
-            <div class="term-btn" style="color:#00ff00; border-color:#00ff00; margin-top:10px;" onclick="usePromo()">АКТИВИРОВАТЬ</div>
+            <input type="text" id="set-nick" class="term-in" placeholder="Ваш ник">
+            <div style="display:flex; gap:10px;">
+                <button class="term-btn" style="border-color:#2d164d" onclick="setGender('m')">М</button>
+                <button class="term-btn" style="border-color:#2d164d" onclick="setGender('f')">Ж</button>
+            </div>
+        </div>
+        <div class="term-btn" style="border-color:#00ff00" onclick="saveSettings()">СОХРАНИТЬ</div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-adm" class="overlay">
+        <h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2>
+        <div class="info-card">
+            <input type="number" id="adm-target-id" class="term-in" placeholder="TG ID">
+            <input type="number" id="adm-amount" class="term-in" placeholder="Количество">
+            <div class="term-btn" onclick="admAction('shards')">ВЫДАТЬ ОСКОЛКИ</div>
+            <div class="term-btn" onclick="admAction('sub')">ВЫДАТЬ SUB (30д)</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-profile-info" class="overlay">
-        <h2 style="color:#bc42f5;">ИНФОРМАЦИЯ</h2>
+    <div id="p-con" class="overlay">
+        <h2 style="color:#e91e63">OWNER CONSOLE</h2>
         <div class="info-card">
-            <div class="info-row"><span class="info-label">Ник</span><span class="info-val" id="i-nick">-</span></div>
-            <div class="info-row"><span class="info-label">Айди</span><span class="info-val" id="i-id">-</span></div>
-            <div class="info-row"><span class="info-label">Осколки</span><span class="info-val" id="i-shards">-</span></div>
-            <div class="info-row"><span class="info-label">Статус</span><span class="info-val" id="i-role">-</span></div>
+            <input type="number" id="con-admin-id" class="term-in" placeholder="TG ID">
+            <div class="term-btn" onclick="conAction('add-adm')">НАЗНАЧИТЬ АДМИНА</div>
+            <div class="term-btn" style="border-color:#ff4444" onclick="conAction('rem-adm')">СНЯТЬ АДМИНА</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-adm-main" class="overlay">
-        <h2 style="color:#00bcd4;">ADMIN PANEL</h2>
-        <div class="menu-grid">
-            <div class="menu-item btn-adm">ВЫДАТЬ ОСКОЛКИ</div>
-            <div class="menu-item btn-adm">ВЫДАТЬ ПОДПИСКУ</div>
-            <div class="menu-item btn-adm">ДОБАВИТЬ ЗАДАНИЕ</div>
-            <div class="menu-item btn-adm" onclick="tg.showAlert('Функция добавления промо в разработке')">ДОБАВИТЬ ПРОМО</div>
-        </div>
-        <div class="term-btn" style="margin-top:20px;" onclick="closeAll()">ЗАКРЫТЬ</div>
-    </div>
-
-    <div id="p-home" class="overlay">
-        <h2 style="color:#e91e63;">OWNER CONSOLE</h2>
-        <div class="menu-grid">
-            <div class="menu-item btn-con">УПРАВЛЕНИЕ ОСКОЛКАМИ</div>
-            <div class="menu-item btn-con">УПРАВЛЕНИЕ АДМИНАМИ</div>
-        </div>
-        <div class="term-btn" style="margin-top:20px;" onclick="closeAll()">ЗАКРЫТЬ</div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-btn" onclick="back()"><span>⬅️</span><span>Назад</span></div>
-        <div class="nav-btn" onclick="closeAll()"><span>🏠</span><span>Домой</span></div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const OID = 8287041036;
+        const OID = "8287041036";
         let stack = [];
 
-        tg.enableClosingConfirmation();
         tg.expand();
+        tg.enableClosingConfirmation();
 
+        // Запрет свайпа (Железобетон)
         let startY = 0;
-        document.addEventListener('touchstart', (e) => { startY = e.touches[0].pageY; }, {passive: false});
-        document.addEventListener('touchmove', (e) => {
-            if (document.getElementById('app').scrollTop <= 0 && e.touches[0].pageY > startY) {
-                if (e.cancelable) e.preventDefault();
-            }
+        document.addEventListener('touchstart', e => startY = e.touches[0].pageY);
+        document.addEventListener('touchmove', e => {
+            if (document.getElementById('app').scrollTop <= 0 && e.touches[0].pageY > startY) e.preventDefault();
         }, {passive: false});
 
-        const getDB = (k) => JSON.parse(localStorage.getItem(k) || "{}");
-        const setDB = (k, v) => localStorage.setItem(k, JSON.stringify(v));
-
-        function usePromo() {
-            const codeInput = document.getElementById('promo-input');
-            const code = codeInput.value.trim();
-            const user = tg.initDataUnsafe?.user || { id: OID };
-            const uid = String(user.id);
-            let promos = getDB('m_promos'); 
-            
-            if (!promos[code]) return tg.showAlert("❌ Код не найден");
-            if (promos[code].usedBy && promos[code].usedBy.includes(uid)) return tg.showAlert("🚫 Вы уже использовали этот код!");
-            if (promos[code].limit <= 0) return tg.showAlert("⚠️ Лимиты исчерпаны");
-
-            if (!promos[code].usedBy) promos[code].usedBy = [];
-            let shardsDB = getDB('m_shards');
-            shardsDB[uid] = (shardsDB[uid] || 0) + promos[code].shards;
-            
-            promos[code].limit -= 1;
-            promos[code].usedBy.push(uid);
-            
-            setDB('m_shards', shardsDB);
-            setDB('m_promos', promos);
-            
-            tg.showAlert(`✅ Получено ${promos[code].shards} осколков!`);
-            codeInput.value = "";
-            initUI();
-        }
-
-        function openPanel(id) {
-            const current = document.querySelector('.overlay[style*="display: flex"]');
-            if (current) stack.push(current.id);
-            document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
-            document.getElementById(id).style.display = 'flex';
-        }
-
-        function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); stack = []; }
-        function back() {
-            if (stack.length > 0) {
-                const prevId = stack.pop();
-                document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
-                document.getElementById(prevId).style.display = 'flex';
-            } else { closeAll(); }
-        }
-
-        function initUI() {
+        function init() {
             const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
             const uid = String(user.id);
-            const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
+            
             document.getElementById('u-name').innerText = localStorage.getItem('m_nick') || user.first_name;
             document.getElementById('u-id').innerText = uid;
-            
-            if(uid === String(OID)) {
+
+            // Ранги
+            const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
+            if (uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
             } else {
-                document.getElementById('shards-balance').innerText = getDB('m_shards')[uid] || 0;
-                if(admins.includes(uid)) document.getElementById('nav-adm').style.display = 'flex';
+                document.getElementById('shards-balance').innerText = localStorage.getItem('m_shards_' + uid) || 0;
+                if (admins.includes(uid)) document.getElementById('nav-adm').style.display = 'flex';
             }
+            
+            updateProfile();
+            setTimeout(() => { document.getElementById('loading').style.display='none'; document.getElementById('app').style.display='flex'; }, 1500);
         }
 
-        window.onload = () => {
-            initUI();
-            setTimeout(() => {
-                document.getElementById('loading').style.opacity = '0';
-                setTimeout(() => { 
-                    document.getElementById('loading').style.display = 'none'; 
-                    document.getElementById('app').style.display = 'flex'; 
-                }, 800);
-            }, 3000);
-        };
+        function updateProfile() {
+            const uid = document.getElementById('u-id').innerText;
+            const sub = localStorage.getItem('m_sub_' + uid) || "Free";
+            document.getElementById('profile-content').innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px"><span>СТАТУС:</span><span>${uid === OID ? 'OWNER' : 'USER'}</span></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px"><span>ПОДПИСКА:</span><span>${uid === OID ? 'ULTRA (∞)' : sub}</span></div>
+            `;
+        }
+
+        function saveSettings() {
+            const nick = document.getElementById('set-nick').value;
+            if(nick) localStorage.setItem('m_nick', nick);
+            tg.showAlert("Сохранено!");
+            init();
+            back();
+        }
+
+        function admAction(type) {
+            const target = document.getElementById('adm-target-id').value;
+            const val = document.getElementById('adm-amount').value;
+            if(!target) return tg.showAlert("Введите ID");
+            if(type === 'shards') localStorage.setItem('m_shards_' + target, val);
+            if(type === 'sub') localStorage.setItem('m_sub_' + target, 'Premium');
+            tg.showAlert("Готово!");
+        }
+
+        function conAction(type) {
+            const target = document.getElementById('con-admin-id').value;
+            if(!target) return tg.showAlert("Введите ID");
+            let admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
+            if(type === 'add-adm') { if(!admins.includes(target)) admins.push(target); }
+            if(type === 'rem-adm') { admins = admins.filter(a => a !== target); }
+            localStorage.setItem('m_admins', JSON.stringify(admins));
+            tg.showAlert("Действие выполнено");
+        }
+
+        function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
+        function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
+
+        window.onload = init;
     </script>
 </body>
 </html>
