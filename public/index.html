@@ -19,7 +19,7 @@
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
         .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Сетка 10 кнопок */
+        /* Сетка меню */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
@@ -31,7 +31,10 @@
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: #080212; border-top: 1px solid #2d164d; display: flex; justify-content: space-around; align-items: center; z-index: 16000; }
+        /* Кнопки Консоли как на скрине */
+        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 20px; }
+        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; text-transform: uppercase; font-weight: bold; }
+        .con-title { color: #e91e63; font-size: 24px; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -92,11 +95,24 @@
     </div>
 
     <div id="p-con" class="overlay">
-        <h2 style="color:#e91e63">OWNER CONSOLE</h2>
+        <div class="con-title">CONSOLE</div>
+        <div class="con-grid">
+            <div class="con-btn" onclick="tg.showAlert('Осколки')">осколки</div>
+            <div class="con-btn" onclick="tg.showAlert('Подписки')">подписки</div>
+            <div class="con-btn" onclick="tg.showAlert('Персонаж')">ПЕРСОНАЖ</div>
+            <div class="con-btn" onclick="tg.showAlert('Цены')">ЦЕНЫ</div>
+            <div class="con-btn" onclick="openPanel('p-con-admins')">АДМИНЫ</div>
+            <div class="con-btn" onclick="tg.showAlert('Промокоды')">ПРОМОКОДЫ</div>
+        </div>
+        <div style="margin-top: 30px; color: rgba(255,255,255,0.4); font-size: 10px;" onclick="back()">[ ЗАКРЫТЬ ТЕРМИНАЛ ]</div>
+    </div>
+
+    <div id="p-con-admins" class="overlay">
+        <h2 style="color:#e91e63">УПРАВЛЕНИЕ АДМИНАМИ</h2>
         <div class="info-card">
             <input type="number" id="con-admin-id" class="term-in" placeholder="TG ID">
-            <div class="term-btn" onclick="conAction('add-adm')">НАЗНАЧИТЬ АДМИНА</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="conAction('rem-adm')">СНЯТЬ АДМИНА</div>
+            <div class="term-btn" onclick="conAction('add-adm')">НАЗНАЧИТЬ</div>
+            <div class="term-btn" style="border-color:#ff4444" onclick="conAction('rem-adm')">СНЯТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -123,7 +139,6 @@
             document.getElementById('u-name').innerText = localStorage.getItem('m_nick') || user.first_name;
             document.getElementById('u-id').innerText = uid;
 
-            // Ранги
             const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
             if (uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
