@@ -31,8 +31,8 @@
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; text-transform: uppercase; font-weight: bold; cursor: pointer; }
         .con-title { color: #e91e63; font-size: 24px; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; }
 
-        /* Превью персонажа */
-        .char-preview { width: 150px; height: 150px; border: 2px dashed #2d164d; border-radius: 15px; margin-bottom: 15px; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        /* ПРЕВЬЮ ПЕРСОНАЖА БЕЗ ОБРЕЗКИ */
+        .char-preview { width: 100%; height: 200px; border: 2px dashed #2d164d; border-radius: 15px; margin-bottom: 15px; background-size: contain; background-position: center; background-repeat: no-repeat; display: flex; align-items: center; justify-content: center; overflow: hidden; background-color: #000; }
         select.term-in { appearance: none; }
     </style>
 </head>
@@ -76,77 +76,36 @@
         <div style="margin-top: 30px; color: rgba(255,255,255,0.4); font-size: 10px;" onclick="back()">[ ЗАКРЫТЬ ТЕРМИНАЛ ]</div>
     </div>
 
-    <div id="p-con-shards" class="overlay">
-        <h2 style="color:#e91e63">ОСКОЛКИ</h2>
-        <div class="info-card">
-            <input type="number" id="con-sh-id" class="term-in" placeholder="TG ID">
-            <input type="number" id="con-sh-val" class="term-in" placeholder="ЧИСЛО">
-            <div class="term-btn" style="border-color:#00ff00" onclick="conManageShards('add')">ВЫДАТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="conManageShards('rem')">ЗАБРАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-con-subs" class="overlay">
-        <h2 style="color:#e91e63">ПОДПИСКИ</h2>
-        <div class="info-card">
-            <input type="number" id="con-sub-id" class="term-in" placeholder="TG ID">
-            <select id="con-sub-type" class="term-in">
-                <option value="Premium">PREMIUM</option>
-                <option value="Pro">PRO</option>
-                <option value="VIP">VIP</option>
-                <option value="Ultra">ULTRA</option>
-            </select>
-            <div class="term-btn" style="border-color:#00ff00" onclick="conManageSub('add')">ВЫДАТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="conManageSub('rem')">ЗАБРАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
     <div id="p-con-char" class="overlay">
         <h2 style="color:#e91e63">НОВЫЙ ПЕРСОНАЖ</h2>
         <div class="info-card">
             <center>
                 <div class="char-preview" id="char-img-preview" onclick="document.getElementById('char-upload').click()">
-                    <span>ФОТО</span>
+                    <span id="preview-hint">НАЖМИ ЧТОБЫ ЗАГРУЗИТЬ ФОТО</span>
                 </div>
                 <input type="file" id="char-upload" hidden accept="image/*" onchange="previewChar(this)">
             </center>
             <input type="text" id="char-name" class="term-in" placeholder="ИМЯ">
             <input type="number" id="char-age" class="term-in" placeholder="ВОЗРАСТ">
             <textarea id="char-desc" class="term-in" style="height:80px;" placeholder="ХАРАКТЕРИСТИКИ"></textarea>
-            <div class="term-btn" style="border-color:#bc42f5" onclick="conAddChar()">ДОБАВИТЬ ПЕРСОНАЖА</div>
+            <div class="term-btn" style="border-color:#bc42f5" onclick="conAddChar()">ДОБАВИТЬ В БАЗУ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-con-promos" class="overlay">
-        <h2 style="color:#e91e63">ПРОМОКОДЫ</h2>
-        <div class="info-card">
-            <input type="text" id="con-pr-code" class="term-in" placeholder="ПРОМОКОД">
-            <input type="number" id="con-pr-val" class="term-in" placeholder="НАГРАДА">
-            <div class="term-btn" style="border-color:#bc42f5" onclick="conCreatePromo()">СОЗДАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-con-admins" class="overlay">
-        <h2 style="color:#e91e63">АДМИНЫ</h2>
-        <div class="info-card">
-            <input type="number" id="con-adm-id-val" class="term-in" placeholder="TG ID">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="conManageAdmin('add')">ДОБАВИТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="conManageAdmin('rem')">РАЗЖАЛОВАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-profile" class="overlay"><h2>ПРОФИЛЬ</h2><div class="info-card" id="profile-content"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-settings" class="overlay"><h2>НАСТРОЙКИ</h2><div class="info-card"><input type="text" id="set-nick" class="term-in" placeholder="Ник"><div style="display:flex; gap:10px;"><button class="term-btn" style="border-color:#2d164d" onclick="setGender('m')">М</button><button class="term-btn" style="border-color:#2d164d" onclick="setGender('f')">Ж</button></div></div><div class="term-btn" style="border-color:#00ff00" onclick="saveSettings()">СОХРАНИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-con-shards" class="overlay">...</div>
+    <div id="p-con-subs" class="overlay">...</div>
+    <div id="p-con-promos" class="overlay">...</div>
+    <div id="p-con-admins" class="overlay">...</div>
+    <div id="p-profile" class="overlay">...</div>
+    <div id="p-settings" class="overlay">...</div>
+    <div id="p-adm" class="overlay">...</div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const OID = "8287041036";
         let stack = [];
+        let currentPhotoBase64 = ""; // Храним фото тут
 
         tg.expand();
         tg.enableClosingConfirmation();
@@ -161,6 +120,7 @@
             const uid = String(user.id);
             document.getElementById('u-name').innerText = localStorage.getItem('m_nick') || user.first_name;
             document.getElementById('u-id').innerText = uid;
+            
             const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
             if (uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
@@ -174,34 +134,15 @@
             setTimeout(() => { document.getElementById('loading').style.display='none'; document.getElementById('app').style.display='flex'; }, 1000);
         }
 
-        // --- ЛОГИКА КОНСОЛИ ---
-        function conManageShards(action) {
-            const id = document.getElementById('con-sh-id').value;
-            const val = parseInt(document.getElementById('con-sh-val').value);
-            if(!id || isNaN(val)) return tg.showAlert("Ошибка ввода");
-            let balance = parseInt(localStorage.getItem('m_shards_' + id) || 0);
-            balance = (action === 'add') ? balance + val : Math.max(0, balance - val);
-            localStorage.setItem('m_shards_' + id, balance);
-            tg.showAlert(`Баланс ID ${id}: ${balance}`);
-            init();
-        }
-
-        function conManageSub(action) {
-            const id = document.getElementById('con-sub-id').value;
-            const type = document.getElementById('con-sub-type').value;
-            if(!id) return tg.showAlert("Введите ID");
-            if(action === 'add') localStorage.setItem('m_sub_' + id, type);
-            else localStorage.removeItem('m_sub_' + id);
-            tg.showAlert("Подписка обновлена");
-            init();
-        }
-
+        // ЛОГИКА ПЕРСОНАЖА
         function previewChar(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = e => {
-                    document.getElementById('char-img-preview').style.backgroundImage = `url(${e.target.result})`;
-                    document.getElementById('char-img-preview').querySelector('span').style.display = 'none';
+                    currentPhotoBase64 = e.target.result;
+                    const preview = document.getElementById('char-img-preview');
+                    preview.style.backgroundImage = `url(${currentPhotoBase64})`;
+                    document.getElementById('preview-hint').style.display = 'none';
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -209,43 +150,40 @@
 
         function conAddChar() {
             const name = document.getElementById('char-name').value;
-            if(!name) return tg.showAlert("Имя?");
-            tg.showAlert(`Персонаж ${name} добавлен (визуал)`);
+            const age = document.getElementById('char-age').value;
+            const desc = document.getElementById('char-desc').value;
+
+            if(!name || !currentPhotoBase64) return tg.showAlert("Загрузи фото и введи имя!");
+
+            const newChar = {
+                id: Date.now(),
+                name: name,
+                age: age,
+                desc: desc,
+                photo: currentPhotoBase64
+            };
+
+            // Сохраняем в "БД"
+            let db = JSON.parse(localStorage.getItem('m_characters') || "[]");
+            db.push(newChar);
+            localStorage.setItem('m_characters', JSON.stringify(db));
+
+            tg.showAlert(`Персонаж ${name} сохранен в базу!`);
+            
+            // Чистим поля
+            document.getElementById('char-name').value = "";
+            document.getElementById('char-age').value = "";
+            document.getElementById('char-desc').value = "";
+            document.getElementById('char-img-preview').style.backgroundImage = "none";
+            document.getElementById('preview-hint').style.display = 'block';
+            currentPhotoBase64 = "";
             back();
         }
 
-        function conManageAdmin(action) {
-            const id = document.getElementById('con-adm-id-val').value;
-            if(!id) return tg.showAlert("ID?");
-            let admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            if(action === 'add') { if(!admins.includes(id)) admins.push(id); }
-            else { admins = admins.filter(a => a !== id); }
-            localStorage.setItem('m_admins', JSON.stringify(admins));
-            tg.showAlert("Готово");
-            init();
-        }
-
-        function conCreatePromo() {
-            const code = document.getElementById('con-pr-code').value;
-            const val = document.getElementById('con-pr-val').value;
-            if(!code || !val) return tg.showAlert("Заполни поля");
-            localStorage.setItem('m_promo_' + code, val);
-            tg.showAlert(`Промо ${code} создан`);
-        }
-
-        function updateProfile() {
-            const uid = document.getElementById('u-id').innerText;
-            const sub = localStorage.getItem('m_sub_' + uid) || "Free";
-            document.getElementById('profile-content').innerHTML = `
-                <div>СТАТУС: ${uid === OID ? 'OWNER' : 'USER'}</div>
-                <div>ПОДПИСКА: ${uid === OID ? 'ULTRA (∞)' : sub}</div>
-            `;
-        }
-
+        // --- ВСЕ ОСТАЛЬНЫЕ ФУНКЦИИ (conManageShards, conManageSub, conManageAdmin, conCreatePromo, openPanel, back, и т.д.) оставляешь из прошлого сообщения ---
         function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
         function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
-        function saveSettings() { localStorage.setItem('m_nick', document.getElementById('set-nick').value); tg.showAlert("Ок"); init(); back(); }
-
+        
         window.onload = init;
     </script>
 </body>
