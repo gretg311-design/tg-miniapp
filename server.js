@@ -19,7 +19,7 @@ const connectDB = async () => {
 
 const userSchema = new mongoose.Schema({
     tg_id: { type: Number, unique: true },
-    shards: { type: Number, default: 0 },
+    shards: { type: Number, default: 150 },
     subscription: { type: String, default: "None" },
     is_admin: { type: Boolean, default: false }
 });
