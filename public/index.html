@@ -21,8 +21,6 @@
             50% { transform: scale(1.05); box-shadow: 0 0 60px #fff; }
             100% { transform: scale(1); box-shadow: 0 0 35px #fff; }
         }
-        .disclaimer { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.2); font-size: 10px; text-transform: uppercase; }
-        .version { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.1); font-size: 10px; z-index: 5; }
 
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; touch-action: pan-y; padding-bottom: 110px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
@@ -47,13 +45,7 @@
     </style>
 </head>
 <body>
-    <div id="loading">
-        <div class="disclaimer">Все персонажи вымышлены</div>
-        <div class="moon-logo"></div>
-        <div style="margin-top:20px; letter-spacing: 2px; font-size: 12px; color: #fff;">ЗАГРУЗКА МИРА...</div>
-    </div>
-
-    <div class="version">v1.0.4 - STABLE</div>
+    <div id="loading"><div class="moon-logo"></div></div>
 
     <div id="app">
         <div class="u-header">
@@ -64,7 +56,7 @@
             <div class="menu-item" onclick="tg.showAlert('В разработке')">Чаты</div>
             <div class="menu-item" onclick="tg.showAlert('В разработке')">Персонажи</div>
             <div class="menu-item" onclick="tg.showAlert('В разработке')">Ежедневка</div>
-            <div class="menu-item" onclick="tg.showAlert('Экран заданий в разработке')">Задания</div>
+            <div class="menu-item" onclick="openTasks()">Задания</div>
             <div class="menu-item" onclick="tg.showAlert('В разработке')">Магазин</div>
             <div class="menu-item" onclick="tg.showAlert('В разработке')">Промокоды</div>
             <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
@@ -101,7 +93,7 @@
     </div>
 
     <div id="p-task-manage" class="overlay">
-        <h2 style="color:#bc42f5">ЗАДАНИЯ</h2>
+        <h2 id="task-title" style="color:#bc42f5">ЗАДАНИЯ</h2>
         <div class="info-card">
             <input type="text" id="task-name" class="term-in" placeholder="Название">
             <input type="text" id="task-link" class="term-in" placeholder="Ссылка">
@@ -174,31 +166,31 @@
     </div>
 
     <div id="p-con-admins" class="overlay">
-        <h2 style="color:#e91e63">АДМИНЫ</h2>
+        <h2>АДМИНЫ</h2>
         <div class="info-card">
             <input type="number" id="con-adm-id-val" class="term-in" placeholder="TG ID">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="conManageAdmin('add')">ДОБАВИТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="conManageAdmin('rem')">УДАЛИТЬ</div>
+            <div class="term-btn" onclick="conManageAdmin('add')">ДОБАВИТЬ</div>
+            <div class="term-btn" onclick="conManageAdmin('rem')">УДАЛИТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-con-char" class="overlay">
-        <h2 style="color:#bc42f5">ПЕРСОНАЖ</h2>
+        <h2>ПЕРСОНАЖ</h2>
         <div class="info-card">
             <div class="char-preview" id="char-img-preview" onclick="document.getElementById('char-upload').click()">ФОТО</div>
             <input type="file" id="char-upload" hidden accept="image/*" onchange="previewChar(this)">
             <input type="text" id="char-name" class="term-in" placeholder="ИМЯ">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="conAddChar()">В БАЗУ</div>
+            <div class="term-btn" onclick="conAddChar()">В БАЗУ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-con-promos" class="overlay">
-        <h2 style="color:#e91e63">ПРОМО</h2>
+        <h2>ПРОМО</h2>
         <div class="info-card">
             <input type="text" id="con-pr-code" class="term-in" placeholder="КОД"><input type="number" id="con-pr-val" class="term-in" placeholder="ОСКОЛКИ">
-            <div class="term-btn" style="border-color:#bc42f5" onclick="conCreatePromo()">СОЗДАТЬ</div>
+            <div class="term-btn" onclick="conCreatePromo()">СОЗДАТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -232,7 +224,7 @@
             }
             renderTasksList();
             updateProfile();
-            setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
+            setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1000);
         }
 
         function manageTask(action, taskId = null) {
