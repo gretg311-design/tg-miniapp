@@ -44,6 +44,12 @@
 
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; font-size: 11px; width: 100%; }
         .char-preview { width: 100%; height: 180px; border: 2px dashed #2d164d; border-radius: 15px; margin-bottom: 15px; background-size: contain; background-position: center; background-repeat: no-repeat; display: flex; align-items: center; justify-content: center; background-color: #000; }
+        
+        /* Styles for settings */
+        .setting-label { display: block; margin-bottom: 8px; font-size: 12px; color: #888; text-transform: uppercase; }
+        .slider-wrap { margin-bottom: 20px; width: 100%; }
+        .slider { width: 100%; height: 6px; border-radius: 5px; background: #2d164d; appearance: none; outline: none; }
+        .slider::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #bc42f5; cursor: pointer; border: 2px solid #fff; }
     </style>
 </head>
 <body>
@@ -53,7 +59,7 @@
         <div style="margin-top:20px; letter-spacing: 2px; font-size: 12px; color: #fff;">ЗАГРУЗКА МИРА...</div>
     </div>
 
-    <div class="version">v1.0.4 - STABLE</div>
+    <div class="version">v1.0.5 - STABLE</div>
 
     <div id="app">
         <div class="u-header">
@@ -100,6 +106,37 @@
         <div class="term-btn" style="margin-top:20px" onclick="back()">НАЗАД</div>
     </div>
 
+    <div id="p-settings" class="overlay">
+        <h2 style="color:#bc42f5">НАСТРОЙКИ</h2>
+        <div class="info-card">
+            <span class="setting-label">Имя пользователя</span>
+            <input type="text" id="set-nick" class="term-in" placeholder="Ваше имя">
+            
+            <span class="setting-label">Пол</span>
+            <select id="set-gender" class="term-in">
+                <option value="male">Мужской</option>
+                <option value="female">Женский</option>
+            </select>
+
+            <span class="setting-label">Язык</span>
+            <div class="term-btn" style="padding:10px; font-size:12px;" onclick="tg.showAlert('В разработке')">Русский (В разработке)</div>
+
+            <div class="slider-wrap">
+                <span class="setting-label">Длина сообщений: <b id="val-words">45</b> слов</span>
+                <input type="range" id="set-words" class="slider" min="45" max="45" value="45" oninput="updateSettingsUI()">
+            </div>
+
+            <div class="slider-wrap">
+                <span class="setting-label">Уровень пошлости: <span id="val-vulgar">🙂 0</span></span>
+                <input type="range" id="set-vulgar" class="slider" min="0" max="6" value="0" oninput="updateSettingsUI()">
+            </div>
+            
+            <div class="term-btn" style="border-color:#ff00ea; color:#ff00ea;" id="btn-18" onclick="troll18()">КОНТЕНТ 18+</div>
+        </div>
+        <div class="term-btn" style="border-color:#00ff00" onclick="saveSettings()">СОХРАНИТЬ</div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
     <div id="p-task-manage" class="overlay">
         <h2 style="color:#bc42f5">ЗАДАНИЯ</h2>
         <div class="info-card">
@@ -118,99 +155,26 @@
 
     <div id="p-con-prices" class="overlay">
         <h2 style="color:#e91e63">ЦЕНЫ</h2>
-        <div class="info-card">
-            <h4 style="color:#00bcd4">ОСКОЛКИ</h4>
-            <input type="number" id="pr-sh-stars" class="term-in" placeholder="Stars">
-            <input type="number" id="pr-sh-ton" class="term-in" placeholder="TON">
-            <div class="term-btn" onclick="savePrices('shards')">СОХРАНИТЬ</div>
-        </div>
-        <div class="info-card">
-            <h4 style="color:#bc42f5">ПОДПИСКИ</h4>
-            <input type="number" id="pr-sub-stars" class="term-in" placeholder="Stars">
-            <input type="number" id="pr-sub-ton" class="term-in" placeholder="TON">
-            <div class="term-btn" onclick="savePrices('subs')">СОХРАНИТЬ</div>
-        </div>
+        <div class="info-card"><input type="number" id="pr-sh-stars" class="term-in" placeholder="Stars Shards"><input type="number" id="pr-sh-ton" class="term-in" placeholder="TON Shards"><div class="term-btn" onclick="savePrices('shards')">СОХРАНИТЬ</div></div>
+        <div class="info-card"><input type="number" id="pr-sub-stars" class="term-in" placeholder="Stars Subs"><input type="number" id="pr-sub-ton" class="term-in" placeholder="TON Subs"><div class="term-btn" onclick="savePrices('subs')">СОХРАНИТЬ</div></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-con-shards-adm" class="overlay">
-        <h2 style="color:#00bcd4">ВЫДАЧА ОСКОЛКОВ</h2>
-        <div class="info-card">
-            <input type="number" id="adm-sh-id" class="term-in" placeholder="TG ID"><input type="number" id="adm-sh-val" class="term-in" placeholder="ЧИСЛО">
-            <div class="term-btn" style="border-color:#00ff00" onclick="manageFunds('shards', 'add', 'adm-sh-id', 'adm-sh-val')">ВЫДАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-con-shards" class="overlay">
-        <h2 style="color:#e91e63">ОСКОЛКИ (OWNER)</h2>
-        <div class="info-card">
-            <input type="number" id="own-sh-id" class="term-in" placeholder="TG ID"><input type="number" id="own-sh-val" class="term-in" placeholder="ЧИСЛО">
-            <div class="term-btn" style="border-color:#00ff00" onclick="manageFunds('shards', 'add', 'own-sh-id', 'own-sh-val')">ВЫДАТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="manageFunds('shards', 'rem', 'own-sh-id', 'own-sh-val')">ЗАБРАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-con-subs-adm" class="overlay">
-        <h2 style="color:#00bcd4">ВЫДАЧА SUB</h2>
-        <div class="info-card">
-            <input type="number" id="adm-sub-id" class="term-in" placeholder="TG ID">
-            <select id="adm-sub-type" class="term-in"><option value="Premium">PREMIUM</option><option value="Pro">PRO</option><option value="VIP">VIP</option><option value="Ultra">ULTRA</option></select>
-            <div class="term-btn" style="border-color:#00ff00" onclick="manageFunds('sub', 'add', 'adm-sub-id', 'adm-sub-type')">ВЫДАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-con-subs" class="overlay">
-        <h2 style="color:#e91e63">SUB (OWNER)</h2>
-        <div class="info-card">
-            <input type="number" id="own-sub-id" class="term-in" placeholder="TG ID">
-            <select id="own-sub-type" class="term-in"><option value="Premium">PREMIUM</option><option value="Pro">PRO</option><option value="VIP">VIP</option><option value="Ultra">ULTRA</option></select>
-            <div class="term-btn" style="border-color:#00ff00" onclick="manageFunds('sub', 'add', 'own-sub-id', 'own-sub-type')">ВЫДАТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="manageFunds('sub', 'rem', 'own-sub-id')">ЗАБРАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-con-admins" class="overlay">
-        <h2 style="color:#e91e63">АДМИНЫ</h2>
-        <div class="info-card">
-            <input type="number" id="con-adm-id-val" class="term-in" placeholder="TG ID">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="conManageAdmin('add')">ДОБАВИТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="conManageAdmin('rem')">УДАЛИТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-con-char" class="overlay">
-        <h2 style="color:#bc42f5">ПЕРСОНАЖ</h2>
-        <div class="info-card">
-            <div class="char-preview" id="char-img-preview" onclick="document.getElementById('char-upload').click()">ФОТО</div>
-            <input type="file" id="char-upload" hidden accept="image/*" onchange="previewChar(this)">
-            <input type="text" id="char-name" class="term-in" placeholder="ИМЯ">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="conAddChar()">В БАЗУ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-con-promos" class="overlay">
-        <h2 style="color:#e91e63">ПРОМО</h2>
-        <div class="info-card">
-            <input type="text" id="con-pr-code" class="term-in" placeholder="КОД"><input type="number" id="con-pr-val" class="term-in" placeholder="ОСКОЛКИ">
-            <div class="term-btn" style="border-color:#bc42f5" onclick="conCreatePromo()">СОЗДАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
+    <div id="p-con-shards-adm" class="overlay"><h2>ВЫДАЧА ОСКОЛКОВ</h2><div class="info-card"><input type="number" id="adm-sh-id" class="term-in" placeholder="TG ID"><input type="number" id="adm-sh-val" class="term-in" placeholder="ЧИСЛО"><div class="term-btn" onclick="manageFunds('shards', 'add', 'adm-sh-id', 'adm-sh-val')">ВЫДАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-con-shards" class="overlay"><h2>ОСКОЛКИ (OWNER)</h2><div class="info-card"><input type="number" id="own-sh-id" class="term-in" placeholder="TG ID"><input type="number" id="own-sh-val" class="term-in" placeholder="ЧИСЛО"><div class="term-btn" onclick="manageFunds('shards', 'add', 'own-sh-id', 'own-sh-val')">ВЫДАТЬ</div><div class="term-btn" onclick="manageFunds('shards', 'rem', 'own-sh-id', 'own-sh-val')">ЗАБРАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-con-subs-adm" class="overlay"><h2>ВЫДАЧА SUB</h2><div class="info-card"><input type="number" id="adm-sub-id" class="term-in" placeholder="TG ID"><select id="adm-sub-type" class="term-in"><option value="Premium">PREMIUM</option><option value="Pro">PRO</option><option value="VIP">VIP</option><option value="Ultra">ULTRA</option></select><div class="term-btn" onclick="manageFunds('sub', 'add', 'adm-sub-id', 'adm-sub-type')">ВЫДАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-con-subs" class="overlay"><h2>SUB (OWNER)</h2><div class="info-card"><input type="number" id="own-sub-id" class="term-in" placeholder="TG ID"><select id="own-sub-type" class="term-in"><option value="Premium">PREMIUM</option><option value="Pro">PRO</option><option value="VIP">VIP</option><option value="Ultra">ULTRA</option></select><div class="term-btn" onclick="manageFunds('sub', 'add', 'own-sub-id', 'own-sub-type')">ВЫДАТЬ</div><div class="term-btn" onclick="manageFunds('sub', 'rem', 'own-sub-id')">ЗАБРАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-con-admins" class="overlay"><h2>АДМИНЫ</h2><div class="info-card"><input type="number" id="con-adm-id-val" class="term-in" placeholder="TG ID"><div class="term-btn" onclick="conManageAdmin('add')">ДОБАВИТЬ</div><div class="term-btn" onclick="conManageAdmin('rem')">УДАЛИТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-con-char" class="overlay"><h2>ПЕРСОНАЖ</h2><div class="info-card"><div class="char-preview" id="char-img-preview" onclick="document.getElementById('char-upload').click()">ФОТО</div><input type="file" id="char-upload" hidden onchange="previewChar(this)"><input type="text" id="char-name" class="term-in" placeholder="ИМЯ"><div class="term-btn" onclick="conAddChar()">В БАЗУ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-con-promos" class="overlay"><h2>ПРОМО</h2><div class="info-card"><input type="text" id="con-pr-code" class="term-in" placeholder="КОД"><input type="number" id="con-pr-val" class="term-in" placeholder="ОСКОЛКИ"><div class="term-btn" onclick="conCreatePromo()">СОЗДАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     <div id="p-profile" class="overlay"><h2>ПРОФИЛЬ</h2><div class="info-card" id="profile-content"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-settings" class="overlay"><h2>НАСТРОЙКИ</h2><div class="info-card"><input type="text" id="set-nick" class="term-in" placeholder="Ник"></div><div class="term-btn" onclick="saveSettings()">СОХРАНИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const OID = "8287041036";
         let stack = [];
         let currentPhotoBase64 = "";
+        let trollCount = 0;
 
         tg.expand();
         tg.enableClosingConfirmation();
@@ -230,11 +194,88 @@
                 document.getElementById('shards-balance').innerText = localStorage.getItem('m_shards_' + uid) || 0;
                 if (admins.includes(uid)) document.getElementById('nav-adm').style.display = 'flex';
             }
+            
+            // Загрузка настроек
+            document.getElementById('set-nick').value = localStorage.getItem('m_nick') || user.first_name;
+            document.getElementById('set-gender').value = localStorage.getItem('m_gender') || 'male';
+            document.getElementById('set-words').value = localStorage.getItem('m_set_words') || 45;
+            document.getElementById('set-vulgar').value = localStorage.getItem('m_set_vulgar') || 0;
+
             renderTasksList();
             updateProfile();
+            updateSettingsUI();
+            
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
         }
 
+        function updateSettingsUI() {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            const sub = (uid === OID) ? "Ultra" : (localStorage.getItem('m_sub_'+uid) || "Free");
+            
+            // Лимиты слов
+            let maxWords = 45;
+            if(sub === 'Premium') maxWords = 55;
+            if(sub === 'Pro') maxWords = 65;
+            if(sub === 'VIP') maxWords = 80;
+            if(sub === 'Ultra') maxWords = 100;
+            
+            const wordsRange = document.getElementById('set-words');
+            wordsRange.max = maxWords;
+            if(parseInt(wordsRange.value) > maxWords) wordsRange.value = maxWords;
+            document.getElementById('val-words').innerText = wordsRange.value;
+
+            // Пошлость
+            const vulgarRange = document.getElementById('set-vulgar');
+            let vVal = parseInt(vulgarRange.value);
+            
+            // Ограничения пошлости
+            if(vVal === 5 && !(sub === 'VIP' || sub === 'Ultra')) {
+                tg.showAlert("Уровень 5 доступен только VIP и Ultra!");
+                vulgarRange.value = 4; vVal = 4;
+            }
+            if(vVal === 6 && sub !== 'Ultra') {
+                tg.showAlert("Уровень 6 доступен только для Ultra!");
+                vulgarRange.value = 5; vVal = 5;
+            }
+
+            const vLabels = ["🙂 0", "😉 1", "🫢 2", "😏 3", "😍 4", "💋 5", "🥵 6"];
+            document.getElementById('val-vulgar').innerText = vLabels[vVal];
+        }
+
+        function troll18() {
+            trollCount++;
+            if(trollCount === 1) tg.showAlert("Попался!!! Я ещё в разработке!");
+            else {
+                tg.showAlert("Не трогай меня, 😒 мне не приятно, стоп");
+                trollCount = 0;
+            }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('m_nick', document.getElementById('set-nick').value);
+            localStorage.setItem('m_gender', document.getElementById('set-gender').value);
+            localStorage.setItem('m_set_words', document.getElementById('set-words').value);
+            localStorage.setItem('m_set_vulgar', document.getElementById('set-vulgar').value);
+            tg.showAlert("Настройки сохранены!");
+            init();
+            back();
+        }
+
+        function updateProfile() {
+            const uid = document.getElementById('u-id').innerText;
+            const sub = (uid === OID) ? "Ultra" : (localStorage.getItem('m_sub_'+uid) || "Free");
+            const gender = localStorage.getItem('m_gender') === 'female' ? 'Ж' : 'М';
+            document.getElementById('profile-content').innerHTML = `
+                <b>ID:</b> ${uid}<br>
+                <b>SUB:</b> ${sub}<br>
+                <b>ПОЛ:</b> ${gender}<br>
+                <b>ЛИМИТ:</b> ${localStorage.getItem('m_set_words') || 45} слов
+            `;
+        }
+
+        // --- Базовые функции (не изменять) ---
+        function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
+        function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
         function manageTask(action, taskId = null) {
             let tasks = JSON.parse(localStorage.getItem('m_tasks') || "[]");
             if(action === 'add') {
@@ -242,38 +283,22 @@
                 const link = document.getElementById('task-link').value;
                 const rType = document.getElementById('task-reward-type').value;
                 const rVal = document.getElementById('task-reward-val').value;
-                if(!name || !link) return tg.showAlert("Заполни все!");
+                if(!name || !link) return;
                 tasks.push({ id: Date.now(), name, link, rType, rVal: rType === 'sub7' ? 7 : rVal });
-                tg.showAlert("Добавлено");
             } else if(action === 'rem' && String(tg.initDataUnsafe?.user?.id || OID) === OID) {
                 tasks = tasks.filter(t => t.id !== taskId);
             }
             localStorage.setItem('m_tasks', JSON.stringify(tasks));
             renderTasksList();
         }
-
         function renderTasksList() {
             const list = document.getElementById('task-list-manage');
             const tasks = JSON.parse(localStorage.getItem('m_tasks') || "[]");
             const isOwner = String(tg.initDataUnsafe?.user?.id || OID) === OID;
-            list.innerHTML = tasks.map(t => `
-                <div class="task-item">
-                    <span>${t.name}</span>
-                    ${isOwner ? `<button onclick="manageTask('rem', ${t.id})" style="background:#ff4444; border:none; color:white; border-radius:5px; padding:5px;">Удалить</button>` : ''}
-                </div>
-            `).join('');
+            list.innerHTML = tasks.map(t => `<div class="task-item"><span>${t.name}</span>${isOwner ? `<button onclick="manageTask('rem', ${t.id})" style="background:#ff4444; border:none; color:white; border-radius:5px; padding:5px;">Удалить</button>` : ''}</div>`).join('');
         }
-
-        function toggleTaskInput() {
-            document.getElementById('task-reward-val').style.display = (document.getElementById('task-reward-type').value === 'shards') ? 'block' : 'none';
-        }
-
-        function savePrices(type) {
-            localStorage.setItem('price_'+type+'_stars', document.getElementById('pr-'+(type==='shards'?'sh':'sub')+'-stars').value);
-            localStorage.setItem('price_'+type+'_ton', document.getElementById('pr-'+(type==='shards'?'sh':'sub')+'-ton').value);
-            tg.showAlert("Сохранено");
-        }
-
+        function toggleTaskInput() { document.getElementById('task-reward-val').style.display = (document.getElementById('task-reward-type').value === 'shards') ? 'block' : 'none'; }
+        function savePrices(type) { localStorage.setItem('price_'+type+'_stars', document.getElementById('pr-sh-stars').value); tg.showAlert("Ок"); }
         function manageFunds(type, action, idField, valField) {
             const id = document.getElementById(idField).value;
             const val = valField ? document.getElementById(valField).value : null;
@@ -282,53 +307,13 @@
                 let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
                 b = (action === 'add') ? b + parseInt(val) : Math.max(0, b - parseInt(val));
                 localStorage.setItem('m_shards_'+id, b);
-            } else {
-                if(action==='add') localStorage.setItem('m_sub_'+id, val);
-                else localStorage.removeItem('m_sub_'+id);
-            }
+            } else { if(action==='add') localStorage.setItem('m_sub_'+id, val); else localStorage.removeItem('m_sub_'+id); }
             tg.showAlert("Готово"); init();
         }
-
-        function previewChar(i) {
-            if (i.files && i.files[0]) {
-                const r = new FileReader();
-                r.onload = e => { currentPhotoBase64 = e.target.result; document.getElementById('char-img-preview').style.backgroundImage = `url(${e.target.result})`; };
-                r.readAsDataURL(i.files[0]);
-            }
-        }
-
-        function conAddChar() {
-            const n = document.getElementById('char-name').value;
-            if(!n || !currentPhotoBase64) return;
-            let d = JSON.parse(localStorage.getItem('m_characters') || "[]");
-            d.push({id:Date.now(), name:n, photo:currentPhotoBase64});
-            localStorage.setItem('m_characters', JSON.stringify(d));
-            tg.showAlert("Ок"); back();
-        }
-
-        function conManageAdmin(action) {
-            const id = document.getElementById('con-adm-id-val').value;
-            let a = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            if(action==='add') { if(!a.includes(id)) a.push(id); }
-            else a = a.filter(i => i !== id);
-            localStorage.setItem('m_admins', JSON.stringify(a));
-            init();
-        }
-
-        function conCreatePromo() {
-            localStorage.setItem('m_promo_'+document.getElementById('con-pr-code').value, document.getElementById('con-pr-val').value);
-            tg.showAlert("Ок");
-        }
-
-        function updateProfile() {
-            const uid = document.getElementById('u-id').innerText;
-            const sub = localStorage.getItem('m_sub_'+uid) || "Free";
-            document.getElementById('profile-content').innerHTML = `ID: ${uid}<br>SUB: ${uid === OID ? 'ULTRA' : sub}`;
-        }
-
-        function saveSettings() { localStorage.setItem('m_nick', document.getElementById('set-nick').value); init(); back(); }
-        function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
-        function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
+        function previewChar(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = e => { currentPhotoBase64 = e.target.result; document.getElementById('char-img-preview').style.backgroundImage = `url(${e.target.result})`; }; r.readAsDataURL(i.files[0]); } }
+        function conAddChar() { const n = document.getElementById('char-name').value; if(!n || !currentPhotoBase64) return; let d = JSON.parse(localStorage.getItem('m_characters') || "[]"); d.push({id:Date.now(), name:n, photo:currentPhotoBase64}); localStorage.setItem('m_characters', JSON.stringify(d)); tg.showAlert("Ок"); back(); }
+        function conManageAdmin(action) { const id = document.getElementById('con-adm-id-val').value; let a = JSON.parse(localStorage.getItem('m_admins') || "[]"); if(action==='add') { if(!a.includes(id)) a.push(id); } else a = a.filter(i => i !== id); localStorage.setItem('m_admins', JSON.stringify(a)); init(); }
+        function conCreatePromo() { localStorage.setItem('m_promo_'+document.getElementById('con-pr-code').value, document.getElementById('con-pr-val').value); tg.showAlert("Ок"); }
         window.onload = init;
     </script>
 </body>
