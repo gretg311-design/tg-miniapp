@@ -9,32 +9,31 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
-        /* Загрузка */
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; }
         .disclaimer { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.2); font-size: 10px; text-transform: uppercase; }
 
-        /* Контент */
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; touch-action: pan-y; padding-bottom: 110px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
         .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Сетка меню */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 70px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* Оверлеи */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; touch-action: pan-y; }
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
-        .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; }
+        .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
         
-        /* Кнопки Консоли как на скрине */
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 20px; }
-        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; text-transform: uppercase; font-weight: bold; }
+        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; text-transform: uppercase; font-weight: bold; cursor: pointer; }
         .con-title { color: #e91e63; font-size: 24px; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; }
+
+        /* Превью персонажа */
+        .char-preview { width: 150px; height: 150px; border: 2px dashed #2d164d; border-radius: 15px; margin-bottom: 15px; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        select.term-in { appearance: none; }
     </style>
 </head>
 <body>
@@ -64,58 +63,85 @@
         </div>
     </div>
 
-    <div id="p-profile" class="overlay">
-        <h2>ПРОФИЛЬ</h2>
-        <div class="info-card" id="profile-content"></div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-settings" class="overlay">
-        <h2>НАСТРОЙКИ</h2>
-        <div class="info-card">
-            <input type="text" id="set-nick" class="term-in" placeholder="Ваш ник">
-            <div style="display:flex; gap:10px;">
-                <button class="term-btn" style="border-color:#2d164d" onclick="setGender('m')">М</button>
-                <button class="term-btn" style="border-color:#2d164d" onclick="setGender('f')">Ж</button>
-            </div>
-        </div>
-        <div class="term-btn" style="border-color:#00ff00" onclick="saveSettings()">СОХРАНИТЬ</div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-adm" class="overlay">
-        <h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2>
-        <div class="info-card">
-            <input type="number" id="adm-target-id" class="term-in" placeholder="TG ID">
-            <input type="number" id="adm-amount" class="term-in" placeholder="Количество">
-            <div class="term-btn" onclick="admAction('shards')">ВЫДАТЬ ОСКОЛКИ</div>
-            <div class="term-btn" onclick="admAction('sub')">ВЫДАТЬ SUB (30д)</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
     <div id="p-con" class="overlay">
         <div class="con-title">CONSOLE</div>
         <div class="con-grid">
-            <div class="con-btn" onclick="tg.showAlert('Осколки')">осколки</div>
-            <div class="con-btn" onclick="tg.showAlert('Подписки')">подписки</div>
-            <div class="con-btn" onclick="tg.showAlert('Персонаж')">ПЕРСОНАЖ</div>
-            <div class="con-btn" onclick="tg.showAlert('Цены')">ЦЕНЫ</div>
+            <div class="con-btn" onclick="openPanel('p-con-shards')">осколки</div>
+            <div class="con-btn" onclick="openPanel('p-con-subs')">подписки</div>
+            <div class="con-btn" onclick="openPanel('p-con-char')">ПЕРСОНАЖ</div>
+            <div class="con-btn" onclick="tg.showAlert('Цены в разработке')">ЦЕНЫ</div>
             <div class="con-btn" onclick="openPanel('p-con-admins')">АДМИНЫ</div>
-            <div class="con-btn" onclick="tg.showAlert('Промокоды')">ПРОМОКОДЫ</div>
+            <div class="con-btn" onclick="openPanel('p-con-promos')">ПРОМОКОДЫ</div>
         </div>
         <div style="margin-top: 30px; color: rgba(255,255,255,0.4); font-size: 10px;" onclick="back()">[ ЗАКРЫТЬ ТЕРМИНАЛ ]</div>
     </div>
 
-    <div id="p-con-admins" class="overlay">
-        <h2 style="color:#e91e63">УПРАВЛЕНИЕ АДМИНАМИ</h2>
+    <div id="p-con-shards" class="overlay">
+        <h2 style="color:#e91e63">ОСКОЛКИ</h2>
         <div class="info-card">
-            <input type="number" id="con-admin-id" class="term-in" placeholder="TG ID">
-            <div class="term-btn" onclick="conAction('add-adm')">НАЗНАЧИТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="conAction('rem-adm')">СНЯТЬ</div>
+            <input type="number" id="con-sh-id" class="term-in" placeholder="TG ID">
+            <input type="number" id="con-sh-val" class="term-in" placeholder="ЧИСЛО">
+            <div class="term-btn" style="border-color:#00ff00" onclick="conManageShards('add')">ВЫДАТЬ</div>
+            <div class="term-btn" style="border-color:#ff4444" onclick="conManageShards('rem')">ЗАБРАТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
+
+    <div id="p-con-subs" class="overlay">
+        <h2 style="color:#e91e63">ПОДПИСКИ</h2>
+        <div class="info-card">
+            <input type="number" id="con-sub-id" class="term-in" placeholder="TG ID">
+            <select id="con-sub-type" class="term-in">
+                <option value="Premium">PREMIUM</option>
+                <option value="Pro">PRO</option>
+                <option value="VIP">VIP</option>
+                <option value="Ultra">ULTRA</option>
+            </select>
+            <div class="term-btn" style="border-color:#00ff00" onclick="conManageSub('add')">ВЫДАТЬ</div>
+            <div class="term-btn" style="border-color:#ff4444" onclick="conManageSub('rem')">ЗАБРАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-con-char" class="overlay">
+        <h2 style="color:#e91e63">НОВЫЙ ПЕРСОНАЖ</h2>
+        <div class="info-card">
+            <center>
+                <div class="char-preview" id="char-img-preview" onclick="document.getElementById('char-upload').click()">
+                    <span>ФОТО</span>
+                </div>
+                <input type="file" id="char-upload" hidden accept="image/*" onchange="previewChar(this)">
+            </center>
+            <input type="text" id="char-name" class="term-in" placeholder="ИМЯ">
+            <input type="number" id="char-age" class="term-in" placeholder="ВОЗРАСТ">
+            <textarea id="char-desc" class="term-in" style="height:80px;" placeholder="ХАРАКТЕРИСТИКИ"></textarea>
+            <div class="term-btn" style="border-color:#bc42f5" onclick="conAddChar()">ДОБАВИТЬ ПЕРСОНАЖА</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-con-promos" class="overlay">
+        <h2 style="color:#e91e63">ПРОМОКОДЫ</h2>
+        <div class="info-card">
+            <input type="text" id="con-pr-code" class="term-in" placeholder="ПРОМОКОД">
+            <input type="number" id="con-pr-val" class="term-in" placeholder="НАГРАДА">
+            <div class="term-btn" style="border-color:#bc42f5" onclick="conCreatePromo()">СОЗДАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-con-admins" class="overlay">
+        <h2 style="color:#e91e63">АДМИНЫ</h2>
+        <div class="info-card">
+            <input type="number" id="con-adm-id-val" class="term-in" placeholder="TG ID">
+            <div class="term-btn" style="border-color:#00bcd4" onclick="conManageAdmin('add')">ДОБАВИТЬ</div>
+            <div class="term-btn" style="border-color:#ff4444" onclick="conManageAdmin('rem')">РАЗЖАЛОВАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-profile" class="overlay"><h2>ПРОФИЛЬ</h2><div class="info-card" id="profile-content"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-settings" class="overlay"><h2>НАСТРОЙКИ</h2><div class="info-card"><input type="text" id="set-nick" class="term-in" placeholder="Ник"><div style="display:flex; gap:10px;"><button class="term-btn" style="border-color:#2d164d" onclick="setGender('m')">М</button><button class="term-btn" style="border-color:#2d164d" onclick="setGender('f')">Ж</button></div></div><div class="term-btn" style="border-color:#00ff00" onclick="saveSettings()">СОХРАНИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -125,20 +151,16 @@
         tg.expand();
         tg.enableClosingConfirmation();
 
-        // Запрет свайпа (Железобетон)
+        // Запрет свайпа
         let startY = 0;
         document.addEventListener('touchstart', e => startY = e.touches[0].pageY);
-        document.addEventListener('touchmove', e => {
-            if (document.getElementById('app').scrollTop <= 0 && e.touches[0].pageY > startY) e.preventDefault();
-        }, {passive: false});
+        document.addEventListener('touchmove', e => { if (document.getElementById('app').scrollTop <= 0 && e.touches[0].pageY > startY) e.preventDefault(); }, {passive: false});
 
         function init() {
             const user = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
             const uid = String(user.id);
-            
             document.getElementById('u-name').innerText = localStorage.getItem('m_nick') || user.first_name;
             document.getElementById('u-id').innerText = uid;
-
             const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
             if (uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
@@ -148,49 +170,81 @@
                 document.getElementById('shards-balance').innerText = localStorage.getItem('m_shards_' + uid) || 0;
                 if (admins.includes(uid)) document.getElementById('nav-adm').style.display = 'flex';
             }
-            
             updateProfile();
-            setTimeout(() => { document.getElementById('loading').style.display='none'; document.getElementById('app').style.display='flex'; }, 1500);
+            setTimeout(() => { document.getElementById('loading').style.display='none'; document.getElementById('app').style.display='flex'; }, 1000);
+        }
+
+        // --- ЛОГИКА КОНСОЛИ ---
+        function conManageShards(action) {
+            const id = document.getElementById('con-sh-id').value;
+            const val = parseInt(document.getElementById('con-sh-val').value);
+            if(!id || isNaN(val)) return tg.showAlert("Ошибка ввода");
+            let balance = parseInt(localStorage.getItem('m_shards_' + id) || 0);
+            balance = (action === 'add') ? balance + val : Math.max(0, balance - val);
+            localStorage.setItem('m_shards_' + id, balance);
+            tg.showAlert(`Баланс ID ${id}: ${balance}`);
+            init();
+        }
+
+        function conManageSub(action) {
+            const id = document.getElementById('con-sub-id').value;
+            const type = document.getElementById('con-sub-type').value;
+            if(!id) return tg.showAlert("Введите ID");
+            if(action === 'add') localStorage.setItem('m_sub_' + id, type);
+            else localStorage.removeItem('m_sub_' + id);
+            tg.showAlert("Подписка обновлена");
+            init();
+        }
+
+        function previewChar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    document.getElementById('char-img-preview').style.backgroundImage = `url(${e.target.result})`;
+                    document.getElementById('char-img-preview').querySelector('span').style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function conAddChar() {
+            const name = document.getElementById('char-name').value;
+            if(!name) return tg.showAlert("Имя?");
+            tg.showAlert(`Персонаж ${name} добавлен (визуал)`);
+            back();
+        }
+
+        function conManageAdmin(action) {
+            const id = document.getElementById('con-adm-id-val').value;
+            if(!id) return tg.showAlert("ID?");
+            let admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
+            if(action === 'add') { if(!admins.includes(id)) admins.push(id); }
+            else { admins = admins.filter(a => a !== id); }
+            localStorage.setItem('m_admins', JSON.stringify(admins));
+            tg.showAlert("Готово");
+            init();
+        }
+
+        function conCreatePromo() {
+            const code = document.getElementById('con-pr-code').value;
+            const val = document.getElementById('con-pr-val').value;
+            if(!code || !val) return tg.showAlert("Заполни поля");
+            localStorage.setItem('m_promo_' + code, val);
+            tg.showAlert(`Промо ${code} создан`);
         }
 
         function updateProfile() {
             const uid = document.getElementById('u-id').innerText;
             const sub = localStorage.getItem('m_sub_' + uid) || "Free";
             document.getElementById('profile-content').innerHTML = `
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px"><span>СТАТУС:</span><span>${uid === OID ? 'OWNER' : 'USER'}</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px"><span>ПОДПИСКА:</span><span>${uid === OID ? 'ULTRA (∞)' : sub}</span></div>
+                <div>СТАТУС: ${uid === OID ? 'OWNER' : 'USER'}</div>
+                <div>ПОДПИСКА: ${uid === OID ? 'ULTRA (∞)' : sub}</div>
             `;
-        }
-
-        function saveSettings() {
-            const nick = document.getElementById('set-nick').value;
-            if(nick) localStorage.setItem('m_nick', nick);
-            tg.showAlert("Сохранено!");
-            init();
-            back();
-        }
-
-        function admAction(type) {
-            const target = document.getElementById('adm-target-id').value;
-            const val = document.getElementById('adm-amount').value;
-            if(!target) return tg.showAlert("Введите ID");
-            if(type === 'shards') localStorage.setItem('m_shards_' + target, val);
-            if(type === 'sub') localStorage.setItem('m_sub_' + target, 'Premium');
-            tg.showAlert("Готово!");
-        }
-
-        function conAction(type) {
-            const target = document.getElementById('con-admin-id').value;
-            if(!target) return tg.showAlert("Введите ID");
-            let admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            if(type === 'add-adm') { if(!admins.includes(target)) admins.push(target); }
-            if(type === 'rem-adm') { admins = admins.filter(a => a !== target); }
-            localStorage.setItem('m_admins', JSON.stringify(admins));
-            tg.showAlert("Действие выполнено");
         }
 
         function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
         function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
+        function saveSettings() { localStorage.setItem('m_nick', document.getElementById('set-nick').value); tg.showAlert("Ок"); init(); back(); }
 
         window.onload = init;
     </script>
