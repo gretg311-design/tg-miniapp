@@ -3,36 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон FULL</title>
+    <title>Moon Project - Железобетон</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
-        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease; }
+        /* ПУЛЬСИРУЮЩАЯ ЛУНА */
+        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
-        @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 35px #fff; } 50% { transform: scale(1.05); box-shadow: 0 0 60px #fff; } 100% { transform: scale(1); box-shadow: 0 0 35px #fff; } }
+        @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 30px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 60px #fff; } 100% { transform: scale(1); box-shadow: 0 0 30px #fff; } }
 
-        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; touch-action: pan-y; padding-bottom: 30px; }
+        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Сетка меню: 2 колонки */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; padding: 5px; }
-        
-        /* Кнопки спец-доступа */
+        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; touch-action: pan-y; }
+        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
         
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; padding: 4px; }
-        .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px;}
+        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; }
+        #char-preview { width: 100px; height: 100px; border-radius: 10px; object-fit: cover; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
     </style>
 </head>
 <body>
@@ -45,17 +44,16 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="tg.showAlert('В разработке')">Чаты</div>
-            <div class="menu-item" onclick="tg.showAlert('В разработке')">Персонажи</div>
-            <div class="menu-item" onclick="tg.showAlert('В разработке')">Ежедневка</div>
-            <div class="menu-item" onclick="tg.showAlert('В разработке')">Задания</div>
-            <div class="menu-item" onclick="tg.showAlert('В разработке')">Магазин</div>
-            <div class="menu-item" onclick="tg.showAlert('В разработке')">Промокоды</div>
+            <div class="menu-item" onclick="tg.showAlert('Чаты в разработке')">Чаты</div>
+            <div class="menu-item" onclick="tg.showAlert('Персонажи в разработке')">Персонажи</div>
+            <div class="menu-item" onclick="tg.showAlert('Ежедневка в разработке')">Ежедневка</div>
+            <div class="menu-item" onclick="tg.showAlert('Задания в разработке')">Задания</div>
+            <div class="menu-item" onclick="tg.showAlert('Магазин в разработке')">Магазин</div>
+            <div class="menu-item" onclick="tg.showAlert('Промокоды в разработке')">Промокоды</div>
             <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
             <div class="menu-item" onclick="openPanel('p-settings')">Настройка</div>
             
             <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
-            
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
     </div>
@@ -69,7 +67,7 @@
             <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div>
             <div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div>
             <div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div>
-            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5; color: #bc42f5;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</div>
+            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</div>
         </div>
         <div class="term-btn" style="margin-top:30px; border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
     </div>
@@ -92,87 +90,44 @@
             <input type="number" id="ish-id" class="term-in" placeholder="TG ID">
             <input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО">
             <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div>
-            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div>
+            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ (OWNER ONLY)</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-subs" class="overlay">
-        <h2>ПОДПИСКИ (30д)</h2>
+        <h2>ПОДПИСКИ</h2>
         <div class="info-card">
             <input type="number" id="isu-id" class="term-in" placeholder="TG ID">
-            <select id="isu-type" class="term-in">
-                <option value="Premium">Premium (50)</option>
-                <option value="Pro">Pro (100)</option>
-                <option value="VIP">VIP (250)</option>
-                <option value="Ultra">Ultra (500)</option>
-            </select>
-            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div>
-            <div id="own-su-rem" class="term-btn" style="border-color:#ff4444" onclick="modFunds('sub','rem')">ЗАБРАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-m-tasks" class="overlay">
-        <h2>ЗАДАНИЯ</h2>
-        <div class="info-card">
-            <input type="text" id="it-name" class="term-in" placeholder="Название">
-            <input type="text" id="it-link" class="term-in" placeholder="Ссылка">
-            <input type="number" id="it-rew" class="term-in" placeholder="Награда">
-            <div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ</div>
-        </div>
-        <div id="task-list" style="width:100%"></div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-m-prices" class="overlay">
-        <h2>ЦЕНЫ</h2>
-        <div class="info-card">
-            <p style="font-size:10px; color:#888;">ОСКОЛКИ</p>
-            <input type="number" class="term-in" placeholder="Stars">
-            <input type="number" class="term-in" placeholder="TON">
-            <div class="term-btn" onclick="tg.showAlert('Сохранено')">ОБНОВИТЬ ЦЕНЫ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-m-admins" class="overlay">
-        <h2>АДМИНЫ</h2>
-        <div class="info-card">
-            <input type="number" id="ia-id" class="term-in" placeholder="TG ID">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="modAdmin('rem')">УДАЛИТЬ</div>
+            <select id="isu-type" class="term-in"><option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option></select>
+            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ (30д)</div>
+            <div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ (OWNER ONLY)</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-char" class="overlay">
         <h2>ПЕРСОНАЖ</h2>
-        <div class="info-card">
-            <input type="text" class="term-in" placeholder="Имя">
-            <textarea class="term-in" placeholder="Описание" style="height:100px;"></textarea>
-            <div class="term-btn">ВЫБРАТЬ ФОТО</div>
-            <div class="term-btn" style="border-color:#bc42f5">В БАЗУ</div>
+        <div class="info-card" style="text-align: center;">
+            <img id="char-preview" src="#">
+            <input type="text" class="term-in" placeholder="Имя персонажа">
+            <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
+            <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
+            <div class="term-btn" style="border-color:#bc42f5">СОХРАНИТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-m-promos" class="overlay">
-        <h2>ПРОМОКОДЫ</h2>
-        <div class="info-card">
-            <input type="text" id="ipr-c" class="term-in" placeholder="КОД">
-            <input type="number" id="ipr-v" class="term-in" placeholder="СУММА">
-            <div class="term-btn" onclick="tg.showAlert('Создан')">СОЗДАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
+    <div id="p-m-tasks" class="overlay"><h2>ЗАДАНИЯ</h2><div id="task-list" style="width:100%"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-m-prices" class="overlay"><h2>ЦЕНЫ</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-m-admins" class="overlay"><h2>АДМИНЫ</h2><div class="info-card"><input type="number" id="ia-id" class="term-in" placeholder="TG ID"><div class="term-btn" onclick="modAdmin('add')">ДОБАВИТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-m-promos" class="overlay"><h2>ПРОМО</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
     <div id="p-profile" class="overlay"><h2>ПРОФИЛЬ</h2><div class="info-card" id="prof-data"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-settings" class="overlay"><h2>НАСТРОЙКИ</h2><div class="info-card"><input type="text" id="snick" class="term-in" placeholder="Ник"></div><div class="term-btn" onclick="saveSet()">СОХРАНИТЬ</div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-settings" class="overlay"><h2>НАСТРОЙКИ</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const OID = "8287041036"; // ТВОЙ ID
+        const OID = "8287041036";
         let stack = [];
 
         function init() {
@@ -180,32 +135,42 @@
             const uid = String(u.id);
             const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
 
-            document.getElementById('u-name').innerText = localStorage.getItem('m_nick') || u.first_name;
+            document.getElementById('u-name').innerText = u.first_name;
             document.getElementById('u-id').innerText = uid;
 
-            // Логика отображения кнопок доступа
             if(uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
+                // Только овнеру показываем кнопки удаления/забирания
                 document.getElementById('own-sh-rem').style.display = 'block';
                 document.getElementById('own-su-rem').style.display = 'block';
             } else {
                 document.getElementById('shards-balance').innerText = localStorage.getItem('m_shards_'+uid) || 0;
-                if(admins.includes(uid)) document.getElementById('nav-adm').style.display = 'flex';
-                // Скрываем "Забрать" для всех кроме тебя
-                document.getElementById('own-sh-rem').style.display = 'none';
-                document.getElementById('own-su-rem').style.display = 'none';
+                if(admins.includes(uid)) {
+                    document.getElementById('nav-adm').style.display = 'flex';
+                }
             }
-            renderTasks();
             updateProfile();
-            setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1000);
+            setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
+        }
+
+        function previewImg(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const p = document.getElementById('char-preview');
+                    p.src = e.target.result;
+                    p.style.display = 'inline-block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
         function modFunds(type, act) {
             const id = document.getElementById(type==='shards'?'ish-id':'isu-id').value;
             const val = document.getElementById(type==='shards'?'ish-val':'isu-type').value;
-            if(!id) return tg.showAlert("ID?");
+            if(!id) return;
             if(type==='shards') {
                 let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
                 localStorage.setItem('m_shards_'+id, act==='add'? b+parseInt(val) : Math.max(0, b-parseInt(val)));
@@ -213,51 +178,15 @@
                 if(act==='add') localStorage.setItem('m_sub_'+id, val);
                 else localStorage.removeItem('m_sub_'+id);
             }
-            tg.showAlert("Успешно");
-        }
-
-        function modTask(act, tid=null) {
-            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
-            let t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
-            if(act==='add') {
-                const n = document.getElementById('it-name').value;
-                if(n) t.push({id:Date.now(), name:n, rew:document.getElementById('it-rew').value});
-            } else if(act==='rem') {
-                if(!isO) return tg.showAlert("Только Owner!");
-                t = t.filter(x => x.id !== tid);
-            }
-            localStorage.setItem('m_tasks', JSON.stringify(t));
-            renderTasks();
-        }
-
-        function renderTasks() {
-            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
-            const t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
-            document.getElementById('task-list').innerHTML = t.map(x => `
-                <div class="task-item">
-                    <span>${x.name} (${x.rew} 🌙)</span>
-                    ${isO ? `<button onclick="modTask('rem',${x.id})" style="background:#ff4444; border:none; color:white; border-radius:4px; padding:4px;">УДАЛИТЬ</button>` : ''}
-                </div>
-            `).join('');
-        }
-
-        function modAdmin(act) {
-            const id = document.getElementById('ia-id').value;
-            if(!id) return;
-            let a = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            if(act==='add') { if(!a.includes(id)) a.push(id); }
-            else a = a.filter(x => x !== id);
-            localStorage.setItem('m_admins', JSON.stringify(a));
-            tg.showAlert("Обновлено");
+            tg.showAlert("Готово");
         }
 
         function updateProfile() {
             const uid = document.getElementById('u-id').innerText;
             const s = (uid===OID)?"ULTRA": (localStorage.getItem('m_sub_'+uid)||"FREE");
-            document.getElementById('prof-data').innerHTML = `<b>ID:</b> ${uid}<br><b>STATUS:</b> ${s}`;
+            document.getElementById('prof-data').innerHTML = `ID: ${uid}<br>SUB: ${s}`;
         }
 
-        function saveSet() { localStorage.setItem('m_nick', document.getElementById('snick').value); init(); back(); }
         function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
         function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
 
