@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон</title>
+    <title>Moon Project - Железобетон FULL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -18,8 +18,9 @@
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
+        /* СЕТКА МЕНЮ: 8 кнопок + Админка + Консоль */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
+        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; padding: 5px; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
@@ -29,9 +30,10 @@
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
         
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
-        .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; }
-        #char-preview { width: 100px; height: 100px; border-radius: 10px; object-fit: cover; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
+        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; padding: 5px; }
+        
+        #char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -44,12 +46,12 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="tg.showAlert('Чаты в разработке')">Чаты</div>
-            <div class="menu-item" onclick="tg.showAlert('Персонажи в разработке')">Персонажи</div>
-            <div class="menu-item" onclick="tg.showAlert('Ежедневка в разработке')">Ежедневка</div>
-            <div class="menu-item" onclick="tg.showAlert('Задания в разработке')">Задания</div>
-            <div class="menu-item" onclick="tg.showAlert('Магазин в разработке')">Магазин</div>
-            <div class="menu-item" onclick="tg.showAlert('Промокоды в разработке')">Промокоды</div>
+            <div class="menu-item">Чаты</div>
+            <div class="menu-item">Персонажи</div>
+            <div class="menu-item">Ежедневка</div>
+            <div class="menu-item">Задания</div>
+            <div class="menu-item">Магазин</div>
+            <div class="menu-item">Промокоды</div>
             <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
             <div class="menu-item" onclick="openPanel('p-settings')">Настройка</div>
             
@@ -63,8 +65,8 @@
         <div class="con-grid">
             <div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div>
             <div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div>
-            <div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖ</div>
-            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div>
+            <div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div>
+            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ (STARS/TON)</div>
             <div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div>
             <div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div>
             <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</div>
@@ -90,18 +92,20 @@
             <input type="number" id="ish-id" class="term-in" placeholder="TG ID">
             <input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО">
             <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div>
-            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ (OWNER ONLY)</div>
+            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-subs" class="overlay">
-        <h2>ПОДПИСКИ</h2>
+        <h2>ПОДПИСКИ (30д)</h2>
         <div class="info-card">
             <input type="number" id="isu-id" class="term-in" placeholder="TG ID">
-            <select id="isu-type" class="term-in"><option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option></select>
-            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ (30д)</div>
-            <div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ (OWNER ONLY)</div>
+            <select id="isu-type" class="term-in">
+                <option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option>
+            </select>
+            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div>
+            <div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -110,20 +114,59 @@
         <h2>ПЕРСОНАЖ</h2>
         <div class="info-card" style="text-align: center;">
             <img id="char-preview" src="#">
-            <input type="text" class="term-in" placeholder="Имя персонажа">
+            <input type="text" id="ich-name" class="term-in" placeholder="Имя">
             <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
-            <div class="term-btn" style="border-color:#bc42f5">СОХРАНИТЬ</div>
+            <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ВЫБРАТЬ ФОТО</div>
+            <div class="term-btn" style="border-color:#bc42f5">СОХРАНИТЬ В БАЗУ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-m-tasks" class="overlay"><h2>ЗАДАНИЯ</h2><div id="task-list" style="width:100%"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-m-prices" class="overlay"><h2>ЦЕНЫ</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-m-admins" class="overlay"><h2>АДМИНЫ</h2><div class="info-card"><input type="number" id="ia-id" class="term-in" placeholder="TG ID"><div class="term-btn" onclick="modAdmin('add')">ДОБАВИТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-m-promos" class="overlay"><h2>ПРОМО</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-m-prices" class="overlay">
+        <h2>ЦЕНЫ</h2>
+        <div class="info-card">
+            <p style="font-size:10px; color:gray">Цена за 100 осколков</p>
+            <input type="number" class="term-in" placeholder="Stars">
+            <input type="number" class="term-in" placeholder="TON">
+            <div class="term-btn" style="border-color:#00ff00">ОБНОВИТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-m-admins" class="overlay">
+        <h2>УПРАВЛЕНИЕ АДМИНАМИ</h2>
+        <div class="info-card">
+            <input type="number" id="ia-id" class="term-in" placeholder="TG ID">
+            <div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div>
+            <div class="term-btn" style="border-color:#ff4444" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-m-tasks" class="overlay">
+        <h2>ЗАДАНИЯ</h2>
+        <div class="info-card">
+            <input type="text" id="it-name" class="term-in" placeholder="Название">
+            <input type="text" id="it-link" class="term-in" placeholder="Ссылка">
+            <input type="number" id="it-rew" class="term-in" placeholder="Награда">
+            <div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ</div>
+        </div>
+        <div id="task-list" style="width:100%"></div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-m-promos" class="overlay">
+        <h2>ПРОМОКОДЫ</h2>
+        <div class="info-card">
+            <input type="text" class="term-in" placeholder="КОД">
+            <input type="number" class="term-in" placeholder="ОСКОЛКИ">
+            <div class="term-btn" onclick="tg.showAlert('Создан')">СОЗДАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
     <div id="p-profile" class="overlay"><h2>ПРОФИЛЬ</h2><div class="info-card" id="prof-data"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-settings" class="overlay"><h2>НАСТРОЙКИ</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-settings" class="overlay"><h2>НАСТРОЙКИ</h2><div class="info-card"><input type="text" id="snick" class="term-in" placeholder="Ник"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -142,15 +185,14 @@
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
-                // Только овнеру показываем кнопки удаления/забирания
+                // Показываем кнопки "Забрать/Удалить" только овнеру
                 document.getElementById('own-sh-rem').style.display = 'block';
                 document.getElementById('own-su-rem').style.display = 'block';
             } else {
                 document.getElementById('shards-balance').innerText = localStorage.getItem('m_shards_'+uid) || 0;
-                if(admins.includes(uid)) {
-                    document.getElementById('nav-adm').style.display = 'flex';
-                }
+                if(admins.includes(uid)) document.getElementById('nav-adm').style.display = 'flex';
             }
+            renderTasks();
             updateProfile();
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
         }
@@ -161,7 +203,7 @@
                 reader.onload = (e) => {
                     const p = document.getElementById('char-preview');
                     p.src = e.target.result;
-                    p.style.display = 'inline-block';
+                    p.style.display = 'block';
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -181,10 +223,44 @@
             tg.showAlert("Готово");
         }
 
+        function modAdmin(act) {
+            const id = document.getElementById('ia-id').value;
+            if(!id) return;
+            let a = JSON.parse(localStorage.getItem('m_admins') || "[]");
+            if(act==='add') { if(!a.includes(id)) a.push(id); }
+            else a = a.filter(x => x !== id);
+            localStorage.setItem('m_admins', JSON.stringify(a));
+            tg.showAlert("Обновлено");
+        }
+
+        function modTask(act, tid=null) {
+            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
+            let t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            if(act==='add') {
+                const n = document.getElementById('it-name').value;
+                if(n) t.push({id:Date.now(), name:n, rew:document.getElementById('it-rew').value});
+            } else if(act==='rem' && isO) {
+                t = t.filter(x => x.id !== tid);
+            }
+            localStorage.setItem('m_tasks', JSON.stringify(t));
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
+            const t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            document.getElementById('task-list').innerHTML = t.map(x => `
+                <div class="task-item">
+                    <span>${x.name} (${x.rew} 🌙)</span>
+                    ${isO ? `<button onclick="modTask('rem',${x.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">УДАЛИТЬ</button>` : ''}
+                </div>
+            `).join('');
+        }
+
         function updateProfile() {
             const uid = document.getElementById('u-id').innerText;
             const s = (uid===OID)?"ULTRA": (localStorage.getItem('m_sub_'+uid)||"FREE");
-            document.getElementById('prof-data').innerHTML = `ID: ${uid}<br>SUB: ${s}`;
+            document.getElementById('prof-data').innerHTML = `ID: ${uid}<br>СТАТУС: ${s}`;
         }
 
         function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
