@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон FULL (Save Settings)</title>
+    <title>Moon Project - Железобетон FULL (Anti-Swipe & Save)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -231,6 +231,14 @@
 
     <script>
         const tg = window.Telegram.WebApp;
+        
+        // --- ЗАЩИТА ОТ СЛУЧАЙНОГО ЗАКРЫТИЯ И СВАЙПОВ ---
+        tg.expand();
+        tg.enableClosingConfirmation(); // Вызывает окно "Вы уверены, что хотите закрыть?"
+        if (tg.disableVerticalSwipes) {
+            tg.disableVerticalSwipes(); // Блокирует закрытие свайпом вниз
+        }
+        
         const OID = "8287041036";
         let stack = [], trollCount = 0;
 
@@ -415,7 +423,6 @@
         function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
         function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
 
-        tg.expand();
         window.onload = init;
     </script>
 </body>
