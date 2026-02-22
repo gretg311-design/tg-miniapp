@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон FULL</title>
+    <title>Moon Project - Железобетон FULL (Save Settings)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -239,16 +239,22 @@
             const uid = String(u.id);
             const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
 
-            // Инициализация интерфейса
-            document.getElementById('u-name').innerText = u.first_name;
+            // Инициализация интерфейса с учетом сохраненных настроек
             document.getElementById('u-id-head').innerText = uid;
-            document.getElementById('set-nick').value = u.first_name;
-            
-            // Инициализация профиля
-            document.getElementById('prof-nick').innerText = u.first_name;
             document.getElementById('prof-id').innerText = uid;
 
-            const lS = document.getElementById('len-slider'), sS = document.getElementById('sex-slider');
+            // Загрузка сохраненного ника (если нет - берем из ТГ)
+            const savedNick = localStorage.getItem('m_nick_' + uid) || u.first_name;
+            document.getElementById('u-name').innerText = savedNick;
+            document.getElementById('prof-nick').innerText = savedNick;
+            document.getElementById('set-nick').value = savedNick;
+
+            // Загрузка сохраненного пола
+            const savedGender = localStorage.getItem('m_gender_' + uid) || 'm';
+            setGender(savedGender, true);
+
+            const lS = document.getElementById('len-slider');
+            const sS = document.getElementById('sex-slider');
 
             if(uid === OID) {
                 // ПРАВА ОВНЕРА
@@ -265,7 +271,8 @@
                 if(document.getElementById('own-su-rem')) document.getElementById('own-su-rem').style.display = 'block';
                 if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').style.display = 'block';
                 
-                lS.max = 100; sS.max = 6;
+                lS.max = 100; 
+                sS.max = 6;
                 document.getElementById('len-info').innerText = "Твой лимит (Ultra): 100 слов";
             } else {
                 // ПРАВА ЮЗЕРА/АДМИНА
@@ -290,27 +297,50 @@
                 if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').remove();
             }
 
+            // Загрузка ползунков после установки лимитов
+            const savedLen = localStorage.getItem('m_len_' + uid) || 45;
+            lS.value = savedLen;
+            updateLen(savedLen, true);
+
+            const savedSex = localStorage.getItem('m_sex_' + uid) || 0;
+            sS.value = savedSex;
+            updateSex(savedSex, true);
+
             renderTasks();
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
         }
 
-        // ЛОГИКА НАСТРОЕК
+        // ЛОГИКА НАСТРОЕК (С СОХРАНЕНИЕМ)
         function updateLiveNick(v) { 
             let nick = v || "User";
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
             document.getElementById('u-name').innerText = nick; 
             document.getElementById('prof-nick').innerText = nick; 
+            localStorage.setItem('m_nick_' + uid, nick);
         }
-        function setGender(g) {
+
+        function setGender(g, skipSave = false) {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
             document.getElementById('g-m').classList.toggle('active', g === 'm');
             document.getElementById('g-f').classList.toggle('active', g === 'f');
+            if(!skipSave) localStorage.setItem('m_gender_' + uid, g);
         }
-        function updateLen(v) { document.getElementById('len-val').innerText = v; }
-        function updateSex(v) {
+
+        function updateLen(v, skipSave = false) { 
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            document.getElementById('len-val').innerText = v; 
+            if(!skipSave) localStorage.setItem('m_len_' + uid, v);
+        }
+
+        function updateSex(v, skipSave = false) {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
             const m = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "Очень высокая", "СУПЕР ПОШЛОСТЬ 🔥"];
             document.getElementById('sex-val').innerText = v;
             document.getElementById('sex-info').innerText = "Уровень " + v + ": " + m[v];
             document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5";
+            if(!skipSave) localStorage.setItem('m_sex_' + uid, v);
         }
+
         function troll() {
             trollCount++;
             tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨");
