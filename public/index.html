@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон 1.0.8 FULL (Daily)</title>
+    <title>Moon Project - Железобетон 1.0.8 FIXED FUNDS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -47,7 +47,6 @@
         .char-counter { font-size: 10px; color: #bc42f5; text-align: right; margin-top: -8px; margin-bottom: 10px; }
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
 
-        /* МАГАЗИН */
         .shop-item { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; }
         .shop-title { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 5px; }
         .shop-desc { font-size: 12px; color: #888; margin-bottom: 15px; text-align: center; }
@@ -197,13 +196,28 @@
 
     <div id="p-m-shards" class="overlay">
         <h2>ОСКОЛКИ</h2>
-        <div class="info-card"><input type="number" id="ish-id" class="term-in" placeholder="TG ID"><input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО"><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div><div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div></div>
+        <div class="info-card">
+            <input type="number" id="ish-id" class="term-in" placeholder="TG ID">
+            <input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО">
+            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div>
+            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div>
+        </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-subs" class="overlay">
         <h2>ПОДПИСКИ (30д)</h2>
-        <div class="info-card"><input type="number" id="isu-id" class="term-in" placeholder="TG ID"><select id="isu-type" class="term-in"><option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option></select><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div><div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div></div>
+        <div class="info-card">
+            <input type="number" id="isu-id" class="term-in" placeholder="TG ID">
+            <select id="isu-type" class="term-in">
+                <option value="Premium">Premium</option>
+                <option value="Pro">Pro</option>
+                <option value="VIP">VIP</option>
+                <option value="Ultra">Ultra</option>
+            </select>
+            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div>
+            <div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div>
+        </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
@@ -355,13 +369,12 @@
             if(sub === "VIP") return 250;
             if(sub === "Pro") return 100;
             if(sub === "Premium") return 50;
-            return 10; // Free
+            return 10;
         }
 
         function updateDailyUI() {
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             let userSub = uid === OID ? "ULTRA" : (localStorage.getItem('m_sub_'+uid) || "FREE");
-            
             let lastClaim = parseInt(localStorage.getItem('m_daily_time_' + uid) || 0);
             let streak = parseInt(localStorage.getItem('m_daily_streak_' + uid) || 0);
             
@@ -373,7 +386,7 @@
                 diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
             }
 
-            if (diff > 1) streak = 0; // Сброс стрика при пропуске дня
+            if (diff > 1) streak = 0;
             
             let nextStreak = streak + 1;
             let is7thDay = (nextStreak % 7 === 0);
@@ -395,7 +408,6 @@
         function claimDaily() {
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             let userSub = uid === OID ? "ULTRA" : (localStorage.getItem('m_sub_'+uid) || "FREE");
-            
             let lastClaim = parseInt(localStorage.getItem('m_daily_time_' + uid) || 0);
             let streak = parseInt(localStorage.getItem('m_daily_streak_' + uid) || 0);
             
@@ -421,24 +433,46 @@
             }
 
             localStorage.setItem('m_daily_time_' + uid, now);
-            if(is7thDay) streak = 0; // Сброс цикла после бонуса
+            if(is7thDay) streak = 0;
             localStorage.setItem('m_daily_streak_' + uid, streak);
 
             tg.showAlert(`Награда получена: ${actualRew} 🌙!`);
             updateDailyUI();
         }
 
-        // ЛОГИКА ЗАДАНИЙ ЮЗЕРА
+        // --- ЛОГИКА ОПЕРАЦИЙ FUNDS ---
+        function modFunds(t, a) {
+            let idField = t === 'shards' ? 'ish-id' : 'isu-id';
+            let valField = t === 'shards' ? 'ish-val' : 'isu-type';
+            
+            const id = document.getElementById(idField).value;
+            const v = document.getElementById(valField).value;
+            
+            if(!id) return tg.showAlert("Введите ID!");
+            
+            if(t==='shards') {
+                let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
+                localStorage.setItem('m_shards_'+id, a==='add'? b+parseInt(v) : Math.max(0, b-parseInt(v)));
+            } else {
+                if(a==='add') {
+                    localStorage.setItem('m_sub_'+id, v);
+                    let exp = new Date(); exp.setDate(exp.getDate() + 30);
+                    localStorage.setItem('m_sub_exp_'+id, exp.getTime());
+                } else {
+                    localStorage.removeItem('m_sub_'+id); localStorage.removeItem('m_sub_exp_'+id);
+                }
+            }
+            tg.showAlert(a === 'add' ? "Успешно выдано!" : "Успешно удалено!");
+        }
+
+        // ЗАДАНИЯ ЮЗЕРА
         function renderUserTasks() {
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             const allTasks = JSON.parse(localStorage.getItem('m_tasks') || "[]");
             const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]");
             const list = document.getElementById('user-task-list');
             
-            if (allTasks.length === 0) {
-                list.innerHTML = "<div class='info-card' style='text-align:center; color:#888;'>Пока нет доступных заданий</div>";
-                return;
-            }
+            if (allTasks.length === 0) { list.innerHTML = "<div class='info-card' style='text-align:center; color:#888;'>Пока нет доступных заданий</div>"; return; }
             list.innerHTML = allTasks.map(t => {
                 if(completed.includes(t.id)) {
                     return `<div class="task-item" style="opacity:0.5;"><span>${t.name}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
@@ -466,7 +500,6 @@
             const allTasks = JSON.parse(localStorage.getItem('m_tasks') || "[]");
             const t = allTasks.find(x => x.id === id);
             if(!t) return;
-
             let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]");
             if(completed.includes(id)) return;
 
@@ -500,25 +533,6 @@
             const cur = currency === 'stars' ? 'Stars' : 'TON';
             tg.sendData(JSON.stringify({ action: "buy", type: type, item: item, currency: currency, price: price }));
             tg.showAlert(`Генерация счета на ${txt} за ${price} ${cur}...`);
-        }
-
-        function modFunds(t, a) {
-            const id = document.getElementById(t==='shards'?'ish-id':'isu-id').value;
-            const v = document.getElementById(t==='shards'?'ish-val':'isu-type').value;
-            if(!id) return tg.showAlert("Введите ID!");
-            if(t==='shards') {
-                let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
-                localStorage.setItem('m_shards_'+id, a==='add'? b+parseInt(v) : Math.max(0, b-parseInt(v)));
-            } else {
-                if(a==='add') {
-                    localStorage.setItem('m_sub_'+id, v);
-                    let exp = new Date(); exp.setDate(exp.getDate() + 30);
-                    localStorage.setItem('m_sub_exp_'+id, exp.getTime());
-                } else {
-                    localStorage.removeItem('m_sub_'+id); localStorage.removeItem('m_sub_exp_'+id);
-                }
-            }
-            tg.showAlert(a === 'add' ? "Успешно выдано!" : "Успешно удалено!");
         }
 
         function savePrices(type) {
