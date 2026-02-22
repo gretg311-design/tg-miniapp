@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон FULL</title>
+    <title>Moon Project - Железобетон 1.0.2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
-        /* ПУЛЬСИРУЮЩАЯ ЛУНА */
+        /* ПУЛЬСИРУЮЩАЯ ЛУНА (SPLASH) */
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
         @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 30px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 60px #fff; } 100% { transform: scale(1); box-shadow: 0 0 30px #fff; } }
@@ -18,19 +18,21 @@
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* СЕТКА МЕНЮ: 8 кнопок + Админка + Консоль */
+        /* ГЛАВНОЕ МЕНЮ (8 базовых + 2 спец) */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; padding: 5px; }
+        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
+        /* ОВЕРЛЕИ ПАНЕЛЕЙ */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
         
+        /* КОНСОЛЬНАЯ СЕТКА */
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; padding: 5px; }
+        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
         
         #char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
@@ -46,12 +48,12 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item">Чаты</div>
-            <div class="menu-item">Персонажи</div>
-            <div class="menu-item">Ежедневка</div>
-            <div class="menu-item">Задания</div>
-            <div class="menu-item">Магазин</div>
-            <div class="menu-item">Промокоды</div>
+            <div class="menu-item" onclick="tg.showAlert('Чаты в разработке')">Чаты</div>
+            <div class="menu-item" onclick="tg.showAlert('Персонажи в разработке')">Персонажи</div>
+            <div class="menu-item" onclick="tg.showAlert('Ежедневка в разработке')">Ежедневка</div>
+            <div class="menu-item" onclick="tg.showAlert('Задания в разработке')">Задания</div>
+            <div class="menu-item" onclick="tg.showAlert('Магазин в разработке')">Магазин</div>
+            <div class="menu-item" onclick="tg.showAlert('Промокоды в разработке')">Промокоды</div>
             <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
             <div class="menu-item" onclick="openPanel('p-settings')">Настройка</div>
             
@@ -114,31 +116,10 @@
         <h2>ПЕРСОНАЖ</h2>
         <div class="info-card" style="text-align: center;">
             <img id="char-preview" src="#">
-            <input type="text" id="ich-name" class="term-in" placeholder="Имя">
+            <input type="text" class="term-in" placeholder="Имя">
             <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ВЫБРАТЬ ФОТО</div>
-            <div class="term-btn" style="border-color:#bc42f5">СОХРАНИТЬ В БАЗУ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-m-prices" class="overlay">
-        <h2>ЦЕНЫ</h2>
-        <div class="info-card">
-            <p style="font-size:10px; color:gray">Цена за 100 осколков</p>
-            <input type="number" class="term-in" placeholder="Stars">
-            <input type="number" class="term-in" placeholder="TON">
-            <div class="term-btn" style="border-color:#00ff00">ОБНОВИТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-m-admins" class="overlay">
-        <h2>УПРАВЛЕНИЕ АДМИНАМИ</h2>
-        <div class="info-card">
-            <input type="number" id="ia-id" class="term-in" placeholder="TG ID">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div>
-            <div class="term-btn" style="border-color:#ff4444" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div>
+            <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ГАЛЕРЕЯ</div>
+            <div class="term-btn" style="border-color:#bc42f5">СОХРАНИТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -155,18 +136,18 @@
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-m-promos" class="overlay">
-        <h2>ПРОМОКОДЫ</h2>
+    <div id="p-m-admins" class="overlay">
+        <h2>АДМИНЫ</h2>
         <div class="info-card">
-            <input type="text" class="term-in" placeholder="КОД">
-            <input type="number" class="term-in" placeholder="ОСКОЛКИ">
-            <div class="term-btn" onclick="tg.showAlert('Создан')">СОЗДАТЬ</div>
+            <input type="number" id="ia-id" class="term-in" placeholder="TG ID">
+            <div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div>
+            <div id="own-adm-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-profile" class="overlay"><h2>ПРОФИЛЬ</h2><div class="info-card" id="prof-data"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-settings" class="overlay"><h2>НАСТРОЙКИ</h2><div class="info-card"><input type="text" id="snick" class="term-in" placeholder="Ник"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-settings" class="overlay"><h2>НАСТРОЙКИ</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -181,16 +162,22 @@
             document.getElementById('u-name').innerText = u.first_name;
             document.getElementById('u-id').innerText = uid;
 
+            // Логика железобетонного доступа
             if(uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
-                // Показываем кнопки "Забрать/Удалить" только овнеру
+                // Показываем кнопки "Забрать" только тебе
                 document.getElementById('own-sh-rem').style.display = 'block';
                 document.getElementById('own-su-rem').style.display = 'block';
+                if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').style.display = 'block';
             } else {
                 document.getElementById('shards-balance').innerText = localStorage.getItem('m_shards_'+uid) || 0;
                 if(admins.includes(uid)) document.getElementById('nav-adm').style.display = 'flex';
+                // Удаляем кнопки удаления для всех остальных
+                if(document.getElementById('own-sh-rem')) document.getElementById('own-sh-rem').remove();
+                if(document.getElementById('own-su-rem')) document.getElementById('own-su-rem').remove();
+                if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').remove();
             }
             renderTasks();
             updateProfile();
@@ -202,8 +189,7 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const p = document.getElementById('char-preview');
-                    p.src = e.target.result;
-                    p.style.display = 'block';
+                    p.src = e.target.result; p.style.display = 'block';
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -220,7 +206,7 @@
                 if(act==='add') localStorage.setItem('m_sub_'+id, val);
                 else localStorage.removeItem('m_sub_'+id);
             }
-            tg.showAlert("Готово");
+            tg.showAlert("Выполнено");
         }
 
         function modAdmin(act) {
@@ -260,7 +246,7 @@
         function updateProfile() {
             const uid = document.getElementById('u-id').innerText;
             const s = (uid===OID)?"ULTRA": (localStorage.getItem('m_sub_'+uid)||"FREE");
-            document.getElementById('prof-data').innerHTML = `ID: ${uid}<br>СТАТУС: ${s}`;
+            document.getElementById('prof-data').innerHTML = `ID: ${uid}<br>STATUS: ${s}`;
         }
 
         function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
