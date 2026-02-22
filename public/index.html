@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон 1.0.6 (SHOP)</title>
+    <title>Moon Project - Железобетон 1.0.6 FULL FIXED</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -47,7 +47,7 @@
         .char-counter { font-size: 10px; color: #bc42f5; text-align: right; margin-top: -8px; margin-bottom: 10px; }
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
 
-        /* СТИЛИ МАГАЗИНА */
+        /* МАГАЗИН */
         .shop-item { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; }
         .shop-title { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 5px; }
         .shop-desc { font-size: 12px; color: #888; margin-bottom: 15px; text-align: center; }
@@ -85,88 +85,18 @@
         <div style="font-size: 11px; color: #888; margin-bottom: 20px;">Оплата через Telegram Stars или CryptoBot (TON)</div>
 
         <div class="shop-header">ПОДПИСКИ (30 ДНЕЙ)</div>
-        
-        <div class="shop-item">
-            <div class="shop-title" style="color: #a8b8c8;">PREMIUM</div>
-            <div class="shop-desc">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div>
-            </div>
-        </div>
-
-        <div class="shop-item">
-            <div class="shop-title" style="color: #ffd700;">PRO</div>
-            <div class="shop-desc">100 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div>
-            </div>
-        </div>
-
-        <div class="shop-item">
-            <div class="shop-title" style="color: #ff00ff;">VIP</div>
-            <div class="shop-desc">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div>
-            </div>
-        </div>
-
-        <div class="shop-item">
-            <div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div>
-            <div class="shop-desc">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div>
-            </div>
-        </div>
+        <div class="shop-item"><div class="shop-title" style="color: #a8b8c8;">PREMIUM</div><div class="shop-desc">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div></div></div>
+        <div class="shop-item"><div class="shop-title" style="color: #ffd700;">PRO</div><div class="shop-desc">100 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div></div></div>
+        <div class="shop-item"><div class="shop-title" style="color: #ff00ff;">VIP</div><div class="shop-desc">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div></div></div>
+        <div class="shop-item"><div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div><div class="shop-desc">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div></div></div>
 
         <div class="shop-header">ОСКОЛКИ ЛУНЫ</div>
-
-        <div class="shop-item">
-            <div class="shop-title">10 Осколков 🌙</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div>
-                <div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div>
-            </div>
-        </div>
-        <div class="shop-item">
-            <div class="shop-title">50 Осколков 🌙</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div>
-                <div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div>
-            </div>
-        </div>
-        <div class="shop-item">
-            <div class="shop-title">100 Осколков 🌙</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div>
-                <div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div>
-            </div>
-        </div>
-        <div class="shop-item">
-            <div class="shop-title">500 Осколков 🌙</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div>
-                <div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div>
-            </div>
-        </div>
-        <div class="shop-item">
-            <div class="shop-title">1000 Осколков 🌙</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div>
-                <div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div>
-            </div>
-        </div>
-        <div class="shop-item">
-            <div class="shop-title" style="color: #ffaa00;">5000 Осколков 🌙</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('shards', 5000, 'stars', 2500)">⭐️ 2500 Stars</div>
-                <div class="btn-ton" onclick="buyItem('shards', 5000, 'ton', 250)">💎 250 TON</div>
-            </div>
-        </div>
-
+        <div class="shop-item"><div class="shop-title">10 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div>
+        <div class="shop-item"><div class="shop-title">50 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div>
+        <div class="shop-item"><div class="shop-title">100 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div>
+        <div class="shop-item"><div class="shop-title">500 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div>
+        <div class="shop-item"><div class="shop-title">1000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div>
+        <div class="shop-item"><div class="shop-title" style="color: #ffaa00;">5000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 5000, 'stars', 2500)">⭐️ 2500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 5000, 'ton', 250)">💎 250 TON</div></div></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
@@ -207,17 +137,11 @@
         </div>
         <div class="info-card">
             <span class="s-label">Длина сообщений <span class="slider-val" id="len-val">45</span></span>
-            <div class="slider-wrap">
-                <input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)">
-                <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div>
-            </div>
+            <div class="slider-wrap"><input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div></div>
         </div>
         <div class="info-card">
             <span class="s-label">Пошлость персонажей <span class="slider-val" id="sex-val">0</span></span>
-            <div class="slider-wrap">
-                <input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)">
-                <div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div>
-            </div>
+            <div class="slider-wrap"><input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div></div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -228,10 +152,10 @@
             <div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div>
             <div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div>
             <div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div>
-            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ (STARS/TON)</div>
+            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div>
             <div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div>
             <div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div>
-            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</div>
+            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">ЗАДАНИЯ</div>
         </div>
         <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
     </div>
@@ -274,76 +198,39 @@
 
     <div id="p-m-prices" class="overlay">
         <h2 style="color:#e91e63">УПРАВЛЕНИЕ ЦЕНАМИ</h2>
-        <div class="info-card">
-            <h4 style="margin:0 0 10px 0; color:#00bcd4">ОСКОЛКИ</h4>
-            <input type="number" id="pr-sh-stars" class="term-in" placeholder="Цена Stars">
-            <input type="number" id="pr-sh-ton" class="term-in" placeholder="Цена TON">
-            <div class="term-btn" style="border-color:#00ff00" onclick="savePrices('shards')">СОХРАНИТЬ ЦЕНУ ОСКОЛКОВ</div>
-        </div>
-        <div class="info-card">
-            <h4 style="margin:0 0 10px 0; color:#bc42f5">ПОДПИСКИ (30д)</h4>
-            <input type="number" id="pr-sub-stars" class="term-in" placeholder="Цена Stars">
-            <input type="number" id="pr-sub-ton" class="term-in" placeholder="Цена TON">
-            <div class="term-btn" style="border-color:#00ff00" onclick="savePrices('subs')">СОХРАНИТЬ ЦЕНУ ПОДПИСОК</div>
-        </div>
+        <div class="info-card"><h4 style="margin:0 0 10px 0; color:#00bcd4">ОСКОЛКИ</h4><input type="number" id="pr-sh-stars" class="term-in" placeholder="Цена Stars"><input type="number" id="pr-sh-ton" class="term-in" placeholder="Цена TON"><div class="term-btn" style="border-color:#00ff00" onclick="savePrices('shards')">СОХРАНИТЬ ЦЕНУ ОСКОЛКОВ</div></div>
+        <div class="info-card"><h4 style="margin:0 0 10px 0; color:#bc42f5">ПОДПИСКИ (30д)</h4><input type="number" id="pr-sub-stars" class="term-in" placeholder="Цена Stars"><input type="number" id="pr-sub-ton" class="term-in" placeholder="Цена TON"><div class="term-btn" style="border-color:#00ff00" onclick="savePrices('subs')">СОХРАНИТЬ ЦЕНУ ПОДПИСОК</div></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-char" class="overlay">
         <h2>ПЕРСОНАЖ</h2>
-        <div class="info-card" style="text-align: center;">
-            <img id="char-preview" src="#">
-            <input type="text" id="ich-name" class="term-in" placeholder="Имя">
-            <input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18">
-            <textarea id="ich-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание персонажа..." maxlength="2000" oninput="updateCharCounter()"></textarea>
-            <div id="char-limit" class="char-counter">0/2000</div>
-            <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
-            <div class="term-btn" style="border-color:#bc42f5" onclick="saveCharDB()">В БАЗУ</div>
-        </div>
+        <div class="info-card" style="text-align: center;"><img id="char-preview" src="#"><input type="text" id="ich-name" class="term-in" placeholder="Имя"><input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18"><textarea id="ich-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание..." maxlength="2000" oninput="updateCharCounter()"></textarea><div id="char-limit" class="char-counter">0/2000</div><input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)"><div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ГАЛЕРЕЯ</div><div class="term-btn" style="border-color:#bc42f5" onclick="saveCharDB()">В БАЗУ</div></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-tasks" class="overlay">
         <h2>ЗАДАНИЯ</h2>
-        <div class="info-card">
-            <input type="text" id="it-name" class="term-in" placeholder="Название задания">
-            <input type="text" id="it-link" class="term-in" placeholder="Ссылка (https://...)">
-            <select id="it-rtype" class="term-in" onchange="toggleTaskInput()">
-                <option value="shards">Награда: Осколки</option>
-                <option value="sub7">Награда: Подписка (7 дней)</option>
-            </select>
-            <input type="number" id="it-rew" class="term-in" placeholder="Кол-во осколков">
-            <div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ ЗАДАНИЕ</div>
-        </div>
+        <div class="info-card"><input type="text" id="it-name" class="term-in" placeholder="Название"><input type="text" id="it-link" class="term-in" placeholder="Ссылка (https://...)"><select id="it-rtype" class="term-in" onchange="toggleTaskInput()"><option value="shards">Осколки</option><option value="sub7">Подписка (7 дней)</option></select><input type="number" id="it-rew" class="term-in" placeholder="Кол-во осколков"><div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ ЗАДАНИЕ</div></div>
         <div id="task-list" style="width:100%"></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-promos" class="overlay">
         <h2>ПРОМОКОДЫ</h2>
-        <div class="info-card">
-            <input type="text" id="ip-code" class="term-in" placeholder="КОД">
-            <input type="number" id="ip-rew" class="term-in" placeholder="НАГРАДА">
-            <div class="term-btn" onclick="createPromo()">СОЗДАТЬ ПРОМО</div>
-        </div>
+        <div class="info-card"><input type="text" id="ip-code" class="term-in" placeholder="КОД"><input type="number" id="ip-rew" class="term-in" placeholder="НАГРАДА"><div class="term-btn" onclick="createPromo()">СОЗДАТЬ ПРОМО</div></div>
         <div id="promo-list" style="width:100%"></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-admins" class="overlay">
         <h2>АДМИНЫ</h2>
-        <div class="info-card">
-            <input type="number" id="ia-id" class="term-in" placeholder="TG ID">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div>
-            <div id="own-adm-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div>
-        </div>
+        <div class="info-card"><input type="number" id="ia-id" class="term-in" placeholder="TG ID"><div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div><div id="own-adm-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        
         tg.expand();
         tg.enableClosingConfirmation();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
@@ -372,7 +259,9 @@
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('prof-shards').innerText = "∞";
                 document.getElementById('prof-sub').innerText = "ULTRA";
+                document.getElementById('prof-exp').innerText = "Без ограничений";
                 document.getElementById('prof-status').innerText = "Овнер";
+                
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
                 document.getElementById('own-sh-rem').style.display = 'block';
@@ -384,12 +273,30 @@
                 let bal = localStorage.getItem('m_shards_'+uid) || 0;
                 document.getElementById('shards-balance').innerText = bal;
                 document.getElementById('prof-shards').innerText = bal;
+                
                 let sub = localStorage.getItem('m_sub_'+uid) || "FREE";
                 document.getElementById('prof-sub').innerText = sub;
+                
+                // РЕАЛЬНЫЙ РАСЧЕТ ДАТЫ ПОДПИСКИ ДЛЯ ЮЗЕРА
+                if(sub !== "FREE") {
+                    let expTs = localStorage.getItem('m_sub_exp_'+uid);
+                    if(expTs) {
+                        let expDate = new Date(parseInt(expTs));
+                        document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU');
+                    } else {
+                        document.getElementById('prof-exp').innerText = "Активна";
+                    }
+                } else {
+                    document.getElementById('prof-exp').innerText = "-";
+                }
+
                 if(admins.includes(uid)) {
                     document.getElementById('prof-status').innerText = "Админ";
                     document.getElementById('nav-adm').style.display = 'flex';
+                } else {
+                    document.getElementById('prof-status').innerText = "Юзер";
                 }
+
                 document.getElementById('own-sh-rem').remove();
                 document.getElementById('own-su-rem').remove();
                 document.getElementById('own-adm-rem').remove();
@@ -403,34 +310,52 @@
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
         }
 
-        // ЛОГИКА ПОКУПКИ В МАГАЗИНЕ
         function buyItem(type, item, currency, price) {
             const txt = type === 'sub' ? `подписку ${item}` : `${item} осколков`;
             const cur = currency === 'stars' ? 'Stars' : 'TON';
-            // В будущем здесь будет запрос к server.js для генерации инвойса Telegram Stars или ссылки CryptoBot
             tg.sendData(JSON.stringify({ action: "buy", type: type, item: item, currency: currency, price: price }));
             tg.showAlert(`Генерация счета на ${txt} за ${price} ${cur}...`);
         }
 
+        // ИСПРАВЛЕННАЯ ЛОГИКА ВЫДАЧИ ПОДПИСОК (С ДАТОЙ ОКОНЧАНИЯ)
+        function modFunds(t, a) {
+            const id = document.getElementById(t==='shards'?'ish-id':'isu-id').value;
+            const v = document.getElementById(t==='shards'?'ish-val':'isu-type').value;
+            if(!id) return tg.showAlert("Введите ID!");
+            
+            if(t==='shards') {
+                let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
+                localStorage.setItem('m_shards_'+id, a==='add'? b+parseInt(v) : Math.max(0, b-parseInt(v)));
+            } else {
+                if(a==='add') {
+                    localStorage.setItem('m_sub_'+id, v);
+                    // Генерируем дату окончания: +30 дней от текущего момента
+                    let exp = new Date();
+                    exp.setDate(exp.getDate() + 30);
+                    localStorage.setItem('m_sub_exp_'+id, exp.getTime());
+                } else {
+                    localStorage.removeItem('m_sub_'+id);
+                    localStorage.removeItem('m_sub_exp_'+id);
+                }
+            }
+            tg.showAlert(a === 'add' ? "Успешно выдано!" : "Успешно удалено!");
+        }
+
         function savePrices(type) {
             const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-';
-            const stars = document.getElementById(prefix + 'stars').value;
-            const ton = document.getElementById(prefix + 'ton').value;
-            localStorage.setItem('price_' + type + '_stars', stars);
-            localStorage.setItem('price_' + type + '_ton', ton);
-            tg.showAlert("Цены успешно сохранены!");
+            localStorage.setItem('price_' + type + '_stars', document.getElementById(prefix + 'stars').value);
+            localStorage.setItem('price_' + type + '_ton', document.getElementById(prefix + 'ton').value);
+            tg.showAlert("Цены сохранены!");
         }
 
         function saveCharDB() {
             const n = document.getElementById('ich-name').value;
-            const age = document.getElementById('ich-age').value;
-            const desc = document.getElementById('ich-desc').value;
             const img = document.getElementById('char-preview').src;
-            if(!n || img.includes('#')) return tg.showAlert("Введите имя и выберите фото!");
+            if(!n || img.includes('#')) return tg.showAlert("Имя и фото обязательны!");
             let db = JSON.parse(localStorage.getItem('m_characters') || "[]");
-            db.push({ id: Date.now(), name: n, age: age, desc: desc, photo: img });
+            db.push({ id: Date.now(), name: n, age: document.getElementById('ich-age').value, desc: document.getElementById('ich-desc').value, photo: img });
             localStorage.setItem('m_characters', JSON.stringify(db));
-            tg.showAlert("Персонаж добавлен в базу!");
+            tg.showAlert("Добавлено в базу!");
         }
 
         function createPromo() {
@@ -441,141 +366,67 @@
             if(promos.find(p => p.code === code)) return tg.showAlert("Такой код уже есть");
             promos.push({code, rew});
             localStorage.setItem('m_all_promos', JSON.stringify(promos));
-            document.getElementById('ip-code').value = '';
-            document.getElementById('ip-rew').value = '';
-            renderAdminPromos();
-            tg.showAlert("Промокод создан!");
+            renderAdminPromos(); tg.showAlert("Создано!");
         }
-
         function renderAdminPromos() {
-            const promos = JSON.parse(localStorage.getItem('m_all_promos') || "[]");
-            document.getElementById('promo-list').innerHTML = promos.map(p => `
-                <div class="task-item">
-                    <span>${p.code} (+${p.rew})</span>
-                    <button onclick="delPromo('${p.code}')" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">X</button>
-                </div>
+            document.getElementById('promo-list').innerHTML = JSON.parse(localStorage.getItem('m_all_promos') || "[]").map(p => `
+                <div class="task-item"><span>${p.code} (+${p.rew})</span><button onclick="delPromo('${p.code}')" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">X</button></div>
             `).join('');
         }
-
         function delPromo(code) {
-            let promos = JSON.parse(localStorage.getItem('m_all_promos') || "[]");
-            promos = promos.filter(p => p.code !== code);
-            localStorage.setItem('m_all_promos', JSON.stringify(promos));
+            localStorage.setItem('m_all_promos', JSON.stringify(JSON.parse(localStorage.getItem('m_all_promos') || "[]").filter(p => p.code !== code)));
             renderAdminPromos();
         }
-
         function usePromo() {
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             const input = document.getElementById('user-promo-input').value.toUpperCase().trim();
             const promos = JSON.parse(localStorage.getItem('m_all_promos') || "[]");
             const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]");
-            
             const found = promos.find(p => p.code === input);
-            if(!found) return tg.showAlert("Ошибка: Промокод не верен");
-            if(used.includes(input)) return tg.showAlert("Вы уже активировали этот код");
-
+            if(!found) return tg.showAlert("Неверный код");
+            if(used.includes(input)) return tg.showAlert("Уже активирован");
             if(uid !== OID) {
-                let bal = parseInt(localStorage.getItem('m_shards_'+uid) || 0);
-                bal += found.rew;
+                let bal = parseInt(localStorage.getItem('m_shards_'+uid) || 0) + found.rew;
                 localStorage.setItem('m_shards_'+uid, bal);
-                document.getElementById('shards-balance').innerText = bal;
-                document.getElementById('prof-shards').innerText = bal;
+                document.getElementById('shards-balance').innerText = bal; document.getElementById('prof-shards').innerText = bal;
             }
-            
-            used.push(input);
-            localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
-            document.getElementById('user-promo-input').value = '';
-            tg.showAlert(`Успех! Получено ${found.rew} осколков!`);
+            used.push(input); localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
+            tg.showAlert(`Получено ${found.rew} 🌙!`);
         }
 
-        function toggleTaskInput() {
-            document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none';
-        }
+        function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
         function modTask(act, tid=null) {
             const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
             let t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
             if(act==='add') {
                 const n = document.getElementById('it-name').value;
-                const link = document.getElementById('it-link').value;
                 const rType = document.getElementById('it-rtype').value;
-                const rVal = document.getElementById('it-rew').value;
-                if(!n || !link) return tg.showAlert("Заполните название и ссылку!");
-                t.push({ id: Date.now(), name: n, link: link, rType: rType, rVal: rType === 'sub7' ? 7 : rVal });
+                if(!n) return;
+                t.push({ id: Date.now(), name: n, link: document.getElementById('it-link').value, rType: rType, rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value });
             } else if(act==='rem') {
-                if(!isO) return tg.showAlert("Только Owner может удалять!");
+                if(!isO) return tg.showAlert("Только Owner!");
                 t = t.filter(x => x.id !== tid);
             }
-            localStorage.setItem('m_tasks', JSON.stringify(t));
-            renderTasks();
+            localStorage.setItem('m_tasks', JSON.stringify(t)); renderTasks();
         }
         function renderTasks() {
             const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
-            const t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
-            document.getElementById('task-list').innerHTML = t.map(x => `
-                <div class="task-item">
-                    <span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>
-                    ${isO ? `<button onclick="modTask('rem',${x.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">X</button>` : ''}
-                </div>
+            document.getElementById('task-list').innerHTML = JSON.parse(localStorage.getItem('m_tasks') || "[]").map(x => `
+                <div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>
+                ${isO ? `<button onclick="modTask('rem',${x.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">X</button>` : ''}</div>
             `).join('');
         }
 
-        function updateLiveNick(v) { 
-            let nick = v || "User";
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            document.getElementById('u-name').innerText = nick; 
-            document.getElementById('prof-nick').innerText = nick; 
-            localStorage.setItem('m_nick_' + uid, nick);
-        }
-        function setGender(g, s=false) {
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            document.getElementById('g-m').classList.toggle('active', g === 'm');
-            document.getElementById('g-f').classList.toggle('active', g === 'f');
-            if(!s) localStorage.setItem('m_gender_' + uid, g);
-        }
-        function updateLen(v, s=false) { 
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            document.getElementById('len-val').innerText = v; 
-            if(!s) localStorage.setItem('m_len_' + uid, v);
-        }
-        function updateSex(v, s=false) {
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            const m = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "Очень высокая", "СУПЕР ПОШЛОСТЬ 🔥"];
-            document.getElementById('sex-val').innerText = v;
-            document.getElementById('sex-info').innerText = "Уровень " + v + ": " + m[v];
-            document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5";
-            if(!s) localStorage.setItem('m_sex_' + uid, v);
-        }
-        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); }
-        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
-        function previewImg(i) {
-            if (i.files && i.files[0]) {
-                const r = new FileReader();
-                r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; };
-                r.readAsDataURL(i.files[0]);
-            }
-        }
-        function modFunds(t, a) {
-            const id = document.getElementById(t==='shards'?'ish-id':'isu-id').value;
-            const v = document.getElementById(t==='shards'?'ish-val':'isu-type').value;
-            if(!id) return;
-            if(t==='shards') {
-                let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
-                localStorage.setItem('m_shards_'+id, a==='add'? b+parseInt(v) : Math.max(0, b-parseInt(v)));
-            } else {
-                if(a==='add') localStorage.setItem('m_sub_'+id, v);
-                else localStorage.removeItem('m_sub_'+id);
-            }
-            tg.showAlert("Готово");
-        }
-        function modAdmin(a) {
-            const id = document.getElementById('ia-id').value; if(!id) return;
-            let ad = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            if(a==='add') { if(!ad.includes(id)) ad.push(id); } else ad = ad.filter(x => x !== id);
-            localStorage.setItem('m_admins', JSON.stringify(ad));
-            tg.showAlert("Обновлено");
-        }
-        function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
-        function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
+        function updateLiveNick(v) { let n=v||"User"; const uid=String(tg.initDataUnsafe?.user?.id||OID); document.getElementById('u-name').innerText=n; document.getElementById('prof-nick').innerText=n; localStorage.setItem('m_nick_'+uid, n); }
+        function setGender(g, s=false) { const uid=String(tg.initDataUnsafe?.user?.id||OID); document.getElementById('g-m').classList.toggle('active', g==='m'); document.getElementById('g-f').classList.toggle('active', g==='f'); if(!s) localStorage.setItem('m_gender_'+uid, g); }
+        function updateLen(v, s=false) { document.getElementById('len-val').innerText=v; if(!s) localStorage.setItem('m_len_'+String(tg.initDataUnsafe?.user?.id||OID), v); }
+        function updateSex(v, s=false) { const m=["Нет","Слабая","Норм","Сильная","Высокая","V-Пошлая","HOT 🔥"]; document.getElementById('sex-val').innerText=v; document.getElementById('sex-info').innerText="Уровень "+v+": "+m[v]; document.getElementById('sex-val').style.color=(v==6)?"#ff00ff":"#bc42f5"; if(!s) localStorage.setItem('m_sex_'+String(tg.initDataUnsafe?.user?.id||OID), v); }
+        function troll() { trollCount++; tg.showAlert(trollCount===1?"Попался! 🤡":"Не трогай! 🤨"); }
+        function updateCharCounter() { document.getElementById('char-limit').innerText=document.getElementById('ich-desc').value.length+"/2000"; }
+        function previewImg(i) { if(i.files&&i.files[0]){const r=new FileReader();r.onload=(e)=>{document.getElementById('char-preview').src=e.target.result;document.getElementById('char-preview').style.display='block';};r.readAsDataURL(i.files[0]);} }
+        function modAdmin(a) { const id=document.getElementById('ia-id').value; if(!id) return; let ad=JSON.parse(localStorage.getItem('m_admins')||"[]"); if(a==='add'){if(!ad.includes(id))ad.push(id);}else ad=ad.filter(x=>x!==id); localStorage.setItem('m_admins',JSON.stringify(ad)); tg.showAlert("Обновлено"); }
+        function openPanel(id) { stack.push(id); document.getElementById(id).style.display='flex'; }
+        function back() { if(stack.length>0) document.getElementById(stack.pop()).style.display='none'; }
         
         window.onload = init;
     </script>
