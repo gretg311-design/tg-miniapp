@@ -108,11 +108,17 @@
         </div>
         <div class="info-card">
             <span class="s-label">Длина сообщений <span class="slider-val" id="len-val">45</span></span>
-            <div class="slider-wrap"><input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)"></div>
+            <div class="slider-wrap">
+                <input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)">
+                <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div>
+            </div>
         </div>
         <div class="info-card">
             <span class="s-label">Пошлость персонажей <span class="slider-val" id="sex-val">0</span></span>
-            <div class="slider-wrap"><input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)"></div>
+            <div class="slider-wrap">
+                <input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)">
+                <div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div>
+            </div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -239,7 +245,7 @@
     <script>
         const tg = window.Telegram.WebApp;
         
-        // ЗАЩИТА
+        // ЗАЩИТА ОТ СЛУЧАЙНОГО ЗАКРЫТИЯ
         tg.expand();
         tg.enableClosingConfirmation();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
@@ -262,7 +268,8 @@
 
             setGender(localStorage.getItem('m_gender_' + uid) || 'm', true);
 
-            const lS = document.getElementById('len-slider'), sS = document.getElementById('sex-slider');
+            const lS = document.getElementById('len-slider');
+            const sS = document.getElementById('sex-slider');
 
             if(uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
@@ -275,6 +282,7 @@
                 document.getElementById('own-su-rem').style.display = 'block';
                 document.getElementById('own-adm-rem').style.display = 'block';
                 lS.max = 100; sS.max = 6;
+                document.getElementById('len-info').innerText = "Твой лимит (Ultra): 100 слов";
             } else {
                 let bal = localStorage.getItem('m_shards_'+uid) || 0;
                 document.getElementById('shards-balance').innerText = bal;
@@ -290,14 +298,16 @@
                 document.getElementById('own-adm-rem').remove();
             }
 
+            // Загрузка ползунков (теперь HTML-элементы для текста существуют, ошибки не будет)
             updateLen(localStorage.getItem('m_len_' + uid) || 45, true);
             updateSex(localStorage.getItem('m_sex_' + uid) || 0, true);
+            
             renderTasks();
             renderAdminPromos();
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
         }
 
-        // ВОССТАНОВЛЕННАЯ ЛОГИКА ЦЕН
+        // ЛОГИКА ЦЕН
         function savePrices(type) {
             const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-';
             const stars = document.getElementById(prefix + 'stars').value;
@@ -307,52 +317,17 @@
             tg.showAlert("Цены успешно сохранены!");
         }
 
-        // ВОССТАНОВЛЕННАЯ ЛОГИКА ПЕРСОНАЖЕЙ
+        // ЛОГИКА ПЕРСОНАЖЕЙ
         function saveCharDB() {
             const n = document.getElementById('ich-name').value;
             const age = document.getElementById('ich-age').value;
             const desc = document.getElementById('ich-desc').value;
             const img = document.getElementById('char-preview').src;
-            
             if(!n || img.includes('#')) return tg.showAlert("Введите имя и выберите фото!");
-            
             let db = JSON.parse(localStorage.getItem('m_characters') || "[]");
             db.push({ id: Date.now(), name: n, age: age, desc: desc, photo: img });
             localStorage.setItem('m_characters', JSON.stringify(db));
             tg.showAlert("Персонаж добавлен в базу!");
-        }
-
-        // ВОССТАНОВЛЕННАЯ ЛОГИКА ЗАДАЧ (С ВЫПАДАЮЩИМ СПИСКОМ SUB7/SHARDS)
-        function toggleTaskInput() {
-            document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none';
-        }
-        function modTask(act, tid=null) {
-            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
-            let t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
-            if(act==='add') {
-                const n = document.getElementById('it-name').value;
-                const link = document.getElementById('it-link').value;
-                const rType = document.getElementById('it-rtype').value;
-                const rVal = document.getElementById('it-rew').value;
-                if(!n || !link) return tg.showAlert("Заполните название и ссылку!");
-                
-                t.push({ id: Date.now(), name: n, link: link, rType: rType, rVal: rType === 'sub7' ? 7 : rVal });
-            } else if(act==='rem') {
-                if(!isO) return tg.showAlert("Только Owner может удалять!");
-                t = t.filter(x => x.id !== tid);
-            }
-            localStorage.setItem('m_tasks', JSON.stringify(t));
-            renderTasks();
-        }
-        function renderTasks() {
-            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
-            const t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
-            document.getElementById('task-list').innerHTML = t.map(x => `
-                <div class="task-item">
-                    <span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>
-                    ${isO ? `<button onclick="modTask('rem',${x.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">X</button>` : ''}
-                </div>
-            `).join('');
         }
 
         // ПРОМОКОДЫ
@@ -369,6 +344,7 @@
             renderAdminPromos();
             tg.showAlert("Промокод создан!");
         }
+
         function renderAdminPromos() {
             const promos = JSON.parse(localStorage.getItem('m_all_promos') || "[]");
             document.getElementById('promo-list').innerHTML = promos.map(p => `
@@ -378,12 +354,14 @@
                 </div>
             `).join('');
         }
+
         function delPromo(code) {
             let promos = JSON.parse(localStorage.getItem('m_all_promos') || "[]");
             promos = promos.filter(p => p.code !== code);
             localStorage.setItem('m_all_promos', JSON.stringify(promos));
             renderAdminPromos();
         }
+
         function usePromo() {
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             const input = document.getElementById('user-promo-input').value.toUpperCase().trim();
@@ -408,7 +386,39 @@
             tg.showAlert(`Успех! Получено ${found.rew} осколков!`);
         }
 
-        // ОСТАЛЬНЫЕ УТИЛИТЫ
+        // ЗАДАНИЯ
+        function toggleTaskInput() {
+            document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none';
+        }
+        function modTask(act, tid=null) {
+            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
+            let t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            if(act==='add') {
+                const n = document.getElementById('it-name').value;
+                const link = document.getElementById('it-link').value;
+                const rType = document.getElementById('it-rtype').value;
+                const rVal = document.getElementById('it-rew').value;
+                if(!n || !link) return tg.showAlert("Заполните название и ссылку!");
+                t.push({ id: Date.now(), name: n, link: link, rType: rType, rVal: rType === 'sub7' ? 7 : rVal });
+            } else if(act==='rem') {
+                if(!isO) return tg.showAlert("Только Owner может удалять!");
+                t = t.filter(x => x.id !== tid);
+            }
+            localStorage.setItem('m_tasks', JSON.stringify(t));
+            renderTasks();
+        }
+        function renderTasks() {
+            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
+            const t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            document.getElementById('task-list').innerHTML = t.map(x => `
+                <div class="task-item">
+                    <span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>
+                    ${isO ? `<button onclick="modTask('rem',${x.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">X</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // ОСТАЛЬНАЯ ЛОГИКА
         function updateLiveNick(v) { 
             let nick = v || "User";
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
@@ -435,12 +445,12 @@
             document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5";
             if(!s) localStorage.setItem('m_sex_' + uid, v);
         }
-        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); }
+        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай! 🤨"); }
         function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
         function previewImg(i) {
             if (i.files && i.files[0]) {
                 const r = new FileReader();
-                r.onload = (e) => { document.getElementById('char-preview').src = e.target.result; document.getElementById('char-preview').style.display = 'block'; };
+                r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; };
                 r.readAsDataURL(i.files[0]);
             }
         }
@@ -455,7 +465,7 @@
                 if(a==='add') localStorage.setItem('m_sub_'+id, v);
                 else localStorage.removeItem('m_sub_'+id);
             }
-            tg.showAlert("Выполнено");
+            tg.showAlert("Готово");
         }
         function modAdmin(a) {
             const id = document.getElementById('ia-id').value; if(!id) return;
