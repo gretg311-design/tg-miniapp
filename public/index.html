@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон 1.0.6 FULL FIXED</title>
+    <title>Moon Project - Железобетон 1.0.7 FULL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -70,7 +70,7 @@
             <div class="menu-item" onclick="tg.showAlert('Чаты в разработке')">Чаты</div>
             <div class="menu-item" onclick="tg.showAlert('Персонажи в разработке')">Персонажи</div>
             <div class="menu-item" onclick="tg.showAlert('Ежедневка в разработке')">Ежедневка</div>
-            <div class="menu-item" onclick="tg.showAlert('Задания в разработке')">Задания</div>
+            <div class="menu-item" onclick="openPanel('p-user-tasks')">Задания</div>
             <div class="menu-item" onclick="openPanel('p-shop')">Магазин</div>
             <div class="menu-item" onclick="openPanel('p-user-promos')">Промокоды</div>
             <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
@@ -78,6 +78,12 @@
             <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
+    </div>
+
+    <div id="p-user-tasks" class="overlay">
+        <h2 style="color:#00ff00; margin-bottom: 20px;">ЗАДАНИЯ</h2>
+        <div id="user-task-list" style="width:100%"></div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-shop" class="overlay">
@@ -137,17 +143,11 @@
         </div>
         <div class="info-card">
             <span class="s-label">Длина сообщений <span class="slider-val" id="len-val">45</span></span>
-            <div class="slider-wrap">
-                <input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)">
-                <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div>
-            </div>
+            <div class="slider-wrap"><input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div></div>
         </div>
         <div class="info-card">
             <span class="s-label">Пошлость персонажей <span class="slider-val" id="sex-val">0</span></span>
-            <div class="slider-wrap">
-                <input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)">
-                <div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div>
-            </div>
+            <div class="slider-wrap"><input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div></div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -180,25 +180,13 @@
 
     <div id="p-m-shards" class="overlay">
         <h2>ОСКОЛКИ</h2>
-        <div class="info-card">
-            <input type="number" id="ish-id" class="term-in" placeholder="TG ID">
-            <input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО">
-            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div>
-            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div>
-        </div>
+        <div class="info-card"><input type="number" id="ish-id" class="term-in" placeholder="TG ID"><input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО"><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div><div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-subs" class="overlay">
         <h2>ПОДПИСКИ (30д)</h2>
-        <div class="info-card">
-            <input type="number" id="isu-id" class="term-in" placeholder="TG ID">
-            <select id="isu-type" class="term-in">
-                <option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option>
-            </select>
-            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div>
-            <div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div>
-        </div>
+        <div class="info-card"><input type="number" id="isu-id" class="term-in" placeholder="TG ID"><select id="isu-type" class="term-in"><option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option></select><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div><div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
@@ -216,7 +204,7 @@
     </div>
 
     <div id="p-m-tasks" class="overlay">
-        <h2>ЗАДАНИЯ</h2>
+        <h2>АДМИН: ЗАДАНИЯ</h2>
         <div class="info-card"><input type="text" id="it-name" class="term-in" placeholder="Название"><input type="text" id="it-link" class="term-in" placeholder="Ссылка (https://...)"><select id="it-rtype" class="term-in" onchange="toggleTaskInput()"><option value="shards">Осколки</option><option value="sub7">Подписка (7 дней)</option></select><input type="number" id="it-rew" class="term-in" placeholder="Кол-во осколков"><div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ ЗАДАНИЕ</div></div>
         <div id="task-list" style="width:100%"></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
@@ -242,7 +230,7 @@
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
 
         const OID = "8287041036";
-        let stack = [], trollCount = 0;
+        let stack = [], trollCount = 0, clickedTasks = [];
 
         function init() {
             const u = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
@@ -259,9 +247,7 @@
 
             setGender(localStorage.getItem('m_gender_' + uid) || 'm', true);
 
-            const lS = document.getElementById('len-slider');
-            const sS = document.getElementById('sex-slider');
-
+            const lS = document.getElementById('len-slider'), sS = document.getElementById('sex-slider');
             let userSub = "FREE";
 
             if(uid === OID) {
@@ -309,36 +295,115 @@
                 if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').remove();
             }
 
-            // ДИНАМИЧЕСКИЕ ЛИМИТЫ ПОЛЗУНКОВ ПОДПИСКИ
-            let maxLen = 45;
-            let maxSex = 0; // Для FREE и Premium пошлость заблокирована на 0
-
+            let maxLen = 45; let maxSex = 0;
             if(userSub === "Premium") { maxLen = 55; }
             else if(userSub === "Pro") { maxLen = 65; maxSex = 3; }
             else if(userSub === "VIP") { maxLen = 80; maxSex = 5; }
             else if(userSub === "ULTRA" || userSub === "Ultra") { maxLen = 100; maxSex = 6; }
 
-            lS.max = maxLen;
-            sS.max = maxSex;
-
+            lS.max = maxLen; sS.max = maxSex;
             document.getElementById('len-info').innerText = `Твой лимит (${userSub}): ${maxLen} слов`;
             document.getElementById('sex-info').innerText = maxSex === 0 ? "Пошлость недоступна для вашей подписки" : `Доступно уровней: ${maxSex}`;
 
-            // Загружаем сохраненные значения (или сбрасываем, если они превышают новый лимит)
             let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 45);
             if(savedLen > maxLen) savedLen = maxLen;
-            lS.value = savedLen;
-            updateLen(savedLen, true);
+            lS.value = savedLen; updateLen(savedLen, true);
 
             let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
             if(savedSex > maxSex) savedSex = maxSex;
-            sS.value = savedSex;
-            updateSex(savedSex, true);
+            sS.value = savedSex; updateSex(savedSex, true);
             
             renderTasks();
+            renderUserTasks();
             renderAdminPromos();
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
         }
+
+        // --- ЛОГИКА ЗАДАНИЙ ДЛЯ ЮЗЕРА ---
+        function renderUserTasks() {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            const allTasks = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]");
+            const list = document.getElementById('user-task-list');
+            
+            if (allTasks.length === 0) {
+                list.innerHTML = "<div class='info-card' style='text-align:center; color:#888;'>Пока нет доступных заданий</div>";
+                return;
+            }
+
+            list.innerHTML = allTasks.map(t => {
+                if(completed.includes(t.id)) {
+                    return `<div class="task-item" style="opacity:0.5;">
+                        <span>${t.name}<br><span style="font-size:10px;color:#888">Выполнено</span></span>
+                        <span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span>
+                    </div>`;
+                } else {
+                    return `<div class="task-item" id="utask-${t.id}">
+                        <span>${t.name}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
+                        <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button>
+                    </div>`;
+                }
+            }).join('');
+        }
+
+        function startTask(id, link) {
+            tg.openLink(link); // Открывает ссылку в Telegram
+            if(!clickedTasks.includes(id)) clickedTasks.push(id);
+            
+            // Меняем кнопку на "Проверить"
+            const taskDiv = document.getElementById(`utask-${id}`);
+            if(taskDiv) {
+                const t = JSON.parse(localStorage.getItem('m_tasks') || "[]").find(x => x.id === id);
+                taskDiv.innerHTML = `<span>${t.name}<br><span style="font-size:10px;color:orange">Ожидание проверки...</span></span>
+                <button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`;
+            }
+        }
+
+        function checkTask(id) {
+            if(!clickedTasks.includes(id)) return;
+            tg.showAlert("Идет проверка...");
+            // Симуляция проверки
+            setTimeout(() => { completeTaskAction(id); }, 1500);
+        }
+
+        function completeTaskAction(id) {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            const allTasks = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            const t = allTasks.find(x => x.id === id);
+            if(!t) return;
+
+            let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]");
+            if(completed.includes(id)) return;
+
+            // Выдача награды
+            if(uid !== OID) {
+                if(t.rType === 'shards') {
+                    let bal = parseInt(localStorage.getItem('m_shards_'+uid) || 0) + parseInt(t.rVal);
+                    localStorage.setItem('m_shards_'+uid, bal);
+                    document.getElementById('shards-balance').innerText = bal;
+                    document.getElementById('prof-shards').innerText = bal;
+                } else if(t.rType === 'sub7') {
+                    let currentSub = localStorage.getItem('m_sub_'+uid) || "FREE";
+                    let expTs = localStorage.getItem('m_sub_exp_'+uid);
+                    let expDate = expTs ? new Date(parseInt(expTs)) : new Date();
+                    
+                    if(currentSub === "FREE") {
+                        localStorage.setItem('m_sub_'+uid, "Premium");
+                        document.getElementById('prof-sub').innerText = "Premium";
+                        expDate = new Date(); // Стартуем от сегодня
+                    }
+                    expDate.setDate(expDate.getDate() + 7);
+                    localStorage.setItem('m_sub_exp_'+uid, expDate.getTime());
+                    document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU');
+                }
+            }
+
+            completed.push(id);
+            localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed));
+            tg.showAlert(`Задание "${t.name}" выполнено! Награда получена.`);
+            renderUserTasks(); // Обновляем список заданий
+        }
+        // --- КОНЕЦ ЛОГИКИ ЗАДАНИЙ ДЛЯ ЮЗЕРА ---
 
         function buyItem(type, item, currency, price) {
             const txt = type === 'sub' ? `подписку ${item}` : `${item} осколков`;
@@ -351,19 +416,16 @@
             const id = document.getElementById(t==='shards'?'ish-id':'isu-id').value;
             const v = document.getElementById(t==='shards'?'ish-val':'isu-type').value;
             if(!id) return tg.showAlert("Введите ID!");
-            
             if(t==='shards') {
                 let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
                 localStorage.setItem('m_shards_'+id, a==='add'? b+parseInt(v) : Math.max(0, b-parseInt(v)));
             } else {
                 if(a==='add') {
                     localStorage.setItem('m_sub_'+id, v);
-                    let exp = new Date();
-                    exp.setDate(exp.getDate() + 30);
+                    let exp = new Date(); exp.setDate(exp.getDate() + 30);
                     localStorage.setItem('m_sub_exp_'+id, exp.getTime());
                 } else {
-                    localStorage.removeItem('m_sub_'+id);
-                    localStorage.removeItem('m_sub_exp_'+id);
+                    localStorage.removeItem('m_sub_'+id); localStorage.removeItem('m_sub_exp_'+id);
                 }
             }
             tg.showAlert(a === 'add' ? "Успешно выдано!" : "Успешно удалено!");
@@ -394,8 +456,7 @@
             if(promos.find(p => p.code === code)) return tg.showAlert("Такой код уже есть");
             promos.push({code, rew});
             localStorage.setItem('m_all_promos', JSON.stringify(promos));
-            document.getElementById('ip-code').value = '';
-            document.getElementById('ip-rew').value = '';
+            document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = '';
             renderAdminPromos(); tg.showAlert("Создано!");
         }
         function renderAdminPromos() {
@@ -437,7 +498,7 @@
                 if(!isO) return tg.showAlert("Только Owner!");
                 t = t.filter(x => x.id !== tid);
             }
-            localStorage.setItem('m_tasks', JSON.stringify(t)); renderTasks();
+            localStorage.setItem('m_tasks', JSON.stringify(t)); renderTasks(); renderUserTasks();
         }
         function renderTasks() {
             const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
@@ -447,57 +508,16 @@
             `).join('');
         }
 
-        function updateLiveNick(v) { 
-            let nick = v || "User";
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            document.getElementById('u-name').innerText = nick; 
-            document.getElementById('prof-nick').innerText = nick; 
-            localStorage.setItem('m_nick_' + uid, nick);
-        }
-        function setGender(g, s=false) {
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            document.getElementById('g-m').classList.toggle('active', g === 'm');
-            document.getElementById('g-f').classList.toggle('active', g === 'f');
-            if(!s) localStorage.setItem('m_gender_' + uid, g);
-        }
-        function updateLen(v, s=false) { 
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            document.getElementById('len-val').innerText = v; 
-            if(!s) localStorage.setItem('m_len_' + uid, v);
-        }
-        function updateSex(v, s=false) {
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            const m = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"];
-            document.getElementById('sex-val').innerText = v;
-            
-            // Если ползунок заблокирован (для Free и Premium)
-            if(document.getElementById('sex-slider').max == 0) {
-                document.getElementById('sex-info').innerText = "Пошлость недоступна для вашей подписки";
-            } else {
-                document.getElementById('sex-info').innerText = "Уровень " + v + ": " + m[v];
-            }
-            
-            document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5";
-            if(!s) localStorage.setItem('m_sex_' + uid, v);
-        }
-        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); }
-        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
-        function previewImg(i) {
-            if (i.files && i.files[0]) {
-                const r = new FileReader();
-                r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; };
-                r.readAsDataURL(i.files[0]);
-            }
-        }
-        function modAdmin(a) {
-            const id = document.getElementById('ia-id').value; if(!id) return;
-            let ad = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            if(a==='add') { if(!ad.includes(id)) ad.push(id); } else ad = ad.filter(x => x !== id);
-            localStorage.setItem('m_admins', JSON.stringify(ad));
-            tg.showAlert("Обновлено");
-        }
-        function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
-        function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
+        function updateLiveNick(v) { let n=v||"User"; const uid=String(tg.initDataUnsafe?.user?.id||OID); document.getElementById('u-name').innerText=n; document.getElementById('prof-nick').innerText=n; localStorage.setItem('m_nick_'+uid, n); }
+        function setGender(g, s=false) { const uid=String(tg.initDataUnsafe?.user?.id||OID); document.getElementById('g-m').classList.toggle('active', g==='m'); document.getElementById('g-f').classList.toggle('active', g==='f'); if(!s) localStorage.setItem('m_gender_'+uid, g); }
+        function updateLen(v, s=false) { document.getElementById('len-val').innerText=v; if(!s) localStorage.setItem('m_len_'+String(tg.initDataUnsafe?.user?.id||OID), v); }
+        function updateSex(v, s=false) { const uid=String(tg.initDataUnsafe?.user?.id||OID); const m=["Нет пошлости","Слабая","Нормальная","Сильная","Высокая","V-Пошлая","HOT 🔥"]; document.getElementById('sex-val').innerText=v; if(document.getElementById('sex-slider').max == 0){document.getElementById('sex-info').innerText="Пошлость недоступна для вашей подписки";}else{document.getElementById('sex-info').innerText="Уровень "+v+": "+m[v];} document.getElementById('sex-val').style.color=(v==6)?"#ff00ff":"#bc42f5"; if(!s) localStorage.setItem('m_sex_'+uid, v); }
+        function troll() { trollCount++; tg.showAlert(trollCount===1?"Попался! 🤡":"Не трогай меня, мне неприятно! 🤨"); }
+        function updateCharCounter() { document.getElementById('char-limit').innerText=document.getElementById('ich-desc').value.length+"/2000"; }
+        function previewImg(i) { if(i.files&&i.files[0]){const r=new FileReader();r.onload=(e)=>{document.getElementById('char-preview').src=e.target.result;document.getElementById('char-preview').style.display='block';};r.readAsDataURL(i.files[0]);} }
+        function modAdmin(a) { const id=document.getElementById('ia-id').value; if(!id) return; let ad=JSON.parse(localStorage.getItem('m_admins')||"[]"); if(a==='add'){if(!ad.includes(id))ad.push(id);}else ad=ad.filter(x=>x!==id); localStorage.setItem('m_admins',JSON.stringify(ad)); tg.showAlert("Обновлено"); }
+        function openPanel(id) { stack.push(id); document.getElementById(id).style.display='flex'; }
+        function back() { if(stack.length>0) document.getElementById(stack.pop()).style.display='none'; }
         
         window.onload = init;
     </script>
