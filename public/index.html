@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон 1.0.2</title>
+    <title>Moon Project - Железобетон 1.0.2 (Char Upd)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -18,24 +18,27 @@
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* ГЛАВНОЕ МЕНЮ (8 базовых + 2 спец) */
+        /* ГЛАВНОЕ МЕНЮ */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* ОВЕРЛЕИ ПАНЕЛЕЙ */
+        /* ОВЕРЛЕИ */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
         
-        /* КОНСОЛЬНАЯ СЕТКА */
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
         
         #char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
+
+        /* СПЕЦИФИКА ПЕРСОНАЖА */
+        .char-desc { height: 120px; resize: none; -webkit-user-select: text; }
+        .char-counter { font-size: 10px; color: #bc42f5; text-align: right; margin-top: -8px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -116,10 +119,15 @@
         <h2>ПЕРСОНАЖ</h2>
         <div class="info-card" style="text-align: center;">
             <img id="char-preview" src="#">
-            <input type="text" class="term-in" placeholder="Имя">
+            <input type="text" id="ich-name" class="term-in" placeholder="Имя">
+            <input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18">
+            
+            <textarea id="ich-desc" class="term-in char-desc" placeholder="Описание персонажа..." maxlength="2000" oninput="updateCharCounter()"></textarea>
+            <div id="char-limit" class="char-counter">0/2000</div>
+
             <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
             <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ГАЛЕРЕЯ</div>
-            <div class="term-btn" style="border-color:#bc42f5">СОХРАНИТЬ</div>
+            <div class="term-btn" style="border-color:#bc42f5" onclick="tg.showAlert('Сохранено в базу')">СОХРАНИТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -162,19 +170,16 @@
             document.getElementById('u-name').innerText = u.first_name;
             document.getElementById('u-id').innerText = uid;
 
-            // Логика железобетонного доступа
             if(uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
-                // Показываем кнопки "Забрать" только тебе
                 document.getElementById('own-sh-rem').style.display = 'block';
                 document.getElementById('own-su-rem').style.display = 'block';
                 if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').style.display = 'block';
             } else {
                 document.getElementById('shards-balance').innerText = localStorage.getItem('m_shards_'+uid) || 0;
                 if(admins.includes(uid)) document.getElementById('nav-adm').style.display = 'flex';
-                // Удаляем кнопки удаления для всех остальных
                 if(document.getElementById('own-sh-rem')) document.getElementById('own-sh-rem').remove();
                 if(document.getElementById('own-su-rem')) document.getElementById('own-su-rem').remove();
                 if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').remove();
@@ -182,6 +187,11 @@
             renderTasks();
             updateProfile();
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
+        }
+
+        function updateCharCounter() {
+            const len = document.getElementById('ich-desc').value.length;
+            document.getElementById('char-limit').innerText = `${len}/2000`;
         }
 
         function previewImg(input) {
