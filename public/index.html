@@ -74,6 +74,99 @@
         </div>
         <div class="term-btn" onclick="back()">ВЫХОД</div>
     </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (Железобетон 1.0.2)
+        const OWNER_ID = "8287041036";
+        let user = {
+            id: tg.initDataUnsafe?.user?.id || "8287041036",
+            nick: tg.initDataUnsafe?.user?.first_name || "Admin_Moon",
+            shards: 1000,
+            sub: "None",
+            sub_end: "-",
+            status: "User",
+            streak: 1,
+            lastCheckIn: null
+        };
+
+        // Инициализация при старте
+        function init() {
+            // Проверка прав
+            if (String(user.id) === OWNER_ID) {
+                user.status = "Owner";
+                user.shards = Infinity;
+                user.sub = "Infinity Ultra";
+                document.getElementById('nav-adm').style.display = 'flex';
+                document.getElementById('nav-con').style.display = 'flex';
+            }
+
+            updateUI();
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+            }, 1500);
+        }
+
+        function updateUI() {
+            document.getElementById('u-name').innerText = user.nick;
+            document.getElementById('u-id-head').innerText = user.id;
+            document.getElementById('shards-balance').innerText = user.shards === Infinity ? "∞" : user.shards;
+            
+            // Обновление профиля (строго по списку)
+            document.getElementById('prof-nick').innerText = user.nick;
+            document.getElementById('prof-id').innerText = user.id;
+            document.getElementById('prof-sub').innerText = user.sub;
+            document.getElementById('prof-sub-end').innerText = user.sub_end;
+            document.getElementById('prof-shards').innerText = user.shards === Infinity ? "∞" : user.shards;
+            document.getElementById('prof-status').innerText = user.status;
+        }
+
+        function openPanel(id) {
+            document.querySelectorAll('.overlay').forEach(p => p.style.display = 'none');
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function back() {
+            document.querySelectorAll('.overlay').forEach(p => p.style.display = 'none');
+        }
+
+        // КОНСОЛЬНЫЕ ФУНКЦИИ (ТОЛЬКО ДЛЯ ID 8287041036)
+        function conGiveShards() {
+            const targetId = document.getElementById('con-target-id').value;
+            if (!targetId) return tg.showAlert("Введите ID");
+            tg.showConfirm(`Выдать бесконечные осколки пользователю ${targetId}?`, (ok) => {
+                if (ok) tg.showAlert("Осколки выданы успешно");
+            });
+        }
+
+        function conGiveSub() {
+            const targetId = document.getElementById('con-target-id').value;
+            if (!targetId) return tg.showAlert("Введите ID");
+            tg.showAlert(`Подписка выдана пользователю ${targetId} на неограниченный срок`);
+        }
+
+        // ЕЖЕДНЕВНЫЙ БОНУС (Система начислений)
+        function claimDaily() {
+            let reward = 0;
+            const subType = user.sub.toLowerCase();
+            
+            if (subType.includes("premium")) reward = 50;
+            else if (subType.includes("pro")) reward = 100;
+            else if (subType.includes("vip")) reward = 250;
+            else if (subType.includes("ultra")) reward = 500;
+            else reward = 10; // Базовый для обычных
+
+            if (user.streak >= 7) reward *= 2; // Бонус за серию 7 дней
+
+            user.shards += reward;
+            tg.showAlert(`Вы получили ${reward} 🌙! Серия: ${user.streak} дн.`);
+            updateUI();
+        }
+
+        init();
+    </script>
 
     </body>
 </html>
