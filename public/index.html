@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон FULL (Anti-Swipe & Save)</title>
+    <title>Moon Project - Железобетон 1.0.5 FULL FIXED</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
-        /* ПУЛЬСИРУЮЩАЯ ЛУНА */
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
         @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 30px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 60px #fff; } 100% { transform: scale(1); box-shadow: 0 0 30px #fff; } }
@@ -18,13 +17,11 @@
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* СЕТКА МЕНЮ */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* ОКНА И ФОРМЫ */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
@@ -33,12 +30,10 @@
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 20px; }
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
 
-        /* ПРОФИЛЬ */
         .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a0b2e; font-size: 14px; }
         .p-label { color: #888; }
         .p-val { color: #fff; font-weight: bold; }
 
-        /* НАСТРОЙКИ */
         .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .slider-wrap { width: 100%; margin-top: 5px; }
         .slider { width: 100%; -webkit-appearance: none; height: 4px; background: #2d164d; border-radius: 2px; outline: none; }
@@ -48,7 +43,6 @@
         .gender-btn { flex: 1; padding: 10px; border: 1px solid #2d164d; border-radius: 8px; text-align: center; font-size: 12px; color: #555; }
         .gender-btn.active { border-color: #bc42f5; color: #bc42f5; background: rgba(188, 66, 245, 0.1); }
 
-        /* ПЕРСОНАЖИ И ЗАДАНИЯ */
         #char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
         .char-counter { font-size: 10px; color: #bc42f5; text-align: right; margin-top: -8px; margin-bottom: 10px; }
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
@@ -69,12 +63,22 @@
             <div class="menu-item" onclick="tg.showAlert('Ежедневка в разработке')">Ежедневка</div>
             <div class="menu-item" onclick="tg.showAlert('Задания в разработке')">Задания</div>
             <div class="menu-item" onclick="tg.showAlert('Магазин в разработке')">Магазин</div>
-            <div class="menu-item" onclick="tg.showAlert('Промокоды в разработке')">Промокоды</div>
+            <div class="menu-item" onclick="openPanel('p-user-promos')">Промокоды</div>
             <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
             <div class="menu-item" onclick="openPanel('p-settings')">Настройка</div>
             <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
+    </div>
+
+    <div id="p-user-promos" class="overlay">
+        <h2 style="color:#bc42f5">ПРОМОКОД</h2>
+        <div class="info-card">
+            <span class="s-label">Введите секретный код</span>
+            <input type="text" id="user-promo-input" class="term-in" placeholder="Напр: MOON2026">
+            <div class="term-btn" style="border-color:#bc42f5" onclick="usePromo()">АКТИВИРОВАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-profile" class="overlay">
@@ -95,28 +99,20 @@
         <div class="info-card">
             <span class="s-label">Ник в приложении</span>
             <input type="text" id="set-nick" class="term-in" placeholder="Новый ник..." oninput="updateLiveNick(this.value)">
-            
             <span class="s-label">Ваш пол</span>
             <div class="gender-box">
                 <div class="gender-btn active" id="g-m" onclick="setGender('m')">Мужчина</div>
                 <div class="gender-btn" id="g-f" onclick="setGender('f')">Женщина</div>
             </div>
-            
             <div class="term-btn" style="background:#000; border-color:#333; color:#444; font-size:9px;" onclick="troll()">СМЕНИТЬ ЯЗЫК (В РАЗРАБОТКЕ)</div>
         </div>
         <div class="info-card">
             <span class="s-label">Длина сообщений <span class="slider-val" id="len-val">45</span></span>
-            <div class="slider-wrap">
-                <input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)">
-                <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div>
-            </div>
+            <div class="slider-wrap"><input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)"></div>
         </div>
         <div class="info-card">
             <span class="s-label">Пошлость персонажей <span class="slider-val" id="sex-val">0</span></span>
-            <div class="slider-wrap">
-                <input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)">
-                <div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div>
-            </div>
+            <div class="slider-wrap"><input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)"></div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -127,10 +123,10 @@
             <div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div>
             <div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div>
             <div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div>
-            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ (STARS/TON)</div>
+            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div>
             <div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div>
             <div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div>
-            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</div>
+            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">ЗАДАНИЯ</div>
         </div>
         <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
     </div>
@@ -171,6 +167,23 @@
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
+    <div id="p-m-prices" class="overlay">
+        <h2 style="color:#e91e63">УПРАВЛЕНИЕ ЦЕНАМИ</h2>
+        <div class="info-card">
+            <h4 style="margin:0 0 10px 0; color:#00bcd4">ОСКОЛКИ</h4>
+            <input type="number" id="pr-sh-stars" class="term-in" placeholder="Цена Stars">
+            <input type="number" id="pr-sh-ton" class="term-in" placeholder="Цена TON">
+            <div class="term-btn" style="border-color:#00ff00" onclick="savePrices('shards')">СОХРАНИТЬ ЦЕНУ ОСКОЛКОВ</div>
+        </div>
+        <div class="info-card">
+            <h4 style="margin:0 0 10px 0; color:#bc42f5">ПОДПИСКИ (30д)</h4>
+            <input type="number" id="pr-sub-stars" class="term-in" placeholder="Цена Stars">
+            <input type="number" id="pr-sub-ton" class="term-in" placeholder="Цена TON">
+            <div class="term-btn" style="border-color:#00ff00" onclick="savePrices('subs')">СОХРАНИТЬ ЦЕНУ ПОДПИСОК</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
     <div id="p-m-char" class="overlay">
         <h2>ПЕРСОНАЖ</h2>
         <div class="info-card" style="text-align: center;">
@@ -180,25 +193,41 @@
             <textarea id="ich-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание персонажа..." maxlength="2000" oninput="updateCharCounter()"></textarea>
             <div id="char-limit" class="char-counter">0/2000</div>
             <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
-            <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ГАЛЕРЕЯ</div>
-            <div class="term-btn" style="border-color:#bc42f5" onclick="tg.showAlert('Сохранено в базу')">СОХРАНИТЬ В БАЗУ</div>
+            <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
+            <div class="term-btn" style="border-color:#bc42f5" onclick="saveCharDB()">В БАЗУ</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-m-prices" class="overlay">
-        <h2>ЦЕНЫ</h2>
+    <div id="p-m-tasks" class="overlay">
+        <h2>ЗАДАНИЯ</h2>
         <div class="info-card">
-            <p style="font-size:10px; color:gray">Цена за 100 осколков</p>
-            <input type="number" class="term-in" placeholder="Stars">
-            <input type="number" class="term-in" placeholder="TON">
-            <div class="term-btn" style="border-color:#00ff00" onclick="tg.showAlert('Цены обновлены')">ОБНОВИТЬ</div>
+            <input type="text" id="it-name" class="term-in" placeholder="Название задания">
+            <input type="text" id="it-link" class="term-in" placeholder="Ссылка (https://...)">
+            <select id="it-rtype" class="term-in" onchange="toggleTaskInput()">
+                <option value="shards">Награда: Осколки</option>
+                <option value="sub7">Награда: Подписка (7 дней)</option>
+            </select>
+            <input type="number" id="it-rew" class="term-in" placeholder="Кол-во осколков">
+            <div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ ЗАДАНИЕ</div>
         </div>
+        <div id="task-list" style="width:100%"></div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-m-promos" class="overlay">
+        <h2>ПРОМОКОДЫ</h2>
+        <div class="info-card">
+            <input type="text" id="ip-code" class="term-in" placeholder="КОД">
+            <input type="number" id="ip-rew" class="term-in" placeholder="НАГРАДА">
+            <div class="term-btn" onclick="createPromo()">СОЗДАТЬ ПРОМО</div>
+        </div>
+        <div id="promo-list" style="width:100%"></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-admins" class="overlay">
-        <h2>УПРАВЛЕНИЕ АДМИНАМИ</h2>
+        <h2>АДМИНЫ</h2>
         <div class="info-card">
             <input type="number" id="ia-id" class="term-in" placeholder="TG ID">
             <div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div>
@@ -207,38 +236,14 @@
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-m-promos" class="overlay">
-        <h2>ПРОМОКОДЫ</h2>
-        <div class="info-card">
-            <input type="text" class="term-in" placeholder="КОД">
-            <input type="number" class="term-in" placeholder="ОСКОЛКИ">
-            <div class="term-btn" onclick="tg.showAlert('Промокод создан')">СОЗДАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-m-tasks" class="overlay">
-        <h2>ЗАДАНИЯ</h2>
-        <div class="info-card">
-            <input type="text" id="it-name" class="term-in" placeholder="Название">
-            <input type="text" id="it-link" class="term-in" placeholder="Ссылка">
-            <input type="number" id="it-rew" class="term-in" placeholder="Награда">
-            <div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ</div>
-        </div>
-        <div id="task-list" style="width:100%"></div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
     <script>
         const tg = window.Telegram.WebApp;
         
-        // --- ЗАЩИТА ОТ СЛУЧАЙНОГО ЗАКРЫТИЯ И СВАЙПОВ ---
+        // ЗАЩИТА
         tg.expand();
-        tg.enableClosingConfirmation(); // Вызывает окно "Вы уверены, что хотите закрыть?"
-        if (tg.disableVerticalSwipes) {
-            tg.disableVerticalSwipes(); // Блокирует закрытие свайпом вниз
-        }
-        
+        tg.enableClosingConfirmation();
+        if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+
         const OID = "8287041036";
         let stack = [], trollCount = 0;
 
@@ -247,78 +252,163 @@
             const uid = String(u.id);
             const admins = JSON.parse(localStorage.getItem('m_admins') || "[]");
 
-            // Инициализация интерфейса с учетом сохраненных настроек
             document.getElementById('u-id-head').innerText = uid;
             document.getElementById('prof-id').innerText = uid;
 
-            // Загрузка сохраненного ника (если нет - берем из ТГ)
             const savedNick = localStorage.getItem('m_nick_' + uid) || u.first_name;
             document.getElementById('u-name').innerText = savedNick;
             document.getElementById('prof-nick').innerText = savedNick;
             document.getElementById('set-nick').value = savedNick;
 
-            // Загрузка сохраненного пола
-            const savedGender = localStorage.getItem('m_gender_' + uid) || 'm';
-            setGender(savedGender, true);
+            setGender(localStorage.getItem('m_gender_' + uid) || 'm', true);
 
-            const lS = document.getElementById('len-slider');
-            const sS = document.getElementById('sex-slider');
+            const lS = document.getElementById('len-slider'), sS = document.getElementById('sex-slider');
 
             if(uid === OID) {
-                // ПРАВА ОВНЕРА
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('prof-shards').innerText = "∞";
                 document.getElementById('prof-sub').innerText = "ULTRA";
-                document.getElementById('prof-exp').innerText = "Без ограничений";
                 document.getElementById('prof-status').innerText = "Овнер";
-                
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
-                
-                if(document.getElementById('own-sh-rem')) document.getElementById('own-sh-rem').style.display = 'block';
-                if(document.getElementById('own-su-rem')) document.getElementById('own-su-rem').style.display = 'block';
-                if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').style.display = 'block';
-                
-                lS.max = 100; 
-                sS.max = 6;
-                document.getElementById('len-info').innerText = "Твой лимит (Ultra): 100 слов";
+                document.getElementById('own-sh-rem').style.display = 'block';
+                document.getElementById('own-su-rem').style.display = 'block';
+                document.getElementById('own-adm-rem').style.display = 'block';
+                lS.max = 100; sS.max = 6;
             } else {
-                // ПРАВА ЮЗЕРА/АДМИНА
-                let userShards = localStorage.getItem('m_shards_'+uid) || 0;
-                document.getElementById('shards-balance').innerText = userShards;
-                document.getElementById('prof-shards').innerText = userShards;
-                
-                let userSub = localStorage.getItem('m_sub_'+uid) || "FREE";
-                document.getElementById('prof-sub').innerText = userSub;
-                document.getElementById('prof-exp').innerText = userSub === "FREE" ? "-" : "30 дней";
-
+                let bal = localStorage.getItem('m_shards_'+uid) || 0;
+                document.getElementById('shards-balance').innerText = bal;
+                document.getElementById('prof-shards').innerText = bal;
+                let sub = localStorage.getItem('m_sub_'+uid) || "FREE";
+                document.getElementById('prof-sub').innerText = sub;
                 if(admins.includes(uid)) {
                     document.getElementById('prof-status').innerText = "Админ";
                     document.getElementById('nav-adm').style.display = 'flex';
-                } else {
-                    document.getElementById('prof-status').innerText = "Юзер";
                 }
-
-                // ЖЕЛЕЗОБЕТОННОЕ УДАЛЕНИЕ КНОПОК
-                if(document.getElementById('own-sh-rem')) document.getElementById('own-sh-rem').remove();
-                if(document.getElementById('own-su-rem')) document.getElementById('own-su-rem').remove();
-                if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').remove();
+                document.getElementById('own-sh-rem').remove();
+                document.getElementById('own-su-rem').remove();
+                document.getElementById('own-adm-rem').remove();
             }
 
-            // Загрузка ползунков после установки лимитов
-            const savedLen = localStorage.getItem('m_len_' + uid) || 45;
-            lS.value = savedLen;
-            updateLen(savedLen, true);
-
-            const savedSex = localStorage.getItem('m_sex_' + uid) || 0;
-            sS.value = savedSex;
-            updateSex(savedSex, true);
-
+            updateLen(localStorage.getItem('m_len_' + uid) || 45, true);
+            updateSex(localStorage.getItem('m_sex_' + uid) || 0, true);
             renderTasks();
+            renderAdminPromos();
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
         }
 
-        // ЛОГИКА НАСТРОЕК (С СОХРАНЕНИЕМ)
+        // ВОССТАНОВЛЕННАЯ ЛОГИКА ЦЕН
+        function savePrices(type) {
+            const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-';
+            const stars = document.getElementById(prefix + 'stars').value;
+            const ton = document.getElementById(prefix + 'ton').value;
+            localStorage.setItem('price_' + type + '_stars', stars);
+            localStorage.setItem('price_' + type + '_ton', ton);
+            tg.showAlert("Цены успешно сохранены!");
+        }
+
+        // ВОССТАНОВЛЕННАЯ ЛОГИКА ПЕРСОНАЖЕЙ
+        function saveCharDB() {
+            const n = document.getElementById('ich-name').value;
+            const age = document.getElementById('ich-age').value;
+            const desc = document.getElementById('ich-desc').value;
+            const img = document.getElementById('char-preview').src;
+            
+            if(!n || img.includes('#')) return tg.showAlert("Введите имя и выберите фото!");
+            
+            let db = JSON.parse(localStorage.getItem('m_characters') || "[]");
+            db.push({ id: Date.now(), name: n, age: age, desc: desc, photo: img });
+            localStorage.setItem('m_characters', JSON.stringify(db));
+            tg.showAlert("Персонаж добавлен в базу!");
+        }
+
+        // ВОССТАНОВЛЕННАЯ ЛОГИКА ЗАДАЧ (С ВЫПАДАЮЩИМ СПИСКОМ SUB7/SHARDS)
+        function toggleTaskInput() {
+            document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none';
+        }
+        function modTask(act, tid=null) {
+            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
+            let t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            if(act==='add') {
+                const n = document.getElementById('it-name').value;
+                const link = document.getElementById('it-link').value;
+                const rType = document.getElementById('it-rtype').value;
+                const rVal = document.getElementById('it-rew').value;
+                if(!n || !link) return tg.showAlert("Заполните название и ссылку!");
+                
+                t.push({ id: Date.now(), name: n, link: link, rType: rType, rVal: rType === 'sub7' ? 7 : rVal });
+            } else if(act==='rem') {
+                if(!isO) return tg.showAlert("Только Owner может удалять!");
+                t = t.filter(x => x.id !== tid);
+            }
+            localStorage.setItem('m_tasks', JSON.stringify(t));
+            renderTasks();
+        }
+        function renderTasks() {
+            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
+            const t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
+            document.getElementById('task-list').innerHTML = t.map(x => `
+                <div class="task-item">
+                    <span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>
+                    ${isO ? `<button onclick="modTask('rem',${x.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">X</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // ПРОМОКОДЫ
+        function createPromo() {
+            const code = document.getElementById('ip-code').value.toUpperCase().trim();
+            const rew = parseInt(document.getElementById('ip-rew').value);
+            if(!code || !rew) return;
+            let promos = JSON.parse(localStorage.getItem('m_all_promos') || "[]");
+            if(promos.find(p => p.code === code)) return tg.showAlert("Такой код уже есть");
+            promos.push({code, rew});
+            localStorage.setItem('m_all_promos', JSON.stringify(promos));
+            document.getElementById('ip-code').value = '';
+            document.getElementById('ip-rew').value = '';
+            renderAdminPromos();
+            tg.showAlert("Промокод создан!");
+        }
+        function renderAdminPromos() {
+            const promos = JSON.parse(localStorage.getItem('m_all_promos') || "[]");
+            document.getElementById('promo-list').innerHTML = promos.map(p => `
+                <div class="task-item">
+                    <span>${p.code} (+${p.rew})</span>
+                    <button onclick="delPromo('${p.code}')" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">X</button>
+                </div>
+            `).join('');
+        }
+        function delPromo(code) {
+            let promos = JSON.parse(localStorage.getItem('m_all_promos') || "[]");
+            promos = promos.filter(p => p.code !== code);
+            localStorage.setItem('m_all_promos', JSON.stringify(promos));
+            renderAdminPromos();
+        }
+        function usePromo() {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            const input = document.getElementById('user-promo-input').value.toUpperCase().trim();
+            const promos = JSON.parse(localStorage.getItem('m_all_promos') || "[]");
+            const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]");
+            
+            const found = promos.find(p => p.code === input);
+            if(!found) return tg.showAlert("Ошибка: Промокод не верен");
+            if(used.includes(input)) return tg.showAlert("Вы уже активировали этот код");
+
+            if(uid !== OID) {
+                let bal = parseInt(localStorage.getItem('m_shards_'+uid) || 0);
+                bal += found.rew;
+                localStorage.setItem('m_shards_'+uid, bal);
+                document.getElementById('shards-balance').innerText = bal;
+                document.getElementById('prof-shards').innerText = bal;
+            }
+            
+            used.push(input);
+            localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
+            document.getElementById('user-promo-input').value = '';
+            tg.showAlert(`Успех! Получено ${found.rew} осколков!`);
+        }
+
+        // ОСТАЛЬНЫЕ УТИЛИТЫ
         function updateLiveNick(v) { 
             let nick = v || "User";
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
@@ -326,103 +416,57 @@
             document.getElementById('prof-nick').innerText = nick; 
             localStorage.setItem('m_nick_' + uid, nick);
         }
-
-        function setGender(g, skipSave = false) {
+        function setGender(g, s=false) {
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             document.getElementById('g-m').classList.toggle('active', g === 'm');
             document.getElementById('g-f').classList.toggle('active', g === 'f');
-            if(!skipSave) localStorage.setItem('m_gender_' + uid, g);
+            if(!s) localStorage.setItem('m_gender_' + uid, g);
         }
-
-        function updateLen(v, skipSave = false) { 
+        function updateLen(v, s=false) { 
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             document.getElementById('len-val').innerText = v; 
-            if(!skipSave) localStorage.setItem('m_len_' + uid, v);
+            if(!s) localStorage.setItem('m_len_' + uid, v);
         }
-
-        function updateSex(v, skipSave = false) {
+        function updateSex(v, s=false) {
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             const m = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "Очень высокая", "СУПЕР ПОШЛОСТЬ 🔥"];
             document.getElementById('sex-val').innerText = v;
             document.getElementById('sex-info').innerText = "Уровень " + v + ": " + m[v];
             document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5";
-            if(!skipSave) localStorage.setItem('m_sex_' + uid, v);
+            if(!s) localStorage.setItem('m_sex_' + uid, v);
         }
-
-        function troll() {
-            trollCount++;
-            tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨");
-        }
-
-        // ЛОГИКА ПЕРСОНАЖА
-        function updateCharCounter() {
-            const len = document.getElementById('ich-desc').value.length;
-            document.getElementById('char-limit').innerText = `${len}/2000`;
-        }
-        function previewImg(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const p = document.getElementById('char-preview');
-                    p.src = e.target.result;
-                    p.style.display = 'block';
-                };
-                reader.readAsDataURL(input.files[0]);
+        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); }
+        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
+        function previewImg(i) {
+            if (i.files && i.files[0]) {
+                const r = new FileReader();
+                r.onload = (e) => { document.getElementById('char-preview').src = e.target.result; document.getElementById('char-preview').style.display = 'block'; };
+                r.readAsDataURL(i.files[0]);
             }
         }
-
-        // БАЗОВЫЕ ФУНКЦИИ КОНСОЛИ
-        function modFunds(type, act) {
-            const id = document.getElementById(type==='shards'?'ish-id':'isu-id').value;
-            const val = document.getElementById(type==='shards'?'ish-val':'isu-type').value;
+        function modFunds(t, a) {
+            const id = document.getElementById(t==='shards'?'ish-id':'isu-id').value;
+            const v = document.getElementById(t==='shards'?'ish-val':'isu-type').value;
             if(!id) return;
-            if(type==='shards') {
+            if(t==='shards') {
                 let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
-                localStorage.setItem('m_shards_'+id, act==='add'? b+parseInt(val) : Math.max(0, b-parseInt(val)));
+                localStorage.setItem('m_shards_'+id, a==='add'? b+parseInt(v) : Math.max(0, b-parseInt(v)));
             } else {
-                if(act==='add') localStorage.setItem('m_sub_'+id, val);
+                if(a==='add') localStorage.setItem('m_sub_'+id, v);
                 else localStorage.removeItem('m_sub_'+id);
             }
-            tg.showAlert("Готово");
+            tg.showAlert("Выполнено");
         }
-
-        function modAdmin(act) {
-            const id = document.getElementById('ia-id').value;
-            if(!id) return;
-            let a = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            if(act==='add') { if(!a.includes(id)) a.push(id); }
-            else a = a.filter(x => x !== id);
-            localStorage.setItem('m_admins', JSON.stringify(a));
+        function modAdmin(a) {
+            const id = document.getElementById('ia-id').value; if(!id) return;
+            let ad = JSON.parse(localStorage.getItem('m_admins') || "[]");
+            if(a==='add') { if(!ad.includes(id)) ad.push(id); } else ad = ad.filter(x => x !== id);
+            localStorage.setItem('m_admins', JSON.stringify(ad));
             tg.showAlert("Обновлено");
         }
-
-        function modTask(act, tid=null) {
-            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
-            let t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
-            if(act==='add') {
-                const n = document.getElementById('it-name').value;
-                if(n) t.push({id:Date.now(), name:n, rew:document.getElementById('it-rew').value});
-            } else if(act==='rem' && isO) {
-                t = t.filter(x => x.id !== tid);
-            }
-            localStorage.setItem('m_tasks', JSON.stringify(t));
-            renderTasks();
-        }
-
-        function renderTasks() {
-            const isO = String(tg.initDataUnsafe?.user?.id || OID) === OID;
-            const t = JSON.parse(localStorage.getItem('m_tasks') || "[]");
-            document.getElementById('task-list').innerHTML = t.map(x => `
-                <div class="task-item">
-                    <span>${x.name} (${x.rew} 🌙)</span>
-                    ${isO ? `<button onclick="modTask('rem',${x.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:5px;">УДАЛИТЬ</button>` : ''}
-                </div>
-            `).join('');
-        }
-
         function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
         function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
-
+        
         window.onload = init;
     </script>
 </body>
