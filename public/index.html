@@ -137,11 +137,17 @@
         </div>
         <div class="info-card">
             <span class="s-label">Длина сообщений <span class="slider-val" id="len-val">45</span></span>
-            <div class="slider-wrap"><input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div></div>
+            <div class="slider-wrap">
+                <input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)">
+                <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div>
+            </div>
         </div>
         <div class="info-card">
             <span class="s-label">Пошлость персонажей <span class="slider-val" id="sex-val">0</span></span>
-            <div class="slider-wrap"><input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div></div>
+            <div class="slider-wrap">
+                <input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)">
+                <div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div>
+            </div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -253,9 +259,13 @@
 
             setGender(localStorage.getItem('m_gender_' + uid) || 'm', true);
 
-            const lS = document.getElementById('len-slider'), sS = document.getElementById('sex-slider');
+            const lS = document.getElementById('len-slider');
+            const sS = document.getElementById('sex-slider');
+
+            let userSub = "FREE";
 
             if(uid === OID) {
+                userSub = "ULTRA";
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('prof-shards').innerText = "∞";
                 document.getElementById('prof-sub').innerText = "ULTRA";
@@ -267,18 +277,15 @@
                 document.getElementById('own-sh-rem').style.display = 'block';
                 document.getElementById('own-su-rem').style.display = 'block';
                 document.getElementById('own-adm-rem').style.display = 'block';
-                lS.max = 100; sS.max = 6;
-                document.getElementById('len-info').innerText = "Твой лимит (Ultra): 100 слов";
             } else {
                 let bal = localStorage.getItem('m_shards_'+uid) || 0;
                 document.getElementById('shards-balance').innerText = bal;
                 document.getElementById('prof-shards').innerText = bal;
                 
-                let sub = localStorage.getItem('m_sub_'+uid) || "FREE";
-                document.getElementById('prof-sub').innerText = sub;
+                userSub = localStorage.getItem('m_sub_'+uid) || "FREE";
+                document.getElementById('prof-sub').innerText = userSub;
                 
-                // РЕАЛЬНЫЙ РАСЧЕТ ДАТЫ ПОДПИСКИ ДЛЯ ЮЗЕРА
-                if(sub !== "FREE") {
+                if(userSub !== "FREE") {
                     let expTs = localStorage.getItem('m_sub_exp_'+uid);
                     if(expTs) {
                         let expDate = new Date(parseInt(expTs));
@@ -297,13 +304,36 @@
                     document.getElementById('prof-status').innerText = "Юзер";
                 }
 
-                document.getElementById('own-sh-rem').remove();
-                document.getElementById('own-su-rem').remove();
-                document.getElementById('own-adm-rem').remove();
+                if(document.getElementById('own-sh-rem')) document.getElementById('own-sh-rem').remove();
+                if(document.getElementById('own-su-rem')) document.getElementById('own-su-rem').remove();
+                if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').remove();
             }
 
-            updateLen(localStorage.getItem('m_len_' + uid) || 45, true);
-            updateSex(localStorage.getItem('m_sex_' + uid) || 0, true);
+            // ДИНАМИЧЕСКИЕ ЛИМИТЫ ПОЛЗУНКОВ ПОДПИСКИ
+            let maxLen = 45;
+            let maxSex = 0; // Для FREE и Premium пошлость заблокирована на 0
+
+            if(userSub === "Premium") { maxLen = 55; }
+            else if(userSub === "Pro") { maxLen = 65; maxSex = 3; }
+            else if(userSub === "VIP") { maxLen = 80; maxSex = 5; }
+            else if(userSub === "ULTRA" || userSub === "Ultra") { maxLen = 100; maxSex = 6; }
+
+            lS.max = maxLen;
+            sS.max = maxSex;
+
+            document.getElementById('len-info').innerText = `Твой лимит (${userSub}): ${maxLen} слов`;
+            document.getElementById('sex-info').innerText = maxSex === 0 ? "Пошлость недоступна для вашей подписки" : `Доступно уровней: ${maxSex}`;
+
+            // Загружаем сохраненные значения (или сбрасываем, если они превышают новый лимит)
+            let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 45);
+            if(savedLen > maxLen) savedLen = maxLen;
+            lS.value = savedLen;
+            updateLen(savedLen, true);
+
+            let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
+            if(savedSex > maxSex) savedSex = maxSex;
+            sS.value = savedSex;
+            updateSex(savedSex, true);
             
             renderTasks();
             renderAdminPromos();
@@ -317,7 +347,6 @@
             tg.showAlert(`Генерация счета на ${txt} за ${price} ${cur}...`);
         }
 
-        // ИСПРАВЛЕННАЯ ЛОГИКА ВЫДАЧИ ПОДПИСОК (С ДАТОЙ ОКОНЧАНИЯ)
         function modFunds(t, a) {
             const id = document.getElementById(t==='shards'?'ish-id':'isu-id').value;
             const v = document.getElementById(t==='shards'?'ish-val':'isu-type').value;
@@ -329,7 +358,6 @@
             } else {
                 if(a==='add') {
                     localStorage.setItem('m_sub_'+id, v);
-                    // Генерируем дату окончания: +30 дней от текущего момента
                     let exp = new Date();
                     exp.setDate(exp.getDate() + 30);
                     localStorage.setItem('m_sub_exp_'+id, exp.getTime());
@@ -366,6 +394,8 @@
             if(promos.find(p => p.code === code)) return tg.showAlert("Такой код уже есть");
             promos.push({code, rew});
             localStorage.setItem('m_all_promos', JSON.stringify(promos));
+            document.getElementById('ip-code').value = '';
+            document.getElementById('ip-rew').value = '';
             renderAdminPromos(); tg.showAlert("Создано!");
         }
         function renderAdminPromos() {
@@ -417,16 +447,57 @@
             `).join('');
         }
 
-        function updateLiveNick(v) { let n=v||"User"; const uid=String(tg.initDataUnsafe?.user?.id||OID); document.getElementById('u-name').innerText=n; document.getElementById('prof-nick').innerText=n; localStorage.setItem('m_nick_'+uid, n); }
-        function setGender(g, s=false) { const uid=String(tg.initDataUnsafe?.user?.id||OID); document.getElementById('g-m').classList.toggle('active', g==='m'); document.getElementById('g-f').classList.toggle('active', g==='f'); if(!s) localStorage.setItem('m_gender_'+uid, g); }
-        function updateLen(v, s=false) { document.getElementById('len-val').innerText=v; if(!s) localStorage.setItem('m_len_'+String(tg.initDataUnsafe?.user?.id||OID), v); }
-        function updateSex(v, s=false) { const m=["Нет","Слабая","Норм","Сильная","Высокая","V-Пошлая","HOT 🔥"]; document.getElementById('sex-val').innerText=v; document.getElementById('sex-info').innerText="Уровень "+v+": "+m[v]; document.getElementById('sex-val').style.color=(v==6)?"#ff00ff":"#bc42f5"; if(!s) localStorage.setItem('m_sex_'+String(tg.initDataUnsafe?.user?.id||OID), v); }
-        function troll() { trollCount++; tg.showAlert(trollCount===1?"Попался! 🤡":"Не трогай! 🤨"); }
-        function updateCharCounter() { document.getElementById('char-limit').innerText=document.getElementById('ich-desc').value.length+"/2000"; }
-        function previewImg(i) { if(i.files&&i.files[0]){const r=new FileReader();r.onload=(e)=>{document.getElementById('char-preview').src=e.target.result;document.getElementById('char-preview').style.display='block';};r.readAsDataURL(i.files[0]);} }
-        function modAdmin(a) { const id=document.getElementById('ia-id').value; if(!id) return; let ad=JSON.parse(localStorage.getItem('m_admins')||"[]"); if(a==='add'){if(!ad.includes(id))ad.push(id);}else ad=ad.filter(x=>x!==id); localStorage.setItem('m_admins',JSON.stringify(ad)); tg.showAlert("Обновлено"); }
-        function openPanel(id) { stack.push(id); document.getElementById(id).style.display='flex'; }
-        function back() { if(stack.length>0) document.getElementById(stack.pop()).style.display='none'; }
+        function updateLiveNick(v) { 
+            let nick = v || "User";
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            document.getElementById('u-name').innerText = nick; 
+            document.getElementById('prof-nick').innerText = nick; 
+            localStorage.setItem('m_nick_' + uid, nick);
+        }
+        function setGender(g, s=false) {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            document.getElementById('g-m').classList.toggle('active', g === 'm');
+            document.getElementById('g-f').classList.toggle('active', g === 'f');
+            if(!s) localStorage.setItem('m_gender_' + uid, g);
+        }
+        function updateLen(v, s=false) { 
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            document.getElementById('len-val').innerText = v; 
+            if(!s) localStorage.setItem('m_len_' + uid, v);
+        }
+        function updateSex(v, s=false) {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            const m = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"];
+            document.getElementById('sex-val').innerText = v;
+            
+            // Если ползунок заблокирован (для Free и Premium)
+            if(document.getElementById('sex-slider').max == 0) {
+                document.getElementById('sex-info').innerText = "Пошлость недоступна для вашей подписки";
+            } else {
+                document.getElementById('sex-info').innerText = "Уровень " + v + ": " + m[v];
+            }
+            
+            document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5";
+            if(!s) localStorage.setItem('m_sex_' + uid, v);
+        }
+        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); }
+        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
+        function previewImg(i) {
+            if (i.files && i.files[0]) {
+                const r = new FileReader();
+                r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; };
+                r.readAsDataURL(i.files[0]);
+            }
+        }
+        function modAdmin(a) {
+            const id = document.getElementById('ia-id').value; if(!id) return;
+            let ad = JSON.parse(localStorage.getItem('m_admins') || "[]");
+            if(a==='add') { if(!ad.includes(id)) ad.push(id); } else ad = ad.filter(x => x !== id);
+            localStorage.setItem('m_admins', JSON.stringify(ad));
+            tg.showAlert("Обновлено");
+        }
+        function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
+        function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
         
         window.onload = init;
     </script>
