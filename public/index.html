@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон 1.0.5 FULL FIXED</title>
+    <title>Moon Project - Железобетон 1.0.6 (SHOP)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -46,6 +46,15 @@
         #char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
         .char-counter { font-size: 10px; color: #bc42f5; text-align: right; margin-top: -8px; margin-bottom: 10px; }
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
+
+        /* СТИЛИ МАГАЗИНА */
+        .shop-item { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; }
+        .shop-title { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 5px; }
+        .shop-desc { font-size: 12px; color: #888; margin-bottom: 15px; text-align: center; }
+        .buy-btns { display: flex; gap: 10px; width: 100%; }
+        .btn-stars { flex: 1; background: rgba(255, 215, 0, 0.1); border: 1px solid gold; color: gold; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-ton { flex: 1; background: rgba(0, 136, 204, 0.1); border: 1px solid #0088cc; color: #0088cc; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .shop-header { color: #e91e63; font-size: 14px; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; width: 100%; text-align: left; border-bottom: 1px solid #2d164d; padding-bottom: 5px;}
     </style>
 </head>
 <body>
@@ -62,13 +71,103 @@
             <div class="menu-item" onclick="tg.showAlert('Персонажи в разработке')">Персонажи</div>
             <div class="menu-item" onclick="tg.showAlert('Ежедневка в разработке')">Ежедневка</div>
             <div class="menu-item" onclick="tg.showAlert('Задания в разработке')">Задания</div>
-            <div class="menu-item" onclick="tg.showAlert('Магазин в разработке')">Магазин</div>
+            <div class="menu-item" onclick="openPanel('p-shop')">Магазин</div>
             <div class="menu-item" onclick="openPanel('p-user-promos')">Промокоды</div>
             <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
             <div class="menu-item" onclick="openPanel('p-settings')">Настройка</div>
             <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
+    </div>
+
+    <div id="p-shop" class="overlay">
+        <h2 style="color:#00bcd4; margin-bottom: 5px;">МАГАЗИН</h2>
+        <div style="font-size: 11px; color: #888; margin-bottom: 20px;">Оплата через Telegram Stars или CryptoBot (TON)</div>
+
+        <div class="shop-header">ПОДПИСКИ (30 ДНЕЙ)</div>
+        
+        <div class="shop-item">
+            <div class="shop-title" style="color: #a8b8c8;">PREMIUM</div>
+            <div class="shop-desc">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div>
+                <div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div>
+            </div>
+        </div>
+
+        <div class="shop-item">
+            <div class="shop-title" style="color: #ffd700;">PRO</div>
+            <div class="shop-desc">100 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div>
+                <div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div>
+            </div>
+        </div>
+
+        <div class="shop-item">
+            <div class="shop-title" style="color: #ff00ff;">VIP</div>
+            <div class="shop-desc">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div>
+                <div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div>
+            </div>
+        </div>
+
+        <div class="shop-item">
+            <div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div>
+            <div class="shop-desc">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div>
+                <div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div>
+            </div>
+        </div>
+
+        <div class="shop-header">ОСКОЛКИ ЛУНЫ</div>
+
+        <div class="shop-item">
+            <div class="shop-title">10 Осколков 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title">50 Осколков 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title">100 Осколков 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title">500 Осколков 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title">1000 Осколков 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title" style="color: #ffaa00;">5000 Осколков 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 5000, 'stars', 2500)">⭐️ 2500 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 5000, 'ton', 250)">💎 250 TON</div>
+            </div>
+        </div>
+
+        <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-user-promos" class="overlay">
@@ -129,10 +228,10 @@
             <div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div>
             <div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div>
             <div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div>
-            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div>
+            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ (STARS/TON)</div>
             <div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div>
             <div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div>
-            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">ЗАДАНИЯ</div>
+            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</div>
         </div>
         <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
     </div>
@@ -245,7 +344,6 @@
     <script>
         const tg = window.Telegram.WebApp;
         
-        // ЗАЩИТА ОТ СЛУЧАЙНОГО ЗАКРЫТИЯ
         tg.expand();
         tg.enableClosingConfirmation();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
@@ -268,8 +366,7 @@
 
             setGender(localStorage.getItem('m_gender_' + uid) || 'm', true);
 
-            const lS = document.getElementById('len-slider');
-            const sS = document.getElementById('sex-slider');
+            const lS = document.getElementById('len-slider'), sS = document.getElementById('sex-slider');
 
             if(uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
@@ -298,7 +395,6 @@
                 document.getElementById('own-adm-rem').remove();
             }
 
-            // Загрузка ползунков (теперь HTML-элементы для текста существуют, ошибки не будет)
             updateLen(localStorage.getItem('m_len_' + uid) || 45, true);
             updateSex(localStorage.getItem('m_sex_' + uid) || 0, true);
             
@@ -307,7 +403,15 @@
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
         }
 
-        // ЛОГИКА ЦЕН
+        // ЛОГИКА ПОКУПКИ В МАГАЗИНЕ
+        function buyItem(type, item, currency, price) {
+            const txt = type === 'sub' ? `подписку ${item}` : `${item} осколков`;
+            const cur = currency === 'stars' ? 'Stars' : 'TON';
+            // В будущем здесь будет запрос к server.js для генерации инвойса Telegram Stars или ссылки CryptoBot
+            tg.sendData(JSON.stringify({ action: "buy", type: type, item: item, currency: currency, price: price }));
+            tg.showAlert(`Генерация счета на ${txt} за ${price} ${cur}...`);
+        }
+
         function savePrices(type) {
             const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-';
             const stars = document.getElementById(prefix + 'stars').value;
@@ -317,7 +421,6 @@
             tg.showAlert("Цены успешно сохранены!");
         }
 
-        // ЛОГИКА ПЕРСОНАЖЕЙ
         function saveCharDB() {
             const n = document.getElementById('ich-name').value;
             const age = document.getElementById('ich-age').value;
@@ -330,7 +433,6 @@
             tg.showAlert("Персонаж добавлен в базу!");
         }
 
-        // ПРОМОКОДЫ
         function createPromo() {
             const code = document.getElementById('ip-code').value.toUpperCase().trim();
             const rew = parseInt(document.getElementById('ip-rew').value);
@@ -386,7 +488,6 @@
             tg.showAlert(`Успех! Получено ${found.rew} осколков!`);
         }
 
-        // ЗАДАНИЯ
         function toggleTaskInput() {
             document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none';
         }
@@ -418,7 +519,6 @@
             `).join('');
         }
 
-        // ОСТАЛЬНАЯ ЛОГИКА
         function updateLiveNick(v) { 
             let nick = v || "User";
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
@@ -445,7 +545,7 @@
             document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5";
             if(!s) localStorage.setItem('m_sex_' + uid, v);
         }
-        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай! 🤨"); }
+        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); }
         function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
         function previewImg(i) {
             if (i.files && i.files[0]) {
