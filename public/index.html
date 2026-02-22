@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон 1.0.7 FULL</title>
+    <title>Moon Project - Железобетон 1.0.8 FULL (Daily)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -69,7 +69,7 @@
         <div class="menu-grid">
             <div class="menu-item" onclick="tg.showAlert('Чаты в разработке')">Чаты</div>
             <div class="menu-item" onclick="tg.showAlert('Персонажи в разработке')">Персонажи</div>
-            <div class="menu-item" onclick="tg.showAlert('Ежедневка в разработке')">Ежедневка</div>
+            <div class="menu-item" onclick="openPanel('p-daily')">Ежедневка</div>
             <div class="menu-item" onclick="openPanel('p-user-tasks')">Задания</div>
             <div class="menu-item" onclick="openPanel('p-shop')">Магазин</div>
             <div class="menu-item" onclick="openPanel('p-user-promos')">Промокоды</div>
@@ -78,6 +78,23 @@
             <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
+    </div>
+
+    <div id="p-daily" class="overlay">
+        <h2 style="color:#00ff00; margin-bottom: 5px;">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
+        <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
+        
+        <div class="info-card" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
+            <h3 id="daily-streak-text" style="color: #bc42f5; margin: 0 0 10px 0;">Стрик: 0 дней</h3>
+            <div style="font-size: 14px; margin-bottom: 15px; color:#aaa;">Ваша награда сегодня:<br>
+                <b id="daily-reward-text" style="color: #00ff00; font-size: 24px;">...</b>
+            </div>
+            
+            <div id="daily-btn" class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00; width:80%;" onclick="claimDaily()">ЗАБРАТЬ</div>
+            <div id="daily-wait" style="display:none; color:#888; font-size: 12px; margin-top: 10px;">Следующая награда будет доступна завтра.</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-user-tasks" class="overlay">
@@ -203,13 +220,8 @@
             <img id="char-preview" src="#">
             <input type="text" id="ich-name" class="term-in" placeholder="Имя">
             <input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18">
-            
             <span class="s-label">Пол персонажа</span>
-            <div class="gender-box">
-                <div class="gender-btn active" id="cg-m" onclick="setCharGender('m')">Мужской</div>
-                <div class="gender-btn" id="cg-f" onclick="setCharGender('f')">Женский</div>
-            </div>
-
+            <div class="gender-box"><div class="gender-btn active" id="cg-m" onclick="setCharGender('m')">Мужской</div><div class="gender-btn" id="cg-f" onclick="setCharGender('f')">Женский</div></div>
             <textarea id="ich-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание..." maxlength="2000" oninput="updateCharCounter()"></textarea>
             <div id="char-limit" class="char-counter">0/2000</div>
             <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
@@ -247,7 +259,7 @@
 
         const OID = "8287041036";
         let stack = [], trollCount = 0, clickedTasks = [];
-        let currentCharGender = 'm'; // Для создания персонажа
+        let currentCharGender = 'm';
 
         function init() {
             const u = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
@@ -265,7 +277,6 @@
             setGender(localStorage.getItem('m_gender_' + uid) || 'm', true);
 
             const lS = document.getElementById('len-slider'), sS = document.getElementById('sex-slider');
-
             let userSub = "FREE";
 
             if(uid === OID) {
@@ -313,34 +324,108 @@
                 if(document.getElementById('own-adm-rem')) document.getElementById('own-adm-rem').remove();
             }
 
-            let maxLen = 45;
-            let maxSex = 0;
-
+            let maxLen = 45; let maxSex = 0;
             if(userSub === "Premium") { maxLen = 55; }
             else if(userSub === "Pro") { maxLen = 65; maxSex = 3; }
             else if(userSub === "VIP") { maxLen = 80; maxSex = 5; }
             else if(userSub === "ULTRA" || userSub === "Ultra") { maxLen = 100; maxSex = 6; }
 
-            lS.max = maxLen;
-            sS.max = maxSex;
-
+            lS.max = maxLen; sS.max = maxSex;
             document.getElementById('len-info').innerText = `Твой лимит (${userSub}): ${maxLen} слов`;
             document.getElementById('sex-info').innerText = maxSex === 0 ? "Пошлость недоступна для вашей подписки" : `Доступно уровней: ${maxSex}`;
 
             let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 45);
             if(savedLen > maxLen) savedLen = maxLen;
-            lS.value = savedLen;
-            updateLen(savedLen, true);
+            lS.value = savedLen; updateLen(savedLen, true);
 
             let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
             if(savedSex > maxSex) savedSex = maxSex;
-            sS.value = savedSex;
-            updateSex(savedSex, true);
+            sS.value = savedSex; updateSex(savedSex, true);
             
+            updateDailyUI();
             renderTasks();
             renderUserTasks();
             renderAdminPromos();
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
+        }
+
+        // --- ЛОГИКА ЕЖЕДНЕВКИ ---
+        function getBaseDaily(sub) {
+            if(sub === "ULTRA" || sub === "Ultra") return 500;
+            if(sub === "VIP") return 250;
+            if(sub === "Pro") return 100;
+            if(sub === "Premium") return 50;
+            return 10; // Free
+        }
+
+        function updateDailyUI() {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            let userSub = uid === OID ? "ULTRA" : (localStorage.getItem('m_sub_'+uid) || "FREE");
+            
+            let lastClaim = parseInt(localStorage.getItem('m_daily_time_' + uid) || 0);
+            let streak = parseInt(localStorage.getItem('m_daily_streak_' + uid) || 0);
+            
+            let now = Date.now();
+            let diff = 0;
+            if (lastClaim > 0) {
+                const d1 = new Date(lastClaim).setHours(0,0,0,0);
+                const d2 = new Date(now).setHours(0,0,0,0);
+                diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+            }
+
+            if (diff > 1) streak = 0; // Сброс стрика при пропуске дня
+            
+            let nextStreak = streak + 1;
+            let is7thDay = (nextStreak % 7 === 0);
+            let baseRew = getBaseDaily(userSub);
+            let actualRew = is7thDay ? baseRew * 2 : baseRew;
+
+            document.getElementById('daily-streak-text').innerText = `Стрик: ${streak} дней`;
+            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? " (БОНУС x2!)" : "");
+
+            if (diff === 0 && lastClaim !== 0) {
+                document.getElementById('daily-btn').style.display = 'none';
+                document.getElementById('daily-wait').style.display = 'block';
+            } else {
+                document.getElementById('daily-btn').style.display = 'block';
+                document.getElementById('daily-wait').style.display = 'none';
+            }
+        }
+
+        function claimDaily() {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            let userSub = uid === OID ? "ULTRA" : (localStorage.getItem('m_sub_'+uid) || "FREE");
+            
+            let lastClaim = parseInt(localStorage.getItem('m_daily_time_' + uid) || 0);
+            let streak = parseInt(localStorage.getItem('m_daily_streak_' + uid) || 0);
+            
+            let now = Date.now();
+            if (lastClaim > 0) {
+                const d1 = new Date(lastClaim).setHours(0,0,0,0);
+                const d2 = new Date(now).setHours(0,0,0,0);
+                let diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+                if (diff === 0) return tg.showAlert("Вы уже забрали награду сегодня!");
+                if (diff > 1) streak = 0;
+            }
+
+            streak++;
+            let is7thDay = (streak % 7 === 0);
+            let baseRew = getBaseDaily(userSub);
+            let actualRew = is7thDay ? baseRew * 2 : baseRew;
+
+            if(uid !== OID) {
+                let bal = parseInt(localStorage.getItem('m_shards_'+uid) || 0) + actualRew;
+                localStorage.setItem('m_shards_'+uid, bal);
+                document.getElementById('shards-balance').innerText = bal;
+                document.getElementById('prof-shards').innerText = bal;
+            }
+
+            localStorage.setItem('m_daily_time_' + uid, now);
+            if(is7thDay) streak = 0; // Сброс цикла после бонуса
+            localStorage.setItem('m_daily_streak_' + uid, streak);
+
+            tg.showAlert(`Награда получена: ${actualRew} 🌙!`);
+            updateDailyUI();
         }
 
         // ЛОГИКА ЗАДАНИЙ ЮЗЕРА
@@ -354,39 +439,28 @@
                 list.innerHTML = "<div class='info-card' style='text-align:center; color:#888;'>Пока нет доступных заданий</div>";
                 return;
             }
-
             list.innerHTML = allTasks.map(t => {
                 if(completed.includes(t.id)) {
-                    return `<div class="task-item" style="opacity:0.5;">
-                        <span>${t.name}<br><span style="font-size:10px;color:#888">Выполнено</span></span>
-                        <span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span>
-                    </div>`;
+                    return `<div class="task-item" style="opacity:0.5;"><span>${t.name}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
                 } else {
-                    return `<div class="task-item" id="utask-${t.id}">
-                        <span>${t.name}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
-                        <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button>
-                    </div>`;
+                    return `<div class="task-item" id="utask-${t.id}"><span>${t.name}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`;
                 }
             }).join('');
         }
-
         function startTask(id, link) {
             tg.openLink(link);
             if(!clickedTasks.includes(id)) clickedTasks.push(id);
             const taskDiv = document.getElementById(`utask-${id}`);
             if(taskDiv) {
                 const t = JSON.parse(localStorage.getItem('m_tasks') || "[]").find(x => x.id === id);
-                taskDiv.innerHTML = `<span>${t.name}<br><span style="font-size:10px;color:orange">Ожидание проверки...</span></span>
-                <button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`;
+                taskDiv.innerHTML = `<span>${t.name}<br><span style="font-size:10px;color:orange">Ожидание проверки...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`;
             }
         }
-
         function checkTask(id) {
             if(!clickedTasks.includes(id)) return;
             tg.showAlert("Идет проверка...");
             setTimeout(() => { completeTaskAction(id); }, 1500);
         }
-
         function completeTaskAction(id) {
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             const allTasks = JSON.parse(localStorage.getItem('m_tasks') || "[]");
@@ -406,7 +480,6 @@
                     let currentSub = localStorage.getItem('m_sub_'+uid) || "FREE";
                     let expTs = localStorage.getItem('m_sub_exp_'+uid);
                     let expDate = expTs ? new Date(parseInt(expTs)) : new Date();
-                    
                     if(currentSub === "FREE") {
                         localStorage.setItem('m_sub_'+uid, "Premium");
                         document.getElementById('prof-sub').innerText = "Premium";
@@ -417,13 +490,11 @@
                     document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU');
                 }
             }
-
-            completed.push(id);
-            localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed));
-            tg.showAlert(`Задание "${t.name}" выполнено! Награда получена.`);
-            renderUserTasks();
+            completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed));
+            tg.showAlert(`Задание "${t.name}" выполнено! Награда получена.`); renderUserTasks();
         }
 
+        // БАЗОВЫЕ ФУНКЦИИ
         function buyItem(type, item, currency, price) {
             const txt = type === 'sub' ? `подписку ${item}` : `${item} осколков`;
             const cur = currency === 'stars' ? 'Stars' : 'TON';
@@ -435,19 +506,16 @@
             const id = document.getElementById(t==='shards'?'ish-id':'isu-id').value;
             const v = document.getElementById(t==='shards'?'ish-val':'isu-type').value;
             if(!id) return tg.showAlert("Введите ID!");
-            
             if(t==='shards') {
                 let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
                 localStorage.setItem('m_shards_'+id, a==='add'? b+parseInt(v) : Math.max(0, b-parseInt(v)));
             } else {
                 if(a==='add') {
                     localStorage.setItem('m_sub_'+id, v);
-                    let exp = new Date();
-                    exp.setDate(exp.getDate() + 30);
+                    let exp = new Date(); exp.setDate(exp.getDate() + 30);
                     localStorage.setItem('m_sub_exp_'+id, exp.getTime());
                 } else {
-                    localStorage.removeItem('m_sub_'+id);
-                    localStorage.removeItem('m_sub_exp_'+id);
+                    localStorage.removeItem('m_sub_'+id); localStorage.removeItem('m_sub_exp_'+id);
                 }
             }
             tg.showAlert(a === 'add' ? "Успешно выдано!" : "Успешно удалено!");
@@ -460,7 +528,6 @@
             tg.showAlert("Цены сохранены!");
         }
 
-        // ЛОГИКА СОЗДАНИЯ ПЕРСОНАЖА (С ПОЛОМ)
         function setCharGender(g) {
             currentCharGender = g;
             document.getElementById('cg-m').classList.toggle('active', g === 'm');
@@ -472,14 +539,7 @@
             const img = document.getElementById('char-preview').src;
             if(!n || img.includes('#')) return tg.showAlert("Имя и фото обязательны!");
             let db = JSON.parse(localStorage.getItem('m_characters') || "[]");
-            db.push({ 
-                id: Date.now(), 
-                name: n, 
-                age: document.getElementById('ich-age').value, 
-                gender: currentCharGender,
-                desc: document.getElementById('ich-desc').value, 
-                photo: img 
-            });
+            db.push({ id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img });
             localStorage.setItem('m_characters', JSON.stringify(db));
             tg.showAlert("Персонаж добавлен в базу!");
         }
@@ -492,8 +552,7 @@
             if(promos.find(p => p.code === code)) return tg.showAlert("Такой код уже есть");
             promos.push({code, rew});
             localStorage.setItem('m_all_promos', JSON.stringify(promos));
-            document.getElementById('ip-code').value = '';
-            document.getElementById('ip-rew').value = '';
+            document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = '';
             renderAdminPromos(); tg.showAlert("Создано!");
         }
         function renderAdminPromos() {
@@ -545,52 +604,22 @@
             `).join('');
         }
 
-        function updateLiveNick(v) { 
-            let nick = v || "User";
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            document.getElementById('u-name').innerText = nick; 
-            document.getElementById('prof-nick').innerText = nick; 
-            localStorage.setItem('m_nick_' + uid, nick);
-        }
-        function setGender(g, s=false) {
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            document.getElementById('g-m').classList.toggle('active', g === 'm');
-            document.getElementById('g-f').classList.toggle('active', g === 'f');
-            if(!s) localStorage.setItem('m_gender_' + uid, g);
-        }
-        function updateLen(v, s=false) { 
-            const uid = String(tg.initDataUnsafe?.user?.id || OID);
-            document.getElementById('len-val').innerText = v; 
-            if(!s) localStorage.setItem('m_len_' + uid, v);
-        }
+        function updateLiveNick(v) { let n = v || "User"; const uid = String(tg.initDataUnsafe?.user?.id || OID); document.getElementById('u-name').innerText = n; document.getElementById('prof-nick').innerText = n; localStorage.setItem('m_nick_' + uid, n); }
+        function setGender(g, s=false) { const uid = String(tg.initDataUnsafe?.user?.id || OID); document.getElementById('g-m').classList.toggle('active', g === 'm'); document.getElementById('g-f').classList.toggle('active', g === 'f'); if(!s) localStorage.setItem('m_gender_' + uid, g); }
+        function updateLen(v, s=false) { const uid = String(tg.initDataUnsafe?.user?.id || OID); document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + uid, v); }
         function updateSex(v, s=false) {
             const uid = String(tg.initDataUnsafe?.user?.id || OID);
             const m = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"];
             document.getElementById('sex-val').innerText = v;
-            if(document.getElementById('sex-slider').max == 0){
-                document.getElementById('sex-info').innerText = "Пошлость недоступна для вашей подписки";
-            }else{
-                document.getElementById('sex-info').innerText = "Уровень " + v + ": " + m[v];
-            }
+            if(document.getElementById('sex-slider').max == 0){ document.getElementById('sex-info').innerText = "Пошлость недоступна для вашей подписки"; }
+            else{ document.getElementById('sex-info').innerText = "Уровень " + v + ": " + m[v]; }
             document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5";
             if(!s) localStorage.setItem('m_sex_' + uid, v);
         }
         function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); }
         function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
-        function previewImg(i) {
-            if (i.files && i.files[0]) {
-                const r = new FileReader();
-                r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; };
-                r.readAsDataURL(i.files[0]);
-            }
-        }
-        function modAdmin(a) {
-            const id = document.getElementById('ia-id').value; if(!id) return;
-            let ad = JSON.parse(localStorage.getItem('m_admins') || "[]");
-            if(a==='add') { if(!ad.includes(id)) ad.push(id); } else ad = ad.filter(x => x !== id);
-            localStorage.setItem('m_admins', JSON.stringify(ad));
-            tg.showAlert("Обновлено");
-        }
+        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(i.files[0]); } }
+        function modAdmin(a) { const id = document.getElementById('ia-id').value; if(!id) return; let ad = JSON.parse(localStorage.getItem('m_admins') || "[]"); if(a==='add') { if(!ad.includes(id)) ad.push(id); } else ad = ad.filter(x => x !== id); localStorage.setItem('m_admins', JSON.stringify(ad)); tg.showAlert("Обновлено"); }
         function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
         function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
         
