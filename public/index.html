@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон 1.0.8 FIXED FUNDS</title>
+    <title>Moon Project - Железобетон 1.0.9 FULL (Chars & Realtime)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
@@ -54,6 +54,15 @@
         .btn-stars { flex: 1; background: rgba(255, 215, 0, 0.1); border: 1px solid gold; color: gold; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-ton { flex: 1; background: rgba(0, 136, 204, 0.1); border: 1px solid #0088cc; color: #0088cc; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
         .shop-header { color: #e91e63; font-size: 14px; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; width: 100%; text-align: left; border-bottom: 1px solid #2d164d; padding-bottom: 5px;}
+
+        /* СЕТКА ПЕРСОНАЖЕЙ (КАРТОЧКИ) */
+        .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .char-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; }
+        .char-card img { width: 100%; height: 120px; object-fit: cover; }
+        .char-card-info { padding: 10px; text-align: center; }
+        .char-card-name { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 5px; }
+        .char-card-tags { font-size: 10px; color: #00bcd4; }
+        .dossier-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; border: 1px solid #bc42f5; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -67,7 +76,7 @@
 
         <div class="menu-grid">
             <div class="menu-item" onclick="tg.showAlert('Чаты в разработке')">Чаты</div>
-            <div class="menu-item" onclick="tg.showAlert('Персонажи в разработке')">Персонажи</div>
+            <div class="menu-item" onclick="openPanel('p-user-chars')">Персонажи</div>
             <div class="menu-item" onclick="openPanel('p-daily')">Ежедневка</div>
             <div class="menu-item" onclick="openPanel('p-user-tasks')">Задания</div>
             <div class="menu-item" onclick="openPanel('p-shop')">Магазин</div>
@@ -77,6 +86,25 @@
             <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
+    </div>
+
+    <div id="p-user-chars" class="overlay">
+        <h2 style="color:#bc42f5; margin-bottom: 20px;">ПЕРСОНАЖИ</h2>
+        <div id="user-char-list" class="char-grid"></div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-char-dossier" class="overlay">
+        <h2 style="color:#bc42f5; margin-bottom: 10px;" id="dos-name">Имя</h2>
+        <div class="info-card">
+            <img id="dos-img" src="" class="dossier-img">
+            <div class="p-row"><span class="p-label">Возраст:</span> <span class="p-val" id="dos-age">18</span></div>
+            <div class="p-row"><span class="p-label">Пол:</span> <span class="p-val" id="dos-gender">М</span></div>
+            <div style="margin-top:15px; font-size:12px; color:#ccc; line-height:1.4;" id="dos-desc">Описание...</div>
+        </div>
+        <div class="term-btn" style="border-color:#00ff00" onclick="chatWithChar()">НАПИСАТЬ (-1 🌙)</div>
+        <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()">УДАЛИТЬ ПЕРСОНАЖА</div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-daily" class="overlay">
@@ -196,28 +224,13 @@
 
     <div id="p-m-shards" class="overlay">
         <h2>ОСКОЛКИ</h2>
-        <div class="info-card">
-            <input type="number" id="ish-id" class="term-in" placeholder="TG ID">
-            <input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО">
-            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div>
-            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div>
-        </div>
+        <div class="info-card"><input type="number" id="ish-id" class="term-in" placeholder="TG ID"><input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО"><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div><div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-m-subs" class="overlay">
         <h2>ПОДПИСКИ (30д)</h2>
-        <div class="info-card">
-            <input type="number" id="isu-id" class="term-in" placeholder="TG ID">
-            <select id="isu-type" class="term-in">
-                <option value="Premium">Premium</option>
-                <option value="Pro">Pro</option>
-                <option value="VIP">VIP</option>
-                <option value="Ultra">Ultra</option>
-            </select>
-            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div>
-            <div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div>
-        </div>
+        <div class="info-card"><input type="number" id="isu-id" class="term-in" placeholder="TG ID"><select id="isu-type" class="term-in"><option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option></select><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div><div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div></div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
@@ -274,6 +287,14 @@
         const OID = "8287041036";
         let stack = [], trollCount = 0, clickedTasks = [];
         let currentCharGender = 'm';
+        let activeCharId = null;
+
+        // --- ГЛОБАЛЬНОЕ ОБНОВЛЕНИЕ БАЛАНСА В РЕАЛЬНОМ ВРЕМЕНИ ---
+        function updateBalanceUI(val) {
+            if(String(tg.initDataUnsafe?.user?.id || OID) === OID) return; // Овнер имеет бесконечность, не трогаем
+            document.getElementById('shards-balance').innerText = val;
+            document.getElementById('prof-shards').innerText = val;
+        }
 
         function init() {
             const u = tg.initDataUnsafe?.user || { id: OID, first_name: "Owner" };
@@ -308,8 +329,7 @@
                 document.getElementById('own-adm-rem').style.display = 'block';
             } else {
                 let bal = localStorage.getItem('m_shards_'+uid) || 0;
-                document.getElementById('shards-balance').innerText = bal;
-                document.getElementById('prof-shards').innerText = bal;
+                updateBalanceUI(bal); // Инитим рил-тайм UI
                 
                 userSub = localStorage.getItem('m_sub_'+uid) || "FREE";
                 document.getElementById('prof-sub').innerText = userSub;
@@ -360,7 +380,65 @@
             renderTasks();
             renderUserTasks();
             renderAdminPromos();
+            renderUserChars(); // Рендер списка персонажей
+
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
+        }
+
+        // --- ЛОГИКА ПЕРСОНАЖЕЙ (КАРТОЧКИ И ДОСЬЕ) ---
+        function renderUserChars() {
+            const db = JSON.parse(localStorage.getItem('m_characters') || "[]");
+            const list = document.getElementById('user-char-list');
+            if(db.length === 0) {
+                list.innerHTML = "<div style='grid-column: span 2; text-align:center; color:#888;'>Нет доступных персонажей</div>";
+                return;
+            }
+            list.innerHTML = db.map(c => `
+                <div class="char-card" onclick="openDossier(${c.id})">
+                    <img src="${c.photo}">
+                    <div class="char-card-info">
+                        <div class="char-card-name">${c.name}</div>
+                        <div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? 'Муж' : 'Жен'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openDossier(id) {
+            const c = JSON.parse(localStorage.getItem('m_characters') || "[]").find(x => x.id === id);
+            if(!c) return;
+            activeCharId = id;
+            document.getElementById('dos-name').innerText = c.name;
+            document.getElementById('dos-img').src = c.photo;
+            document.getElementById('dos-age').innerText = c.age;
+            document.getElementById('dos-gender').innerText = c.gender === 'm' ? 'Мужской' : 'Женский';
+            document.getElementById('dos-desc').innerText = c.desc;
+            
+            if(String(tg.initDataUnsafe?.user?.id || OID) === OID) {
+                document.getElementById('dos-del-btn').style.display = 'block';
+            }
+            openPanel('p-char-dossier');
+        }
+
+        function deleteChar() {
+            let db = JSON.parse(localStorage.getItem('m_characters') || "[]");
+            db = db.filter(x => x.id !== activeCharId);
+            localStorage.setItem('m_characters', JSON.stringify(db));
+            tg.showAlert("Персонаж удален из базы!");
+            renderUserChars();
+            back(); // Закрываем досье
+        }
+
+        function chatWithChar() {
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
+            if(uid !== OID) {
+                let bal = parseInt(localStorage.getItem('m_shards_'+uid) || 0);
+                if(bal < 1) return tg.showAlert("Недостаточно осколков (нужен 1 🌙)!");
+                bal -= 1; // Списываем 1 осколок
+                localStorage.setItem('m_shards_'+uid, bal);
+                updateBalanceUI(bal); // Рил-тайм обновление
+            }
+            tg.showAlert("Открываем чат... (Списан 1 🌙)");
         }
 
         // --- ЛОГИКА ЕЖЕДНЕВКИ ---
@@ -428,8 +506,7 @@
             if(uid !== OID) {
                 let bal = parseInt(localStorage.getItem('m_shards_'+uid) || 0) + actualRew;
                 localStorage.setItem('m_shards_'+uid, bal);
-                document.getElementById('shards-balance').innerText = bal;
-                document.getElementById('prof-shards').innerText = bal;
+                updateBalanceUI(bal); // Рил-тайм обновление
             }
 
             localStorage.setItem('m_daily_time_' + uid, now);
@@ -444,15 +521,17 @@
         function modFunds(t, a) {
             let idField = t === 'shards' ? 'ish-id' : 'isu-id';
             let valField = t === 'shards' ? 'ish-val' : 'isu-type';
-            
             const id = document.getElementById(idField).value;
             const v = document.getElementById(valField).value;
+            const uid = String(tg.initDataUnsafe?.user?.id || OID);
             
             if(!id) return tg.showAlert("Введите ID!");
             
             if(t==='shards') {
                 let b = parseInt(localStorage.getItem('m_shards_'+id) || 0);
-                localStorage.setItem('m_shards_'+id, a==='add'? b+parseInt(v) : Math.max(0, b-parseInt(v)));
+                let newBal = a==='add'? b+parseInt(v) : Math.max(0, b-parseInt(v));
+                localStorage.setItem('m_shards_'+id, newBal);
+                if(id === uid) updateBalanceUI(newBal); // Если выдаешь сам себе - обновится рил-тайм
             } else {
                 if(a==='add') {
                     localStorage.setItem('m_sub_'+id, v);
@@ -507,8 +586,7 @@
                 if(t.rType === 'shards') {
                     let bal = parseInt(localStorage.getItem('m_shards_'+uid) || 0) + parseInt(t.rVal);
                     localStorage.setItem('m_shards_'+uid, bal);
-                    document.getElementById('shards-balance').innerText = bal;
-                    document.getElementById('prof-shards').innerText = bal;
+                    updateBalanceUI(bal); // Рил-тайм обновление
                 } else if(t.rType === 'sub7') {
                     let currentSub = localStorage.getItem('m_sub_'+uid) || "FREE";
                     let expTs = localStorage.getItem('m_sub_exp_'+uid);
@@ -556,6 +634,7 @@
             db.push({ id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img });
             localStorage.setItem('m_characters', JSON.stringify(db));
             tg.showAlert("Персонаж добавлен в базу!");
+            renderUserChars(); // Рил-тайм обновление списка персонажей
         }
 
         function createPromo() {
@@ -589,7 +668,7 @@
             if(uid !== OID) {
                 let bal = parseInt(localStorage.getItem('m_shards_'+uid) || 0) + found.rew;
                 localStorage.setItem('m_shards_'+uid, bal);
-                document.getElementById('shards-balance').innerText = bal; document.getElementById('prof-shards').innerText = bal;
+                updateBalanceUI(bal); // Рил-тайм обновление
             }
             used.push(input); localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
             tg.showAlert(`Получено ${found.rew} 🌙!`);
