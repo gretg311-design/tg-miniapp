@@ -4,8 +4,6 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-
-// Лимит 50mb нужен, чтобы картинки персонажей из галереи помещались в запрос
 app.use(express.json({ limit: '50mb' }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -14,11 +12,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
+// НОВЫЕ КЛЮЧИ (ИИ И КРИПТОБОТ)
+const OPENROUTER_API_KEY = "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";
+const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
+
 const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -29,27 +31,19 @@ const userSchema = new mongoose.Schema({
     tg_id: { type: Number, unique: true },
     shards: { type: Number, default: 0 },
     subscription: { type: String, default: "FREE" },
-    sub_exp: { type: Number, default: 0 }, // Время окончания подписки
+    sub_exp: { type: Number, default: 0 },
     is_admin: { type: Boolean, default: false },
-    last_daily: { type: Number, default: 0 }, // Серверное время сбора ежедневки
-    daily_streak: { type: Number, default: 0 } // Серия дней
+    last_daily: { type: Number, default: 0 },
+    daily_streak: { type: Number, default: 0 }
 });
 
 const charSchema = new mongoose.Schema({
     id: Number, name: String, age: Number, gender: String, desc: String, photo: String
 });
 
-const promoSchema = new mongoose.Schema({
-    code: { type: String, unique: true }, reward: Number
-});
-
-const taskSchema = new mongoose.Schema({
-    id: Number, name: String, link: String, rType: String, rVal: Number
-});
-
-const priceSchema = new mongoose.Schema({
-    item_id: { type: String, unique: true }, stars: { type: Number, default: 0 }, ton: { type: Number, default: 0 }
-});
+const promoSchema = new mongoose.Schema({ code: { type: String, unique: true }, reward: Number });
+const taskSchema = new mongoose.Schema({ id: Number, name: String, link: String, rType: String, rVal: Number });
+const priceSchema = new mongoose.Schema({ item_id: { type: String, unique: true }, stars: { type: Number, default: 0 }, ton: { type: Number, default: 0 } });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 const Character = mongoose.models.Character || mongoose.model('Character', charSchema);
@@ -57,7 +51,7 @@ const Promo = mongoose.models.Promo || mongoose.model('Promo', promoSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
 const Price = mongoose.models.Price || mongoose.model('Price', priceSchema);
 
-// ================= ПРОВЕРКА ПРАВ =================
+// Проверка прав
 const checkAdmin = async (sender_id) => {
     if (Number(sender_id) === OWNER_ID) return true;
     const sender = await User.findOne({ tg_id: Number(sender_id) });
@@ -65,7 +59,6 @@ const checkAdmin = async (sender_id) => {
 };
 
 // ================= API: ЮЗЕРЫ =================
-// 1. Инициализация и проверка подписки
 app.post('/api/user/get-data', async (req, res) => {
     try {
         const uid = Number(req.body.tg_id);
@@ -77,17 +70,13 @@ app.post('/api/user/get-data', async (req, res) => {
             await user.save(); 
         }
 
-        // Авто-сброс просроченной подписки
         if (uid !== OWNER_ID && user.subscription !== "FREE" && user.sub_exp > 0 && user.sub_exp < Date.now()) {
-            user.subscription = "FREE";
-            user.sub_exp = 0;
-            await user.save();
+            user.subscription = "FREE"; user.sub_exp = 0; await user.save();
         }
         res.json(user);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// 2. СЕРВЕРНАЯ ЕЖЕДНЕВКА (ЗАЩИТА ОТ ЧИТОВ)
 app.post('/api/user/claim-daily', async (req, res) => {
     try {
         const uid = Number(req.body.tg_id);
@@ -100,10 +89,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         const ONE_DAY = 24 * 60 * 60 * 1000;
         const timePassed = now - user.last_daily;
 
-        if (timePassed < ONE_DAY && user.last_daily !== 0) {
-            return res.status(400).json({ error: "Рано", timeLeft: ONE_DAY - timePassed });
-        }
-
+        if (timePassed < ONE_DAY && user.last_daily !== 0) return res.status(400).json({ error: "Рано", timeLeft: ONE_DAY - timePassed });
         if (timePassed > ONE_DAY * 2 && user.last_daily !== 0) user.daily_streak = 0;
 
         user.daily_streak += 1;
@@ -116,7 +102,6 @@ app.post('/api/user/claim-daily', async (req, res) => {
         else if (user.subscription === "Premium") baseRew = 50;
 
         let actualRew = is7thDay ? baseRew * 2 : baseRew;
-
         user.shards += actualRew;
         user.last_daily = now;
         if (is7thDay) user.daily_streak = 0;
@@ -126,6 +111,140 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ================= API: ЧАТ И ИИ (OPENROUTER) =================
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { tg_id, char_id, message, chat_history, len, sex } = req.body;
+        const uid = Number(tg_id);
+
+        // 1. Проверка и списание осколков
+        let user = await User.findOne({ tg_id: uid });
+        if (!user) return res.status(404).json({ error: "Юзер не найден" });
+
+        if (uid !== OWNER_ID) {
+            if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
+            user.shards -= 1;
+            await user.save();
+        }
+
+        // 2. Получение данных персонажа
+        const char = await Character.findOne({ id: char_id });
+        if (!char) return res.status(404).json({ error: "Персонаж не найден" });
+
+        // 3. Формирование системного промпта
+        const sexLevels = [
+            "Строго без пошлости. Игнорируй любые намеки на интим.",
+            "Слабая романтика, легкий флирт, без откровенностей.",
+            "Нормальный уровень общения, допускаются объятия и поцелуи.",
+            "Сильный флирт, горячие намеки.",
+            "Высокая откровенность, страсть.",
+            "Очень пошло, откровенный RolePlay без цензуры.",
+            "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все детали открыто."
+        ];
+        
+        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. 
+Твоя легенда и описание: ${char.desc}. 
+Веди себя строго в рамках этого персонажа. 
+Длина твоего ответа должна быть около ${len} слов. 
+Уровень откровенности: ${sexLevels[sex]}.`;
+
+        // 4. Формирование истории для ИИ
+        let messagesArray = [{ role: "system", content: systemPrompt }];
+        if (chat_history && chat_history.length > 0) {
+            // Берем последние 10 сообщений для контекста
+            let recentHistory = chat_history.slice(-10);
+            recentHistory.forEach(msg => {
+                messagesArray.push({ role: msg.sender === 'user' ? "user" : "assistant", content: msg.text });
+            });
+        }
+        messagesArray.push({ role: "user", content: message });
+
+        // 5. Запрос к OpenRouter
+        const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "meta-llama/llama-3.1-8b-instruct:free", // Можем сменить на любую (gpt-4o, claude)
+                messages: messagesArray,
+                temperature: 0.8
+            })
+        });
+
+        const aiData = await aiResponse.json();
+        
+        if (aiData.choices && aiData.choices.length > 0) {
+            res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
+        } else {
+            res.status(500).json({ error: "ИИ не смог ответить" });
+        }
+
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ================= API: КРИПТОБОТ ОПЛАТА =================
+// 1. Создание инвойса (счета)
+app.post('/api/payment/create', async (req, res) => {
+    try {
+        const { tg_id, type, item, amount_ton } = req.body;
+        
+        // Упаковываем данные о покупке в payload (до 4000 байт)
+        const customPayload = JSON.stringify({ tg_id: Number(tg_id), type, item });
+
+        const response = await fetch("https://pay.crypt.bot/api/createInvoice", {
+            method: "POST",
+            headers: {
+                "Crypto-Pay-API-Token": CRYPTOBOT_TOKEN,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                asset: "TON",
+                amount: amount_ton,
+                payload: customPayload,
+                expires_in: 3600 // Счет живет 1 час
+            })
+        });
+
+        const data = await response.json();
+        if(data.ok) {
+            res.json({ pay_url: data.result.pay_url });
+        } else {
+            res.status(400).json({ error: "Ошибка CryptoBot" });
+        }
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 2. Вебхук (Криптобот дергает этот URL когда юзер оплатил)
+// ВАЖНО: В настройках CryptoBot (через @CryptoBot) в разделе App -> Webhooks нужно будет указать твой домен + /api/payment/webhook
+app.post('/api/payment/webhook', async (req, res) => {
+    try {
+        const update = req.body;
+        
+        // Проверяем, что это оплаченный счет
+        if (update.update_type === 'invoice_paid') {
+            const invoice = update.payload;
+            const customData = JSON.parse(invoice.payload);
+            const uid = Number(customData.tg_id);
+
+            // Выдача товара
+            if (customData.type === 'shards') {
+                await User.findOneAndUpdate({ tg_id: uid }, { $inc: { shards: Number(customData.item) } }, { upsert: true });
+            } else if (customData.type === 'sub') {
+                const expDate = new Date();
+                expDate.setDate(expDate.getDate() + 30);
+                await User.findOneAndUpdate({ tg_id: uid }, { subscription: customData.item, sub_exp: expDate.getTime() }, { upsert: true });
+            }
+        }
+        res.sendStatus(200); // Обязательно отвечаем 200, иначе бот будет слать запрос бесконечно
+    } catch (e) { 
+        console.error("WEBHOOK ERROR:", e);
+        res.sendStatus(500); 
+    }
+});
+
+
 // ================= API: ПУБЛИЧНЫЕ ДАННЫЕ =================
 app.get('/api/get-characters', async (req, res) => { res.json(await Character.find()); });
 app.get('/api/get-tasks', async (req, res) => { res.json(await Task.find()); });
@@ -134,11 +253,7 @@ app.get('/api/get-promos', async (req, res) => { res.json(await Promo.find()); }
 // ================= API: АДМИНКА И КОНСОЛЬ =================
 app.post('/api/admin/manage-shards', async (req, res) => {
     if (!(await checkAdmin(req.body.sender_id))) return res.status(403).send("No Access");
-    await User.findOneAndUpdate(
-        { tg_id: Number(req.body.target_id) }, 
-        { $inc: { shards: req.body.action === 'add' ? Number(req.body.amount) : -Number(req.body.amount) } }, 
-        { upsert: true }
-    );
+    await User.findOneAndUpdate( { tg_id: Number(req.body.target_id) }, { $inc: { shards: req.body.action === 'add' ? Number(req.body.amount) : -Number(req.body.amount) } }, { upsert: true });
     res.json({ message: "Готово" });
 });
 
@@ -148,9 +263,7 @@ app.post('/api/admin/manage-sub', async (req, res) => {
     if (req.body.action === 'add') {
         const expDate = new Date(); expDate.setDate(expDate.getDate() + 30);
         updateData = { subscription: req.body.sub_type, sub_exp: expDate.getTime() };
-    } else {
-        updateData = { subscription: "FREE", sub_exp: 0 };
-    }
+    } else { updateData = { subscription: "FREE", sub_exp: 0 }; }
     await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, updateData, { upsert: true });
     res.json({ message: "Готово" });
 });
@@ -179,7 +292,6 @@ app.post('/api/admin/create-task', async (req, res) => {
     res.json({ message: "Задание создано" });
 });
 
-// ТОЛЬКО ДЛЯ ОВНЕРА
 app.post('/api/owner/set-admin', async (req, res) => {
     if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).send("Only Owner");
     await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true });
