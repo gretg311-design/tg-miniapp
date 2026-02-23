@@ -117,7 +117,6 @@ app.post('/api/chat', async (req, res) => {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
         const uid = Number(tg_id);
 
-        // 1. Проверка и списание осколков
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден" });
 
@@ -127,11 +126,9 @@ app.post('/api/chat', async (req, res) => {
             await user.save();
         }
 
-        // 2. Получение данных персонажа
         const char = await Character.findOne({ id: char_id });
         if (!char) return res.status(404).json({ error: "Персонаж не найден" });
 
-        // 3. Формирование системного промпта
         const sexLevels = [
             "Строго без пошлости. Игнорируй любые намеки на интим.",
             "Слабая романтика, легкий флирт, без откровенностей.",
@@ -148,10 +145,8 @@ app.post('/api/chat', async (req, res) => {
 Длина твоего ответа должна быть около ${len} слов. 
 Уровень откровенности: ${sexLevels[sex]}.`;
 
-        // 4. Формирование истории для ИИ
         let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
-            // Берем последние 10 сообщений для контекста
             let recentHistory = chat_history.slice(-10);
             recentHistory.forEach(msg => {
                 messagesArray.push({ role: msg.sender === 'user' ? "user" : "assistant", content: msg.text });
@@ -159,15 +154,17 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // 5. Запрос к OpenRouter
+        // УЛУЧШЕННЫЙ ЗАПРОС С ПОДДЕРЖКОЙ NSFW И ОБРАБОТКОЙ ОШИБОК
         const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://t.me", // Обязательно для OpenRouter
+                "X-Title": "Moon Anime AI" // Обязательно для OpenRouter
             },
             body: JSON.stringify({
-                model: "meta-llama/llama-3.1-8b-instruct:free", // Можем сменить на любую (gpt-4o, claude)
+                model: "gryphe/mythomax-l2-13b:free", // Модель без цензуры, идеальна для 18+
                 messages: messagesArray,
                 temperature: 0.8
             })
@@ -175,22 +172,28 @@ app.post('/api/chat', async (req, res) => {
 
         const aiData = await aiResponse.json();
         
+        // ЕСЛИ OPENROUTER ВЫДАЛ ОШИБКУ - МЫ ЕЁ ПЕРЕХВАТЫВАЕМ И ПОКАЗЫВАЕМ
+        if (!aiResponse.ok) {
+            console.error("OPENROUTER API ОШИБКА:", aiData);
+            return res.status(500).json({ error: (aiData.error?.message || "OpenRouter перегружен, попробуйте еще раз через секунду.") });
+        }
+
         if (aiData.choices && aiData.choices.length > 0) {
             res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
         } else {
-            res.status(500).json({ error: "ИИ не смог ответить" });
+            res.status(500).json({ error: "ИИ прислал пустой ответ." });
         }
 
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { 
+        console.error("CHAT CRASH:", e);
+        res.status(500).json({ error: "Внутренняя ошибка сервера связи." }); 
+    }
 });
 
 // ================= API: КРИПТОБОТ ОПЛАТА =================
-// 1. Создание инвойса (счета)
 app.post('/api/payment/create', async (req, res) => {
     try {
         const { tg_id, type, item, amount_ton } = req.body;
-        
-        // Упаковываем данные о покупке в payload (до 4000 байт)
         const customPayload = JSON.stringify({ tg_id: Number(tg_id), type, item });
 
         const response = await fetch("https://pay.crypt.bot/api/createInvoice", {
@@ -200,50 +203,33 @@ app.post('/api/payment/create', async (req, res) => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                asset: "TON",
-                amount: amount_ton,
-                payload: customPayload,
-                expires_in: 3600 // Счет живет 1 час
+                asset: "TON", amount: amount_ton, payload: customPayload, expires_in: 3600
             })
         });
 
         const data = await response.json();
-        if(data.ok) {
-            res.json({ pay_url: data.result.pay_url });
-        } else {
-            res.status(400).json({ error: "Ошибка CryptoBot" });
-        }
+        if(data.ok) { res.json({ pay_url: data.result.pay_url }); } else { res.status(400).json({ error: "Ошибка CryptoBot" }); }
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// 2. Вебхук (Криптобот дергает этот URL когда юзер оплатил)
-// ВАЖНО: В настройках CryptoBot (через @CryptoBot) в разделе App -> Webhooks нужно будет указать твой домен + /api/payment/webhook
 app.post('/api/payment/webhook', async (req, res) => {
     try {
         const update = req.body;
-        
-        // Проверяем, что это оплаченный счет
         if (update.update_type === 'invoice_paid') {
             const invoice = update.payload;
             const customData = JSON.parse(invoice.payload);
             const uid = Number(customData.tg_id);
 
-            // Выдача товара
             if (customData.type === 'shards') {
                 await User.findOneAndUpdate({ tg_id: uid }, { $inc: { shards: Number(customData.item) } }, { upsert: true });
             } else if (customData.type === 'sub') {
-                const expDate = new Date();
-                expDate.setDate(expDate.getDate() + 30);
+                const expDate = new Date(); expDate.setDate(expDate.getDate() + 30);
                 await User.findOneAndUpdate({ tg_id: uid }, { subscription: customData.item, sub_exp: expDate.getTime() }, { upsert: true });
             }
         }
-        res.sendStatus(200); // Обязательно отвечаем 200, иначе бот будет слать запрос бесконечно
-    } catch (e) { 
-        console.error("WEBHOOK ERROR:", e);
-        res.sendStatus(500); 
-    }
+        res.sendStatus(200); 
+    } catch (e) { res.sendStatus(500); }
 });
-
 
 // ================= API: ПУБЛИЧНЫЕ ДАННЫЕ =================
 app.get('/api/get-characters', async (req, res) => { res.json(await Character.find()); });
@@ -307,4 +293,4 @@ app.post('/api/owner/set-price', async (req, res) => {
 
 module.exports = app;
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`[SYSTEM] Сервер крутится на порту ${PORT}`));
+app.listen(PORT, () => console.log(`[SYSTEM] Сервер запущен на порту ${PORT}`));
