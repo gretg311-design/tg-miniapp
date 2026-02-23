@@ -13,7 +13,7 @@ const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
 // НОВЫЕ КЛЮЧИ (ИИ И КРИПТОБОТ)
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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"; // <--- ОБЯЗАТЕЛЬНО ВСТАВЬ НОВЫЙ КЛЮЧ ТУТ
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 
 const connectDB = async () => {
@@ -160,11 +160,11 @@ app.post('/api/chat', async (req, res) => {
             headers: {
                 "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://t.me", // Обязательно для OpenRouter
-                "X-Title": "Moon Anime AI" // Обязательно для OpenRouter
+                "HTTP-Referer": "https://google.com", // ОБМАНКА ДЛЯ OPENROUTER
+                "X-Title": "Moon Anime AI"
             },
             body: JSON.stringify({
-                model: "gryphe/mythomax-l2-13b:free", // Модель без цензуры, идеальна для 18+
+                model: "gryphe/mythomax-l2-13b:free", // Модель без цензуры
                 messages: messagesArray,
                 temperature: 0.8
             })
@@ -172,10 +172,9 @@ app.post('/api/chat', async (req, res) => {
 
         const aiData = await aiResponse.json();
         
-        // ЕСЛИ OPENROUTER ВЫДАЛ ОШИБКУ - МЫ ЕЁ ПЕРЕХВАТЫВАЕМ И ПОКАЗЫВАЕМ
         if (!aiResponse.ok) {
             console.error("OPENROUTER API ОШИБКА:", aiData);
-            return res.status(500).json({ error: (aiData.error?.message || "OpenRouter перегружен, попробуйте еще раз через секунду.") });
+            return res.status(500).json({ error: (aiData.error?.message || "Ошибка OpenRouter. Попробуйте еще раз.") });
         }
 
         if (aiData.choices && aiData.choices.length > 0) {
