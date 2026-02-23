@@ -12,15 +12,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// Твой личный токен Hugging Face (разбит для обхода защиты GitHub)
+// КЛЮЧИ
 const HF_TOKEN = "hf_" + "EhICrHTZAzTbhabiMGjvQFxDthNoMiRSWk"; 
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
+const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
+
+// ФУНКЦИЯ ОТПРАВКИ УВЕДОМЛЕНИЙ В ТЕЛЕГРАМ
+const sendTgMessage = async (tg_id, text) => {
+    try {
+        await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: tg_id, text: text })
+        });
+    } catch (e) { console.error("TG BOT ERROR:", e.message); }
+};
 
 const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & HUGGING FACE MULTI-AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & TG NOTIFICATIONS ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -69,7 +81,6 @@ app.post('/api/user/get-data', async (req, res) => {
 
         let isModified = false;
 
-        // ЖЕЛЕЗОБЕТОННАЯ ОЧИСТКА
         if (user.subscription) {
             let cleanSub = user.subscription.trim();
             if (/^ultra$/i.test(cleanSub)) cleanSub = "Ultra";
@@ -84,7 +95,6 @@ app.post('/api/user/get-data', async (req, res) => {
             }
         }
 
-        // Овнер всегда бог
         if (uid === OWNER_ID) {
             if (user.subscription !== "Ultra") { user.subscription = "Ultra"; isModified = true; }
             if (!user.is_admin) { user.is_admin = true; isModified = true; }
@@ -99,7 +109,6 @@ app.post('/api/user/get-data', async (req, res) => {
             await user.save();
         }
 
-        // Точная цифра награды для Фронтенда (Pro теперь 150)
         let responseObj = user.toObject();
         let s = responseObj.subscription;
         responseObj.daily_reward = (s === 'Ultra') ? 500 : (s === 'VIP') ? 250 : (s === 'Pro') ? 150 : (s === 'Premium') ? 50 : 10;
@@ -127,15 +136,14 @@ app.post('/api/user/claim-daily', async (req, res) => {
         user.daily_streak += 1;
         let is7thDay = (user.daily_streak % 7 === 0);
 
-        // Принудительный нижний регистр для 100% совпадения
-        let sub = (user.subscription || "FREE").trim().toLowerCase();
-        if (uid === OWNER_ID) sub = "ultra";
+        let sub = (user.subscription || "FREE").trim();
+        if (uid === OWNER_ID) sub = "Ultra";
 
         let baseRew = 10;
-        if (sub === "ultra") baseRew = 500;
-        else if (sub === "vip") baseRew = 250;
-        else if (sub === "pro") baseRew = 150;
-        else if (sub === "premium") baseRew = 50;
+        if (sub === "Ultra") baseRew = 500;
+        else if (sub === "VIP") baseRew = 250;
+        else if (sub === "Pro") baseRew = 150;
+        else if (sub === "Premium") baseRew = 50;
 
         let actualRew = is7thDay ? baseRew * 2 : baseRew; 
         
@@ -158,7 +166,6 @@ app.post('/api/chat', async (req, res) => {
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден в БД" });
 
-        // ПРОВЕРКА ПОШЛОСТИ: 6 уровень только для Ultra!
         let requestedSex = Number(sex) || 0;
         let userSub = (uid === OWNER_ID) ? "ultra" : (user.subscription || "FREE").trim().toLowerCase();
         
@@ -166,7 +173,6 @@ app.post('/api/chat', async (req, res) => {
             return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
         }
 
-        // Моментальное списание 1 осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1;
@@ -287,9 +293,11 @@ app.post('/api/payment/webhook', async (req, res) => {
 
             if (customData.type === 'shards') {
                 await User.findOneAndUpdate({ tg_id: uid }, { $inc: { shards: Number(customData.item) } }, { upsert: true });
+                sendTgMessage(uid, `Вам начислено ${customData.item} токенов после оплаты.`);
             } else if (customData.type === 'sub') {
                 const expDate = new Date(); expDate.setDate(expDate.getDate() + 30);
                 await User.findOneAndUpdate({ tg_id: uid }, { subscription: customData.item, sub_exp: expDate.getTime() }, { upsert: true });
+                sendTgMessage(uid, `Ваша подписка ${customData.item} успешно активирована!`);
             }
         }
         res.sendStatus(200); 
@@ -301,7 +309,7 @@ app.get('/api/get-characters', async (req, res) => { res.json(await Character.fi
 app.get('/api/get-tasks', async (req, res) => { res.json(await Task.find()); });
 app.get('/api/get-promos', async (req, res) => { res.json(await Promo.find()); });
 
-// ================= API: АДМИНКА И КОНСОЛЬ =================
+// ================= API: АДМИНКА И КОНСОЛЬ (С УВЕДОМЛЕНИЯМИ) =================
 app.post('/api/admin/manage-shards', async (req, res) => {
     const sender_id = Number(req.body.sender_id);
     const target_id = Number(req.body.target_id);
@@ -313,9 +321,13 @@ app.post('/api/admin/manage-shards', async (req, res) => {
     if (req.body.action === 'remove') {
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать осколки" });
         await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: -amount } }, { upsert: true });
+        
+        sendTgMessage(target_id, `Администратор забрал у вас ${amount} токенов`);
         res.json({ message: `Снято ${amount} осколков` });
     } else {
         await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: amount } }, { upsert: true });
+        
+        sendTgMessage(target_id, `Администратор выдал вам ${amount} токенов`);
         res.json({ message: `Выдано ${amount} осколков` });
     }
 });
@@ -342,10 +354,14 @@ app.post('/api/admin/manage-sub', async (req, res) => {
         else if (/^premium$/i.test(cleanSub)) cleanSub = "Premium";
 
         await User.findOneAndUpdate({ tg_id: target_id }, { subscription: cleanSub, sub_exp: expDate.getTime() }, { upsert: true });
+        
+        sendTgMessage(target_id, `Администратор выдал вам подписку ${cleanSub}`);
         res.json({ message: `Подписка выдана на ${days} дней` });
     } else {
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать подписку" });
         await User.findOneAndUpdate({ tg_id: target_id }, { subscription: "FREE", sub_exp: 0 }, { upsert: true });
+        
+        sendTgMessage(target_id, `Администратор забрал вашу подписку`);
         res.json({ message: "Подписка аннулирована" });
     }
 });
@@ -388,7 +404,15 @@ app.post('/api/admin/delete-task', async (req, res) => {
 
 app.post('/api/owner/set-admin', async (req, res) => {
     if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
+    
     await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true });
+    
+    if (req.body.status) {
+        sendTgMessage(req.body.target_id, `Администратор сделал вас админом`);
+    } else {
+        sendTgMessage(req.body.target_id, `Администратор забрал у вас права админа`);
+    }
+    
     res.json({ message: "Статус администратора обновлен" });
 });
 
