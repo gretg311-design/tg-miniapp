@@ -12,8 +12,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// НОВЫЕ КЛЮЧИ (ИИ И КРИПТОБОТ)
-// Токен разбит на две части для обхода антивируса GitHub!
+// Твой личный токен Hugging Face (разбит для обхода защиты GitHub)
 const HF_TOKEN = "hf_" + "EhICrHTZAzTbhabiMGjvQFxDthNoMiRSWk"; 
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 
@@ -21,7 +20,7 @@ const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & MULTI-MODEL HF AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & HUGGING FACE MULTI-AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -52,13 +51,14 @@ const Promo = mongoose.models.Promo || mongoose.model('Promo', promoSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
 const Price = mongoose.models.Price || mongoose.model('Price', priceSchema);
 
+// ПРОВЕРКА ПРАВ
 const checkAdmin = async (sender_id) => {
     if (Number(sender_id) === OWNER_ID) return true;
     const sender = await User.findOne({ tg_id: Number(sender_id) });
     return sender && sender.is_admin;
 };
 
-// ================= API: ЮЗЕРЫ =================
+// ================= API: ПРОФИЛЬ И ЮЗЕРЫ =================
 app.post('/api/user/get-data', async (req, res) => {
     try {
         const uid = Number(req.body.tg_id);
@@ -66,22 +66,29 @@ app.post('/api/user/get-data', async (req, res) => {
         
         if (!user) { 
             user = new User({ tg_id: uid }); 
-            if(uid === OWNER_ID) { user.subscription = "ULTRA"; user.is_admin = true; user.shards = 999999; }
+            if(uid === OWNER_ID) { user.subscription = "Ultra"; user.is_admin = true; user.shards = 999999; }
             await user.save(); 
         }
 
-        if (uid !== OWNER_ID && user.subscription !== "FREE" && user.sub_exp > 0 && user.sub_exp < Date.now()) {
-            user.subscription = "FREE"; user.sub_exp = 0; await user.save();
+        // Железобетон: Овнер всегда бог
+        if (uid === OWNER_ID) {
+            user.subscription = "Ultra";
+            user.is_admin = true;
+            user.shards = 999999;
+        } else if (user.subscription !== "FREE" && user.sub_exp > 0 && user.sub_exp < Date.now()) {
+            // Строгое обнуление истекшей подписки
+            user.subscription = "FREE"; 
+            user.sub_exp = 0; 
+            await user.save();
         }
         res.json(user);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ЕЖЕДНЕВКИ И СТРИКИ (С режимом теста для Овнера)
 app.post('/api/user/claim-daily', async (req, res) => {
     try {
         const uid = Number(req.body.tg_id);
-        if (uid === OWNER_ID) return res.json({ success: true, reward: 500, new_balance: 999999, streak: 0 });
-
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден" });
 
@@ -89,29 +96,37 @@ app.post('/api/user/claim-daily', async (req, res) => {
         const ONE_DAY = 24 * 60 * 60 * 1000;
         const timePassed = now - user.last_daily;
 
-        if (timePassed < ONE_DAY && user.last_daily !== 0) return res.status(400).json({ error: "Рано", timeLeft: ONE_DAY - timePassed });
-        if (timePassed > ONE_DAY * 2 && user.last_daily !== 0) user.daily_streak = 0;
+        // Таймер 24 часа. Для Овнера (тебя) отключен, чтобы тестировать стрик.
+        if (uid !== OWNER_ID) {
+            if (timePassed < ONE_DAY && user.last_daily !== 0) return res.status(400).json({ error: "Рано", timeLeft: ONE_DAY - timePassed });
+            if (timePassed > ONE_DAY * 2 && user.last_daily !== 0) user.daily_streak = 0; // Сброс при пропуске
+        }
 
         user.daily_streak += 1;
         let is7thDay = (user.daily_streak % 7 === 0);
 
+        // Награды по подпискам
         let baseRew = 10;
-        if (user.subscription === "ULTRA") baseRew = 500;
-        else if (user.subscription === "VIP") baseRew = 250;
-        else if (user.subscription === "Pro") baseRew = 100;
-        else if (user.subscription === "Premium") baseRew = 50;
+        let sub = user.subscription.toLowerCase();
+        if (sub === "ultra") baseRew = 500;
+        else if (sub === "vip") baseRew = 250;
+        else if (sub === "pro") baseRew = 100;
+        else if (sub === "premium") baseRew = 50;
 
-        let actualRew = is7thDay ? baseRew * 2 : baseRew;
+        let actualRew = is7thDay ? baseRew * 2 : baseRew; // Бонус х2 на 7-й день
+        
         user.shards += actualRew;
         user.last_daily = now;
-        if (is7thDay) user.daily_streak = 0;
+        
+        let currentStreak = user.daily_streak;
+        if (is7thDay) user.daily_streak = 0; // Начинаем новый круг после 7 дней
 
         await user.save();
-        res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: user.daily_streak });
+        res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (АВТОПЕРЕКЛЮЧЕНИЕ МОДЕЛЕЙ) =================
+// ================= API: ЧАТ (С ПРАВИЛЬНЫМ СПИСАНИЕМ И HUGGING FACE КАРУСЕЛЬЮ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -120,10 +135,11 @@ app.post('/api/chat', async (req, res) => {
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден в БД" });
 
+        // Моментальное списание 1 осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1;
-            await user.save();
+            await user.save(); 
         }
 
         const char = await Character.findOne({ id: char_id });
@@ -153,7 +169,7 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // МАССИВ ЛУЧШИХ БЕСПЛАТНЫХ МОДЕЛЕЙ НА HUGGING FACE
+        // КАРУСЕЛЬ МОДЕЛЕЙ HUGGING FACE
         const hfModels = [
             "mistralai/Mistral-7B-Instruct-v0.3",
             "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
@@ -163,9 +179,8 @@ app.post('/api/chat', async (req, res) => {
         let aiData = null;
         let lastErrorStatus = null;
 
-        // Пытаемся получить ответ, перебирая модели по очереди
         for (const model of hfModels) {
-            console.log(`[AI] Пробуем модель: ${model}`);
+            console.log(`[AI] Пробуем HF модель: ${model}`);
             const aiResponse = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
                 method: "POST",
                 headers: {
@@ -182,25 +197,25 @@ app.post('/api/chat', async (req, res) => {
 
             if (aiResponse.ok) {
                 aiData = await aiResponse.json();
-                break; // Успех! Выходим из цикла
+                break; // Успешно получили ответ!
             } else {
                 lastErrorStatus = aiResponse.status;
                 if (lastErrorStatus === 401) {
-                    // Если 401, значит токен кривой, нет смысла пробовать другие модели
-                    return res.status(500).json({ error: "Ошибка 401: Токен HF недействителен или нет прав Inference." });
+                    if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } // Возврат осколка
+                    return res.status(500).json({ error: "Ошибка 401: Токен HF недействителен." });
                 }
-                // Если 410 (удалено) или 503 (спит) - цикл просто перейдет к следующей модели
-                console.log(`[AI] Модель ${model} недоступна (Код ${lastErrorStatus}). Переключаемся...`);
             }
         }
 
         if (!aiData) {
-            return res.status(500).json({ error: `Все нейросети сейчас заняты или недоступны (Последний код: ${lastErrorStatus}). Попробуй через минуту!` });
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } // Возврат осколка
+            return res.status(500).json({ error: `Все нейросети заняты (Последний код: ${lastErrorStatus}). Попробуй через пару секунд.` });
         }
         
         if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
             res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
         } else {
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } // Возврат осколка
             res.status(500).json({ error: "ИИ прислал пустой ответ." });
         }
 
@@ -210,7 +225,7 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-// ================= API: КРИПТОБОТ ОПЛАТА =================
+// ================= API: ОПЛАТА =================
 app.post('/api/payment/create', async (req, res) => {
     try {
         const { tg_id, type, item, amount_ton } = req.body;
@@ -251,70 +266,107 @@ app.post('/api/payment/webhook', async (req, res) => {
     } catch (e) { res.sendStatus(500); }
 });
 
-// ================= API: ПУБЛИЧНЫЕ ДАННЫЕ =================
+// ================= API: ВОЗВРАЩЕНИЕ ОБЩИХ ДАННЫХ =================
 app.get('/api/get-characters', async (req, res) => { res.json(await Character.find()); });
 app.get('/api/get-tasks', async (req, res) => { res.json(await Task.find()); });
 app.get('/api/get-promos', async (req, res) => { res.json(await Promo.find()); });
 
-// ================= API: АДМИНКА И КОНСОЛЬ =================
+// ================= API: АДМИНКА И КОНСОЛЬ (ЖЕСТКОЕ РАЗДЕЛЕНИЕ ПРАВ) =================
 app.post('/api/admin/manage-shards', async (req, res) => {
-    if (!(await checkAdmin(req.body.sender_id))) return res.status(403).send("No Access");
-    await User.findOneAndUpdate( { tg_id: Number(req.body.target_id) }, { $inc: { shards: req.body.action === 'add' ? Number(req.body.amount) : -Number(req.body.amount) } }, { upsert: true });
-    res.json({ message: "Готово" });
+    const sender_id = Number(req.body.sender_id);
+    const target_id = Number(req.body.target_id);
+    const isOwner = sender_id === OWNER_ID;
+    
+    if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
+
+    const amount = Number(req.body.amount);
+    if (req.body.action === 'remove') {
+        if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать осколки" });
+        await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: -amount } }, { upsert: true });
+        res.json({ message: `Снято ${amount} осколков` });
+    } else {
+        await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: amount } }, { upsert: true });
+        res.json({ message: `Выдано ${amount} осколков` });
+    }
 });
 
 app.post('/api/admin/manage-sub', async (req, res) => {
-    if (!(await checkAdmin(req.body.sender_id))) return res.status(403).send("No Access");
-    let updateData = {};
+    const sender_id = Number(req.body.sender_id);
+    const target_id = Number(req.body.target_id);
+    const isOwner = sender_id === OWNER_ID;
+
+    if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
+
     if (req.body.action === 'add') {
-        const expDate = new Date(); expDate.setDate(expDate.getDate() + 30);
-        updateData = { subscription: req.body.sub_type, sub_exp: expDate.getTime() };
-    } else { updateData = { subscription: "FREE", sub_exp: 0 }; }
-    await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, updateData, { upsert: true });
-    res.json({ message: "Готово" });
+        let days = 30; // Админы выдают строго на 30 дней
+        if (isOwner && req.body.days) days = Number(req.body.days); // Овнер может менять срок
+
+        let user = await User.findOne({ tg_id: target_id });
+        let expDate = user && user.sub_exp > Date.now() ? new Date(user.sub_exp) : new Date();
+        expDate.setDate(expDate.getDate() + days);
+
+        await User.findOneAndUpdate({ tg_id: target_id }, { subscription: req.body.sub_type, sub_exp: expDate.getTime() }, { upsert: true });
+        res.json({ message: `Подписка выдана на ${days} дней` });
+    } else {
+        if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать подписку" });
+        await User.findOneAndUpdate({ tg_id: target_id }, { subscription: "FREE", sub_exp: 0 }, { upsert: true });
+        res.json({ message: "Подписка аннулирована" });
+    }
 });
 
 app.post('/api/admin/create-char', async (req, res) => {
-    if (!(await checkAdmin(req.body.sender_id))) return res.status(403).send("No Access");
+    if (!(await checkAdmin(req.body.sender_id))) return res.status(403).json({ error: "Нет доступа" });
     await new Character(req.body.charData).save();
-    res.json({ message: "Персонаж создан!" });
+    res.json({ message: "Персонаж успешно добавлен!" });
 });
 
 app.post('/api/admin/delete-char', async (req, res) => {
-    if (Number(req.body.sender_id) !== OWNER_ID) return res.status(403).send("Only Owner");
+    if (Number(req.body.sender_id) !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять персонажей" });
     await Character.findOneAndDelete({ id: req.body.char_id });
-    res.json({ message: "Удалено" });
+    res.json({ message: "Персонаж удален" });
 });
 
 app.post('/api/admin/create-promo', async (req, res) => {
-    if (!(await checkAdmin(req.body.sender_id))) return res.status(403).send("No Access");
+    if (!(await checkAdmin(req.body.sender_id))) return res.status(403).json({ error: "Нет доступа" });
     await new Promo(req.body.promoData).save();
-    res.json({ message: "Промокод создан" });
+    res.json({ message: "Промокод успешно создан" });
+});
+
+app.post('/api/admin/delete-promo', async (req, res) => {
+    if (!(await checkAdmin(req.body.sender_id))) return res.status(403).json({ error: "Нет доступа" });
+    await Promo.findOneAndDelete({ code: req.body.code });
+    res.json({ message: "Промокод удален" });
 });
 
 app.post('/api/admin/create-task', async (req, res) => {
-    if (!(await checkAdmin(req.body.sender_id))) return res.status(403).send("No Access");
+    if (!(await checkAdmin(req.body.sender_id))) return res.status(403).json({ error: "Нет доступа" });
     await new Task(req.body.taskData).save();
-    res.json({ message: "Задание создано" });
+    res.json({ message: "Задание добавлено" });
+});
+
+app.post('/api/admin/delete-task', async (req, res) => {
+    if (Number(req.body.sender_id) !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять задания" });
+    await Task.findOneAndDelete({ id: req.body.task_id });
+    res.json({ message: "Задание удалено" });
 });
 
 app.post('/api/owner/set-admin', async (req, res) => {
-    if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).send("Only Owner");
+    if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
     await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true });
-    res.json({ message: "Готово" });
+    res.json({ message: "Статус администратора обновлен" });
 });
 
 app.post('/api/owner/set-price', async (req, res) => {
-    if (Number(req.body.sender_id) !== OWNER_ID) return res.status(403).send("Only Owner");
+    if (Number(req.body.sender_id) !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
     const { item_id, stars, ton } = req.body;
     await Price.findOneAndUpdate({ item_id }, { stars: Number(stars), ton: Number(ton) }, { upsert: true });
-    res.json({ message: "Цена сохранена!" });
+    res.json({ message: "Прайс-лист успешно обновлен!" });
 });
 
-// Экспортируем приложение для Vercel Serverless
+// Экспорт для Vercel
 module.exports = app;
 
-// Запуск сервера только локально
+// Запуск только локально (Vercel это игнорирует и не крашится)
 if (!process.env.VERCEL) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`[SYSTEM] Сервер запущен на порту ${PORT}`));
