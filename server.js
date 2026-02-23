@@ -13,7 +13,7 @@ const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
 // НОВЫЕ КЛЮЧИ (ИИ И КРИПТОБОТ)
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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";
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 
 const connectDB = async () => {
