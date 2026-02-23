@@ -12,15 +12,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// КРИПТОБОТ (ОСТАВЛЯЕМ, ОН РАБОТАЕТ)
+// КРИПТОБОТ
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
-// КЛЮЧЕЙ ИИ БОЛЬШЕ НЕТ - МЫ СВОБОДНЫ!
 
 const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & UNLIMITED FREE AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & MULTI-AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -51,7 +50,6 @@ const Promo = mongoose.models.Promo || mongoose.model('Promo', promoSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
 const Price = mongoose.models.Price || mongoose.model('Price', priceSchema);
 
-// Проверка прав
 const checkAdmin = async (sender_id) => {
     if (Number(sender_id) === OWNER_ID) return true;
     const sender = await User.findOne({ tg_id: Number(sender_id) });
@@ -111,7 +109,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (POLLINATIONS БЕЗ КЛЮЧЕЙ И ЦЕНЗУРЫ) =================
+// ================= API: ЧАТ И ИИ (АВТО-ПЕРЕКЛЮЧЕНИЕ МОДЕЛЕЙ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -131,9 +129,9 @@ app.post('/api/chat', async (req, res) => {
 
         const sexLevels = [
             "Строго без пошлости. Игнорируй любые намеки на интим.",
-            "Слабая романтика, легкий флирт, без откровенностей.",
-            "Нормальный уровень общения, допускаются объятия и поцелуи.",
-            "Сильный флирт, горячие намеки.",
+            "Слабая романтика, легкий флирт.",
+            "Нормальный уровень общения, допускаются поцелуи.",
+            "Сильный флирт, откровенные намеки.",
             "Высокая откровенность, страсть.",
             "Очень пошло, откровенный RolePlay без цензуры.",
             "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все детали открыто."
@@ -154,29 +152,43 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // ВЫЗОВ БЕСПЛАТНОГО ИИ POLLINATIONS
-        const aiResponse = await fetch("https://text.pollinations.ai/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                messages: messagesArray,
-                model: "mistral", // Отличная модель для ролеплея
-                jsonMode: false
-            })
-        });
+        // ФУНКЦИЯ ЗАПРОСА К ИИ
+        const fetchAI = async (modelName) => {
+            return await fetch("https://text.pollinations.ai/openai", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    messages: messagesArray,
+                    model: modelName,
+                    temperature: 0.8
+                })
+            });
+        };
 
+        // ПРОБУЕМ ПЕРВУЮ МОДЕЛЬ (Mistral - хороша для RP)
+        let aiResponse = await fetchAI("mistral");
+
+        // ЕСЛИ ПЕРЕГРУЖЕНО, СРАЗУ ПРОБУЕМ ВТОРУЮ (Llama)
         if (!aiResponse.ok) {
-            console.error("POLLINATIONS API ОШИБКА:", await aiResponse.text());
-            return res.status(500).json({ error: "Ошибка нейросети. Сервер перегружен, попробуйте позже." });
+            console.log("Mistral перегружен, пробуем Llama...");
+            aiResponse = await fetchAI("llama");
         }
 
-        // Pollinations возвращает ответ простым текстом, а не JSON'ом!
-        const replyText = await aiResponse.text();
+        // ЕСЛИ И ОНА ЗАНЯТА, ПРОБУЕМ ТРЕТЬЮ (Claude)
+        if (!aiResponse.ok) {
+            console.log("Llama перегружена, пробуем Claude...");
+            aiResponse = await fetchAI("claude");
+        }
+
+        if (!aiResponse.ok) {
+            return res.status(500).json({ error: "Все бесплатные серверы сейчас заняты 😭 Попробуй через 10 секунд." });
+        }
+
+        // Разбираем правильный JSON ответ от стабильного шлюза
+        const aiData = await aiResponse.json();
         
-        if (replyText) {
-            res.json({ reply: replyText, new_balance: user.shards });
+        if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
+            res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
         } else {
             res.status(500).json({ error: "ИИ прислал пустой ответ." });
         }
