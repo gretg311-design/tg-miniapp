@@ -69,15 +69,14 @@ app.post('/api/user/get-data', async (req, res) => {
 
         let isModified = false;
 
-        // ИДЕАЛЬНАЯ ОЧИСТКА ДЛЯ ФРОНТЕНДА (Чтобы на экране писало 500, а не 10)
+        // ЖЕЛЕЗОБЕТОННАЯ ОЧИСТКА
         if (user.subscription) {
-            let cleanSub = user.subscription.trim(); // Удаляем пробелы
-            // Выравниваем регистр, чтобы Фронтенд точно узнал слово
+            let cleanSub = user.subscription.trim();
             if (/^ultra$/i.test(cleanSub)) cleanSub = "Ultra";
             else if (/^vip$/i.test(cleanSub)) cleanSub = "VIP";
             else if (/^pro$/i.test(cleanSub)) cleanSub = "Pro";
             else if (/^premium$/i.test(cleanSub)) cleanSub = "Premium";
-            else if (/^free$/i.test(cleanSub)) cleanSub = "FREE";
+            else cleanSub = "FREE";
 
             if (user.subscription !== cleanSub) {
                 user.subscription = cleanSub;
@@ -85,7 +84,7 @@ app.post('/api/user/get-data', async (req, res) => {
             }
         }
 
-        // Железобетон: Овнер всегда бог
+        // Овнер всегда бог
         if (uid === OWNER_ID) {
             if (user.subscription !== "Ultra") { user.subscription = "Ultra"; isModified = true; }
             if (!user.is_admin) { user.is_admin = true; isModified = true; }
@@ -100,7 +99,12 @@ app.post('/api/user/get-data', async (req, res) => {
             await user.save();
         }
 
-        res.json(user);
+        // Точная цифра награды для Фронтенда (Pro теперь 150)
+        let responseObj = user.toObject();
+        let s = responseObj.subscription;
+        responseObj.daily_reward = (s === 'Ultra') ? 500 : (s === 'VIP') ? 250 : (s === 'Pro') ? 150 : (s === 'Premium') ? 50 : 10;
+
+        res.json(responseObj);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -123,13 +127,14 @@ app.post('/api/user/claim-daily', async (req, res) => {
         user.daily_streak += 1;
         let is7thDay = (user.daily_streak % 7 === 0);
 
+        // Принудительный нижний регистр для 100% совпадения
         let sub = (user.subscription || "FREE").trim().toLowerCase();
         if (uid === OWNER_ID) sub = "ultra";
 
         let baseRew = 10;
         if (sub === "ultra") baseRew = 500;
         else if (sub === "vip") baseRew = 250;
-        else if (sub === "pro") baseRew = 100;
+        else if (sub === "pro") baseRew = 150;
         else if (sub === "premium") baseRew = 50;
 
         let actualRew = is7thDay ? baseRew * 2 : baseRew; 
@@ -144,7 +149,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= API: ЧАТ (С HUGGING FACE КАРУСЕЛЬЮ) =================
+// ================= API: ЧАТ (С HUGGING FACE КАРУСЕЛЬЮ И ПРОВЕРКОЙ ПОШЛОСТИ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -153,6 +158,15 @@ app.post('/api/chat', async (req, res) => {
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден в БД" });
 
+        // ПРОВЕРКА ПОШЛОСТИ: 6 уровень только для Ultra!
+        let requestedSex = Number(sex) || 0;
+        let userSub = (uid === OWNER_ID) ? "ultra" : (user.subscription || "FREE").trim().toLowerCase();
+        
+        if (requestedSex >= 6 && userSub !== "ultra") {
+            return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
+        }
+
+        // Моментальное списание 1 осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1;
@@ -163,19 +177,19 @@ app.post('/api/chat', async (req, res) => {
         if (!char) return res.status(404).json({ error: "Персонаж не найден в БД" });
 
         const sexLevels = [
-            "Строго без пошлости. Игнорируй любые намеки на интим.",
-            "Слабая романтика, легкий флирт.",
-            "Нормальный уровень общения, допускаются поцелуи.",
-            "Сильный флирт, откровенные намеки.",
-            "Высокая откровенность, страсть.",
-            "Очень пошло, откровенный RolePlay без цензуры.",
-            "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все детали открыто."
+            "Строго без пошлости. Игнорируй любые намеки на интим.", 
+            "Слабая романтика, легкий флирт.", 
+            "Нормальный уровень общения, допускаются поцелуи.", 
+            "Сильный флирт, откровенные намеки.", 
+            "Высокая откровенность, страсть.", 
+            "Очень пошло, откровенный RolePlay без цензуры.", 
+            "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все детали открыто." 
         ];
         
         let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. 
 Твоя легенда: ${char.desc}. 
 Веди себя строго в рамках персонажа. Длина ответа: около ${len} слов. 
-Уровень откровенности: ${sexLevels[sex]}.`;
+Уровень откровенности: ${sexLevels[requestedSex]}.`;
 
         let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
@@ -322,6 +336,10 @@ app.post('/api/admin/manage-sub', async (req, res) => {
         expDate.setDate(expDate.getDate() + days);
 
         let cleanSub = (req.body.sub_type || "FREE").trim();
+        if (/^ultra$/i.test(cleanSub)) cleanSub = "Ultra";
+        else if (/^vip$/i.test(cleanSub)) cleanSub = "VIP";
+        else if (/^pro$/i.test(cleanSub)) cleanSub = "Pro";
+        else if (/^premium$/i.test(cleanSub)) cleanSub = "Premium";
 
         await User.findOneAndUpdate({ tg_id: target_id }, { subscription: cleanSub, sub_exp: expDate.getTime() }, { upsert: true });
         res.json({ message: `Подписка выдана на ${days} дней` });
