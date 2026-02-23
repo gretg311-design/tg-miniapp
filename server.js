@@ -12,15 +12,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// КРИПТОБОТ ОСТАЛСЯ
+// НОВЫЕ КЛЮЧИ (ИИ И КРИПТОБОТ)
+const HF_TOKEN = "ВСТАВЬ_СЮДА_ТОКЕН_hf_..."; // <--- ТВОЙ КЛЮЧ ОТ HUGGING FACE
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
-// КЛЮЧИ ИИ УДАЛЕНЫ - ИСПОЛЬЗУЕМ ПРЯМОЙ ОБХОД
 
 const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & DIRECT AI BYPASS ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & HUGGING FACE AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -65,7 +65,7 @@ app.post('/api/user/get-data', async (req, res) => {
         
         if (!user) { 
             user = new User({ tg_id: uid }); 
-            if(uid === OWNER_ID) { user.subscription = "Ultra"; user.is_admin = true; user.shards = 999999; }
+            if(uid === OWNER_ID) { user.subscription = "ULTRA"; user.is_admin = true; user.shards = 999999; }
             await user.save(); 
         }
 
@@ -95,7 +95,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         let is7thDay = (user.daily_streak % 7 === 0);
 
         let baseRew = 10;
-        if (user.subscription === "Ultra") baseRew = 500;
+        if (user.subscription === "ULTRA") baseRew = 500;
         else if (user.subscription === "VIP") baseRew = 250;
         else if (user.subscription === "Pro") baseRew = 100;
         else if (user.subscription === "Premium") baseRew = 50;
@@ -110,7 +110,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (ГЕНИАЛЬНЫЙ ОБХОД ЧЕРЕЗ ССЫЛКУ) =================
+// ================= API: ЧАТ И ИИ (HUGGING FACE API) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -128,37 +128,63 @@ app.post('/api/chat', async (req, res) => {
         const char = await Character.findOne({ id: char_id });
         if (!char) return res.status(404).json({ error: "Персонаж не найден в БД" });
 
-        const sexLevels = ["Без пошлости", "Легкий флирт", "Поцелуи", "Откровенные намеки", "Страсть", "RolePlay без цензуры", "ХАРДКОР NSFW"];
+        const sexLevels = [
+            "Строго без пошлости. Игнорируй любые намеки на интим.",
+            "Слабая романтика, легкий флирт.",
+            "Нормальный уровень общения, допускаются поцелуи.",
+            "Сильный флирт, откровенные намеки.",
+            "Высокая откровенность, страсть.",
+            "Очень пошло, откровенный RolePlay без цензуры.",
+            "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все детали открыто."
+        ];
         
-        // Собираем всё в ОДИН сплошной текст
-        let fullPrompt = `[СИСТЕМА]: Ты в RolePlay чате. Твоя роль: ${char.name} (${char.age} лет). Пол: ${char.gender === 'm' ? 'М' : 'Ж'}. Описание: ${char.desc}. Отвечай строго от лица персонажа. Длина: ~${len} слов. Откровенность: ${sexLevels[sex]}.\n\n`;
+        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. 
+Твоя легенда: ${char.desc}. 
+Веди себя строго в рамках персонажа. Длина ответа: около ${len} слов. 
+Уровень откровенности: ${sexLevels[sex]}.`;
 
+        let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
-            chat_history.slice(-8).forEach(msg => {
-                fullPrompt += (msg.sender === 'user' ? "User: " : char.name + ": ") + msg.text + "\n";
+            let recentHistory = chat_history.slice(-10);
+            recentHistory.forEach(msg => {
+                messagesArray.push({ role: msg.sender === 'user' ? "user" : "assistant", content: msg.text });
             });
         }
-        fullPrompt += "User: " + message + "\n" + char.name + ": ";
+        messagesArray.push({ role: "user", content: message });
 
-        // ОБХОД ЗАЩИТЫ: Отправляем промпт тупо через адресную строку браузера
-        const aiUrl = "https://text.pollinations.ai/" + encodeURIComponent(fullPrompt) + "?model=mistral";
+        // ЗАПРОС К HUGGING FACE INFERENCE API
+        const aiResponse = await fetch("https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${HF_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "HuggingFaceH4/zephyr-7b-beta", // Топовая RP модель
+                messages: messagesArray,
+                max_tokens: 300,
+                temperature: 0.85
+            })
+        });
 
-        const aiResponse = await fetch(aiUrl);
-        
         if (!aiResponse.ok) {
-            return res.status(500).json({ error: `Сервер ИИ тупит (Код ${aiResponse.status}). Попробуй еще раз.` });
+            // У Hugging Face код 503 означает, что модель была неактивна и сейчас загружается
+            if (aiResponse.status === 503) {
+                return res.status(500).json({ error: "Нейросеть просыпается (загружается в память). Подожди 10 секунд и отправь снова!" });
+            }
+            return res.status(500).json({ error: `Сбой HF (Код ${aiResponse.status}). Проверь свой токен hf_...` });
         }
 
-        const replyText = await aiResponse.text();
+        const aiData = await aiResponse.json();
         
-        if (replyText) {
-            res.json({ reply: replyText.trim(), new_balance: user.shards });
+        if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
+            res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
         } else {
-            res.status(500).json({ error: "ИИ ответил пустотой." });
+            res.status(500).json({ error: "ИИ прислал пустой ответ." });
         }
 
     } catch (e) { 
-        console.error("CHAT CRASH:", e);
+        console.error("CHAT CRASH EXCEPTION:", e);
         res.status(500).json({ error: "Сбой связи: " + e.message }); 
     }
 });
