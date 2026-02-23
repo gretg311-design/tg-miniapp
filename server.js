@@ -17,7 +17,7 @@ const HF_TOKEN = "hf_" + "EhICrHTZAzTbhabiMGjvQFxDthNoMiRSWk";
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
 
-// ФУНКЦИЯ ОТПРАВКИ УВЕДОМЛЕНИЙ В ТЕЛЕГРАМ (Теперь с await, чтобы Vercel не замораживал её)
+// ФУНКЦИЯ ОТПРАВКИ УВЕДОМЛЕНИЙ В ТЕЛЕГРАМ
 const sendTgMessage = async (tg_id, text) => {
     try {
         await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
@@ -117,6 +117,26 @@ app.post('/api/user/get-data', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ================= API: СИНХРОНИЗАЦИЯ В РЕАЛЬНОМ ВРЕМЕНИ =================
+app.post('/api/user/sync', async (req, res) => {
+    try {
+        const uid = Number(req.body.tg_id);
+        let user = await User.findOne({ tg_id: uid });
+        if (!user) return res.json({ shards: 0, subscription: "FREE" });
+
+        let cleanSub = user.subscription ? user.subscription.trim() : "FREE";
+        if (/^ultra$/i.test(cleanSub)) cleanSub = "Ultra";
+        else if (/^vip$/i.test(cleanSub)) cleanSub = "VIP";
+        else if (/^pro$/i.test(cleanSub)) cleanSub = "Pro";
+        else if (/^premium$/i.test(cleanSub)) cleanSub = "Premium";
+        else cleanSub = "FREE";
+
+        if (uid === OWNER_ID) { cleanSub = "Ultra"; }
+
+        res.json({ shards: user.shards, subscription: cleanSub });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ЕЖЕДНЕВКИ И СТРИКИ
 app.post('/api/user/claim-daily', async (req, res) => {
     try {
@@ -136,14 +156,14 @@ app.post('/api/user/claim-daily', async (req, res) => {
         user.daily_streak += 1;
         let is7thDay = (user.daily_streak % 7 === 0);
 
-        let sub = (user.subscription || "FREE").trim();
-        if (uid === OWNER_ID) sub = "Ultra";
+        let sub = (user.subscription || "FREE").trim().toLowerCase();
+        if (uid === OWNER_ID) sub = "ultra";
 
         let baseRew = 10;
-        if (sub === "Ultra") baseRew = 500;
-        else if (sub === "VIP") baseRew = 250;
-        else if (sub === "Pro") baseRew = 150;
-        else if (sub === "Premium") baseRew = 50;
+        if (sub === "ultra") baseRew = 500;
+        else if (sub === "vip") baseRew = 250;
+        else if (sub === "pro") baseRew = 150;
+        else if (sub === "premium") baseRew = 50;
 
         let actualRew = is7thDay ? baseRew * 2 : baseRew; 
         
@@ -157,7 +177,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= API: ЧАТ (С HUGGING FACE КАРУСЕЛЬЮ И ПРОВЕРКОЙ ПОШЛОСТИ) =================
+// ================= API: ЧАТ (С HUGGING FACE И ПРОВЕРКОЙ ПОШЛОСТИ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -169,10 +189,12 @@ app.post('/api/chat', async (req, res) => {
         let requestedSex = Number(sex) || 0;
         let userSub = (uid === OWNER_ID) ? "ultra" : (user.subscription || "FREE").trim().toLowerCase();
         
+        // 6 УРОВЕНЬ ТОЛЬКО ДЛЯ ULTRA
         if (requestedSex >= 6 && userSub !== "ultra") {
             return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
         }
 
+        // Моментальное списание 1 осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1;
@@ -309,7 +331,7 @@ app.get('/api/get-characters', async (req, res) => { res.json(await Character.fi
 app.get('/api/get-tasks', async (req, res) => { res.json(await Task.find()); });
 app.get('/api/get-promos', async (req, res) => { res.json(await Promo.find()); });
 
-// ================= API: АДМИНКА И КОНСОЛЬ (С БРОНЕБОЙНЫМ СНЯТИЕМ ОСКОЛКОВ) =================
+// ================= API: АДМИНКА И КОНСОЛЬ =================
 app.post('/api/admin/manage-shards', async (req, res) => {
     const sender_id = Number(req.body.sender_id);
     const target_id = Number(req.body.target_id);
@@ -320,15 +342,14 @@ app.post('/api/admin/manage-shards', async (req, res) => {
     const action = (req.body.action || '').toLowerCase().trim();
     let rawAmount = Number(req.body.amount);
 
-    // Логика: если команда не "add" (добавить) ИЛИ пришло число с минусом -> это списание
     let isRemoving = (action !== 'add' && action !== '') || rawAmount < 0;
-    let amount = Math.abs(rawAmount); // Всегда чистая цифра
+    let amount = Math.abs(rawAmount); 
 
     if (isRemoving) {
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать осколки" });
         
         let user = await User.findOne({ tg_id: target_id });
-        if (user && user.shards < amount) amount = user.shards; // Не пускаем баланс в минуса
+        if (user && user.shards < amount) amount = user.shards; 
         
         await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: -amount } }, { upsert: true });
         await sendTgMessage(target_id, `Администратор забрал у вас ${amount} токенов`);
@@ -438,4 +459,3 @@ if (!process.env.VERCEL) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`[SYSTEM] Сервер запущен на порту ${PORT}`));
 }
-
