@@ -107,7 +107,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (С ОТЛОВОМ ОШИБОК) =================
+// ================= API: ЧАТ И ИИ (ИСПРАВЛЕННЫЙ ПУТЬ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -149,36 +149,35 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // ВЫЗОВ ИИ (POLLINATIONS) С УНИКАЛЬНЫМ SEED
-        console.log(`[AI] Отправка запроса. Персонаж: ${char.name}`);
-        const aiResponse = await fetch("https://text.pollinations.ai/", {
+        // ВЫЗОВ ИИ С ПРАВИЛЬНЫМ АДРЕСОМ (/openai)
+        const aiResponse = await fetch("https://text.pollinations.ai/openai", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 messages: messagesArray,
-                model: "mistral",
-                seed: Math.floor(Math.random() * 1000000) // Защита от зависаний кэша
+                model: "mistral", // Бесплатная, умная, без цензуры
+                temperature: 0.8,
+                seed: Math.floor(Math.random() * 1000000)
             })
         });
 
         if (!aiResponse.ok) {
             const errStatus = aiResponse.status;
-            let errText = await aiResponse.text();
-            console.error(`[AI ERROR] Статус: ${errStatus}, Текст: ${errText}`);
-            return res.status(500).json({ error: `Сеть перегружена (Код ${errStatus}). Попробуй через 5 сек.` });
+            console.error(`[AI ERROR] Статус: ${errStatus}`);
+            return res.status(500).json({ error: `ИИ занят (Код ${errStatus}). Жми еще раз!` });
         }
 
-        const replyText = await aiResponse.text();
+        // Теперь мы получаем нормальный JSON
+        const aiData = await aiResponse.json();
         
-        if (replyText && replyText.trim().length > 0) {
-            res.json({ reply: replyText, new_balance: user.shards });
+        if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
+            res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
         } else {
             res.status(500).json({ error: "Нейросеть промолчала (пустой ответ)." });
         }
 
     } catch (e) { 
         console.error("CHAT CRASH EXCEPTION:", e);
-        // Выводим РЕАЛЬНУЮ причину краша в телефон
         res.status(500).json({ error: "Сбой связи: " + e.message }); 
     }
 });
