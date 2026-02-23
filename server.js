@@ -12,15 +12,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// НОВЫЕ КЛЮЧИ (ИИ И КРИПТОБОТ)
-const OPENROUTER_API_KEY = "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"; // <--- ВСТАВЬ СВОЙ НОВЫЙ КЛЮЧ ОТ OPENROUTER
+// КРИПТОБОТ (ОСТАВЛЯЕМ, ОН РАБОТАЕТ)
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
+// КЛЮЧЕЙ ИИ БОЛЬШЕ НЕТ - МЫ СВОБОДНЫ!
 
 const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & NSFW AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & UNLIMITED FREE AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -66,7 +66,7 @@ app.post('/api/user/get-data', async (req, res) => {
         
         if (!user) { 
             user = new User({ tg_id: uid }); 
-            if(uid === OWNER_ID) { user.subscription = "ULTRA"; user.is_admin = true; user.shards = 999999; }
+            if(uid === OWNER_ID) { user.subscription = "Ultra"; user.is_admin = true; user.shards = 999999; }
             await user.save(); 
         }
 
@@ -96,7 +96,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         let is7thDay = (user.daily_streak % 7 === 0);
 
         let baseRew = 10;
-        if (user.subscription === "ULTRA") baseRew = 500;
+        if (user.subscription === "Ultra") baseRew = 500;
         else if (user.subscription === "VIP") baseRew = 250;
         else if (user.subscription === "Pro") baseRew = 100;
         else if (user.subscription === "Premium") baseRew = 50;
@@ -111,7 +111,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (OPENROUTER NSFW) =================
+// ================= API: ЧАТ И ИИ (POLLINATIONS БЕЗ КЛЮЧЕЙ И ЦЕНЗУРЫ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -141,7 +141,7 @@ app.post('/api/chat', async (req, res) => {
         
         let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. 
 Твоя легенда и описание: ${char.desc}. 
-Веди себя строго в рамках этого персонажа. 
+Веди себя строго в рамках этого персонажа, не выходи из роли. 
 Длина твоего ответа должна быть около ${len} слов. 
 Уровень откровенности: ${sexLevels[sex]}.`;
 
@@ -154,31 +154,29 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // ТОПОВАЯ МОДЕЛЬ ДЛЯ NSFW БЕЗ ЦЕНЗУРЫ
-        const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        // ВЫЗОВ БЕСПЛАТНОГО ИИ POLLINATIONS
+        const aiResponse = await fetch("https://text.pollinations.ai/", {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://t.me", // Обманка для стабильной работы
-                "X-Title": "Moon Anime AI"
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "gryphe/mythomax-l2-13b:free", // Идеальна для RolePlay 18+
                 messages: messagesArray,
-                temperature: 0.85
+                model: "mistral", // Отличная модель для ролеплея
+                jsonMode: false
             })
         });
 
-        const aiData = await aiResponse.json();
-        
         if (!aiResponse.ok) {
-            console.error("OPENROUTER API ОШИБКА:", aiData);
-            return res.status(500).json({ error: (aiData.error?.message || "Ошибка нейросети. Попробуйте еще раз.") });
+            console.error("POLLINATIONS API ОШИБКА:", await aiResponse.text());
+            return res.status(500).json({ error: "Ошибка нейросети. Сервер перегружен, попробуйте позже." });
         }
 
-        if (aiData.choices && aiData.choices.length > 0) {
-            res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
+        // Pollinations возвращает ответ простым текстом, а не JSON'ом!
+        const replyText = await aiResponse.text();
+        
+        if (replyText) {
+            res.json({ reply: replyText, new_balance: user.shards });
         } else {
             res.status(500).json({ error: "ИИ прислал пустой ответ." });
         }
