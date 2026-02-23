@@ -227,9 +227,9 @@
                     }
                 }
             } catch(e) {}
-        }, 3000); // Опрос каждые 3 секунды
+        }, 3000);
 
-        // ================= ИНИЦИАЛИЗАЦИЯ И СВЯЗЬ С СЕРВЕРОМ =================
+        // ================= ИНИЦИАЛИЗАЦИЯ =================
         async function init() {
             const uid = getUid();
             const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
@@ -427,9 +427,10 @@
         }
         function closeChat() { back(); }
 
-        // ================= МАГАЗИН И CRYPTOBOT =================
+        // ================= ОПЛАТА: TON И STARS =================
         async function buyItem(type, item, currency, price) {
             const uid = getUid();
+            
             if (currency === 'ton') {
                 tg.showAlert("Генерация счета CryptoBot...");
                 try {
@@ -441,11 +442,31 @@
                     if(data.pay_url) {
                         tg.openLink(data.pay_url); 
                     } else {
-                        tg.showAlert("Ошибка создания счета");
+                        tg.showAlert("Ошибка создания счета CryptoBot");
                     }
                 } catch (e) { tg.showAlert("Ошибка сервера оплат"); }
-            } else {
-                tg.showAlert("Оплата через Stars пока в разработке. Используйте TON.");
+                
+            } else if (currency === 'stars') {
+                tg.showAlert("Подготовка оплаты Stars...");
+                try {
+                    const res = await fetch('/api/payment/stars-invoice', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ tg_id: uid, type: type, item: item, amount_stars: price })
+                    });
+                    const data = await res.json();
+                    if(data.invoice_url) {
+                        // Нативное окно оплаты Telegram Stars
+                        tg.openInvoice(data.invoice_url, function(status) {
+                            if (status === 'paid') {
+                                tg.showAlert("Оплата успешна! Награда скоро обновится на экране.");
+                            } else if (status === 'failed') {
+                                tg.showAlert("Ошибка при оплате Stars.");
+                            }
+                        });
+                    } else {
+                        tg.showAlert("Ошибка API Telegram Stars");
+                    }
+                } catch (e) { tg.showAlert("Ошибка сервера оплат"); }
             }
         }
 
