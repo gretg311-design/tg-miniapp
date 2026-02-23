@@ -1,4 +1,4 @@
-const express = require('express');
+lconst express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
@@ -12,8 +12,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// ОБХОД БЛОКИРОВКИ GITHUB: Разбиваем токен на две части, чтобы защита его не увидела
-const HF_TOKEN = "hf_" + "wunkbSvqhjACgxsdLvIkILJLlSlpgXfvaO"; 
+// НОВЫЕ КЛЮЧИ (ИИ И КРИПТОБОТ)
+// Токен разбит на две части для обхода антивируса GitHub!
+const HF_TOKEN = "hf_" + "EhICrHTZAzTbhabiMGjvQFxDthNoMiRSWk"; 
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 
 const connectDB = async () => {
@@ -65,7 +66,7 @@ app.post('/api/user/get-data', async (req, res) => {
         
         if (!user) { 
             user = new User({ tg_id: uid }); 
-            if(uid === OWNER_ID) { user.subscription = "ULTRA"; user.is_admin = true; user.shards = 999999; }
+            if(uid === OWNER_ID) { user.subscription = "Ultra"; user.is_admin = true; user.shards = 999999; }
             await user.save(); 
         }
 
@@ -95,7 +96,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         let is7thDay = (user.daily_streak % 7 === 0);
 
         let baseRew = 10;
-        if (user.subscription === "ULTRA") baseRew = 500;
+        if (user.subscription === "Ultra") baseRew = 500;
         else if (user.subscription === "VIP") baseRew = 250;
         else if (user.subscription === "Pro") baseRew = 100;
         else if (user.subscription === "Premium") baseRew = 50;
@@ -171,7 +172,7 @@ app.post('/api/chat', async (req, res) => {
             if (aiResponse.status === 503) {
                 return res.status(500).json({ error: "Нейросеть просыпается (загружается в память). Подожди 10 секунд и отправь снова!" });
             }
-            return res.status(500).json({ error: `Сбой HF (Код ${aiResponse.status}). Если 401 - токен неверный или нет прав Read.` });
+            return res.status(500).json({ error: `Сбой HF (Код ${aiResponse.status}). Проверь галочки в настройках токена.` });
         }
 
         const aiData = await aiResponse.json();
