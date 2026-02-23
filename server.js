@@ -21,7 +21,7 @@ const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & HUGGING FACE AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & MULTI-MODEL HF AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -111,7 +111,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (HUGGING FACE API) =================
+// ================= API: ЧАТ И ИИ (АВТОПЕРЕКЛЮЧЕНИЕ МОДЕЛЕЙ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -153,29 +153,50 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // ЗАПРОС К HUGGING FACE INFERENCE API
-        const aiResponse = await fetch("https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${HF_TOKEN}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "HuggingFaceH4/zephyr-7b-beta",
-                messages: messagesArray,
-                max_tokens: 300,
-                temperature: 0.85
-            })
-        });
+        // МАССИВ ЛУЧШИХ БЕСПЛАТНЫХ МОДЕЛЕЙ НА HUGGING FACE
+        const hfModels = [
+            "mistralai/Mistral-7B-Instruct-v0.3",
+            "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
+            "Qwen/Qwen2.5-7B-Instruct"
+        ];
 
-        if (!aiResponse.ok) {
-            if (aiResponse.status === 503) {
-                return res.status(500).json({ error: "Нейросеть просыпается (загружается в память). Подожди 10 секунд и отправь снова!" });
+        let aiData = null;
+        let lastErrorStatus = null;
+
+        // Пытаемся получить ответ, перебирая модели по очереди
+        for (const model of hfModels) {
+            console.log(`[AI] Пробуем модель: ${model}`);
+            const aiResponse = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${HF_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: messagesArray,
+                    max_tokens: 300,
+                    temperature: 0.85
+                })
+            });
+
+            if (aiResponse.ok) {
+                aiData = await aiResponse.json();
+                break; // Успех! Выходим из цикла
+            } else {
+                lastErrorStatus = aiResponse.status;
+                if (lastErrorStatus === 401) {
+                    // Если 401, значит токен кривой, нет смысла пробовать другие модели
+                    return res.status(500).json({ error: "Ошибка 401: Токен HF недействителен или нет прав Inference." });
+                }
+                // Если 410 (удалено) или 503 (спит) - цикл просто перейдет к следующей модели
+                console.log(`[AI] Модель ${model} недоступна (Код ${lastErrorStatus}). Переключаемся...`);
             }
-            return res.status(500).json({ error: `Сбой HF (Код ${aiResponse.status}). Если 401 - токен неверный или нет прав Inference.` });
         }
 
-        const aiData = await aiResponse.json();
+        if (!aiData) {
+            return res.status(500).json({ error: `Все нейросети сейчас заняты или недоступны (Последний код: ${lastErrorStatus}). Попробуй через минуту!` });
+        }
         
         if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
             res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
@@ -293,7 +314,7 @@ app.post('/api/owner/set-price', async (req, res) => {
 // Экспортируем приложение для Vercel Serverless
 module.exports = app;
 
-// Запуск сервера только локально (Vercel это проигнорирует)
+// Запуск сервера только локально
 if (!process.env.VERCEL) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`[SYSTEM] Сервер запущен на порту ${PORT}`));
