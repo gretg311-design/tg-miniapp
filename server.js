@@ -51,7 +51,6 @@ const Promo = mongoose.models.Promo || mongoose.model('Promo', promoSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
 const Price = mongoose.models.Price || mongoose.model('Price', priceSchema);
 
-// ПРОВЕРКА ПРАВ
 const checkAdmin = async (sender_id) => {
     if (Number(sender_id) === OWNER_ID) return true;
     const sender = await User.findOne({ tg_id: Number(sender_id) });
@@ -70,7 +69,23 @@ app.post('/api/user/get-data', async (req, res) => {
 
         let isModified = false;
 
-        // Железобетон: Овнер всегда бог (Сохраняем Ультру в БД жестко!)
+        // ИДЕАЛЬНАЯ ОЧИСТКА ДЛЯ ФРОНТЕНДА (Чтобы на экране писало 500, а не 10)
+        if (user.subscription) {
+            let cleanSub = user.subscription.trim(); // Удаляем пробелы
+            // Выравниваем регистр, чтобы Фронтенд точно узнал слово
+            if (/^ultra$/i.test(cleanSub)) cleanSub = "Ultra";
+            else if (/^vip$/i.test(cleanSub)) cleanSub = "VIP";
+            else if (/^pro$/i.test(cleanSub)) cleanSub = "Pro";
+            else if (/^premium$/i.test(cleanSub)) cleanSub = "Premium";
+            else if (/^free$/i.test(cleanSub)) cleanSub = "FREE";
+
+            if (user.subscription !== cleanSub) {
+                user.subscription = cleanSub;
+                isModified = true;
+            }
+        }
+
+        // Железобетон: Овнер всегда бог
         if (uid === OWNER_ID) {
             if (user.subscription !== "Ultra") { user.subscription = "Ultra"; isModified = true; }
             if (!user.is_admin) { user.is_admin = true; isModified = true; }
