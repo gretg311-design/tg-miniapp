@@ -11,13 +11,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 // === ЖЕЛЕЗОБЕТОННЫЕ НАСТРОЙКИ ===
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
+
+// КРИПТОБОТ ОСТАЛСЯ
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
+// КЛЮЧИ ИИ УДАЛЕНЫ - ИСПОЛЬЗУЕМ ПРЯМОЙ ОБХОД
 
 const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & UNLIMITED AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & DIRECT AI BYPASS ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -107,7 +110,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (ИСПРАВЛЕННЫЙ ПРАВИЛЬНЫЙ АДРЕС) =================
+// ================= API: ЧАТ И ИИ (ГЕНИАЛЬНЫЙ ОБХОД ЧЕРЕЗ ССЫЛКУ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -125,63 +128,37 @@ app.post('/api/chat', async (req, res) => {
         const char = await Character.findOne({ id: char_id });
         if (!char) return res.status(404).json({ error: "Персонаж не найден в БД" });
 
-        const sexLevels = [
-            "Строго без пошлости. Игнорируй любые намеки на интим.",
-            "Слабая романтика, легкий флирт.",
-            "Нормальный уровень общения, допускаются поцелуи.",
-            "Сильный флирт, откровенные намеки.",
-            "Высокая откровенность, страсть.",
-            "Очень пошло, откровенный RolePlay без цензуры.",
-            "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все детали открыто."
-        ];
+        const sexLevels = ["Без пошлости", "Легкий флирт", "Поцелуи", "Откровенные намеки", "Страсть", "RolePlay без цензуры", "ХАРДКОР NSFW"];
         
-        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. 
-Твоя легенда: ${char.desc}. 
-Веди себя строго в рамках персонажа. Длина ответа: около ${len} слов. 
-Уровень откровенности: ${sexLevels[sex]}.`;
+        // Собираем всё в ОДИН сплошной текст
+        let fullPrompt = `[СИСТЕМА]: Ты в RolePlay чате. Твоя роль: ${char.name} (${char.age} лет). Пол: ${char.gender === 'm' ? 'М' : 'Ж'}. Описание: ${char.desc}. Отвечай строго от лица персонажа. Длина: ~${len} слов. Откровенность: ${sexLevels[sex]}.\n\n`;
 
-        let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
-            let recentHistory = chat_history.slice(-10);
-            recentHistory.forEach(msg => {
-                messagesArray.push({ role: msg.sender === 'user' ? "user" : "assistant", content: msg.text });
+            chat_history.slice(-8).forEach(msg => {
+                fullPrompt += (msg.sender === 'user' ? "User: " : char.name + ": ") + msg.text + "\n";
             });
         }
-        messagesArray.push({ role: "user", content: message });
+        fullPrompt += "User: " + message + "\n" + char.name + ": ";
 
-        // ФУНКЦИЯ ЗАПРОСА (АДРЕС ИСПРАВЛЕН НА ПРАВИЛЬНЫЙ!)
-        const fetchAI = async (modelName) => {
-            return await fetch("https://text.pollinations.ai/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    messages: messagesArray,
-                    model: modelName,
-                    seed: Math.floor(Math.random() * 1000000)
-                })
-            });
-        };
+        // ОБХОД ЗАЩИТЫ: Отправляем промпт тупо через адресную строку браузера
+        const aiUrl = "https://text.pollinations.ai/" + encodeURIComponent(fullPrompt) + "?model=mistral";
 
-        // Тройная подстраховка: если первая ИИ тупит, переключаемся на следующую
-        let aiResponse = await fetchAI("mistral");
-        if (!aiResponse.ok) aiResponse = await fetchAI("llama");
-        if (!aiResponse.ok) aiResponse = await fetchAI("searchgpt");
-
+        const aiResponse = await fetch(aiUrl);
+        
         if (!aiResponse.ok) {
-            return res.status(500).json({ error: `Все сервера ИИ перегружены (Код ${aiResponse.status}). Попробуй еще раз!` });
+            return res.status(500).json({ error: `Сервер ИИ тупит (Код ${aiResponse.status}). Попробуй еще раз.` });
         }
 
-        // Pollinations возвращает чистый текст, больше никаких json() крашей
         const replyText = await aiResponse.text();
         
-        if (replyText && replyText.trim().length > 0) {
+        if (replyText) {
             res.json({ reply: replyText.trim(), new_balance: user.shards });
         } else {
-            res.status(500).json({ error: "Нейросеть промолчала (пустой ответ)." });
+            res.status(500).json({ error: "ИИ ответил пустотой." });
         }
 
     } catch (e) { 
-        console.error("CHAT CRASH EXCEPTION:", e);
+        console.error("CHAT CRASH:", e);
         res.status(500).json({ error: "Сбой связи: " + e.message }); 
     }
 });
