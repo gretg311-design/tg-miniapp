@@ -17,7 +17,7 @@ const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & POLLINATIONS AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & UNLIMITED AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -107,7 +107,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (ИСПРАВЛЕННЫЙ ПУТЬ) =================
+// ================= API: ЧАТ И ИИ (ИСПРАВЛЕННЫЙ ПРАВИЛЬНЫЙ АДРЕС) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -149,29 +149,33 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // ВЫЗОВ ИИ С ПРАВИЛЬНЫМ АДРЕСОМ (/openai)
-        const aiResponse = await fetch("https://text.pollinations.ai/openai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                messages: messagesArray,
-                model: "mistral", // Бесплатная, умная, без цензуры
-                temperature: 0.8,
-                seed: Math.floor(Math.random() * 1000000)
-            })
-        });
+        // ФУНКЦИЯ ЗАПРОСА (АДРЕС ИСПРАВЛЕН НА ПРАВИЛЬНЫЙ!)
+        const fetchAI = async (modelName) => {
+            return await fetch("https://text.pollinations.ai/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    messages: messagesArray,
+                    model: modelName,
+                    seed: Math.floor(Math.random() * 1000000)
+                })
+            });
+        };
+
+        // Тройная подстраховка: если первая ИИ тупит, переключаемся на следующую
+        let aiResponse = await fetchAI("mistral");
+        if (!aiResponse.ok) aiResponse = await fetchAI("llama");
+        if (!aiResponse.ok) aiResponse = await fetchAI("searchgpt");
 
         if (!aiResponse.ok) {
-            const errStatus = aiResponse.status;
-            console.error(`[AI ERROR] Статус: ${errStatus}`);
-            return res.status(500).json({ error: `ИИ занят (Код ${errStatus}). Жми еще раз!` });
+            return res.status(500).json({ error: `Все сервера ИИ перегружены (Код ${aiResponse.status}). Попробуй еще раз!` });
         }
 
-        // Теперь мы получаем нормальный JSON
-        const aiData = await aiResponse.json();
+        // Pollinations возвращает чистый текст, больше никаких json() крашей
+        const replyText = await aiResponse.text();
         
-        if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
-            res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
+        if (replyText && replyText.trim().length > 0) {
+            res.json({ reply: replyText.trim(), new_balance: user.shards });
         } else {
             res.status(500).json({ error: "Нейросеть промолчала (пустой ответ)." });
         }
