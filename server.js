@@ -12,14 +12,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// КРИПТОБОТ
+// КРИПТОБОТ ОСТАЛСЯ
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
+// КЛЮЧИ ИИ УДАЛЕНЫ НАВСЕГДА
 
 const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & MULTI-AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & P2P HORDE AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -109,7 +110,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (АВТО-ПЕРЕКЛЮЧЕНИЕ МОДЕЛЕЙ) =================
+// ================= API: ЧАТ И ИИ (KOBOLD AI HORDE - P2P НЕТВОРК) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -137,61 +138,72 @@ app.post('/api/chat', async (req, res) => {
             "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все детали открыто."
         ];
         
+        // Horde работает с сырым текстом, поэтому мы собираем весь диалог в один блок
         let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. 
 Твоя легенда и описание: ${char.desc}. 
-Веди себя строго в рамках этого персонажа, не выходи из роли. 
-Длина твоего ответа должна быть около ${len} слов. 
+Веди себя строго в рамках этого персонажа, не выходи из роли. Длина твоего ответа должна быть около ${len} слов. 
 Уровень откровенности: ${sexLevels[sex]}.`;
 
-        let messagesArray = [{ role: "system", content: systemPrompt }];
+        let promptText = systemPrompt + "\n\n";
         if (chat_history && chat_history.length > 0) {
-            let recentHistory = chat_history.slice(-10);
+            let recentHistory = chat_history.slice(-10); // Берем последние 10 сообщений
             recentHistory.forEach(msg => {
-                messagesArray.push({ role: msg.sender === 'user' ? "user" : "assistant", content: msg.text });
+                promptText += (msg.sender === 'user' ? "User: " : char.name + ": ") + msg.text + "\n";
             });
         }
-        messagesArray.push({ role: "user", content: message });
+        promptText += "User: " + message + "\n" + char.name + ":";
 
-        // ФУНКЦИЯ ЗАПРОСА К ИИ
-        const fetchAI = async (modelName) => {
-            return await fetch("https://text.pollinations.ai/openai", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    messages: messagesArray,
-                    model: modelName,
-                    temperature: 0.8
-                })
-            });
-        };
+        // 1. ОТПРАВЛЯЕМ ЗАДАЧУ В СЕТЬ ЭНТУЗИАСТАМ (P2P)
+        const hordeReq = await fetch("https://horde.koboldai.net/api/v2/generate/text/async", {
+            method: "POST",
+            headers: { 
+                "apikey": "0000000000", // Анонимный бесплатный ключ
+                "Content-Type": "application/json" 
+            },
+            body: JSON.stringify({
+                prompt: promptText,
+                params: {
+                    max_length: 150,
+                    temperature: 0.8,
+                    rep_pen: 1.1,
+                    stop_sequence: ["User:", "\nUser"] // Чтобы ИИ не начал говорить за юзера
+                },
+                nsfw: true, // ХАРДКОР РАЗРЕШЕН
+                censor_msg: false,
+                models: [] // Оставляем пустым, чтобы сеть сама нашла самого быстрого волонтера
+            })
+        });
 
-        // ПРОБУЕМ ПЕРВУЮ МОДЕЛЬ (Mistral - хороша для RP)
-        let aiResponse = await fetchAI("mistral");
+        const hordeTask = await hordeReq.json();
+        if (!hordeTask.id) return res.status(500).json({error: "Сеть сейчас занята, попробуй еще раз."});
 
-        // ЕСЛИ ПЕРЕГРУЖЕНО, СРАЗУ ПРОБУЕМ ВТОРУЮ (Llama)
-        if (!aiResponse.ok) {
-            console.log("Mistral перегружен, пробуем Llama...");
-            aiResponse = await fetchAI("llama");
+        // 2. ЦИКЛ ОЖИДАНИЯ (Так как это делают реальные видеокарты волонтеров, ждем результат)
+        let replyText = "";
+        for (let i = 0; i < 20; i++) { // Проверяем 20 раз каждые 2 секунды (до 40 сек)
+            await new Promise(r => setTimeout(r, 2000)); 
+            
+            const checkReq = await fetch("https://horde.koboldai.net/api/v2/generate/text/status/" + hordeTask.id);
+            const checkStatus = await checkReq.json();
+            
+            if (checkStatus.done) {
+                replyText = checkStatus.generations[0].text.trim();
+                break;
+            }
+            if (checkStatus.faulted) {
+                return res.status(500).json({error: "Волонтер прервал генерацию. Попробуй снова."});
+            }
         }
 
-        // ЕСЛИ И ОНА ЗАНЯТА, ПРОБУЕМ ТРЕТЬЮ (Claude)
-        if (!aiResponse.ok) {
-            console.log("Llama перегружена, пробуем Claude...");
-            aiResponse = await fetchAI("claude");
+        if (!replyText) {
+            // Если слишком долго - удаляем задачу из сети
+            await fetch("https://horde.koboldai.net/api/v2/generate/text/status/" + hordeTask.id, {method: "DELETE"});
+            return res.status(500).json({error: "Сеть загружена, ИИ думает слишком долго."});
         }
 
-        if (!aiResponse.ok) {
-            return res.status(500).json({ error: "Все бесплатные серверы сейчас заняты 😭 Попробуй через 10 секунд." });
-        }
+        // Чистим текст от мусора
+        replyText = replyText.replace("User:", "").trim();
 
-        // Разбираем правильный JSON ответ от стабильного шлюза
-        const aiData = await aiResponse.json();
-        
-        if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
-            res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
-        } else {
-            res.status(500).json({ error: "ИИ прислал пустой ответ." });
-        }
+        res.json({ reply: replyText, new_balance: user.shards });
 
     } catch (e) { 
         console.error("CHAT CRASH:", e);
