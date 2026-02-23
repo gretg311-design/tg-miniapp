@@ -17,7 +17,7 @@ const HF_TOKEN = "hf_" + "EhICrHTZAzTbhabiMGjvQFxDthNoMiRSWk";
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
 
-// ФУНКЦИЯ ОТПРАВКИ УВЕДОМЛЕНИЙ В ТЕЛЕГРАМ
+// ФУНКЦИЯ ОТПРАВКИ УВЕДОМЛЕНИЙ В ТЕЛЕГРАМ (Теперь с await, чтобы Vercel не замораживал её)
 const sendTgMessage = async (tg_id, text) => {
     try {
         await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
@@ -157,7 +157,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= API: ЧАТ (С HUGGING FACE КАРУСЕЛЬЮ И ПРОВЕРКОЙ ПОШЛОСТИ) =================
+// ================= API: ЧАТ =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -293,11 +293,11 @@ app.post('/api/payment/webhook', async (req, res) => {
 
             if (customData.type === 'shards') {
                 await User.findOneAndUpdate({ tg_id: uid }, { $inc: { shards: Number(customData.item) } }, { upsert: true });
-                sendTgMessage(uid, `Вам начислено ${customData.item} токенов после оплаты.`);
+                await sendTgMessage(uid, `Вам начислено ${customData.item} токенов после оплаты.`);
             } else if (customData.type === 'sub') {
                 const expDate = new Date(); expDate.setDate(expDate.getDate() + 30);
                 await User.findOneAndUpdate({ tg_id: uid }, { subscription: customData.item, sub_exp: expDate.getTime() }, { upsert: true });
-                sendTgMessage(uid, `Ваша подписка ${customData.item} успешно активирована!`);
+                await sendTgMessage(uid, `Ваша подписка ${customData.item} успешно активирована!`);
             }
         }
         res.sendStatus(200); 
@@ -309,7 +309,7 @@ app.get('/api/get-characters', async (req, res) => { res.json(await Character.fi
 app.get('/api/get-tasks', async (req, res) => { res.json(await Task.find()); });
 app.get('/api/get-promos', async (req, res) => { res.json(await Promo.find()); });
 
-// ================= API: АДМИНКА И КОНСОЛЬ (С УВЕДОМЛЕНИЯМИ) =================
+// ================= API: АДМИНКА И КОНСОЛЬ =================
 app.post('/api/admin/manage-shards', async (req, res) => {
     const sender_id = Number(req.body.sender_id);
     const target_id = Number(req.body.target_id);
@@ -317,17 +317,19 @@ app.post('/api/admin/manage-shards', async (req, res) => {
     
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
 
-    const amount = Number(req.body.amount);
-    if (req.body.action === 'remove') {
+    // ЗАЩИТА ОТ ДВОЙНОГО МИНУСА (берем чистую цифру через Math.abs)
+    const amount = Math.abs(Number(req.body.amount));
+    
+    if (req.body.action === 'remove' || req.body.action === 'take') {
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать осколки" });
         await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: -amount } }, { upsert: true });
         
-        sendTgMessage(target_id, `Администратор забрал у вас ${amount} токенов`);
+        await sendTgMessage(target_id, `Администратор забрал у вас ${amount} токенов`);
         res.json({ message: `Снято ${amount} осколков` });
     } else {
         await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: amount } }, { upsert: true });
         
-        sendTgMessage(target_id, `Администратор выдал вам ${amount} токенов`);
+        await sendTgMessage(target_id, `Администратор выдал вам ${amount} токенов`);
         res.json({ message: `Выдано ${amount} осколков` });
     }
 });
@@ -355,13 +357,13 @@ app.post('/api/admin/manage-sub', async (req, res) => {
 
         await User.findOneAndUpdate({ tg_id: target_id }, { subscription: cleanSub, sub_exp: expDate.getTime() }, { upsert: true });
         
-        sendTgMessage(target_id, `Администратор выдал вам подписку ${cleanSub}`);
+        await sendTgMessage(target_id, `Администратор выдал вам подписку ${cleanSub}`);
         res.json({ message: `Подписка выдана на ${days} дней` });
     } else {
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать подписку" });
         await User.findOneAndUpdate({ tg_id: target_id }, { subscription: "FREE", sub_exp: 0 }, { upsert: true });
         
-        sendTgMessage(target_id, `Администратор забрал вашу подписку`);
+        await sendTgMessage(target_id, `Администратор забрал вашу подписку`);
         res.json({ message: "Подписка аннулирована" });
     }
 });
@@ -408,9 +410,9 @@ app.post('/api/owner/set-admin', async (req, res) => {
     await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true });
     
     if (req.body.status) {
-        sendTgMessage(req.body.target_id, `Администратор сделал вас админом`);
+        await sendTgMessage(req.body.target_id, `Администратор сделал вас админом`);
     } else {
-        sendTgMessage(req.body.target_id, `Администратор забрал у вас права админа`);
+        await sendTgMessage(req.body.target_id, `Администратор забрал у вас права админа`);
     }
     
     res.json({ message: "Статус администратора обновлен" });
