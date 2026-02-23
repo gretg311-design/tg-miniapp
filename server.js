@@ -1,4 +1,4 @@
-lconst express = require('express');
+const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
@@ -66,7 +66,7 @@ app.post('/api/user/get-data', async (req, res) => {
         
         if (!user) { 
             user = new User({ tg_id: uid }); 
-            if(uid === OWNER_ID) { user.subscription = "Ultra"; user.is_admin = true; user.shards = 999999; }
+            if(uid === OWNER_ID) { user.subscription = "ULTRA"; user.is_admin = true; user.shards = 999999; }
             await user.save(); 
         }
 
@@ -96,7 +96,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         let is7thDay = (user.daily_streak % 7 === 0);
 
         let baseRew = 10;
-        if (user.subscription === "Ultra") baseRew = 500;
+        if (user.subscription === "ULTRA") baseRew = 500;
         else if (user.subscription === "VIP") baseRew = 250;
         else if (user.subscription === "Pro") baseRew = 100;
         else if (user.subscription === "Premium") baseRew = 50;
@@ -172,7 +172,7 @@ app.post('/api/chat', async (req, res) => {
             if (aiResponse.status === 503) {
                 return res.status(500).json({ error: "Нейросеть просыпается (загружается в память). Подожди 10 секунд и отправь снова!" });
             }
-            return res.status(500).json({ error: `Сбой HF (Код ${aiResponse.status}). Проверь галочки в настройках токена.` });
+            return res.status(500).json({ error: `Сбой HF (Код ${aiResponse.status}). Если 401 - токен неверный или нет прав Inference.` });
         }
 
         const aiData = await aiResponse.json();
@@ -290,6 +290,11 @@ app.post('/api/owner/set-price', async (req, res) => {
     res.json({ message: "Цена сохранена!" });
 });
 
+// Экспортируем приложение для Vercel Serverless
 module.exports = app;
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`[SYSTEM] Сервер запущен на порту ${PORT}`));
+
+// Запуск сервера только локально (Vercel это проигнорирует)
+if (!process.env.VERCEL) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`[SYSTEM] Сервер запущен на порту ${PORT}`));
+}
