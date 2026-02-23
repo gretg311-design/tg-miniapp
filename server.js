@@ -13,14 +13,14 @@ const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
 // НОВЫЕ КЛЮЧИ (ИИ И КРИПТОБОТ)
-const OPENROUTER_API_KEY = "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"; // <--- ОБЯЗАТЕЛЬНО ВСТАВЬ НОВЫЙ КЛЮЧ ТУТ
+const OPENROUTER_API_KEY = "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"; // <--- ВСТАВЬ СВОЙ НОВЫЙ КЛЮЧ ОТ OPENROUTER
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 
 const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & NSFW AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -111,7 +111,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ И ИИ (OPENROUTER) =================
+// ================= API: ЧАТ И ИИ (OPENROUTER NSFW) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -154,19 +154,19 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // УЛУЧШЕННЫЙ ЗАПРОС С ПОДДЕРЖКОЙ NSFW И ОБРАБОТКОЙ ОШИБОК
+        // ТОПОВАЯ МОДЕЛЬ ДЛЯ NSFW БЕЗ ЦЕНЗУРЫ
         const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://google.com", // ОБМАНКА ДЛЯ OPENROUTER
+                "HTTP-Referer": "https://t.me", // Обманка для стабильной работы
                 "X-Title": "Moon Anime AI"
             },
             body: JSON.stringify({
-                model: "gryphe/mythomax-l2-13b:free", // Модель без цензуры
+                model: "gryphe/mythomax-l2-13b:free", // Идеальна для RolePlay 18+
                 messages: messagesArray,
-                temperature: 0.8
+                temperature: 0.85
             })
         });
 
@@ -174,7 +174,7 @@ app.post('/api/chat', async (req, res) => {
         
         if (!aiResponse.ok) {
             console.error("OPENROUTER API ОШИБКА:", aiData);
-            return res.status(500).json({ error: (aiData.error?.message || "Ошибка OpenRouter. Попробуйте еще раз.") });
+            return res.status(500).json({ error: (aiData.error?.message || "Ошибка нейросети. Попробуйте еще раз.") });
         }
 
         if (aiData.choices && aiData.choices.length > 0) {
