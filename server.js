@@ -157,7 +157,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= API: ЧАТ =================
+// ================= API: ЧАТ (С HUGGING FACE КАРУСЕЛЬЮ И ПРОВЕРКОЙ ПОШЛОСТИ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -309,7 +309,7 @@ app.get('/api/get-characters', async (req, res) => { res.json(await Character.fi
 app.get('/api/get-tasks', async (req, res) => { res.json(await Task.find()); });
 app.get('/api/get-promos', async (req, res) => { res.json(await Promo.find()); });
 
-// ================= API: АДМИНКА И КОНСОЛЬ =================
+// ================= API: АДМИНКА И КОНСОЛЬ (С БРОНЕБОЙНЫМ СНЯТИЕМ ОСКОЛКОВ) =================
 app.post('/api/admin/manage-shards', async (req, res) => {
     const sender_id = Number(req.body.sender_id);
     const target_id = Number(req.body.target_id);
@@ -317,18 +317,24 @@ app.post('/api/admin/manage-shards', async (req, res) => {
     
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
 
-    // ЗАЩИТА ОТ ДВОЙНОГО МИНУСА (берем чистую цифру через Math.abs)
-    const amount = Math.abs(Number(req.body.amount));
-    
-    if (req.body.action === 'remove' || req.body.action === 'take') {
+    const action = (req.body.action || '').toLowerCase().trim();
+    let rawAmount = Number(req.body.amount);
+
+    // Логика: если команда не "add" (добавить) ИЛИ пришло число с минусом -> это списание
+    let isRemoving = (action !== 'add' && action !== '') || rawAmount < 0;
+    let amount = Math.abs(rawAmount); // Всегда чистая цифра
+
+    if (isRemoving) {
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать осколки" });
-        await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: -amount } }, { upsert: true });
         
+        let user = await User.findOne({ tg_id: target_id });
+        if (user && user.shards < amount) amount = user.shards; // Не пускаем баланс в минуса
+        
+        await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: -amount } }, { upsert: true });
         await sendTgMessage(target_id, `Администратор забрал у вас ${amount} токенов`);
         res.json({ message: `Снято ${amount} осколков` });
     } else {
         await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: amount } }, { upsert: true });
-        
         await sendTgMessage(target_id, `Администратор выдал вам ${amount} токенов`);
         res.json({ message: `Выдано ${amount} осколков` });
     }
@@ -432,3 +438,4 @@ if (!process.env.VERCEL) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`[SYSTEM] Сервер запущен на порту ${PORT}`));
 }
+
