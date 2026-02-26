@@ -160,7 +160,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= API: ЧАТ (С БРОНЕЙ ОТ ТАЙМ-АУТОВ И РАЗДЕЛЕНИЕМ ИИ) =================
+// ================= API: ЧАТ (ГОНКА НЕЙРОСЕТЕЙ - PROMISE.ANY) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -174,7 +174,7 @@ app.post('/api/chat', async (req, res) => {
         
         if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
 
-        // Списание
+        // Моментальное списание
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1;
@@ -191,11 +191,11 @@ app.post('/api/chat', async (req, res) => {
             "Сильный флирт, откровенные намеки. Допускается прелюдия.", 
             "Высокая откровенность, страсть. Разрешен откровенный текст.", 
             "Очень пошло, откровенный RolePlay без цензуры. Грязные слова.", 
-            "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все интимные детали открыто и грязно." 
+            "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все интимные детали открыто и максимально грязно." 
         ];
         
         let safeLen = Number(len) || 45;
-        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. Твоя легенда: ${char.desc}. Веди себя строго в рамках персонажа. Длина ответа: около ${safeLen} слов. Уровень откровенности: ${sexLevels[requestedSex]}. Не пиши за пользователя.`;
+        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. Твоя легенда: ${char.desc}. Веди себя строго в рамках персонажа. Длина ответа: около ${safeLen} слов. Уровень откровенности: ${sexLevels[requestedSex]}. Не пиши действия за пользователя.`;
 
         let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
@@ -204,58 +204,76 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
+        // САМЫЕ БЫСТРЫЕ И СТАБИЛЬНЫЕ МОДЕЛИ НА HUGGING FACE
         let hfModels = [];
         if (requestedSex <= 3) {
-            hfModels = ["HuggingFaceH4/zephyr-7b-beta", "mistralai/Mistral-7B-Instruct-v0.2"];
+            hfModels = [
+                "Qwen/Qwen2.5-7B-Instruct",
+                "mistralai/Mistral-Nemo-Instruct-2407",
+                "microsoft/Phi-3-mini-4k-instruct"
+            ];
         } else {
-            hfModels = ["NousResearch/Nous-Hermes-2-Mistral-7B-DPO", "HuggingFaceH4/zephyr-7b-beta"];
+            hfModels = [
+                "NousResearch/Hermes-3-Llama-3.1-8B", // Мощный RP без цензуры
+                "Qwen/Qwen2.5-7B-Instruct",
+                "mistralai/Mistral-7B-Instruct-v0.3"
+            ];
         }
 
-        let aiData = null; let lastErrorStatus = null;
-        
-        for (const model of hfModels) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+        // ОБЩИЙ ТАЙМЕР НА 8.5 СЕКУНД (Чтобы Vercel не убил сервер)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8500);
 
-            try {
-                const aiResponse = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
-                    method: "POST", 
-                    headers: { "Authorization": `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({ model: model, messages: messagesArray, max_tokens: Math.min(safeLen * 3, 500), temperature: 0.85 }),
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                if (aiResponse.ok) { 
-                    aiData = await aiResponse.json(); 
-                    break; 
-                } else { 
-                    lastErrorStatus = aiResponse.status; 
-                    if (lastErrorStatus === 401) { 
-                        if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
-                        return res.status(500).json({ error: "Ошибка 401: Токен HF недействителен." }); 
-                    } 
-                }
-            } catch (err) {
-                clearTimeout(timeoutId);
-                lastErrorStatus = "TIMEOUT";
+        // ЗАПУСКАЕМ ВСЕ 3 НЕЙРОСЕТИ ОДНОВРЕМЕННО
+        const fetchPromises = hfModels.map(async (model) => {
+            const res = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
+                method: "POST", 
+                headers: { "Authorization": `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ model: model, messages: messagesArray, max_tokens: Math.min(safeLen * 3, 500), temperature: 0.85 }),
+                signal: controller.signal
+            });
+            
+            if (!res.ok) {
+                if (res.status === 401) throw new Error("401");
+                throw new Error(`HTTP ${res.status}`);
             }
+            
+            const data = await res.json();
+            if (!data.choices || !data.choices[0].message) throw new Error("Empty");
+            return data; // КТО ПЕРВЫЙ ВЕРНУЛ ДАННЫЕ — ТОТ ПОБЕДИЛ
+        });
+
+        let aiData = null; 
+        let isTokenError = false;
+
+        try {
+            // Promise.any берет ПЕРВЫЙ успешный ответ и игнорирует ошибки остальных
+            aiData = await Promise.any(fetchPromises);
+            clearTimeout(timeoutId);
+        } catch (err) {
+            clearTimeout(timeoutId);
+            if (err.errors) {
+                for (let e of err.errors) { if (e.message === "401") isTokenError = true; }
+            } else if (err.message === "401") { isTokenError = true; }
+        }
+
+        if (isTokenError) {
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
+            return res.status(500).json({ error: "Ошибка 401: Токен Hugging Face недействителен!" });
         }
 
         if (!aiData) { 
+            // Возвращаем осколок
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
-            return res.status(500).json({ error: `Нейросеть еще "спит". Подожди 10 секунд и отправь заново!` }); 
+            return res.status(500).json({ error: `Все нейросети спят под нагрузкой. Подожди 3 секунды и жми снова!` }); 
         }
 
-        if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) { 
-            res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards }); 
-        } else { 
-            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
-            res.status(500).json({ error: "ИИ прислал пустой ответ." }); 
-        }
+        // ОТПРАВЛЯЕМ ОТВЕТ ПОБЕДИВШЕЙ НЕЙРОСЕТИ
+        res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards }); 
 
-    } catch (e) { res.status(500).json({ error: "Сбой связи: " + e.message }); }
+    } catch (e) { 
+        res.status(500).json({ error: "Сбой связи: " + e.message }); 
+    }
 });
 
 // ================= API: ОПЛАТА STARS =================
@@ -271,8 +289,8 @@ app.post('/api/payment/stars-invoice', async (req, res) => {
                 title: type === 'shards' ? `Осколки Луны x${item}` : `Подписка ${item}`,
                 description: type === 'shards' ? `Начисление ${item} 🌙 на ваш баланс` : `Премиум функции и награды на 30 дней`,
                 payload: customPayload,
-                provider_token: "", 
-                currency: "XTR", 
+                provider_token: "", // Для Stars должно быть пустым
+                currency: "XTR", // Валюта Stars
                 prices: [{ label: "Цена", amount: Number(amount_stars) }]
             })
         });
