@@ -158,7 +158,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= API: ЧАТ (OPENROUTER ДВИЖОК - БЕЗ ЗАВИСАНИЙ) =================
+// ================= API: ЧАТ (АЛГОРИТМ "ДРОБОВИК" - УНИВЕРСАЛЬНЫЙ СТУК ВО ВСЕ ДВЕРИ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -172,7 +172,7 @@ app.post('/api/chat', async (req, res) => {
         
         if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
 
-        // Списание
+        // Моментальное списание осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1;
@@ -202,56 +202,79 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // === ИСПОЛЬЗУЕМ 100% СТАБИЛЬНУЮ МОДЕЛЬ ===
-        // Qwen 2.5 отлично тянет и обычное общение, и жесткий RP без отказов.
-        let targetModel = "qwen/qwen-2.5-7b-instruct:free"; 
+        // === ОБОЙМА МОДЕЛЕЙ ДЛЯ ОДНОВРЕМЕННОГО ЗАПУСКА ===
+        // Берем 3 лучшие бесплатные модели, чтобы не словить бан за спам от OpenRouter
+        let targetModels = [
+            "qwen/qwen-2.5-7b-instruct:free",
+            "google/gemma-2-9b-it:free",
+            "meta-llama/llama-3-8b-instruct:free"
+        ];
 
+        if (requestedSex >= 4) {
+            // Для пошлости берем те, что меньше всего цензурят
+            targetModels = [
+                "undi95/toppy-m-7b:free",
+                "qwen/qwen-2.5-7b-instruct:free",
+                "gryphe/mythomax-l2-13b:free"
+            ];
+        }
+
+        // Жесткий лимит 8.5 секунд, чтобы Vercel не убил нас с ошибкой 500
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 9000); // 9 секунд лимит для Vercel
+        const timeoutId = setTimeout(() => controller.abort(), 8500);
 
         try {
-            const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${OPENROUTER_TOKEN}`,
-                    "HTTP-Referer": "https://t.me/moon_project",
-                    "X-Title": "Moon Project",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: targetModel,
-                    messages: messagesArray,
-                    max_tokens: Math.min(safeLen * 3, 500),
-                    temperature: 0.85
-                }),
-                signal: controller.signal
+            // СТРЕЛЯЕМ СРАЗУ ВО ВСЕ 3 НЕЙРОСЕТИ ОДНОВРЕМЕННО
+            const fetchPromises = targetModels.map(async (model) => {
+                const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${OPENROUTER_TOKEN}`,
+                        "HTTP-Referer": "https://t.me/moon_project",
+                        "X-Title": "Moon Project",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: messagesArray,
+                        max_tokens: Math.min(safeLen * 3, 500),
+                        temperature: 0.85
+                    }),
+                    signal: controller.signal
+                });
+
+                if (!aiResponse.ok) {
+                    if (aiResponse.status === 401) throw new Error("401");
+                    throw new Error(`Модель ${model} спит (HTTP ${aiResponse.status})`);
+                }
+
+                const data = await aiResponse.json();
+                if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                    throw new Error(`Пустой ответ от ${model}`);
+                }
+                
+                return data; // Возвращаем первую успешную дату!
             });
 
+            // Promise.any берет ПЕРВУЮ модель, которая ответила без ошибок. Остальные отменяются.
+            const winningData = await Promise.any(fetchPromises);
             clearTimeout(timeoutId);
 
-            if (!aiResponse.ok) {
-                const errData = await aiResponse.json();
-                console.error("OpenRouter Error:", errData);
-                if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                return res.status(500).json({ error: "Ошибка API: " + (errData.error?.message || "Сбой OpenRouter") });
-            }
-
-            const data = await aiResponse.json();
-            
-            if (data.choices && data.choices[0] && data.choices[0].message) {
-                res.json({ reply: data.choices[0].message.content, new_balance: user.shards });
-            } else {
-                if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                res.status(500).json({ error: "ИИ прислал пустой ответ." });
-            }
+            res.json({ reply: winningData.choices[0].message.content, new_balance: user.shards });
 
         } catch (err) {
             clearTimeout(timeoutId);
+            
+            // Если все 3 модели упали или сработал таймаут - возвращаем юзеру 1 осколок
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            if (err.name === 'AbortError') {
-                return res.status(500).json({ error: "Сервер ИИ слишком долго думал. Попробуй еще раз!" });
+
+            // Проверка: может токен отвалился?
+            if (err.errors && err.errors.some(e => e.message === "401")) {
+                return res.status(500).json({ error: "Ошибка 401: Токен OpenRouter заблокирован или неверный!" });
             }
-            return res.status(500).json({ error: "Сбой сети." });
+
+            // Если все модели ответили ошибкой или зависли
+            return res.status(500).json({ error: "Все бесплатные серверы сейчас перегружены. Попробуй еще раз через пару секунд!" });
         }
 
     } catch (e) { 
