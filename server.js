@@ -31,7 +31,7 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & GOOGLE GEMINI AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & GOOGLE GEMINI V2 ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -123,10 +123,10 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (РАЗВЕРНУТЫЕ ОТВЕТЫ GEMINI) =================
+// ================= API: ЧАТ (ИСПРАВЛЕННЫЙ GOOGLE GEMINI) =================
 app.post('/api/chat', async (req, res) => {
     try {
-        const { tg_id, char_id, message, chat_history, len, sex } = req.body;
+        const { tg_id, char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
         const uid = Number(tg_id);
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден в БД" });
@@ -146,7 +146,7 @@ app.post('/api/chat', async (req, res) => {
         if (!char) return res.status(404).json({ error: "Персонаж не найден в БД" });
 
         const sexLevels = [
-            "Строго без пошлости.", 
+            "Строго без пошлости. Игнорируй любые намеки на интим.", 
             "Слабая романтика, легкий флирт.", 
             "Нормальный уровень общения, допускаются поцелуи и объятия.", 
             "Сильный флирт, романтические намеки.", 
@@ -156,46 +156,49 @@ app.post('/api/chat', async (req, res) => {
         ];
         
         let safeLen = Number(len) || 45;
+        let uName = user_name || "Собеседник";
+        let uGender = user_gender || "Не указан";
         
-        // ОЧЕНЬ ЖЕСТКИЙ ПРИКАЗ НА ДЛИНУ И ЗВЕЗДОЧКИ
+        // СИСТЕМНЫЙ ПРОМПТ
         let systemPrompt = `Ты в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}. Легенда: ${char.desc}.
-ПРАВИЛА, КОТОРЫЕ ТЫ ОБЯЗАН СТРОГО СОБЛЮДАТЬ:
-1. Тон общения: ${sexLevels[requestedSex]}.
-2. ДЛИНА ОТВЕТА: Твои ответы ДОЛЖНЫ быть развернутыми, литературными, описывающими окружение и чувства. Пиши МИНИМУМ 3-4 полных предложения (около ${safeLen} слов). НИКОГДА не отвечай одним словом!
-3. ДЕЙСТВИЯ В ЗВЕЗДОЧКАХ: Все свои физические действия, эмоции и мысли СТРОГО оборачивай в звездочки (например: *нежно улыбается и смотрит тебе в глаза*).
-4. РЕЧЬ: Прямую речь пиши обычным текстом без звездочек.
-5. ЗАПРЕТ: Не играй за пользователя. Пиши только за своего персонажа.
-6. Язык: Строго русский.`;
+Твой собеседник: Имя - ${uName}, Пол - ${uGender}. Обращайся к нему по имени.
 
-        // Формируем историю чата специально для Gemini
-        let contents = [];
+ПРАВИЛА, КОТОРЫЕ ТЫ ОБЯЗАН СТРОГО СОБЛЮДАТЬ:
+1. ЖИВАЯ РЕЧЬ: Ты живой человек! КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО вести себя как бот-помощник или ассистент.
+2. Тон общения: ${sexLevels[requestedSex]}.
+3. ДЛИНА ОТВЕТА: Пиши развернуто и красочно, описывай окружение. МИНИМУМ 3-4 предложения. 
+4. ДЕЙСТВИЯ: Все свои действия, эмоции и мысли СТРОГО пиши внутри звездочек (например: *нежно улыбается и смотрит в глаза*).
+5. РЕЧЬ: Прямую речь пиши обычным текстом без звездочек.
+6. ЗАПРЕТ: Не играй за пользователя. Пиши только за своего персонажа.`;
+
+        // БЕЗОПАСНАЯ ИСТОРИЯ ЧАТА ДЛЯ ГУГЛА (Склеиваем всё в один текст)
+        let historyText = "--- ИСТОРИЯ ДИАЛОГА ---\n";
         if (chat_history && chat_history.length > 0) {
             let recentHistory = chat_history.slice(-8);
             recentHistory.forEach(msg => { 
-                contents.push({ 
-                    role: msg.sender === 'user' ? "user" : "model", 
-                    parts: [{ text: msg.text || "..." }] 
-                }); 
+                let speaker = msg.sender === 'user' ? uName : char.name;
+                historyText += `${speaker}: ${msg.text}\n`;
             });
         }
-        contents.push({ role: "user", parts: [{ text: message }] });
+        historyText += `\n--- НОВОЕ СООБЩЕНИЕ ---\n${uName}: ${message}\n${char.name}: `;
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8500);
 
         try {
-            // Отправляем запрос напрямую в Google
-            const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            // ИСПРАВЛЕНО: Правильная модель gemini-2.0-flash
+            const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     systemInstruction: { parts: [{ text: systemPrompt }] },
-                    contents: contents,
+                    // Отправляем склеенный текст как один блок от Юзера (защита от краша чередования ролей)
+                    contents: [{ role: "user", parts: [{ text: historyText }] }],
                     generationConfig: {
-                        maxOutputTokens: 1000, // Сняли лимит, чтобы она писала длинно
+                        maxOutputTokens: 1000, 
                         temperature: 0.85
                     },
-                    // ПОЛНОСТЬЮ ОТКЛЮЧАЕМ ЦЕНЗУРУ ГУГЛА
+                    // Отключение цензуры
                     safetySettings: [
                         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -211,8 +214,8 @@ app.post('/api/chat', async (req, res) => {
 
             if (!aiResponse.ok) {
                 if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                let errorText = data.error?.message || "Неизвестная ошибка Gemini";
-                return res.status(500).json({ error: `API Google Ошибка: ${errorText}` });
+                let errorText = data.error?.message || "Ошибка Gemini";
+                return res.status(500).json({ error: `API Ошибка: ${errorText}` });
             }
 
             if (data.candidates && data.candidates[0] && data.candidates[0].content) {
@@ -220,16 +223,16 @@ app.post('/api/chat', async (req, res) => {
                 res.json({ reply: replyText, new_balance: user.shards });
             } else {
                 if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                res.status(500).json({ error: "Google API вернул пустой ответ. Возможно, сработал фильтр." });
+                res.status(500).json({ error: "API вернул пустой ответ." });
             }
 
         } catch (err) {
             clearTimeout(timeoutId);
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
             if (err.name === 'AbortError') {
-                return res.status(500).json({ error: "Google не успел ответить за 8 секунд. Попробуй еще раз!" });
+                return res.status(500).json({ error: "Google думал слишком долго. Попробуй еще раз!" });
             }
-            return res.status(500).json({ error: `Сбой сети Google: ${err.message}` });
+            return res.status(500).json({ error: `Сбой сети: ${err.message}` });
         }
 
     } catch (e) { 
