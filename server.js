@@ -160,7 +160,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= API: ЧАТ (ГОНКА НЕЙРОСЕТЕЙ - PROMISE.ANY) =================
+// ================= API: ЧАТ (С ДОЛБЕЖКОЙ ПРОСЫПАЮЩИХСЯ НЕЙРОСЕТЕЙ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -204,50 +204,67 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // САМЫЕ БЫСТРЫЕ И СТАБИЛЬНЫЕ МОДЕЛИ НА HUGGING FACE
+        // ЛЕГКИЕ И БЫСТРЫЕ МОДЕЛИ (Чтобы не перегружать бесплатный сервер)
         let hfModels = [];
         if (requestedSex <= 3) {
             hfModels = [
                 "Qwen/Qwen2.5-7B-Instruct",
-                "mistralai/Mistral-Nemo-Instruct-2407",
-                "microsoft/Phi-3-mini-4k-instruct"
+                "HuggingFaceH4/zephyr-7b-beta",
+                "mistralai/Mistral-7B-Instruct-v0.3"
             ];
         } else {
             hfModels = [
-                "NousResearch/Hermes-3-Llama-3.1-8B", // Мощный RP без цензуры
+                "NousResearch/Hermes-2-Pro-Mistral-7B", // Специальная легкая RP-модель без цензуры
                 "Qwen/Qwen2.5-7B-Instruct",
-                "mistralai/Mistral-7B-Instruct-v0.3"
+                "HuggingFaceH4/zephyr-7b-beta"
             ];
         }
 
-        // ОБЩИЙ ТАЙМЕР НА 8.5 СЕКУНД (Чтобы Vercel не убил сервер)
+        // Жесткий таймер-убийца на 8.5 секунд (защита от краша Vercel)
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8500);
 
-        // ЗАПУСКАЕМ ВСЕ 3 НЕЙРОСЕТИ ОДНОВРЕМЕННО
+        // ГОНКА: КТО ПЕРВЫЙ ПРОСНЕТСЯ И ОТВЕТИТ
         const fetchPromises = hfModels.map(async (model) => {
-            const res = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
-                method: "POST", 
-                headers: { "Authorization": `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ model: model, messages: messagesArray, max_tokens: Math.min(safeLen * 3, 500), temperature: 0.85 }),
-                signal: controller.signal
-            });
-            
-            if (!res.ok) {
-                if (res.status === 401) throw new Error("401");
-                throw new Error(`HTTP ${res.status}`);
+            let retries = 3; // Даем каждой модели 3 попытки проснуться
+            while (retries > 0) {
+                try {
+                    const res = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
+                        method: "POST", 
+                        headers: { "Authorization": `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({ model: model, messages: messagesArray, max_tokens: Math.min(safeLen * 3, 500), temperature: 0.85 }),
+                        signal: controller.signal
+                    });
+                    
+                    if (res.status === 503) {
+                        // ВОТ ОНО! Если модель спит (503), ждем 2 сек и долбим её снова, а не крашимся!
+                        retries--;
+                        await new Promise(r => setTimeout(r, 2000));
+                        continue;
+                    }
+                    
+                    if (!res.ok) {
+                        if (res.status === 401) throw new Error("401");
+                        throw new Error(`HTTP ${res.status}`);
+                    }
+                    
+                    const data = await res.json();
+                    if (!data.choices || !data.choices[0].message) throw new Error("Empty");
+                    return data; // Победа!
+                } catch (e) {
+                    if (e.name === 'AbortError') throw e; // Время вышло, Vercel нас убьет, сдаемся
+                    if (e.message === "401") throw e; // Проблема с токеном
+                    throw e; // Другая ошибка, выходим из цикла
+                }
             }
-            
-            const data = await res.json();
-            if (!data.choices || !data.choices[0].message) throw new Error("Empty");
-            return data; // КТО ПЕРВЫЙ ВЕРНУЛ ДАННЫЕ — ТОТ ПОБЕДИЛ
+            throw new Error("Не проснулась");
         });
 
         let aiData = null; 
         let isTokenError = false;
 
         try {
-            // Promise.any берет ПЕРВЫЙ успешный ответ и игнорирует ошибки остальных
+            // Promise.any ждет ПЕРВЫЙ успешный ответ от любой из 3-х моделей
             aiData = await Promise.any(fetchPromises);
             clearTimeout(timeoutId);
         } catch (err) {
@@ -263,12 +280,10 @@ app.post('/api/chat', async (req, res) => {
         }
 
         if (!aiData) { 
-            // Возвращаем осколок
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
-            return res.status(500).json({ error: `Все нейросети спят под нагрузкой. Подожди 3 секунды и жми снова!` }); 
+            return res.status(500).json({ error: `Все нейросети сейчас жестко перегружены. Вернул осколок, попробуй через минуту.` }); 
         }
 
-        // ОТПРАВЛЯЕМ ОТВЕТ ПОБЕДИВШЕЙ НЕЙРОСЕТИ
         res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards }); 
 
     } catch (e) { 
