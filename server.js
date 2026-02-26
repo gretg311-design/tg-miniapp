@@ -32,7 +32,7 @@ const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & STARS PAYMENT ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & SMART AI-SPLIT ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -105,7 +105,6 @@ app.post('/api/user/get-data', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: СИНХРОНИЗАЦИЯ В РЕАЛЬНОМ ВРЕМЕНИ =================
 app.post('/api/user/sync', async (req, res) => {
     try {
         const uid = Number(req.body.tg_id);
@@ -124,7 +123,6 @@ app.post('/api/user/sync', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ЕЖЕДНЕВКИ И СТРИКИ
 app.post('/api/user/claim-daily', async (req, res) => {
     try {
         const uid = Number(req.body.tg_id);
@@ -162,7 +160,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= API: ЧАТ =================
+// ================= API: ЧАТ (С РАЗДЕЛЕНИЕМ МОДЕЛЕЙ ПО ПОШЛОСТИ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -174,8 +172,10 @@ app.post('/api/chat', async (req, res) => {
         let requestedSex = Number(sex) || 0;
         let userSub = (uid === OWNER_ID) ? "ultra" : (user.subscription || "FREE").trim().toLowerCase();
         
+        // 6 УРОВЕНЬ ТОЛЬКО ДЛЯ ULTRA
         if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
 
+        // Моментальное списание 1 осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1;
@@ -186,10 +186,16 @@ app.post('/api/chat', async (req, res) => {
         if (!char) return res.status(404).json({ error: "Персонаж не найден в БД" });
 
         const sexLevels = [
-            "Строго без пошлости. Игнорируй любые намеки на интим.", "Слабая романтика, легкий флирт.", "Нормальный уровень общения, допускаются поцелуи.", "Сильный флирт, откровенные намеки.", "Высокая откровенность, страсть.", "Очень пошло, откровенный RolePlay без цензуры.", "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все детали открыто." 
+            "Строго без пошлости. Игнорируй любые намеки на интим.", 
+            "Слабая романтика, легкий флирт.", 
+            "Нормальный уровень общения, допускаются поцелуи.", 
+            "Сильный флирт, откровенные намеки. Допускается прелюдия.", 
+            "Высокая откровенность, страсть. Разрешен откровенный текст.", 
+            "Очень пошло, откровенный RolePlay без цензуры. Грязные слова.", 
+            "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все интимные детали открыто и грязно." 
         ];
         
-        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. Твоя легенда: ${char.desc}. Веди себя строго в рамках персонажа. Длина ответа: около ${len} слов. Уровень откровенности: ${sexLevels[requestedSex]}.`;
+        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. Твоя легенда: ${char.desc}. Веди себя строго в рамках персонажа. Длина ответа: около ${len} слов. Уровень откровенности: ${sexLevels[requestedSex]}. Не пиши за пользователя.`;
 
         let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
@@ -198,22 +204,53 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        const hfModels = [ "mistralai/Mistral-7B-Instruct-v0.3", "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO", "Qwen/Qwen2.5-7B-Instruct" ];
+        // === УМНОЕ РАЗДЕЛЕНИЕ НЕЙРОСЕТЕЙ ПО УРОВНЯМ ===
+        let hfModels = [];
+        if (requestedSex <= 3) {
+            // Для обычного общения берем самые быстрые и стабильные
+            hfModels = [
+                "Qwen/Qwen2.5-7B-Instruct",
+                "mistralai/Mistral-7B-Instruct-v0.3"
+            ];
+        } else {
+            // Для 4, 5 и 6 уровней берем Uncensored RP модели (без цензуры)
+            hfModels = [
+                "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO", // Эталон RolePlay без цензуры
+                "Qwen/Qwen2.5-7B-Instruct" // Резерв, тоже неплохо тянет RP
+            ];
+        }
 
         let aiData = null; let lastErrorStatus = null;
         for (const model of hfModels) {
+            console.log(`[AI] Уровень ${requestedSex} -> Пробуем модель: ${model}`);
             const aiResponse = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
                 method: "POST", headers: { "Authorization": `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ model: model, messages: messagesArray, max_tokens: 300, temperature: 0.85 })
+                // Умножаем len на 3, т.к. русские символы требуют больше токенов
+                body: JSON.stringify({ model: model, messages: messagesArray, max_tokens: Math.min(Number(len) * 3, 500), temperature: 0.85 })
             });
 
             if (aiResponse.ok) { aiData = await aiResponse.json(); break; } 
-            else { lastErrorStatus = aiResponse.status; if (lastErrorStatus === 401) { if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } return res.status(500).json({ error: "Ошибка 401: Токен HF недействителен." }); } }
+            else { 
+                lastErrorStatus = aiResponse.status; 
+                if (lastErrorStatus === 401) { 
+                    if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
+                    return res.status(500).json({ error: "Ошибка 401: Токен HF недействителен." }); 
+                } 
+            }
         }
 
-        if (!aiData) { if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } return res.status(500).json({ error: `Все нейросети заняты (Код: ${lastErrorStatus}).` }); }
-        if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) { res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards }); } 
-        else { if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } res.status(500).json({ error: "ИИ прислал пустой ответ." }); }
+        if (!aiData) { 
+            // Возвращаем осколок, если ИИ не смог ответить (сервера упали или цензура)
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
+            return res.status(500).json({ error: `Все нейросети заняты (Код: ${lastErrorStatus}).` }); 
+        }
+
+        if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) { 
+            res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards }); 
+        } else { 
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
+            res.status(500).json({ error: "ИИ прислал пустой ответ." }); 
+        }
 
     } catch (e) { res.status(500).json({ error: "Сбой связи: " + e.message }); }
 });
@@ -264,7 +301,6 @@ app.post('/api/payment/create', async (req, res) => {
 app.post('/api/payment/webhook', async (req, res) => {
     try {
         const update = req.body;
-        // 1. Оплата через CryptoBot
         if (update.update_type === 'invoice_paid') {
             const invoice = update.payload;
             const customData = JSON.parse(invoice.payload);
@@ -283,12 +319,10 @@ app.post('/api/payment/webhook', async (req, res) => {
     } catch (e) { res.sendStatus(500); }
 });
 
-// ВЕБХУК ДЛЯ TELEGRAM STARS
 app.post('/api/tg-webhook', async (req, res) => {
     try {
         const update = req.body;
         
-        // Telegram спрашивает: "Можно списывать Stars?" - Отвечаем Да
         if (update.pre_checkout_query) {
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/answerPreCheckoutQuery`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -297,7 +331,6 @@ app.post('/api/tg-webhook', async (req, res) => {
             return res.sendStatus(200);
         }
 
-        // Пользователь успешно оплатил Stars
         if (update.message && update.message.successful_payment) {
             const payloadStr = update.message.successful_payment.invoice_payload;
             const customData = JSON.parse(payloadStr);
