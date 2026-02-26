@@ -12,8 +12,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// БЕЗОПАСНЫЙ КЛЮЧ VERCEL
-const OPENROUTER_TOKEN = process.env.OPENROUTER_TOKEN || "sk-or-v1-no-key"; 
+// БЕЗОПАСНЫЙ КЛЮЧ VERCEL ДЛЯ GOOGLE GEMINI
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "no-key"; 
 
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
@@ -31,7 +31,7 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & DIAGNOSTIC AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & GOOGLE GEMINI AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -123,7 +123,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (ЕДИНИЧНЫЙ ВЫСТРЕЛ С ДИАГНОСТИКОЙ) =================
+// ================= API: ЧАТ (ДВИЖОК GOOGLE GEMINI) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -136,6 +136,7 @@ app.post('/api/chat', async (req, res) => {
         
         if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
 
+        // Списание осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1; await user.save(); 
@@ -145,40 +146,48 @@ app.post('/api/chat', async (req, res) => {
         if (!char) return res.status(404).json({ error: "Персонаж не найден в БД" });
 
         const sexLevels = [
-            "Строго без пошлости.", "Слабая романтика, легкий флирт.", "Нормальный уровень общения.", 
-            "Сильный флирт.", "Высокая откровенность.", "Откровенный RolePlay.", "HARDCORE" 
+            "Строго без пошлости.", "Слабая романтика, легкий флирт.", "Нормальный уровень общения, допускаются поцелуи.", 
+            "Сильный флирт, романтические намеки.", "Страсть.", "Откровенный RolePlay.", "Детальный RolePlay." 
         ];
         
         let safeLen = Number(len) || 45;
-        let systemPrompt = `RolePlay: Ты ${char.name}, ${char.age} лет. Легенда: ${char.desc}. Тон: ${sexLevels[requestedSex]}. Ответ: около ${safeLen} слов. Пиши на русском.`;
+        let systemPrompt = `RolePlay: Ты ${char.name}, ${char.age} лет. Легенда: ${char.desc}. Тон: ${sexLevels[requestedSex]}. Ответ: около ${safeLen} слов. Не пиши действия за пользователя. Пиши на русском языке.`;
 
-        let messagesArray = [{ role: "system", content: systemPrompt }];
+        // Формируем историю чата специально для Gemini
+        let contents = [];
         if (chat_history && chat_history.length > 0) {
             let recentHistory = chat_history.slice(-8);
-            recentHistory.forEach(msg => { messagesArray.push({ role: msg.sender === 'user' ? "user" : "assistant", content: msg.text }); });
+            recentHistory.forEach(msg => { 
+                contents.push({ 
+                    role: msg.sender === 'user' ? "user" : "model", 
+                    parts: [{ text: msg.text || "..." }] 
+                }); 
+            });
         }
-        messagesArray.push({ role: "user", content: message });
-
-        // БЕРЕМ ОДНУ САМУЮ НАДЕЖНУЮ МОДЕЛЬ
-        const targetModel = "meta-llama/llama-3.1-8b-instruct:free";
+        contents.push({ role: "user", parts: [{ text: message }] });
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8500); // Даем ей полноценные 8.5 секунд на ответ!
+        const timeoutId = setTimeout(() => controller.abort(), 8500);
 
         try {
-            const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            // Отправляем запрос напрямую в Google
+            const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                 method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${OPENROUTER_TOKEN}`,
-                    "HTTP-Referer": "https://t.me/moon_project",
-                    "X-Title": "Moon Project",
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: targetModel,
-                    messages: messagesArray,
-                    max_tokens: Math.min(safeLen * 3, 500),
-                    temperature: 0.8
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    contents: contents,
+                    generationConfig: {
+                        maxOutputTokens: Math.min(safeLen * 3, 500),
+                        temperature: 0.85
+                    },
+                    // ПОЛНОСТЬЮ ОТКЛЮЧАЕМ ЦЕНЗУРУ ГУГЛА (ДЛЯ ФЛИРТА И РОМАНТИКИ)
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
                 }),
                 signal: controller.signal
             });
@@ -187,27 +196,26 @@ app.post('/api/chat', async (req, res) => {
             const data = await aiResponse.json();
 
             if (!aiResponse.ok) {
-                // ЕСЛИ ОШИБКА - ВЫДАЕМ ЕЁ ПРЯМО В ЧАТ!
                 if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                let errorText = data.error?.message || JSON.stringify(data);
-                return res.status(500).json({ error: `API Код ${aiResponse.status}: ${errorText}` });
+                let errorText = data.error?.message || "Неизвестная ошибка Gemini";
+                return res.status(500).json({ error: `API Google Ошибка: ${errorText}` });
             }
 
-            if (data.choices && data.choices[0] && data.choices[0].message) {
-                res.json({ reply: data.choices[0].message.content, new_balance: user.shards });
+            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                const replyText = data.candidates[0].content.parts[0].text;
+                res.json({ reply: replyText, new_balance: user.shards });
             } else {
                 if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                res.status(500).json({ error: "API вернуло пустой ответ." });
+                res.status(500).json({ error: "Google API вернул пустой ответ. Возможно, сработал фильтр." });
             }
 
         } catch (err) {
             clearTimeout(timeoutId);
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            
             if (err.name === 'AbortError') {
-                return res.status(500).json({ error: "Модель не успела ответить за 8 секунд. Vercel оборвал связь." });
+                return res.status(500).json({ error: "Google не успел ответить за 8 секунд. Попробуй еще раз!" });
             }
-            return res.status(500).json({ error: `Сбой сети: ${err.message}` });
+            return res.status(500).json({ error: `Сбой сети Google: ${err.message}` });
         }
 
     } catch (e) { 
