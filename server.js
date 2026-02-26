@@ -31,7 +31,7 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & MINIGUN AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & DIAGNOSTIC AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -123,7 +123,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (ШЕСТИСТВОЛЬНЫЙ ПУЛЕМЕТ) =================
+// ================= API: ЧАТ (ЕДИНИЧНЫЙ ВЫСТРЕЛ С ДИАГНОСТИКОЙ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -136,7 +136,6 @@ app.post('/api/chat', async (req, res) => {
         
         if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
 
-        // Моментальное списание осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1; await user.save(); 
@@ -146,17 +145,12 @@ app.post('/api/chat', async (req, res) => {
         if (!char) return res.status(404).json({ error: "Персонаж не найден в БД" });
 
         const sexLevels = [
-            "Строго без пошлости. Игнорируй интим.", 
-            "Слабая романтика, легкий флирт.", 
-            "Нормальный уровень общения, допускаются поцелуи.", 
-            "Сильный флирт, романтические намеки.", 
-            "Страсть, высокий уровень романтики.", 
-            "Очень откровенный RolePlay.", 
-            "Максимальная откровенность, детальный RolePlay." 
+            "Строго без пошлости.", "Слабая романтика, легкий флирт.", "Нормальный уровень общения.", 
+            "Сильный флирт.", "Высокая откровенность.", "Откровенный RolePlay.", "HARDCORE" 
         ];
         
         let safeLen = Number(len) || 45;
-        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. Твоя легенда: ${char.desc}. Веди себя строго в рамках персонажа. Длина ответа: около ${safeLen} слов. Уровень: ${sexLevels[requestedSex]}. Не пиши действия за пользователя. Пиши на русском языке.`;
+        let systemPrompt = `RolePlay: Ты ${char.name}, ${char.age} лет. Легенда: ${char.desc}. Тон: ${sexLevels[requestedSex]}. Ответ: около ${safeLen} слов. Пиши на русском.`;
 
         let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
@@ -165,74 +159,59 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // === ОБОЙМА ИЗ 6 БЕСПЛАТНЫХ МОДЕЛЕЙ ===
-        // Если одна выдает "No endpoints", сервер за 0.1 сек переходит к следующей
-        let targetModels = [
-            "google/gemini-2.0-flash-lite-preview-02-05:free",
-            "qwen/qwen-2.5-7b-instruct:free",
-            "meta-llama/llama-3.1-8b-instruct:free",
-            "mistralai/mistral-7b-instruct:free",
-            "huggingfaceh4/zephyr-7b-beta:free",
-            "openchat/openchat-7b:free"
-        ];
+        // БЕРЕМ ОДНУ САМУЮ НАДЕЖНУЮ МОДЕЛЬ
+        const targetModel = "meta-llama/llama-3.1-8b-instruct:free";
 
-        let aiData = null;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8500); // Даем ей полноценные 8.5 секунд на ответ!
 
-        for (let model of targetModels) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5 секунды максимум на попытку
+        try {
+            const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${OPENROUTER_TOKEN}`,
+                    "HTTP-Referer": "https://t.me/moon_project",
+                    "X-Title": "Moon Project",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: targetModel,
+                    messages: messagesArray,
+                    max_tokens: Math.min(safeLen * 3, 500),
+                    temperature: 0.8
+                }),
+                signal: controller.signal
+            });
 
-            try {
-                const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${OPENROUTER_TOKEN}`,
-                        "HTTP-Referer": "https://t.me/moon_project",
-                        "X-Title": "Moon Project",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: model,
-                        messages: messagesArray,
-                        max_tokens: Math.min(safeLen * 3, 500),
-                        temperature: 0.85
-                    }),
-                    signal: controller.signal
-                });
+            clearTimeout(timeoutId);
+            const data = await aiResponse.json();
 
-                clearTimeout(timeoutId);
-
-                // Если токен отвалился - прерываем всё сразу
-                if (aiResponse.status === 401) {
-                    if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                    return res.status(500).json({ error: "Ошибка 401: Токен OpenRouter не настроен!" });
-                }
-
-                // Если модель спит (выдает ошибку 404/500/502/No endpoints) - идём к следующей
-                if (!aiResponse.ok) continue;
-
-                const data = await aiResponse.json();
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    aiData = data;
-                    break; // Нашли рабочую! Выходим из цикла
-                }
-
-            } catch (err) {
-                clearTimeout(timeoutId);
-                continue; // Таймаут - идём к следующей
+            if (!aiResponse.ok) {
+                // ЕСЛИ ОШИБКА - ВЫДАЕМ ЕЁ ПРЯМО В ЧАТ!
+                if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
+                let errorText = data.error?.message || JSON.stringify(data);
+                return res.status(500).json({ error: `API Код ${aiResponse.status}: ${errorText}` });
             }
-        }
 
-        if (!aiData) {
-            // Возвращаем осколок, если ВСЕ 6 моделей упали
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                res.json({ reply: data.choices[0].message.content, new_balance: user.shards });
+            } else {
+                if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
+                res.status(500).json({ error: "API вернуло пустой ответ." });
+            }
+
+        } catch (err) {
+            clearTimeout(timeoutId);
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            return res.status(500).json({ error: "ИИ сервера полностью загружены халявщиками. Подожди 10 сек и нажми еще раз!" });
+            
+            if (err.name === 'AbortError') {
+                return res.status(500).json({ error: "Модель не успела ответить за 8 секунд. Vercel оборвал связь." });
+            }
+            return res.status(500).json({ error: `Сбой сети: ${err.message}` });
         }
-
-        res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
 
     } catch (e) { 
-        res.status(500).json({ error: "Сбой связи: " + e.message }); 
+        res.status(500).json({ error: "Критическая ошибка кода: " + e.message }); 
     }
 });
 
