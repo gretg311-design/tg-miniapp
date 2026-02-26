@@ -12,7 +12,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// БЕЗОПАСНЫЙ КЛЮЧ: Сервер сам возьмет его из Vercel. Если его там нет, подставит заглушку и не крашнется!
+// БЕЗОПАСНЫЙ КЛЮЧ VERCEL
 const OPENROUTER_TOKEN = process.env.OPENROUTER_TOKEN || "sk-or-v1-ОШИБКА_КЛЮЧА_НЕТ"; 
 
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
@@ -31,7 +31,7 @@ const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & SHOTGUN AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & DOUBLE-TAP AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -123,7 +123,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (АЛГОРИТМ "ДРОБОВИК" - УНИВЕРСАЛЬНЫЙ СТУК ВО ВСЕ ДВЕРИ) =================
+// ================= API: ЧАТ (ТАКТИКА "ДВОЙНОЙ ВЫСТРЕЛ") =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -136,6 +136,7 @@ app.post('/api/chat', async (req, res) => {
         
         if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
 
+        // Моментальное списание осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1; await user.save(); 
@@ -160,43 +161,76 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        let targetModels = ["qwen/qwen-2.5-7b-instruct:free", "google/gemma-2-9b-it:free", "meta-llama/llama-3-8b-instruct:free"];
+        // Оставляем только 2 модели, чтобы гарантированно влезть в тайминги Vercel
+        let targetModels = ["qwen/qwen-2.5-7b-instruct:free", "google/gemma-2-9b-it:free"];
         if (requestedSex >= 4) {
-            targetModels = ["undi95/toppy-m-7b:free", "qwen/qwen-2.5-7b-instruct:free", "gryphe/mythomax-l2-13b:free"];
+            targetModels = ["undi95/toppy-m-7b:free", "qwen/qwen-2.5-7b-instruct:free"];
         }
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8500);
+        let aiData = null;
+        let lastErrorMsg = "Неизвестная ошибка";
 
-        try {
-            const fetchPromises = targetModels.map(async (model) => {
+        // Поочередно проверяем две модели с лимитом 4.2 секунды на каждую
+        for (let model of targetModels) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4200); 
+
+            try {
                 const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST", headers: { "Authorization": `Bearer ${OPENROUTER_TOKEN}`, "HTTP-Referer": "https://t.me/moon_project", "X-Title": "Moon Project", "Content-Type": "application/json" },
-                    body: JSON.stringify({ model: model, messages: messagesArray, max_tokens: Math.min(safeLen * 3, 500), temperature: 0.85 }),
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${OPENROUTER_TOKEN}`,
+                        "HTTP-Referer": "https://t.me/moon_project",
+                        "X-Title": "Moon Project",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: messagesArray,
+                        max_tokens: Math.min(safeLen * 3, 500),
+                        temperature: 0.85
+                    }),
                     signal: controller.signal
                 });
 
+                clearTimeout(timeoutId);
+
+                if (aiResponse.status === 401) {
+                    if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
+                    return res.status(500).json({ error: "Ошибка ключа: Токен OpenRouter не настроен в Vercel или заблокирован!" });
+                }
+
                 if (!aiResponse.ok) {
-                    if (aiResponse.status === 401) throw new Error("401");
-                    throw new Error(`Модель ${model} спит (HTTP ${aiResponse.status})`);
+                    const err = await aiResponse.json();
+                    lastErrorMsg = err.error?.message || `HTTP ${aiResponse.status} (Модель спит)`;
+                    continue; // Сразу прыгаем к следующей модели
                 }
 
                 const data = await aiResponse.json();
-                if (!data.choices || !data.choices[0] || !data.choices[0].message) throw new Error(`Пустой ответ`);
-                return data; 
-            });
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    aiData = data;
+                    break; // Нашли рабочую! Выходим из цикла.
+                }
 
-            const winningData = await Promise.any(fetchPromises);
-            clearTimeout(timeoutId);
-            res.json({ reply: winningData.choices[0].message.content, new_balance: user.shards });
-
-        } catch (err) {
-            clearTimeout(timeoutId);
-            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            if (err.errors && err.errors.some(e => e.message === "401")) return res.status(500).json({ error: "Ошибка 401: Токен OpenRouter заблокирован или неверный!" });
-            return res.status(500).json({ error: "Все бесплатные серверы сейчас перегружены. Попробуй еще раз через пару секунд!" });
+            } catch (err) {
+                clearTimeout(timeoutId);
+                lastErrorMsg = "Модель не успела ответить (Таймаут 4 сек)";
+                continue; // Прыгаем к следующей
+            }
         }
-    } catch (e) { res.status(500).json({ error: "Сбой связи: " + e.message }); }
+
+        if (!aiData) {
+            // Возвращаем осколок, если ни одна не ответила
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
+            // Выдаем реальную ошибку прямо в чат, чтобы понимать, кто виноват
+            return res.status(500).json({ error: `ИИ Отказ: ${lastErrorMsg}. Нажми еще раз!` });
+        }
+
+        res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
+
+    } catch (e) { 
+        res.status(500).json({ error: "Сбой связи: " + e.message }); 
+    }
 });
 
 // ================= API: ОПЛАТА =================
