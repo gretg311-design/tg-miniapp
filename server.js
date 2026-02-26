@@ -12,8 +12,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// КЛЮЧИ
-const HF_TOKEN = "hf_" + "EhICrHTZAzTbhabiMGjvQFxDthNoMiRSWk"; 
+// КЛЮЧИ (СЮДА ВСТАВЬ СВОЙ КЛЮЧ ОТ OPENROUTER)
+const OPENROUTER_TOKEN = "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"; 
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
 
@@ -32,7 +32,7 @@ const connectDB = async () => {
     try {
         if (mongoose.connection.readyState >= 1) return;
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & SMART AI-SPLIT ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & OPENROUTER AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -49,10 +49,7 @@ const userSchema = new mongoose.Schema({
     daily_streak: { type: Number, default: 0 }
 });
 
-const charSchema = new mongoose.Schema({
-    id: Number, name: String, age: Number, gender: String, desc: String, photo: String
-});
-
+const charSchema = new mongoose.Schema({ id: Number, name: String, age: Number, gender: String, desc: String, photo: String });
 const promoSchema = new mongoose.Schema({ code: { type: String, unique: true }, reward: Number });
 const taskSchema = new mongoose.Schema({ id: Number, name: String, link: String, rType: String, rVal: Number });
 const priceSchema = new mongoose.Schema({ item_id: { type: String, unique: true }, stars: { type: Number, default: 0 }, ton: { type: Number, default: 0 } });
@@ -160,7 +157,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= API: ЧАТ (С ДОЛБЕЖКОЙ ПРОСЫПАЮЩИХСЯ НЕЙРОСЕТЕЙ) =================
+// ================= API: ЧАТ (OPENROUTER ДВИЖОК - БЕЗ ЗАВИСАНИЙ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -174,7 +171,7 @@ app.post('/api/chat', async (req, res) => {
         
         if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
 
-        // Моментальное списание
+        // Списание
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1;
@@ -195,7 +192,7 @@ app.post('/api/chat', async (req, res) => {
         ];
         
         let safeLen = Number(len) || 45;
-        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. Твоя легенда: ${char.desc}. Веди себя строго в рамках персонажа. Длина ответа: около ${safeLen} слов. Уровень откровенности: ${sexLevels[requestedSex]}. Не пиши действия за пользователя.`;
+        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. Твоя легенда: ${char.desc}. Веди себя строго в рамках персонажа. Длина ответа: около ${safeLen} слов. Уровень откровенности: ${sexLevels[requestedSex]}. Не пиши действия за пользователя. Пиши на русском языке.`;
 
         let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
@@ -204,87 +201,46 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // ЛЕГКИЕ И БЫСТРЫЕ МОДЕЛИ (Чтобы не перегружать бесплатный сервер)
-        let hfModels = [];
-        if (requestedSex <= 3) {
-            hfModels = [
-                "Qwen/Qwen2.5-7B-Instruct",
-                "HuggingFaceH4/zephyr-7b-beta",
-                "mistralai/Mistral-7B-Instruct-v0.3"
-            ];
-        } else {
-            hfModels = [
-                "NousResearch/Hermes-2-Pro-Mistral-7B", // Специальная легкая RP-модель без цензуры
-                "Qwen/Qwen2.5-7B-Instruct",
-                "HuggingFaceH4/zephyr-7b-beta"
-            ];
+        // === ВЫБОР МОДЕЛЕЙ OPENROUTER ===
+        // Используем 100% бесплатные и быстрые модели из каталога OpenRouter
+        let targetModel = "qwen/qwen-2.5-7b-instruct:free"; 
+        
+        // Для высоких уровней пошлости можно поставить модель без цензуры (например mythomax)
+        // Если хочешь оставить полностью бесплатно - оставляй qwen, она тоже тянет RolePlay.
+        if (requestedSex >= 4) {
+            targetModel = "gryphe/mythomax-l2-13b:free"; // Топовая RP модель, бывает доступна бесплатно
+            // Если mythomax будет тупить, верни сюда "qwen/qwen-2.5-7b-instruct:free"
         }
 
-        // Жесткий таймер-убийца на 8.5 секунд (защита от краша Vercel)
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8500);
-
-        // ГОНКА: КТО ПЕРВЫЙ ПРОСНЕТСЯ И ОТВЕТИТ
-        const fetchPromises = hfModels.map(async (model) => {
-            let retries = 3; // Даем каждой модели 3 попытки проснуться
-            while (retries > 0) {
-                try {
-                    const res = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
-                        method: "POST", 
-                        headers: { "Authorization": `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
-                        body: JSON.stringify({ model: model, messages: messagesArray, max_tokens: Math.min(safeLen * 3, 500), temperature: 0.85 }),
-                        signal: controller.signal
-                    });
-                    
-                    if (res.status === 503) {
-                        // ВОТ ОНО! Если модель спит (503), ждем 2 сек и долбим её снова, а не крашимся!
-                        retries--;
-                        await new Promise(r => setTimeout(r, 2000));
-                        continue;
-                    }
-                    
-                    if (!res.ok) {
-                        if (res.status === 401) throw new Error("401");
-                        throw new Error(`HTTP ${res.status}`);
-                    }
-                    
-                    const data = await res.json();
-                    if (!data.choices || !data.choices[0].message) throw new Error("Empty");
-                    return data; // Победа!
-                } catch (e) {
-                    if (e.name === 'AbortError') throw e; // Время вышло, Vercel нас убьет, сдаемся
-                    if (e.message === "401") throw e; // Проблема с токеном
-                    throw e; // Другая ошибка, выходим из цикла
-                }
-            }
-            throw new Error("Не проснулась");
+        const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${OPENROUTER_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: targetModel,
+                messages: messagesArray,
+                max_tokens: Math.min(safeLen * 3, 500),
+                temperature: 0.85
+            })
         });
 
-        let aiData = null; 
-        let isTokenError = false;
-
-        try {
-            // Promise.any ждет ПЕРВЫЙ успешный ответ от любой из 3-х моделей
-            aiData = await Promise.any(fetchPromises);
-            clearTimeout(timeoutId);
-        } catch (err) {
-            clearTimeout(timeoutId);
-            if (err.errors) {
-                for (let e of err.errors) { if (e.message === "401") isTokenError = true; }
-            } else if (err.message === "401") { isTokenError = true; }
-        }
-
-        if (isTokenError) {
+        if (!aiResponse.ok) {
+            const errData = await aiResponse.json();
+            console.error("OpenRouter Error:", errData);
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            return res.status(500).json({ error: "Ошибка 401: Токен Hugging Face недействителен!" });
+            return res.status(500).json({ error: "Ошибка API: " + (errData.error?.message || "Сбой OpenRouter") });
         }
 
-        if (!aiData) { 
-            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
-            return res.status(500).json({ error: `Все нейросети сейчас жестко перегружены. Вернул осколок, попробуй через минуту.` }); 
+        const data = await aiResponse.json();
+        
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+            res.json({ reply: data.choices[0].message.content, new_balance: user.shards });
+        } else {
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
+            res.status(500).json({ error: "ИИ прислал пустой ответ." });
         }
-
-        res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards }); 
 
     } catch (e) { 
         res.status(500).json({ error: "Сбой связи: " + e.message }); 
