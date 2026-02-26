@@ -12,8 +12,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// КЛЮЧИ (СЮДА ВСТАВЬ СВОЙ КЛЮЧ ОТ OPENROUTER)
-const OPENROUTER_TOKEN = "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"; 
+// КЛЮЧ ИЗ БЕЗОПАСНОГО СЕЙФА VERCEL (В коде не светится!)
+const OPENROUTER_TOKEN = process.env.OPENROUTER_TOKEN; 
+
+// Эти ключи тоже лучше потом перенести в Vercel Environment Variables
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
 
@@ -202,44 +204,58 @@ app.post('/api/chat', async (req, res) => {
         messagesArray.push({ role: "user", content: message });
 
         // === ВЫБОР МОДЕЛЕЙ OPENROUTER ===
-        // Используем 100% бесплатные и быстрые модели из каталога OpenRouter
         let targetModel = "qwen/qwen-2.5-7b-instruct:free"; 
         
-        // Для высоких уровней пошлости можно поставить модель без цензуры (например mythomax)
-        // Если хочешь оставить полностью бесплатно - оставляй qwen, она тоже тянет RolePlay.
         if (requestedSex >= 4) {
-            targetModel = "gryphe/mythomax-l2-13b:free"; // Топовая RP модель, бывает доступна бесплатно
-            // Если mythomax будет тупить, верни сюда "qwen/qwen-2.5-7b-instruct:free"
+            targetModel = "gryphe/mythomax-l2-13b:free"; // Топовая RP модель
         }
 
-        const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${OPENROUTER_TOKEN}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: targetModel,
-                messages: messagesArray,
-                max_tokens: Math.min(safeLen * 3, 500),
-                temperature: 0.85
-            })
-        });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 9000); // 9 секунд лимит для Vercel
 
-        if (!aiResponse.ok) {
-            const errData = await aiResponse.json();
-            console.error("OpenRouter Error:", errData);
-            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            return res.status(500).json({ error: "Ошибка API: " + (errData.error?.message || "Сбой OpenRouter") });
-        }
+        try {
+            const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${OPENROUTER_TOKEN}`,
+                    "HTTP-Referer": "https://t.me/moon_project",
+                    "X-Title": "Moon Project",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: targetModel,
+                    messages: messagesArray,
+                    max_tokens: Math.min(safeLen * 3, 500),
+                    temperature: 0.85
+                }),
+                signal: controller.signal
+            });
 
-        const data = await aiResponse.json();
-        
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-            res.json({ reply: data.choices[0].message.content, new_balance: user.shards });
-        } else {
+            clearTimeout(timeoutId);
+
+            if (!aiResponse.ok) {
+                const errData = await aiResponse.json();
+                console.error("OpenRouter Error:", errData);
+                if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
+                return res.status(500).json({ error: "Ошибка API: " + (errData.error?.message || "Сбой OpenRouter") });
+            }
+
+            const data = await aiResponse.json();
+            
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                res.json({ reply: data.choices[0].message.content, new_balance: user.shards });
+            } else {
+                if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
+                res.status(500).json({ error: "ИИ прислал пустой ответ." });
+            }
+
+        } catch (err) {
+            clearTimeout(timeoutId);
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            res.status(500).json({ error: "ИИ прислал пустой ответ." });
+            if (err.name === 'AbortError') {
+                return res.status(500).json({ error: "Сервер ИИ слишком долго думал. Попробуй еще раз!" });
+            }
+            return res.status(500).json({ error: "Сбой сети." });
         }
 
     } catch (e) { 
