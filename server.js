@@ -12,10 +12,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// КЛЮЧ ИЗ БЕЗОПАСНОГО СЕЙФА VERCEL (В коде не светится!)
+// КЛЮЧ ИЗ БЕЗОПАСНОГО СЕЙФА VERCEL
 const OPENROUTER_TOKEN = process.env.OPENROUTER_TOKEN; 
 
-// Эти ключи тоже лучше потом перенести в Vercel Environment Variables
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
 
@@ -203,12 +202,9 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // === ВЫБОР МОДЕЛЕЙ OPENROUTER ===
+        // === ИСПОЛЬЗУЕМ 100% СТАБИЛЬНУЮ МОДЕЛЬ ===
+        // Qwen 2.5 отлично тянет и обычное общение, и жесткий RP без отказов.
         let targetModel = "qwen/qwen-2.5-7b-instruct:free"; 
-        
-        if (requestedSex >= 4) {
-            targetModel = "gryphe/mythomax-l2-13b:free"; // Топовая RP модель
-        }
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 9000); // 9 секунд лимит для Vercel
