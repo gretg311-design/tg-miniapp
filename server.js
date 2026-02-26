@@ -31,13 +31,12 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & GOOGLE GEMINI V3 (AUTO-RETRY) ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & GEMINI 1.5 FLASH ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
 app.use(async (req, res, next) => { await connectDB(); next(); });
 
-// Функция паузы для обхода лимитов
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // ================= СХЕМЫ БАЗЫ ДАННЫХ =================
@@ -126,7 +125,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (СИСТЕМА AUTO-RETRY ДЛЯ ОБХОДА ЛИМИТОВ) =================
+// ================= API: ЧАТ (НАДЕЖНЫЙ GEMINI 1.5 FLASH) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
@@ -139,7 +138,6 @@ app.post('/api/chat', async (req, res) => {
         
         if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
 
-        // Списание осколка
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
             user.shards -= 1; await user.save(); 
@@ -173,9 +171,10 @@ app.post('/api/chat', async (req, res) => {
 5. РЕЧЬ: Прямую речь пиши обычным текстом без звездочек.
 6. ЗАПРЕТ: Не играй за пользователя. Пиши только за своего персонажа.`;
 
+        // Урезали историю до 4 последних сообщений, чтобы не напрягать лимиты Гугла
         let historyText = "--- ИСТОРИЯ ДИАЛОГА ---\n";
         if (chat_history && chat_history.length > 0) {
-            let recentHistory = chat_history.slice(-6); // Уменьшили историю до 6, чтобы не жрать лимиты
+            let recentHistory = chat_history.slice(-4); 
             recentHistory.forEach(msg => { 
                 let speaker = msg.sender === 'user' ? uName : char.name;
                 historyText += `${speaker}: ${msg.text || "..."}\n`;
@@ -185,14 +184,14 @@ app.post('/api/chat', async (req, res) => {
 
         let aiData = null;
         let finalError = "Неизвестная ошибка";
-        let maxRetries = 2; // Пробуем 3 раза (1 основной + 2 повтора)
 
-        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        for (let attempt = 0; attempt <= 1; attempt++) {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 8500);
 
             try {
-                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                // ИСПРАВЛЕНО НА GEMINI 1.5 FLASH (Безотказная версия)
+                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -212,10 +211,9 @@ app.post('/api/chat', async (req, res) => {
                 clearTimeout(timeoutId);
                 const data = await aiResponse.json();
 
-                // Ошибка 429 - Слишком много запросов (уперлись в лимит 15 RPM)
                 if (aiResponse.status === 429) {
-                    if (attempt < maxRetries) {
-                        await sleep(2000); // Ждем 2 секунды и пробуем снова
+                    if (attempt === 0) {
+                        await sleep(2000); 
                         continue; 
                     } else {
                         finalError = "Лимит сообщений. Подожди 30 секунд!";
@@ -225,16 +223,16 @@ app.post('/api/chat', async (req, res) => {
 
                 if (!aiResponse.ok) {
                     finalError = data.error?.message || `Ошибка API ${aiResponse.status}`;
-                    break; // Если ошибка не 429, значит дело в ключе или Гугле, прерываем цикл
+                    break; 
                 }
 
                 aiData = data;
-                break; // Успех! Выходим из цикла
+                break; 
 
             } catch (err) {
                 clearTimeout(timeoutId);
                 if (err.name === 'AbortError') {
-                    if (attempt < maxRetries) { await sleep(1000); continue; }
+                    if (attempt === 0) { await sleep(1000); continue; }
                     finalError = "Сервер перегружен.";
                     break;
                 }
@@ -243,26 +241,23 @@ app.post('/api/chat', async (req, res) => {
             }
         }
 
-        // ПРОВЕРКА ОТВЕТА
         if (aiData && aiData.candidates && aiData.candidates[0]) {
             let candidate = aiData.candidates[0];
             
-            // Если сработал неснимаемый фильтр безопасности Гугла
             if (candidate.finishReason === 'SAFETY' || !candidate.content) {
                 if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                return res.status(500).json({ error: "ИИ отказался отвечать (Сработал фильтр безопасности)." });
+                return res.status(500).json({ error: "ИИ отказался отвечать на эту тему." });
             }
 
             const replyText = candidate.content.parts[0].text;
             res.json({ reply: replyText, new_balance: user.shards });
         } else {
-            // Если все попытки провалились
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
             res.status(500).json({ error: finalError });
         }
 
     } catch (e) { 
-        res.status(500).json({ error: "Критическая ошибка кода: " + e.message }); 
+        res.status(500).json({ error: "Критическая ошибка: " + e.message }); 
     }
 });
 
