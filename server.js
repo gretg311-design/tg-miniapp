@@ -31,7 +31,7 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & STABLE AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & MINIGUN AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -123,7 +123,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (СУПЕР СТАБИЛЬНЫЙ БЕЗ ВЫЛЕТОВ) =================
+// ================= API: ЧАТ (ШЕСТИСТВОЛЬНЫЙ ПУЛЕМЕТ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -160,23 +160,27 @@ app.post('/api/chat', async (req, res) => {
 
         let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
-            let recentHistory = chat_history.slice(-10);
+            let recentHistory = chat_history.slice(-8);
             recentHistory.forEach(msg => { messagesArray.push({ role: msg.sender === 'user' ? "user" : "assistant", content: msg.text }); });
         }
         messagesArray.push({ role: "user", content: message });
 
-        // Броня: берем 2 самые безотказные модели OpenRouter, которые всегда онлайн
+        // === ОБОЙМА ИЗ 6 БЕСПЛАТНЫХ МОДЕЛЕЙ ===
+        // Если одна выдает "No endpoints", сервер за 0.1 сек переходит к следующей
         let targetModels = [
             "google/gemini-2.0-flash-lite-preview-02-05:free",
-            "meta-llama/llama-3-8b-instruct:free"
+            "qwen/qwen-2.5-7b-instruct:free",
+            "meta-llama/llama-3.1-8b-instruct:free",
+            "mistralai/mistral-7b-instruct:free",
+            "huggingfaceh4/zephyr-7b-beta:free",
+            "openchat/openchat-7b:free"
         ];
 
         let aiData = null;
-        let lastErrorMsg = "Неизвестная ошибка";
 
         for (let model of targetModels) {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4500); // 4.5 секунды на каждую
+            const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5 секунды максимум на попытку
 
             try {
                 const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -198,16 +202,14 @@ app.post('/api/chat', async (req, res) => {
 
                 clearTimeout(timeoutId);
 
+                // Если токен отвалился - прерываем всё сразу
                 if (aiResponse.status === 401) {
                     if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                    return res.status(500).json({ error: "Ошибка 401: Токен OpenRouter заблокирован или не настроен!" });
+                    return res.status(500).json({ error: "Ошибка 401: Токен OpenRouter не настроен!" });
                 }
 
-                if (!aiResponse.ok) {
-                    const err = await aiResponse.json();
-                    lastErrorMsg = err.error?.message || `HTTP ${aiResponse.status} (Модель спит)`;
-                    continue; 
-                }
+                // Если модель спит (выдает ошибку 404/500/502/No endpoints) - идём к следующей
+                if (!aiResponse.ok) continue;
 
                 const data = await aiResponse.json();
                 if (data.choices && data.choices[0] && data.choices[0].message) {
@@ -217,15 +219,14 @@ app.post('/api/chat', async (req, res) => {
 
             } catch (err) {
                 clearTimeout(timeoutId);
-                lastErrorMsg = "Таймаут модели (сервер долго думал)";
-                continue; 
+                continue; // Таймаут - идём к следующей
             }
         }
 
         if (!aiData) {
-            // Возвращаем осколок
+            // Возвращаем осколок, если ВСЕ 6 моделей упали
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            return res.status(500).json({ error: `ИИ перегружен: ${lastErrorMsg}. Нажми еще раз!` });
+            return res.status(500).json({ error: "ИИ сервера полностью загружены халявщиками. Подожди 10 сек и нажми еще раз!" });
         }
 
         res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
