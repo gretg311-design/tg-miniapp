@@ -31,7 +31,7 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & GEMINI 1.5 FLASH ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & GEMINI 2.5 FLASH ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -85,7 +85,7 @@ app.post('/api/user/get-data', async (req, res) => {
 
         if (isModified || user.isNew) await user.save();
         let responseObj = user.toObject(); let s = responseObj.subscription;
-        responseObj.daily_reward = (s === 'Ultra') ? 500 : (s === 'VIP') ? 250 : (s === 'Pro') ? 150 : (s === 'Premium') ? 50 : 10;
+        responseObj.daily_reward = (s === 'Ultra') ? 500 : (s === 'VIP') ? 250 : (s === 'Pro') ? 100 : (s === 'Premium') ? 50 : 10;
         res.json(responseObj);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -115,7 +115,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
 
         user.daily_streak += 1; let is7thDay = (user.daily_streak % 7 === 0);
         let sub = (uid === OWNER_ID) ? "ultra" : (user.subscription || "FREE").trim().toLowerCase();
-        let baseRew = (sub === "ultra") ? 500 : (sub === "vip") ? 250 : (sub === "pro") ? 150 : (sub === "premium") ? 50 : 10;
+        let baseRew = (sub === "ultra") ? 500 : (sub === "vip") ? 250 : (sub === "pro") ? 100 : (sub === "premium") ? 50 : 10;
         let actualRew = is7thDay ? baseRew * 2 : baseRew; 
 
         user.shards += actualRew; user.last_daily = now; let currentStreak = user.daily_streak;
@@ -125,7 +125,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (НАДЕЖНЫЙ GEMINI 1.5 FLASH) =================
+// ================= API: ЧАТ (ВОЗВРАЩАЕМ РАБОЧИЙ GEMINI 2.5 FLASH) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
@@ -171,7 +171,6 @@ app.post('/api/chat', async (req, res) => {
 5. РЕЧЬ: Прямую речь пиши обычным текстом без звездочек.
 6. ЗАПРЕТ: Не играй за пользователя. Пиши только за своего персонажа.`;
 
-        // Урезали историю до 4 последних сообщений, чтобы не напрягать лимиты Гугла
         let historyText = "--- ИСТОРИЯ ДИАЛОГА ---\n";
         if (chat_history && chat_history.length > 0) {
             let recentHistory = chat_history.slice(-4); 
@@ -190,8 +189,8 @@ app.post('/api/chat', async (req, res) => {
             const timeoutId = setTimeout(() => controller.abort(), 8500);
 
             try {
-                // ИСПРАВЛЕНО НА GEMINI 1.5 FLASH (Безотказная версия)
-                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                // ВОЗВРАЩАЕМ АКТУАЛЬНЫЙ GEMINI 2.5 FLASH!
+                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -216,7 +215,7 @@ app.post('/api/chat', async (req, res) => {
                         await sleep(2000); 
                         continue; 
                     } else {
-                        finalError = "Лимит сообщений. Подожди 30 секунд!";
+                        finalError = "Лимит Гугла (15 в минуту). Подожди немного!";
                         break;
                     }
                 }
