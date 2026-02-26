@@ -31,7 +31,7 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & DOUBLE-TAP AI ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & STABLE AI ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -123,7 +123,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (ТАКТИКА "ДВОЙНОЙ ВЫСТРЕЛ") =================
+// ================= API: ЧАТ (СУПЕР СТАБИЛЬНЫЙ БЕЗ ВЫЛЕТОВ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex } = req.body;
@@ -146,13 +146,17 @@ app.post('/api/chat', async (req, res) => {
         if (!char) return res.status(404).json({ error: "Персонаж не найден в БД" });
 
         const sexLevels = [
-            "Строго без пошлости.", "Слабая романтика, легкий флирт.", "Нормальный уровень общения, допускаются поцелуи.", 
-            "Сильный флирт, откровенные намеки.", "Высокая откровенность, страсть.", "Очень пошло, откровенный RolePlay без цензуры.", 
-            "СУПЕР ПОШЛОСТЬ, хардкорный NSFW, описывай все интимные детали открыто и максимально грязно." 
+            "Строго без пошлости. Игнорируй интим.", 
+            "Слабая романтика, легкий флирт.", 
+            "Нормальный уровень общения, допускаются поцелуи.", 
+            "Сильный флирт, романтические намеки.", 
+            "Страсть, высокий уровень романтики.", 
+            "Очень откровенный RolePlay.", 
+            "Максимальная откровенность, детальный RolePlay." 
         ];
         
         let safeLen = Number(len) || 45;
-        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. Твоя легенда: ${char.desc}. Веди себя строго в рамках персонажа. Длина ответа: около ${safeLen} слов. Уровень откровенности: ${sexLevels[requestedSex]}. Не пиши действия за пользователя. Пиши на русском языке.`;
+        let systemPrompt = `Ты находишься в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}, Пол - ${char.gender === 'm' ? 'Мужской' : 'Женский'}. Твоя легенда: ${char.desc}. Веди себя строго в рамках персонажа. Длина ответа: около ${safeLen} слов. Уровень: ${sexLevels[requestedSex]}. Не пиши действия за пользователя. Пиши на русском языке.`;
 
         let messagesArray = [{ role: "system", content: systemPrompt }];
         if (chat_history && chat_history.length > 0) {
@@ -161,16 +165,18 @@ app.post('/api/chat', async (req, res) => {
         }
         messagesArray.push({ role: "user", content: message });
 
-        // Выбираем самые стабильные бесплатные модели
-        let targetModels = ["google/gemini-2.0-flash-lite-preview-02-05:free", "meta-llama/llama-3.1-8b-instruct:free"];
+        // Броня: берем 2 самые безотказные модели OpenRouter, которые всегда онлайн
+        let targetModels = [
+            "google/gemini-2.0-flash-lite-preview-02-05:free",
+            "meta-llama/llama-3-8b-instruct:free"
+        ];
 
         let aiData = null;
         let lastErrorMsg = "Неизвестная ошибка";
 
-        // Поочередно проверяем две модели с лимитом 4.2 секунды на каждую
         for (let model of targetModels) {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4200); 
+            const timeoutId = setTimeout(() => controller.abort(), 4500); // 4.5 секунды на каждую
 
             try {
                 const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -194,33 +200,32 @@ app.post('/api/chat', async (req, res) => {
 
                 if (aiResponse.status === 401) {
                     if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                    return res.status(500).json({ error: "Ошибка ключа: Токен OpenRouter не настроен в Vercel или заблокирован!" });
+                    return res.status(500).json({ error: "Ошибка 401: Токен OpenRouter заблокирован или не настроен!" });
                 }
 
                 if (!aiResponse.ok) {
                     const err = await aiResponse.json();
                     lastErrorMsg = err.error?.message || `HTTP ${aiResponse.status} (Модель спит)`;
-                    continue; // Сразу прыгаем к следующей модели
+                    continue; 
                 }
 
                 const data = await aiResponse.json();
                 if (data.choices && data.choices[0] && data.choices[0].message) {
                     aiData = data;
-                    break; // Нашли рабочую! Выходим из цикла.
+                    break; // Нашли рабочую! Выходим из цикла
                 }
 
             } catch (err) {
                 clearTimeout(timeoutId);
-                lastErrorMsg = "Модель не успела ответить (Таймаут 4 сек)";
-                continue; // Прыгаем к следующей
+                lastErrorMsg = "Таймаут модели (сервер долго думал)";
+                continue; 
             }
         }
 
         if (!aiData) {
-            // Возвращаем осколок, если ни одна не ответила
+            // Возвращаем осколок
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            // Выдаем реальную ошибку прямо в чат, чтобы понимать, кто виноват
-            return res.status(500).json({ error: `ИИ Отказ: ${lastErrorMsg}. Нажми еще раз!` });
+            return res.status(500).json({ error: `ИИ перегружен: ${lastErrorMsg}. Нажми еще раз!` });
         }
 
         res.json({ reply: aiData.choices[0].message.content, new_balance: user.shards });
