@@ -31,11 +31,14 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & GOOGLE GEMINI V2 ACTIVE ---');
+        console.log('--- [SYSTEM] MOON ENGINE & GOOGLE GEMINI V3 (AUTO-RETRY) ACTIVE ---');
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
 app.use(async (req, res, next) => { await connectDB(); next(); });
+
+// Функция паузы для обхода лимитов
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // ================= СХЕМЫ БАЗЫ ДАННЫХ =================
 const userSchema = new mongoose.Schema({
@@ -123,7 +126,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (ИСПРАВЛЕННЫЙ GOOGLE GEMINI) =================
+// ================= API: ЧАТ (СИСТЕМА AUTO-RETRY ДЛЯ ОБХОДА ЛИМИТОВ) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
@@ -159,80 +162,103 @@ app.post('/api/chat', async (req, res) => {
         let uName = user_name || "Собеседник";
         let uGender = user_gender || "Не указан";
         
-        // СИСТЕМНЫЙ ПРОМПТ
         let systemPrompt = `Ты в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}. Легенда: ${char.desc}.
 Твой собеседник: Имя - ${uName}, Пол - ${uGender}. Обращайся к нему по имени.
 
 ПРАВИЛА, КОТОРЫЕ ТЫ ОБЯЗАН СТРОГО СОБЛЮДАТЬ:
 1. ЖИВАЯ РЕЧЬ: Ты живой человек! КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО вести себя как бот-помощник или ассистент.
 2. Тон общения: ${sexLevels[requestedSex]}.
-3. ДЛИНА ОТВЕТА: Пиши развернуто и красочно, описывай окружение. МИНИМУМ 3-4 предложения. 
-4. ДЕЙСТВИЯ: Все свои действия, эмоции и мысли СТРОГО пиши внутри звездочек (например: *нежно улыбается и смотрит в глаза*).
+3. ДЛИНА ОТВЕТА: Пиши развернуто и красочно, описывай окружение. МИНИМУМ 3-4 предложения (не менее ${safeLen} слов). 
+4. ДЕЙСТВИЯ: Все свои действия, эмоции и мысли СТРОГО пиши внутри звездочек (например: *нежно улыбается*).
 5. РЕЧЬ: Прямую речь пиши обычным текстом без звездочек.
 6. ЗАПРЕТ: Не играй за пользователя. Пиши только за своего персонажа.`;
 
-        // БЕЗОПАСНАЯ ИСТОРИЯ ЧАТА ДЛЯ ГУГЛА (Склеиваем всё в один текст)
         let historyText = "--- ИСТОРИЯ ДИАЛОГА ---\n";
         if (chat_history && chat_history.length > 0) {
-            let recentHistory = chat_history.slice(-8);
+            let recentHistory = chat_history.slice(-6); // Уменьшили историю до 6, чтобы не жрать лимиты
             recentHistory.forEach(msg => { 
                 let speaker = msg.sender === 'user' ? uName : char.name;
-                historyText += `${speaker}: ${msg.text}\n`;
+                historyText += `${speaker}: ${msg.text || "..."}\n`;
             });
         }
         historyText += `\n--- НОВОЕ СООБЩЕНИЕ ---\n${uName}: ${message}\n${char.name}: `;
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8500);
+        let aiData = null;
+        let finalError = "Неизвестная ошибка";
+        let maxRetries = 2; // Пробуем 3 раза (1 основной + 2 повтора)
 
-        try {
-            // ИСПРАВЛЕНО: Правильная модель gemini-2.0-flash
-            const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    // Отправляем склеенный текст как один блок от Юзера (защита от краша чередования ролей)
-                    contents: [{ role: "user", parts: [{ text: historyText }] }],
-                    generationConfig: {
-                        maxOutputTokens: 1000, 
-                        temperature: 0.85
-                    },
-                    // Отключение цензуры
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                    ]
-                }),
-                signal: controller.signal
-            });
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8500);
 
-            clearTimeout(timeoutId);
-            const data = await aiResponse.json();
+            try {
+                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        contents: [{ role: "user", parts: [{ text: historyText }] }],
+                        generationConfig: { maxOutputTokens: 1000, temperature: 0.85 },
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                        ]
+                    }),
+                    signal: controller.signal
+                });
 
-            if (!aiResponse.ok) {
+                clearTimeout(timeoutId);
+                const data = await aiResponse.json();
+
+                // Ошибка 429 - Слишком много запросов (уперлись в лимит 15 RPM)
+                if (aiResponse.status === 429) {
+                    if (attempt < maxRetries) {
+                        await sleep(2000); // Ждем 2 секунды и пробуем снова
+                        continue; 
+                    } else {
+                        finalError = "Лимит сообщений. Подожди 30 секунд!";
+                        break;
+                    }
+                }
+
+                if (!aiResponse.ok) {
+                    finalError = data.error?.message || `Ошибка API ${aiResponse.status}`;
+                    break; // Если ошибка не 429, значит дело в ключе или Гугле, прерываем цикл
+                }
+
+                aiData = data;
+                break; // Успех! Выходим из цикла
+
+            } catch (err) {
+                clearTimeout(timeoutId);
+                if (err.name === 'AbortError') {
+                    if (attempt < maxRetries) { await sleep(1000); continue; }
+                    finalError = "Сервер перегружен.";
+                    break;
+                }
+                finalError = `Сбой сети: ${err.message}`;
+                break;
+            }
+        }
+
+        // ПРОВЕРКА ОТВЕТА
+        if (aiData && aiData.candidates && aiData.candidates[0]) {
+            let candidate = aiData.candidates[0];
+            
+            // Если сработал неснимаемый фильтр безопасности Гугла
+            if (candidate.finishReason === 'SAFETY' || !candidate.content) {
                 if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                let errorText = data.error?.message || "Ошибка Gemini";
-                return res.status(500).json({ error: `API Ошибка: ${errorText}` });
+                return res.status(500).json({ error: "ИИ отказался отвечать (Сработал фильтр безопасности)." });
             }
 
-            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-                const replyText = data.candidates[0].content.parts[0].text;
-                res.json({ reply: replyText, new_balance: user.shards });
-            } else {
-                if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-                res.status(500).json({ error: "API вернул пустой ответ." });
-            }
-
-        } catch (err) {
-            clearTimeout(timeoutId);
+            const replyText = candidate.content.parts[0].text;
+            res.json({ reply: replyText, new_balance: user.shards });
+        } else {
+            // Если все попытки провалились
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            if (err.name === 'AbortError') {
-                return res.status(500).json({ error: "Google думал слишком долго. Попробуй еще раз!" });
-            }
-            return res.status(500).json({ error: `Сбой сети: ${err.message}` });
+            res.status(500).json({ error: finalError });
         }
 
     } catch (e) { 
