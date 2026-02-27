@@ -183,3 +183,252 @@
             </div>
         </div>
     </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#05010a'); // Цвет шапки под фон
+        
+        let userData = null;
+        let chatHistory = [];
+        let currentChar = null;
+        let stack = []; // История открытых окон для кнопки Назад
+
+        const OWNER_ID = 8287041036;
+
+        // ================= НАВИГАЦИЯ =================
+        function openPanel(id) { 
+            stack.push(id); 
+            document.getElementById(id).style.display = 'flex'; 
+        }
+        function back() { 
+            if(stack.length > 0) {
+                const id = stack.pop();
+                document.getElementById(id).style.display = 'none'; 
+            }
+        }
+
+        // ================= ИНИЦИАЛИЗАЦИЯ И МЕНЮ =================
+        async function init() {
+            const userId = tg.initDataUnsafe?.user?.id || OWNER_ID;
+            const tgName = tg.initDataUnsafe?.user?.first_name || "Пользователь";
+            
+            document.getElementById('u-name').innerText = tgName;
+            document.getElementById('u-id').innerText = userId;
+
+            try {
+                const res = await fetch('/api/user/get-data', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tg_id: userId })
+                });
+                
+                userData = await res.json();
+                
+                document.getElementById('shards-balance').innerText = (userId === OWNER_ID) ? "∞" : userData.shards;
+
+                // Права доступа
+                if (userData.is_admin || userId === OWNER_ID) {
+                    document.getElementById('nav-adm').style.display = 'flex';
+                }
+                if (userId === OWNER_ID) {
+                    document.getElementById('nav-con').style.display = 'flex';
+                    // Кнопки "Забрать/Снять" видны только Овнеру
+                    document.getElementById('adm-btn-rem').style.display = 'block';
+                    document.getElementById('adm-btn-sub-rem').style.display = 'block';
+                }
+
+                setTimeout(() => {
+                    document.getElementById('loading').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('app').style.display = 'flex';
+                    }, 500);
+                }, 1500);
+
+            } catch (e) {
+                document.querySelector('.loading-text').innerText = "ОШИБКА СЕРВЕРА";
+            }
+        }
+
+        // ================= ПРОФИЛЬ (СТРОГО 6 СТРОК) =================
+        function openProfile() {
+            openPanel('p-profile');
+            const box = document.getElementById('prof-data');
+            const tgName = tg.initDataUnsafe?.user?.first_name || "Неизвестный";
+            const expText = userData.sub_exp > 0 ? new Date(userData.sub_exp).toLocaleDateString() : "Нет";
+            
+            let status = "Пользователь";
+            if (userData.is_admin) status = "Администратор";
+            if (userData.tg_id === OWNER_ID) status = "Владелец";
+
+            // Железобетонные 6 строк
+            box.innerHTML = `
+                Ник <span>${tgName}</span><br>
+                ID <span>${userData.tg_id}</span><br>
+                Подписка <span>${userData.subscription}</span><br>
+                Истекает <span>${expText}</span><br>
+                Осколки <span>${userData.tg_id === OWNER_ID ? '∞' : userData.shards}</span><br>
+                Статус <span>${status}</span>
+            `;
+        }
+
+        // ================= ЕЖЕДНЕВНАЯ НАГРАДА =================
+        async function claimDaily() {
+            try {
+                const res = await fetch('/api/user/claim-daily', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tg_id: userData.tg_id })
+                });
+                const data = await res.json();
+                if (data.error) tg.showAlert(data.error);
+                else {
+                    userData.shards = data.new_balance;
+                    if (userData.tg_id !== OWNER_ID) document.getElementById('shards-balance').innerText = userData.shards;
+                    tg.showAlert(`Награда получена: +${data.reward} 🌙\nВаш стрик: ${data.streak} дн.`);
+                }
+            } catch (e) { tg.showAlert("Ошибка соединения"); }
+        }
+
+        // ================= ЧАТ И ПЕРСОНАЖИ =================
+        async function openCharacters() {
+            openPanel('p-characters');
+            const list = document.getElementById('chars-list');
+            list.innerHTML = '<div style="text-align:center;">Загрузка...</div>';
+            try {
+                const res = await fetch('/api/get-characters');
+                const chars = await res.json();
+                list.innerHTML = "";
+                if(chars.length === 0) { list.innerHTML = '<div style="text-align:center;">Нет персонажей</div>'; return; }
+                
+                chars.forEach(c => {
+                    let div = document.createElement('div');
+                    div.className = "term-btn";
+                    div.style.borderColor = "#00bcd4";
+                    div.innerText = `${c.name} (${c.age} лет)`;
+                    div.onclick = () => startChat(c);
+                    list.appendChild(div);
+                });
+            } catch (e) { list.innerHTML = "Ошибка загрузки"; }
+        }
+
+        function startChat(char) {
+            currentChar = char;
+            chatHistory = [];
+            document.getElementById('chat-title').innerText = char.name;
+            document.getElementById('chat-container').innerHTML = `<div style="text-align:center; color:#555; font-size:12px;">Система: Диалог начат</div>`;
+            openPanel('p-chat');
+        }
+
+        function addMsg(text, sender) {
+            const box = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.className = `msg ${sender}`;
+            div.innerText = text;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+            chatHistory.push({ sender: sender === 'user' ? 'user' : 'bot', text: text });
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !currentChar) return;
+
+            if (userData.tg_id !== OWNER_ID && userData.shards < 1) {
+                return tg.showAlert("Недостаточно осколков! Купите их в магазине.");
+            }
+
+            input.value = '';
+            addMsg(text, 'user');
+            
+            const loadingId = "load-" + Date.now();
+            document.getElementById('chat-container').innerHTML += `<div id="${loadingId}" class="msg bot" style="opacity:0.5;">...</div>`;
+            document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+
+            const tgName = tg.initDataUnsafe?.user?.first_name || "Пользователь";
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tg_id: userData.tg_id,
+                        char_id: currentChar.id,
+                        message: text,
+                        chat_history: chatHistory,
+                        sex: document.getElementById('chat-sex').value,
+                        user_name: tgName
+                    })
+                });
+
+                document.getElementById(loadingId).remove();
+                
+                const data = await res.json();
+                if (data.error) {
+                    addMsg("Ошибка: " + data.error, 'bot');
+                } else {
+                    addMsg(data.reply, 'bot');
+                    userData.shards = data.new_balance;
+                    if (userData.tg_id !== OWNER_ID) document.getElementById('shards-balance').innerText = userData.shards;
+                }
+            } catch (e) {
+                document.getElementById(loadingId).remove();
+                addMsg("Ошибка связи с ИИ.", 'bot');
+            }
+        }
+
+        // ================= ОПЛАТА И МАГАЗИН =================
+        function openShop() { openPanel('p-shop'); }
+
+        async function buyStars(type, item, amount) {
+            try {
+                const res = await fetch('/api/payment/stars-invoice', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tg_id: userData.tg_id, type, item, amount_stars: amount })
+                });
+                const data = await res.json();
+                if (data.invoice_url) tg.openInvoice(data.invoice_url, (status) => { if (status === 'paid') tg.showAlert('Оплата прошла успешно!'); });
+                else tg.showAlert("Ошибка счета");
+            } catch (e) { tg.showAlert("Сбой связи"); }
+        }
+
+        async function buyTon(type, item, amount) {
+             try {
+                const res = await fetch('/api/payment/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tg_id: userData.tg_id, type, item, amount_ton: amount }) });
+                const data = await res.json();
+                if (data.pay_url) tg.openLink(data.pay_url); else tg.showAlert("Ошибка ссылки");
+            } catch (e) { tg.showAlert("Сбой связи"); }
+        }
+
+        // ================= АДМИНКА =================
+        function openAdmin() { openPanel('p-adm'); }
+
+        async function manageShards(action) {
+            const target = document.getElementById('adm-target').value;
+            const amount = document.getElementById('adm-amount').value;
+            if (!target || !amount) return tg.showAlert("Заполните все поля!");
+            const res = await fetch('/api/admin/manage-shards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sender_id: userData.tg_id, target_id: target, amount, action }) });
+            const data = await res.json(); tg.showAlert(data.message || data.error);
+        }
+
+        async function manageSub(action) {
+            const target = document.getElementById('adm-target').value;
+            const sub = document.getElementById('adm-sub').value;
+            if (!target) return tg.showAlert("Введите ID юзера!");
+            const res = await fetch('/api/admin/manage-sub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sender_id: userData.tg_id, target_id: target, sub_type: sub, action }) });
+            const data = await res.json(); tg.showAlert(data.message || data.error);
+        }
+
+        // ================= КОНСОЛЬ =================
+        function openConsole() { openPanel('p-con'); }
+
+        async function setAdmin(status) {
+            const target = document.getElementById('cons-target').value; 
+            if (!target) return tg.showAlert("Введите ID!");
+            const res = await fetch('/api/owner/set-admin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner_id: userData.tg_id, target_id: target, status }) });
+            if(res.ok) tg.showAlert("Права успешно обновлены!"); else tg.showAlert("Ошибка доступа");
+        }
+
+        // ЗАПУСК
+        window.onload = init;
+    </script>
+</body>
+</html>
