@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anime AI 18+</title>
+    <title>Moon Project</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
     <style>
-        /* === ВОЗВРАЩАЕМ ТВОЙ АХУЕННЫЙ ДИЗАЙН === */
+        /* === ТВОЙ АХУЕННЫЙ ДИЗАЙН === */
         :root {
             --bg-dark: #0a0a12;
             --text-primary: #ffffff;
@@ -30,7 +30,7 @@
             user-select: none;
         }
 
-        /* === БЕЛАЯ ПУЛЬСИРУЮЩАЯ ЛУНА НА ЗАГРУЗКЕ === */
+        /* === БЕЛАЯ ПУЛЬСИРУЮЩАЯ ЛУНА === */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-dark);
@@ -42,7 +42,7 @@
         .white-moon-loader {
             width: 80px; height: 80px;
             border-radius: 50%;
-            box-shadow: 20px 10px 0 0 #ffffff; /* Форма белого месяца */
+            box-shadow: 20px 10px 0 0 #ffffff; 
             transform: rotate(-20deg);
             animation: pulseWhiteMoon 2s infinite alternate ease-in-out;
             margin-bottom: 30px;
@@ -53,26 +53,19 @@
             100% { filter: drop-shadow(0 0 25px rgba(255,255,255,1)); transform: rotate(-20deg) scale(1.05); }
         }
 
-        .loading-text { font-size: 16px; font-weight: 800; letter-spacing: 1px; color: #ffffff; opacity: 0.7; }
+        .loading-text { font-size: 16px; font-weight: 800; letter-spacing: 1px; color: #ffffff; opacity: 0.7; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* === БАЗОВЫЕ КЛАССЫ === */
-        .screen { display: none; padding: 20px; min-height: 100vh; box-sizing: border-box; padding-top: 70px; /* Место под шапку */ }
+        /* === БАЗОВЫЕ ЭЛЕМЕНТЫ И НАВИГАЦИЯ === */
+        .screen { display: none; padding: 20px; height: 100vh; box-sizing: border-box; overflow-y: auto; }
         .active-screen { display: block; }
         
-        /* === ВЕРХНЯЯ ШАПКА (Как на скрине) === */
-        .fixed-header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 15px; box-sizing: border-box;
-            background: rgba(10, 10, 18, 0.95);
-            backdrop-filter: blur(5px); z-index: 100;
-            border-bottom: 1px solid #1a1a2a;
-        }
-        .header-title { font-size: 18px; font-weight: 800; flex-grow: 1; text-align: center; }
-        .icon-btn { font-size: 24px; color: var(--text-secondary); background: none; border: none; padding: 5px; }
+        .header-bar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
+        .back-btn { background: none; border: none; color: var(--accent-cyan); font-size: 16px; font-weight: 800; padding: 5px; text-transform: uppercase; }
+        h2 { margin: 0; font-weight: 800; text-align: center; flex-grow: 1; }
 
-        /* === ГЛАВНОЕ МЕНЮ (ТВОЙ ДИЗАЙН) === */
-        .user-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+        /* === МЕНЮ === */
+        .user-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; margin-top: 10px; }
         .nick-gradient { 
             font-size: 28px; font-weight: 900; 
             background: linear-gradient(45deg, #ff00dd, #00e5ff);
@@ -84,57 +77,50 @@
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         
-        /* ТВОИ КНОПКИ */
         .menu-btn {
             background: var(--btn-bg);
             border: 2px solid var(--btn-border);
             color: var(--btn-text);
-            padding: 25px 10px;
-            border-radius: 20px;
+            padding: 20px 10px;
+            border-radius: 16px;
             font-size: 13px; font-weight: 800; letter-spacing: 0.5px;
             text-transform: uppercase; text-align: center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             transition: transform 0.1s, border-color 0.2s;
         }
-        .menu-btn:active { transform: scale(0.98); border-color: #4a3a6f; }
+        .menu-btn:active { transform: scale(0.95); border-color: #4a3a6f; }
+        .menu-btn.full { grid-column: span 2; }
         
-        /* ОСОБЫЕ КНОПКИ АДМИНКИ */
         .btn-admin-cyan { border-color: rgba(0, 229, 255, 0.5); color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 229, 255, 0.1) inset; }
         .btn-admin-pink { border-color: rgba(255, 0, 221, 0.5); color: var(--accent-pink); box-shadow: 0 0 15px rgba(255, 0, 221, 0.1) inset; }
 
-
-        /* === ОСТАЛЬНЫЕ ЭЛЕМЕНТЫ (Чат, Профиль) === */
-        #chat-container { height: calc(100vh - 180px); overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { padding: 12px 18px; border-radius: 18px; max-width: 85%; word-wrap: break-word; font-size: 15px; line-height: 1.4; }
-        .msg.user { align-self: flex-end; background: linear-gradient(45deg, #3a2a6f, #5a3a8f); color: #fff; border-bottom-right-radius: 4px; }
-        .msg.bot { align-self: flex-start; background: #1a1a2a; border: 1px solid #2d224f; color: #d0d0e0; border-bottom-left-radius: 4px; }
-        .input-area { display: flex; gap: 10px; position: fixed; bottom: 15px; left: 15px; right: 15px; }
-        .input-area input { flex: 1; padding: 15px 20px; border-radius: 25px; border: 2px solid var(--btn-border); background: #130e24; color: #fff; outline: none; font-family: inherit; }
-        .input-area button { width: 50px; height: 50px; border-radius: 50%; border: none; background: linear-gradient(45deg, var(--accent-pink), #7b1fa2); color: #fff; font-size: 20px; display: flex; align-items: center; justify-content: center; }
-
-        .profile-card { background: var(--btn-bg); border-radius: 20px; padding: 25px; border: 2px solid var(--btn-border); font-size: 16px; line-height: 2; }
+        /* === ПРОФИЛЬ === */
+        .profile-card { background: var(--btn-bg); border-radius: 20px; padding: 25px; border: 2px solid var(--btn-border); font-size: 16px; line-height: 2.2; }
         .profile-card span { color: var(--accent-cyan); font-weight: 800; float: right; }
 
-        input, select { width: 100%; padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 2px solid var(--btn-border); background: #130e24; color: #fff; box-sizing: border-box; outline: none; font-family: inherit; }
-        .header-bar { display: flex; align-items: center; margin-bottom: 20px; }
-        .header-bar h2 { margin: 0; flex-grow: 1; text-align: center; font-weight: 800; }
-        .back-btn { background: none; border: none; color: var(--text-secondary); font-size: 24px; padding: 5px; }
+        /* === ВВОД ДАННЫХ И ЧАТ === */
+        input, select { width: 100%; padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 2px solid var(--btn-border); background: #130e24; color: #fff; box-sizing: border-box; outline: none; font-family: inherit; font-weight: 600; }
+        
+        #chat-container { height: calc(100vh - 180px); overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 15px; padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 12px; }
+        .msg { padding: 12px 18px; border-radius: 18px; max-width: 85%; word-wrap: break-word; font-size: 14px; line-height: 1.5; font-weight: 600; }
+        .msg.user { align-self: flex-end; background: linear-gradient(45deg, #3a2a6f, #5a3a8f); color: #fff; border-bottom-right-radius: 4px; }
+        .msg.bot { align-self: flex-start; background: #1a1a2a; border: 1px solid #2d224f; color: #d0d0e0; border-bottom-left-radius: 4px; }
+        
+        .input-area { display: flex; gap: 10px; }
+        .input-area input { flex: 1; margin-bottom: 0; border-radius: 25px; }
+        .input-area button { width: 55px; border-radius: 50%; border: none; background: linear-gradient(45deg, var(--accent-pink), #7b1fa2); color: #fff; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+
+        h3 { text-align: center; margin-top: 20px; margin-bottom: 15px; font-weight: 800; }
     </style>
 </head>
 <body>
 
     <div id="loading-screen">
         <div class="white-moon-loader"></div>
-        <div class="loading-text">ЗАГРУЗКА ИНТЕРФЕЙСА...</div>
+        <div class="loading-text">СОЕДИНЕНИЕ С СЕРВЕРОМ...</div>
     </div>
 
-    <div class="fixed-header" id="main-header" style="display: none;">
-        <button class="icon-btn" onclick="goMenu()">✕</button>
-        <div class="header-title">Anime AI 18+</div>
-        <button class="icon-btn">⋮</button>
-    </div>
-
-    <div id="main-menu" class="screen" style="padding-top: 30px;">
+    <div id="main-menu" class="screen">
         <div class="user-header">
             <div>
                 <div class="nick-gradient" id="menu-nick">Загрузка...</div>
@@ -142,35 +128,49 @@
             </div>
             <div class="currency-box">
                 <span class="moon-icon">🌙</span>
-                <span id="menu-shards">∞</span>
+                <span id="menu-shards">...</span>
             </div>
         </div>
 
         <div class="menu-grid">
-            <div class="menu-btn" onclick="openCharacters()">ЧАТЫ</div>
-            <div class="menu-btn" onclick="openCharacters()">ПЕРСОНАЖИ</div>
-            <div class="menu-btn" onclick="claimDaily()">ЕЖЕДНЕВКА</div>
-            <div class="menu-btn" onclick="openTasks()">ЗАДАНИЯ</div>
-            <div class="menu-btn" onclick="openShop()">МАГАЗИН</div>
-            <div class="menu-btn" onclick="openPromo()">ПРОМОКОДЫ</div>
-            <div class="menu-btn" onclick="openProfile()">ПРОФИЛЬ</div>
-            <div class="menu-btn" onclick="tg.showAlert('Настройки в разработке')">НАСТРОЙКА</div>
+            <div class="menu-btn full" onclick="openCharacters()">Выбрать персонажа</div>
+            <div class="menu-btn" onclick="openProfile()">Профиль</div>
+            <div class="menu-btn" onclick="openShop()">Магазин</div>
+            <div class="menu-btn" onclick="openTasks()">Задания</div>
+            <div class="menu-btn" onclick="openPromo()">Промокоды</div>
+            <div class="menu-btn full" onclick="claimDaily()">Ежедневная награда</div>
             
-            <div id="btn-admin" class="menu-btn btn-admin-cyan" style="display: none;" onclick="openAdmin()">АДМИНКА</div>
-            <div id="btn-console" class="menu-btn btn-admin-pink" style="display: none;" onclick="openConsole()">КОНСОЛЬ</div>
+            <div id="btn-admin" class="menu-btn btn-admin-cyan full" style="display: none;" onclick="openAdmin()">Панель Админа</div>
+            <div id="btn-console" class="menu-btn btn-admin-pink full" style="display: none;" onclick="openConsole()">Консоль Владельца</div>
         </div>
     </div>
 
     <div id="profile-screen" class="screen">
+        <div class="header-bar">
+            <button class="back-btn" onclick="goMenu()">◀ Назад</button>
+            <h2>Профиль</h2>
+            <div style="width: 60px;"></div>
+        </div>
         <div class="profile-card" id="profile-data">Загрузка...</div>
     </div>
 
     <div id="characters-screen" class="screen">
+        <div class="header-bar">
+            <button class="back-btn" onclick="goMenu()">◀ Назад</button>
+            <h2>Персонажи</h2>
+            <div style="width: 60px;"></div>
+        </div>
         <div id="chars-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
     </div>
 
-    <div id="chat-screen" class="screen" style="padding-bottom: 80px;">
-        <div id="chat-settings" style="margin-bottom: 10px;">
+    <div id="chat-screen" class="screen">
+        <div class="header-bar">
+            <button class="back-btn" onclick="goMenu()">◀ Назад</button>
+            <h2 id="chat-title">Чат</h2>
+            <div style="width: 60px;"></div>
+        </div>
+        
+        <div id="chat-settings">
             <select id="chat-sex">
                 <option value="0">Уровень 0 (Без пошлости)</option>
                 <option value="1">Уровень 1 (Легкий флирт)</option>
@@ -181,45 +181,78 @@
                 <option value="6">Уровень 6 (Детальный RP / Ultra)</option>
             </select>
         </div>
+
         <div id="chat-container"></div>
         <div class="input-area">
-            <input type="text" id="chat-input" placeholder="Ваше сообщение...">
+            <input type="text" id="chat-input" placeholder="Сообщение... (1 осколок)">
             <button onclick="sendMessage()">➤</button>
         </div>
     </div>
 
     <div id="shop-screen" class="screen">
-        <h3>Осколки</h3>
+        <div class="header-bar">
+            <button class="back-btn" onclick="goMenu()">◀ Назад</button>
+            <h2>Магазин</h2>
+            <div style="width: 60px;"></div>
+        </div>
+        <h3>Осколки Луны</h3>
         <div class="menu-btn" onclick="buyStars('shards', 100, 50)" style="margin-bottom: 10px;">Купить 100 🌙 (50 Stars)</div>
         <div class="menu-btn" onclick="buyTon('shards', 500, 0.5)" style="margin-bottom: 20px;">Купить 500 🌙 (0.5 TON)</div>
+        
         <h3>Подписки (30 дней)</h3>
         <div class="menu-btn" onclick="buyStars('sub', 'Premium', 100)" style="margin-bottom: 10px;">Premium (100 Stars)</div>
-        <div class="menu-btn" onclick="buyTon('sub', 'Ultra', 2)">Ultra (2 TON)</div>
+        <div class="menu-btn" onclick="buyStars('sub', 'Pro', 250)" style="margin-bottom: 10px;">Pro (250 Stars)</div>
+        <div class="menu-btn" onclick="buyTon('sub', 'VIP', 1)" style="margin-bottom: 10px;">VIP (1 TON)</div>
+        <div class="menu-btn btn-admin-pink" onclick="buyTon('sub', 'Ultra', 2)">Ultra (2 TON)</div>
     </div>
 
     <div id="admin-screen" class="screen">
-        <h3>Выдача Осколков</h3>
-        <input type="number" id="adm-target" placeholder="ID юзера">
-        <input type="number" id="adm-amount" placeholder="Количество">
+        <div class="header-bar">
+            <button class="back-btn" onclick="goMenu()">◀ Назад</button>
+            <h2>Админка</h2>
+            <div style="width: 60px;"></div>
+        </div>
+        
+        <h3>Управление Осколками</h3>
+        <input type="number" id="adm-target" placeholder="ID пользователя">
+        <input type="number" id="adm-amount" placeholder="Количество осколков">
         <div style="display:flex; gap:10px;">
-            <div class="menu-btn" style="flex:1; background: var(--accent-cyan); color:#000;" onclick="manageShards('add')">Выдать</div>
-            <div class="menu-btn" style="flex:1; background: var(--accent-pink);" onclick="manageShards('remove')">Забрать</div>
+            <div class="menu-btn btn-admin-cyan" style="flex:1;" onclick="manageShards('add')">Выдать</div>
+            <div class="menu-btn btn-admin-pink" style="flex:1;" onclick="manageShards('remove')">Забрать</div>
+        </div>
+
+        <h3>Управление Подписками</h3>
+        <select id="adm-sub">
+            <option value="Premium">Premium</option>
+            <option value="Pro">Pro</option>
+            <option value="VIP">VIP</option>
+            <option value="Ultra">Ultra</option>
+        </select>
+        <div style="display:flex; gap:10px;">
+            <div class="menu-btn btn-admin-cyan" style="flex:1;" onclick="manageSub('add')">Выдать (30д)</div>
+            <div class="menu-btn btn-admin-pink" style="flex:1;" onclick="manageSub('remove')">Снять</div>
         </div>
     </div>
 
     <div id="console-screen" class="screen">
-        <h3>Управление Админами</h3>
-        <input type="number" id="cons-target" placeholder="ID юзера">
+        <div class="header-bar">
+            <button class="back-btn" onclick="goMenu()">◀ Назад</button>
+            <h2>Консоль</h2>
+            <div style="width: 60px;"></div>
+        </div>
+        
+        <h3>Права Администратора</h3>
+        <input type="number" id="cons-target" placeholder="ID пользователя">
         <div style="display:flex; gap:10px;">
-            <div class="menu-btn" style="flex:1; background: var(--accent-cyan); color:#000;" onclick="setAdmin(true)">Назначить</div>
-            <div class="menu-btn" style="flex:1; background: var(--accent-pink);" onclick="setAdmin(false)">Снять</div>
+            <div class="menu-btn btn-admin-cyan" style="flex:1;" onclick="setAdmin(true)">Назначить</div>
+            <div class="menu-btn btn-admin-pink" style="flex:1;" onclick="setAdmin(false)">Разжаловать</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#0a0a12'); // Цвет хедера телеги под фон
+        tg.setHeaderColor('#0a0a12');
         
         let userData = null;
         let chatHistory = [];
@@ -230,22 +263,20 @@
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
             document.getElementById(id).classList.add('active-screen');
-            // Показываем шапку везде, кроме главного меню
-            document.getElementById('main-header').style.display = (id === 'main-menu') ? 'none' : 'flex';
+            window.scrollTo(0, 0);
         }
+        
         function goMenu() { showScreen('main-menu'); }
         function openShop() { showScreen('shop-screen'); }
-        function openTasks() { tg.showAlert("Задания в разработке!"); }
-        function openPromo() { tg.showAlert("Промокоды в разработке!"); }
+        function openTasks() { tg.showAlert("Задания находятся в разработке!"); }
+        function openPromo() { tg.showAlert("Промокоды находятся в разработке!"); }
         function openAdmin() { showScreen('admin-screen'); }
         function openConsole() { showScreen('console-screen'); }
 
-        // ================= ИНИЦИАЛИЗАЦИЯ =================
         async function init() {
             const userId = tg.initDataUnsafe?.user?.id || OWNER_ID;
-            const tgName = tg.initDataUnsafe?.user?.first_name || "German Green";
+            const tgName = tg.initDataUnsafe?.user?.first_name || "Пользователь";
             
-            // Заполняем меню сразу
             document.getElementById('menu-nick').innerText = tgName;
             document.getElementById('menu-id').innerText = "ID: " + userId;
 
@@ -257,10 +288,8 @@
                 
                 userData = await res.json();
                 
-                // Обновляем баланс в меню
                 document.getElementById('menu-shards').innerText = (userId === OWNER_ID) ? "∞" : userData.shards;
 
-                // Доступы
                 if (userData.is_admin || userId === OWNER_ID) document.getElementById('btn-admin').style.display = 'block';
                 if (userId === OWNER_ID) document.getElementById('btn-console').style.display = 'block';
 
@@ -273,7 +302,7 @@
                 }, 1500);
 
             } catch (e) {
-                document.querySelector('.loading-text').innerText = "ОШИБКА СВЯЗИ";
+                document.querySelector('.loading-text').innerText = "ОШИБКА СЕРВЕРА";
             }
         }
 
@@ -282,15 +311,18 @@
             const box = document.getElementById('profile-data');
             const tgName = tg.initDataUnsafe?.user?.first_name || "Неизвестный";
             const expText = userData.sub_exp > 0 ? new Date(userData.sub_exp).toLocaleDateString() : "Нет";
-            let status = userData.tg_id === OWNER_ID ? "Владелец" : (userData.is_admin ? "Администратор" : "Пользователь");
+            
+            let status = "Пользователь";
+            if (userData.is_admin) status = "Администратор";
+            if (userData.tg_id === OWNER_ID) status = "Владелец";
 
             box.innerHTML = `
-                Ник <span>${tgName}</span><br>
-                ID <span>${userData.tg_id}</span><br>
-                Подписка <span>${userData.subscription}</span><br>
-                Истекает <span>${expText}</span><br>
-                Осколки <span>${userData.shards}</span><br>
-                Статус <span>${status}</span>
+                Ник: <span>${tgName}</span><br>
+                User ID: <span>${userData.tg_id}</span><br>
+                Подписка: <span>${userData.subscription}</span><br>
+                Окончание: <span>${expText}</span><br>
+                Осколки: <span>${userData.shards}</span><br>
+                Статус: <span>${status}</span>
             `;
         }
 
@@ -305,16 +337,15 @@
                 else {
                     userData.shards = data.new_balance;
                     if (userData.tg_id !== OWNER_ID) document.getElementById('menu-shards').innerText = userData.shards;
-                    tg.showAlert(`Награда: +${data.reward} 🌙! Стрик: ${data.streak} дн.`);
+                    tg.showAlert(`Награда получена: +${data.reward} 🌙\nВаш стрик: ${data.streak} дн.`);
                 }
-            } catch (e) { tg.showAlert("Ошибка связи"); }
+            } catch (e) { tg.showAlert("Ошибка соединения"); }
         }
 
-        // ================= ЧАТ И ПЕРСОНАЖИ =================
         async function openCharacters() {
             showScreen('characters-screen');
             const list = document.getElementById('chars-list');
-            list.innerHTML = '<div style="text-align:center; margin-top:20px;">Загрузка...</div>';
+            list.innerHTML = '<div style="text-align:center;">Загрузка...</div>';
             try {
                 const res = await fetch('/api/get-characters');
                 const chars = await res.json();
@@ -325,9 +356,7 @@
                     let div = document.createElement('div');
                     div.className = "menu-btn";
                     div.style.textAlign = "left";
-                    div.style.display = "flex";
-                    div.style.alignItems = "center";
-                    div.innerHTML = `<span style="font-size:24px; margin-right:15px;">👤</span> <div><div>${c.name}</div><div style="font-size:11px; color:var(--text-secondary);">${c.age} лет</div></div>`;
+                    div.innerText = `${c.name} (${c.age} лет)`;
                     div.onclick = () => startChat(c);
                     list.appendChild(div);
                 });
@@ -337,8 +366,8 @@
         function startChat(char) {
             currentChar = char;
             chatHistory = [];
-            document.querySelector('.header-title').innerText = char.name;
-            document.getElementById('chat-container').innerHTML = `<div style="text-align:center; color:var(--text-secondary); font-size:13px; margin-top:10px;">Диалог с ${char.name} начат.</div>`;
+            document.getElementById('chat-title').innerText = char.name;
+            document.getElementById('chat-container').innerHTML = `<div style="text-align:center; color:var(--text-secondary); font-size:12px;">Система: Диалог начат</div>`;
             showScreen('chat-screen');
         }
 
@@ -358,14 +387,14 @@
             if (!text || !currentChar) return;
 
             if (userData.tg_id !== OWNER_ID && userData.shards < 1) {
-                return tg.showAlert("Недостаточно осколков!");
+                return tg.showAlert("Недостаточно осколков! Приобретите их в магазине.");
             }
 
             input.value = '';
             addMsg(text, 'user');
             
             const loadingId = "load-" + Date.now();
-            document.getElementById('chat-container').innerHTML += `<div id="${loadingId}" class="msg bot" style="opacity:0.6;">...</div>`;
+            document.getElementById('chat-container').innerHTML += `<div id="${loadingId}" class="msg bot" style="opacity:0.5;">...</div>`;
             document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
 
             const tgName = tg.initDataUnsafe?.user?.first_name || "Пользователь";
@@ -387,7 +416,7 @@
                 
                 const data = await res.json();
                 if (data.error) {
-                    addMsg("Ошибка ИИ: " + data.error, 'bot');
+                    addMsg("Ошибка: " + data.error, 'bot');
                 } else {
                     addMsg(data.reply, 'bot');
                     userData.shards = data.new_balance;
@@ -395,11 +424,10 @@
                 }
             } catch (e) {
                 document.getElementById(loadingId).remove();
-                addMsg("Ошибка связи с сервером.", 'bot');
+                addMsg("Ошибка связи с ИИ.", 'bot');
             }
         }
 
-        // ================= ОПЛАТА И АДМИНКА (Функции без изменений) =================
         async function buyStars(type, item, amount) {
             try {
                 const res = await fetch('/api/payment/stars-invoice', {
@@ -407,10 +435,11 @@
                     body: JSON.stringify({ tg_id: userData.tg_id, type, item, amount_stars: amount })
                 });
                 const data = await res.json();
-                if (data.invoice_url) tg.openInvoice(data.invoice_url, (status) => { if (status === 'paid') tg.showAlert('Оплата прошла!'); });
+                if (data.invoice_url) tg.openInvoice(data.invoice_url, (status) => { if (status === 'paid') tg.showAlert('Оплата прошла успешно!'); });
                 else tg.showAlert("Ошибка счета");
             } catch (e) { tg.showAlert("Сбой связи"); }
         }
+
         async function buyTon(type, item, amount) {
              try {
                 const res = await fetch('/api/payment/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tg_id: userData.tg_id, type, item, amount_ton: amount }) });
@@ -418,16 +447,28 @@
                 if (data.pay_url) tg.openLink(data.pay_url); else tg.showAlert("Ошибка ссылки");
             } catch (e) { tg.showAlert("Сбой связи"); }
         }
+
         async function manageShards(action) {
-            const target = document.getElementById('adm-target').value; const amount = document.getElementById('adm-amount').value;
-            if (!target || !amount) return tg.showAlert("Заполните поля!");
+            const target = document.getElementById('adm-target').value;
+            const amount = document.getElementById('adm-amount').value;
+            if (!target || !amount) return tg.showAlert("Заполните все поля!");
             const res = await fetch('/api/admin/manage-shards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sender_id: userData.tg_id, target_id: target, amount, action }) });
             const data = await res.json(); tg.showAlert(data.message || data.error);
         }
+
+        async function manageSub(action) {
+            const target = document.getElementById('adm-target').value;
+            const sub = document.getElementById('adm-sub').value;
+            if (!target) return tg.showAlert("Введите ID юзера!");
+            const res = await fetch('/api/admin/manage-sub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sender_id: userData.tg_id, target_id: target, sub_type: sub, action }) });
+            const data = await res.json(); tg.showAlert(data.message || data.error);
+        }
+
         async function setAdmin(status) {
-            const target = document.getElementById('cons-target').value; if (!target) return tg.showAlert("Введите ID!");
+            const target = document.getElementById('cons-target').value; 
+            if (!target) return tg.showAlert("Введите ID!");
             const res = await fetch('/api/owner/set-admin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner_id: userData.tg_id, target_id: target, status }) });
-            if(res.ok) tg.showAlert("Права обновлены!"); else tg.showAlert("Ошибка");
+            if(res.ok) tg.showAlert("Права успешно обновлены!"); else tg.showAlert("Ошибка доступа");
         }
 
         window.onload = init;
