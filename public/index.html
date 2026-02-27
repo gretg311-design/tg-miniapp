@@ -9,17 +9,8 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
-        /* ПУЛЬСИРУЮЩАЯ ЛУНА С ФОНОМ КАК В МЕНЮ */
-        #loading { 
-            position: fixed; 
-            inset: 0; 
-            background: #05010a; /* ИСПРАВЛЕНО: Теперь фон такой же, как в приложении */
-            z-index: 20000; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-        }
+        /* ПУЛЬСИРУЮЩАЯ ЛУНА С ФОНОМ МЕНЮ */
+        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
         @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 30px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 60px #fff; } 100% { transform: scale(1); box-shadow: 0 0 30px #fff; } }
 
@@ -113,162 +104,210 @@
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
     </div>
-    <div id="p-chatlist" class="overlay">
-        <div class="u-header" style="width:100%">
-            <div class="nick-ultra">Ваши диалоги</div>
-            <div class="term-btn" style="width:auto; padding:5px 15px;" onclick="closeAll()">Назад</div>
-        </div>
-        <div id="chat-list-container" style="width:100%"></div>
+    <div id="p-user-chatlist" class="overlay">
+        <h2 style="color:#bc42f5; margin-bottom: 20px;">МОИ ЧАТЫ</h2>
+        <div id="chatlist-container" style="width:100%"></div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-chat-room" class="overlay" style="padding:0; background:#05010a;">
-        <div class="u-header" style="padding:15px; background:#0d041a; border-bottom:1px solid #2d164d; width:100%; margin-bottom:0;">
-            <div id="chat-char-name" style="font-weight:bold; color:#bc42f5;">Персонаж</div>
-            <div class="term-btn" style="width:auto; padding:5px 15px; margin-bottom:0;" onclick="openChatList()">Назад</div>
+    <div id="p-chat" class="overlay" style="padding: 0;">
+        <div style="width: 100%; background: #0d041a; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d164d;">
+            <div style="font-weight: bold; color: #bc42f5; font-size: 18px;" id="chat-char-name">Имя Персонажа</div>
+            <div style="color: #888; font-size: 24px; cursor: pointer; padding: 0 10px;" onclick="closeChat()">×</div>
         </div>
         <div class="chat-container">
-            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-messages" id="chat-messages-box">
+                <div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>
+            </div>
             <div class="chat-input-area">
-                <input type="text" id="chat-input" class="chat-input" placeholder="Напишите сообщение...">
-                <button class="chat-send-btn" onclick="sendChatMessage()">></button>
+                <input type="text" id="chat-input-text" class="chat-input" placeholder="Ваше сообщение...">
+                <button class="chat-send-btn" onclick="sendMessage()">➤</button>
             </div>
         </div>
     </div>
 
-    <div id="p-profile" class="overlay">
-        <div class="info-card">
-            <div class="nick-ultra" style="text-align:center; margin-bottom:15px;">ВАШ ПРОФИЛЬ</div>
-            <div class="p-row"><span class="p-label">Nick:</span> <span class="p-val" id="prof-nick">-</span></div>
-            <div class="p-row"><span class="p-label">User ID:</span> <span class="p-val" id="prof-id">-</span></div>
-            <div class="p-row"><span class="p-label">Subscription:</span> <span class="p-val" id="prof-sub">Base</span></div>
-            <div class="p-row"><span class="p-label">Subscription end date:</span> <span class="p-val" id="prof-sub-date">-</span></div>
-            <div class="p-row"><span class="p-label">Shard count:</span> <span class="p-val" id="prof-shards">0</span></div>
-            <div class="p-row"><span class="p-label">Status:</span> <span class="p-val" id="prof-status">User</span></div>
-        </div>
-        <div class="term-btn" onclick="closeAll()">В главное меню</div>
+    <div id="p-user-chars" class="overlay">
+        <h2 style="color:#bc42f5; margin-bottom: 20px;">ПЕРСОНАЖИ</h2>
+        <div id="user-char-list" class="char-grid"></div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-adm" class="overlay">
-        <div class="nick-ultra">Панель Администратора</div>
+    <div id="p-char-dossier" class="overlay">
+        <h2 style="color:#bc42f5; margin-bottom: 10px;" id="dos-name">Имя</h2>
         <div class="info-card">
-            <input type="text" id="adm-tgid" class="term-in" placeholder="Telegram ID">
-            <input type="number" id="adm-count" class="term-in" placeholder="Количество">
-            <div class="term-btn" onclick="admAddShards()">Выдать осколки</div>
-            <div class="term-btn" onclick="admAddSub()">Выдать сабку (30 дн)</div>
+            <img id="dos-img" src="" class="dossier-img">
+            <div class="p-row"><span class="p-label">Возраст:</span> <span class="p-val" id="dos-age">18</span></div>
+            <div class="p-row"><span class="p-label">Пол:</span> <span class="p-val" id="dos-gender">М</span></div>
+            <div style="margin-top:15px; font-size:12px; color:#ccc; line-height:1.4;" id="dos-desc">Описание...</div>
         </div>
-        <div class="term-btn" style="border-color:#555" onclick="closeAll()">Назад</div>
+        <div class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()">НАЧАТЬ ЧАТ</div>
+        <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()">УДАЛИТЬ ПЕРСОНАЖА</div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
+
+    <div id="p-daily" class="overlay">
+        <h2 style="color:#00ff00; margin-bottom: 5px;">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
+        <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
+        <div class="info-card" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
+            <h3 id="daily-streak-text" style="color: #bc42f5; margin: 0 0 10px 0;">Стрик: 0 дней</h3>
+            <div style="font-size: 14px; margin-bottom: 15px; color:#aaa;">Ваша награда сегодня:<br>
+                <b id="daily-reward-text" style="color: #00ff00; font-size: 24px;">...</b>
+            </div>
+            <div id="daily-btn" class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00; width:80%;" onclick="claimDaily()">ЗАБРАТЬ</div>
+            <div id="daily-wait" style="display:none; color:#888; font-size: 12px; margin-top: 10px;">Следующая награда будет доступна завтра.</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-user-tasks" class="overlay"><h2 style="color:#00ff00; margin-bottom: 20px;">ЗАДАНИЯ</h2><div id="user-task-list" style="width:100%"></div><div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div></div>
+    
+    <div id="p-shop" class="overlay"><h2 style="color:#00bcd4; margin-bottom: 5px;">МАГАЗИН</h2><div style="font-size: 11px; color: #888; margin-bottom: 20px;">Оплата через Telegram Stars или CryptoBot (TON)</div><div class="shop-header">ПОДПИСКИ (30 ДНЕЙ)</div><div class="shop-item"><div class="shop-title" style="color: #a8b8c8;">PREMIUM</div><div class="shop-desc">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ffd700;">PRO</div><div class="shop-desc">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ff00ff;">VIP</div><div class="shop-desc">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div><div class="shop-desc">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div></div></div><div class="shop-header">ОСКОЛКИ ЛУНЫ</div><div class="shop-item"><div class="shop-title">10 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div><div class="shop-item"><div class="shop-title">100 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    
+    <div id="p-user-promos" class="overlay"><h2 style="color:#bc42f5">ПРОМОКОД</h2><div class="info-card"><span class="s-label">Введите секретный код</span><input type="text" id="user-promo-input" class="term-in" placeholder="Напр: MOON2026"><div class="term-btn" style="border-color:#bc42f5" onclick="usePromo()">АКТИВИРОВАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    
+    <div id="p-profile" class="overlay"><h2 style="color:#bc42f5">ПРОФИЛЬ</h2><div class="info-card"><div class="p-row"><span class="p-label">Ник:</span> <span class="p-val" id="prof-nick">...</span></div><div class="p-row"><span class="p-label">Айди юз:</span> <span class="p-val" id="prof-id">0</span></div><div class="p-row"><span class="p-label">Подписка:</span> <span class="p-val" id="prof-sub">FREE</span></div><div class="p-row"><span class="p-label">Срок:</span> <span class="p-val" id="prof-exp">-</span></div><div class="p-row"><span class="p-label">Кол-во осколков:</span> <span class="p-val" id="prof-shards">0</span></div><div class="p-row" style="border:none;"><span class="p-label">Статус:</span> <span class="p-val" id="prof-status">Юзер</span></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    
+    <div id="p-settings" class="overlay"><h2 style="color:#bc42f5">НАСТРОЙКИ</h2><div class="info-card"><span class="s-label">Ник в приложении</span><input type="text" id="set-nick" class="term-in" placeholder="Новый ник..." oninput="updateLiveNick(this.value)"><span class="s-label">Ваш пол</span><div class="gender-box"><div class="gender-btn active" id="g-m" onclick="setGender('m')">Мужчина</div><div class="gender-btn" id="g-f" onclick="setGender('f')">Женщина</div></div></div><div class="info-card"><span class="s-label">Длина сообщений <span class="slider-val" id="len-val">45</span></span><div class="slider-wrap"><input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div></div></div><div class="info-card"><span class="s-label">Пошлость персонажей <span class="slider-val" id="sex-val">0</span></span><div class="slider-wrap"><input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+
+    <div id="p-con" class="overlay"><h2 style="color:#e91e63">CONSOLE</h2><div class="con-grid"><div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div><div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div><div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div><div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div><div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div><div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div><div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">ЗАДАНИЯ</div></div><div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div></div>
+    <div id="p-adm" class="overlay"><h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2><div class="con-grid"><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-shards')">ВЫДАТЬ ОСКОЛКИ</div><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-subs')">ВЫДАТЬ SUB</div><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-char')">ДОБАВИТЬ ПЕРСА</div><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-promos')">СОЗДАТЬ ПРОМО</div><div class="con-btn" style="border-color:#00bcd4; grid-column: span 2;" onclick="openPanel('p-m-tasks')">ДОБАВИТЬ ЗАДАНИЕ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-m-shards" class="overlay"><h2>ОСКОЛКИ</h2><div class="info-card"><input type="number" id="ish-id" class="term-in" placeholder="TG ID"><input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО"><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div><div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-m-subs" class="overlay"><h2>ПОДПИСКИ (30д)</h2><div class="info-card"><input type="number" id="isu-id" class="term-in" placeholder="TG ID"><select id="isu-type" class="term-in"><option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option></select><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div><div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-m-char" class="overlay"><h2>ПЕРСОНАЖ</h2><div class="info-card" style="text-align: center;"><img id="char-preview" src="#"><input type="text" id="ich-name" class="term-in" placeholder="Имя"><input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18"><span class="s-label">Пол персонажа</span><div class="gender-box"><div class="gender-btn active" id="cg-m" onclick="setCharGender('m')">Мужской</div><div class="gender-btn" id="cg-f" onclick="setCharGender('f')">Женский</div></div><textarea id="ich-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание..." maxlength="2000" oninput="updateCharCounter()"></textarea><div id="char-limit" class="char-counter">0/2000</div><input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)"><div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div><div class="term-btn" style="border-color:#bc42f5" onclick="saveCharDB()">В БАЗУ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
 
-        // КОНСТАНТЫ ИЗ ТЗ
-        const OWNER_ID = "8287041036";
-        let USER_DATA = {
-            id: tg.initDataUnsafe?.user?.id || "0",
-            first_name: tg.initDataUnsafe?.user?.first_name || "Странник",
-            shards: 0,
-            sub: "Free",
-            sub_end: "None",
-            role: "user"
-        };
+        const OID = "8287041036";
+        let stack = [], clickedTasks = [];
+        let currentCharGender = 'm'; 
+        let activeCharId = null;
+        let dailyTimerInterval = null;
+        let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
+        let allChars = []; 
 
-        function initApp() {
-            // Имитация загрузки с пульсирующей луной
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
-                syncProfile();
-            }, 2500);
+        function getUid() { return String(tg.initDataUnsafe?.user?.id || OID); }
+
+        function updateBalanceUI(val) {
+            if(getUid() === OID) return;
+            document.getElementById('shards-balance').innerText = val;
+            document.getElementById('prof-shards').innerText = val;
+            userData.shards = val;
         }
 
-        function syncProfile() {
-            const uid = String(USER_DATA.id);
-            const isOwner = (uid === OWNER_ID);
-            
-            // Железобетон: Овнер имеет бесконечные ресурсы
-            if(isOwner) {
-                USER_DATA.shards = "∞";
-                USER_DATA.sub = "Ultra (Infinite)";
-                USER_DATA.role = "Owner";
+        setInterval(async () => {
+            const uid = getUid();
+            if(!uid || document.getElementById('loading').style.display !== 'none') return;
+            try {
+                const res = await fetch('/api/user/sync', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tg_id: uid }) });
+                if(res.ok) {
+                    const data = await res.json();
+                    if(uid !== OID) {
+                        document.getElementById('shards-balance').innerText = data.shards;
+                        document.getElementById('prof-shards').innerText = data.shards;
+                        userData.shards = data.shards;
+                    }
+                    if(document.getElementById('prof-sub').innerText !== data.subscription) {
+                        document.getElementById('prof-sub').innerText = data.subscription;
+                        userData.subscription = data.subscription;
+                    }
+                }
+            } catch(e) {}
+        }, 3000);
+
+        async function init() {
+            const uid = getUid();
+            const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
+            document.getElementById('u-id-head').innerText = uid;
+            document.getElementById('prof-id').innerText = uid;
+            const savedNick = localStorage.getItem('m_nick_' + uid) || u.first_name || "User";
+            document.getElementById('u-name').innerText = savedNick;
+            document.getElementById('prof-nick').innerText = savedNick;
+            document.getElementById('set-nick').value = savedNick;
+
+            try {
+                const res = await fetch('/api/user/get-data', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tg_id: uid }) });
+                userData = await res.json();
+            } catch (e) { console.error("SERVER ERROR:", e); }
+
+            if(uid === OID) {
+                document.getElementById('shards-balance').innerText = "∞";
+                document.getElementById('prof-shards').innerText = "∞";
+                document.getElementById('prof-sub').innerText = "ULTRA";
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
+                document.getElementById('own-sh-rem').style.display = 'block';
+                document.getElementById('own-su-rem').style.display = 'block';
+            } else {
+                updateBalanceUI(userData.shards);
+                document.getElementById('prof-sub').innerText = userData.subscription;
+                if(userData.is_admin) document.getElementById('nav-adm').style.display = 'flex';
             }
-
-            document.getElementById('u-name').innerText = USER_DATA.first_name;
-            document.getElementById('u-id-head').innerText = USER_DATA.id;
-            document.getElementById('shards-balance').innerText = USER_DATA.shards;
-
-            // Наполнение профиля по ТЗ
-            document.getElementById('prof-nick').innerText = USER_DATA.first_name;
-            document.getElementById('prof-id').innerText = USER_DATA.id;
-            document.getElementById('prof-sub').innerText = USER_DATA.sub;
-            document.getElementById('prof-sub-date').innerText = USER_DATA.sub_end;
-            document.getElementById('prof-shards').innerText = USER_DATA.shards;
-            document.getElementById('prof-status').innerText = USER_DATA.role;
+            updateDailyUI();
+            await renderUserChars();
+            setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
         }
 
-        function openPanel(id) {
-            closeAll();
-            document.getElementById(id).style.display = 'flex';
-        }
-
-        function closeAll() {
-            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
-        }
-
-        function openChatList() {
-            openPanel('p-chatlist');
-            const container = document.getElementById('chat-list-container');
-            container.innerHTML = `
-                <div class="chatlist-item" onclick="startChat('Luna')">
-                    <div class="chatlist-img" style="background: #fff;"></div>
-                    <div class="chatlist-info">
-                        <div class="chatlist-name">Luna AI</div>
-                        <div class="chatlist-last">Привет! Я твоя персональная Луна.</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function startChat(name) {
-            openPanel('p-chat-room');
-            document.getElementById('chat-char-name').innerText = name;
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chat-input');
+        async function sendMessage() {
+            const input = document.getElementById('chat-input-text');
             const text = input.value.trim();
             if(!text) return;
-
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'msg-box msg-user';
-            msgDiv.innerText = text;
-            document.getElementById('chat-messages').appendChild(msgDiv);
-            
-            input.value = '';
-            
-            // Снятие осколка (Железобетон 1.0.2)
-            if(USER_DATA.id !== OWNER_ID && USER_DATA.shards > 0) {
-                USER_DATA.shards--;
-                syncProfile();
-            }
+            const uid = getUid();
+            if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков!");
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            if(!allChats[activeCharId]) allChats[activeCharId] = [];
+            allChats[activeCharId].push({sender: 'user', text: text});
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            input.value = ''; renderChatMessages();
+            try {
+                const res = await fetch('/api/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tg_id: uid, char_id: activeCharId, message: text, chat_history: allChats[activeCharId] }) });
+                const data = await res.json();
+                if (!data.error) {
+                    allChats[activeCharId].push({sender: 'char', text: data.reply});
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    if (uid !== OID) updateBalanceUI(data.new_balance); 
+                    renderChatMessages();
+                }
+            } catch (e) { tg.showAlert("Ошибка связи."); }
         }
 
-        // Запуск
-        window.onload = initApp;
+        async function renderUserChars() {
+            try {
+                const res = await fetch('/api/get-characters');
+                allChars = await res.json();
+                const list = document.getElementById('user-char-list');
+                list.innerHTML = allChars.map(c => `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${c.name}</div><div class="char-card-tags">${c.age} лет</div></div></div>`).join('');
+            } catch (e) {}
+        }
 
-        // Запрет закрытия при свайпе вниз (по ТЗ)
-        window.addEventListener('touchmove', function(e) {
-            if (e.target.closest('.overlay') || e.target.closest('#app')) {
-                // Разрешаем скролл внутри элементов
-            } else {
-                e.preventDefault();
-            }
-        }, { passive: false });
+        function openDossier(id) {
+            const c = allChars.find(x => x.id === id);
+            if(!c) return;
+            activeCharId = id;
+            document.getElementById('dos-name').innerText = c.name;
+            document.getElementById('dos-img').src = c.photo;
+            document.getElementById('dos-age').innerText = c.age;
+            document.getElementById('dos-gender').innerText = c.gender === 'm' ? 'Мужской' : 'Женский';
+            document.getElementById('dos-desc').innerText = c.desc;
+            if(getUid() === OID) document.getElementById('dos-del-btn').style.display = 'block';
+            openPanel('p-char-dossier');
+        }
 
+        async function claimDaily() {
+            try {
+                const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tg_id: getUid() }) });
+                const data = await res.json();
+                if (!data.error) { tg.showAlert(`Получено: ${data.reward} 🌙!`); userData.shards = data.new_balance; updateBalanceUI(userData.shards); updateDailyUI(); }
+            } catch (e) { tg.showAlert("Ошибка сервера"); }
+        }
+
+        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
+        function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
+        function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
+        window.onload = init;
     </script>
 </body>
 </html>
