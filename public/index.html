@@ -9,7 +9,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
-        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
         @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 30px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 60px #fff; } 100% { transform: scale(1); box-shadow: 0 0 30px #fff; } }
 
@@ -159,8 +159,8 @@
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
+
     <div id="p-user-tasks" class="overlay"><h2 style="color:#00ff00; margin-bottom: 20px;">ЗАДАНИЯ</h2><div id="user-task-list" style="width:100%"></div><div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div></div>
-    
     <div id="p-shop" class="overlay"><h2 style="color:#00bcd4; margin-bottom: 5px;">МАГАЗИН</h2><div style="font-size: 11px; color: #888; margin-bottom: 20px;">Оплата через Telegram Stars или CryptoBot (TON)</div><div class="shop-header">ПОДПИСКИ (30 ДНЕЙ)</div><div class="shop-item"><div class="shop-title" style="color: #a8b8c8;">PREMIUM</div><div class="shop-desc">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ffd700;">PRO</div><div class="shop-desc">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ff00ff;">VIP</div><div class="shop-desc">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div><div class="shop-desc">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div></div></div><div class="shop-header">ОСКОЛКИ ЛУНЫ</div><div class="shop-item"><div class="shop-title">10 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div><div class="shop-item"><div class="shop-title">50 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div><div class="shop-item"><div class="shop-title">100 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div><div class="shop-item"><div class="shop-title">500 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div><div class="shop-item"><div class="shop-title">1000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ffaa00;">5000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 5000, 'stars', 2500)">⭐️ 2500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 5000, 'ton', 250)">💎 250 TON</div></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     
     <div id="p-user-promos" class="overlay"><h2 style="color:#bc42f5">ПРОМОКОД</h2><div class="info-card"><span class="s-label">Введите секретный код</span><input type="text" id="user-promo-input" class="term-in" placeholder="Напр: MOON2026"><div class="term-btn" style="border-color:#bc42f5" onclick="usePromo()">АКТИВИРОВАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
@@ -182,7 +182,7 @@
     <div id="p-m-admins" class="overlay"><h2>АДМИНЫ</h2><div class="info-card"><input type="number" id="ia-id" class="term-in" placeholder="TG ID"><div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div><div id="own-adm-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     <script>
         const tg = window.Telegram.WebApp;
-        const BackButton = tg.BackButton; // Включаем системную кнопку "Назад"
+        const BackButton = tg.BackButton; // Нативная кнопка Телеграма
         tg.expand();
         tg.enableClosingConfirmation();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
@@ -231,6 +231,13 @@
 
         // ================= ИНИЦИАЛИЗАЦИЯ =================
         async function init() {
+            // ЖЕЛЕЗОБЕТОННЫЙ ФИКС ЛУНЫ: Таймер запускается СРАЗУ. 
+            // Экран загрузки исчезнет 100%, даже если сервер будет отвечать долго.
+            setTimeout(() => { 
+                document.getElementById('loading').style.display = 'none'; 
+                document.getElementById('app').style.display = 'flex'; 
+            }, 1500);
+
             const uid = getUid();
             const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
 
@@ -310,25 +317,397 @@
             }
             
             updateDailyUI();
-            await renderUserChars();
-            await renderUserTasks();
+            
+            try { await renderUserChars(); } catch(e) {}
+            try { await renderUserTasks(); } catch(e) {}
+            
             if (uid === OID || userData.is_admin) {
-                await renderAdminPromos();
-                await renderTasks();
+                try { await renderAdminPromos(); } catch(e) {}
+                try { await renderTasks(); } catch(e) {}
             }
-
-            // ИСПРАВЛЕНИЕ ЛУНЫ: Гарантированное удаление (display: none)
-            setTimeout(() => {
-                const loader = document.getElementById('loading');
-                loader.style.opacity = '0';
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                    document.getElementById('app').style.display = 'flex';
-                }, 500);
-            }, 1500);
         }
 
         // ================= ЧАТЫ =================
         function openChatList() {
             const uid = getUid();
-            const allChats = JSON.parse(localStorage.getItem('m_chats
+            const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            const list = document.getElementById('chatlist-container');
+            
+            let html = ""; let hasChats = false;
+            for (let charId in allChats) {
+                const char = allChars.find(c => c.id == charId);
+                if(!char) continue;
+                hasChats = true;
+                const msgs = allChats[charId];
+                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : "Нет сообщений";
+                
+                html += `<div class="chatlist-item" onclick="resumeChat(${char.id})">
+                    <img src="${char.photo}" class="chatlist-img">
+                    <div class="chatlist-info"><div class="chatlist-name">${char.name}</div><div class="chatlist-last">${lastMsg}</div></div>
+                </div>`;
+            }
+            if(!hasChats) html = "<div class='info-card' style='text-align:center; color:#888;'>У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!</div>";
+            list.innerHTML = html; openPanel('p-user-chatlist');
+        }
+
+        function resumeChat(charId) {
+            activeCharId = charId;
+            const c = allChars.find(x => x.id == charId);
+            if(!c) return;
+            document.getElementById('chat-char-name').innerText = c.name;
+            renderChatMessages(); openPanel('p-chat');
+        }
+
+        function openChatFromDossier() {
+            const c = allChars.find(x => x.id === activeCharId);
+            if(!c) return;
+            document.getElementById('chat-char-name').innerText = c.name;
+            
+            const uid = getUid();
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            if(!allChats[activeCharId]) {
+                allChats[activeCharId] = [];
+                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            }
+            renderChatMessages(); openPanel('p-chat');
+        }
+
+        function renderChatMessages() {
+            const uid = getUid();
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            let msgs = allChats[activeCharId] || [];
+            const chatBox = document.getElementById('chat-messages-box');
+            
+            if(msgs.length === 0) {
+                chatBox.innerHTML = '<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>';
+            } else {
+                chatBox.innerHTML = msgs.map(m => `<div class="msg-box ${m.sender === 'user' ? 'msg-user' : 'msg-char'}">${m.text}</div>`).join('');
+            }
+            setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input-text');
+            const text = input.value.trim();
+            if(!text) return;
+            
+            const uid = getUid();
+            if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков (нужен 1 🌙)!");
+
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            if(!allChats[activeCharId]) allChats[activeCharId] = [];
+            allChats[activeCharId].push({sender: 'user', text: text});
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            
+            input.value = ''; renderChatMessages();
+            const chatBox = document.getElementById('chat-messages-box');
+            chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">Персонаж печатает...</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 45);
+                const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
+
+                const res = await fetch('/api/chat', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        tg_id: uid, char_id: activeCharId, message: text,
+                        chat_history: allChats[activeCharId], len: lenSet, sex: sexSet
+                    })
+                });
+
+                const data = await res.json();
+                document.getElementById('typing-indicator')?.remove();
+
+                if (data.error) {
+                    tg.showAlert("Ошибка ИИ: " + data.error);
+                } else {
+                    allChats[activeCharId].push({sender: 'char', text: data.reply});
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    if (uid !== OID) updateBalanceUI(data.new_balance); 
+                    renderChatMessages();
+                }
+            } catch (e) {
+                document.getElementById('typing-indicator')?.remove();
+                tg.showAlert("Ошибка связи с сервером.");
+            }
+        }
+        function closeChat() { back(); }
+
+        // ================= ОПЛАТА: TON И STARS =================
+        async function buyItem(type, item, currency, price) {
+            const uid = getUid();
+            
+            if (currency === 'ton') {
+                tg.showAlert("Генерация счета CryptoBot...");
+                try {
+                    const res = await fetch('/api/payment/create', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ tg_id: uid, type: type, item: item, amount_ton: price })
+                    });
+                    const data = await res.json();
+                    if(data.pay_url) {
+                        tg.openLink(data.pay_url); 
+                    } else {
+                        tg.showAlert("Ошибка создания счета CryptoBot");
+                    }
+                } catch (e) { tg.showAlert("Ошибка сервера оплат"); }
+                
+            } else if (currency === 'stars') {
+                tg.showAlert("Подготовка оплаты Stars...");
+                try {
+                    const res = await fetch('/api/payment/stars-invoice', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ tg_id: uid, type: type, item: item, amount_stars: price })
+                    });
+                    const data = await res.json();
+                    if(data.invoice_url) {
+                        // Нативное окно оплаты Telegram Stars
+                        tg.openInvoice(data.invoice_url, function(status) {
+                            if (status === 'paid') {
+                                tg.showAlert("Оплата успешна! Награда скоро обновится на экране.");
+                            } else if (status === 'failed') {
+                                tg.showAlert("Ошибка при оплате Stars.");
+                            }
+                        });
+                    } else {
+                        tg.showAlert("Ошибка API Telegram Stars");
+                    }
+                } catch (e) { tg.showAlert("Ошибка сервера оплат"); }
+            }
+        }
+
+        // ================= ЕЖЕДНЕВКА =================
+        function updateDailyUI() {
+            const ONE_DAY = 24 * 60 * 60 * 1000;
+            let timePassed = Date.now() - userData.last_daily;
+
+            let nextStreak = userData.daily_streak + 1; 
+            let is7thDay = (nextStreak % 7 === 0);
+            
+            let baseRew = userData.daily_reward || 10;
+            let actualRew = is7thDay ? baseRew * 2 : baseRew;
+
+            document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`;
+            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? " (БОНУС x2!)" : "");
+
+            clearInterval(dailyTimerInterval);
+
+            if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) {
+                document.getElementById('daily-btn').style.display = 'none';
+                document.getElementById('daily-wait').style.display = 'block';
+
+                dailyTimerInterval = setInterval(() => {
+                    let timeLeft = ONE_DAY - (Date.now() - userData.last_daily);
+                    if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } 
+                    else {
+                        let h = Math.floor(timeLeft / (1000 * 60 * 60));
+                        let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        let s = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s;
+                        document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
+                    }
+                }, 1000);
+            } else {
+                document.getElementById('daily-btn').style.display = 'block';
+                document.getElementById('daily-wait').style.display = 'none';
+            }
+        }
+
+        async function claimDaily() {
+            try {
+                const res = await fetch('/api/user/claim-daily', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ tg_id: getUid() })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    tg.showAlert(data.error);
+                } else {
+                    tg.showAlert(`Получено: ${data.reward} 🌙!`);
+                    userData.shards = data.new_balance;
+                    userData.daily_streak = data.streak;
+                    userData.last_daily = Date.now();
+                    updateBalanceUI(userData.shards);
+                    updateDailyUI();
+                }
+            } catch (e) { tg.showAlert("Ошибка сервера"); }
+        }
+
+        // ================= ПЕРСОНАЖИ =================
+        async function renderUserChars() {
+            try {
+                const res = await fetch('/api/get-characters');
+                allChars = await res.json();
+                const list = document.getElementById('user-char-list');
+                if(allChars.length === 0) { list.innerHTML = "<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>"; return; }
+                list.innerHTML = allChars.map(c => `
+                    <div class="char-card" onclick="openDossier(${c.id})">
+                        <img src="${c.photo}">
+                        <div class="char-card-info">
+                            <div class="char-card-name">${c.name}</div>
+                            <div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? 'Муж' : 'Жен'}</div>
+                        </div>
+                    </div>`).join('');
+            } catch (e) {}
+        }
+
+        function openDossier(id) {
+            const c = allChars.find(x => x.id === id);
+            if(!c) return;
+            activeCharId = id;
+            document.getElementById('dos-name').innerText = c.name;
+            document.getElementById('dos-img').src = c.photo;
+            document.getElementById('dos-age').innerText = c.age;
+            document.getElementById('dos-gender').innerText = c.gender === 'm' ? 'Мужской' : 'Женский';
+            document.getElementById('dos-desc').innerText = c.desc;
+            if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; }
+            openPanel('p-char-dossier');
+        }
+
+        function setCharGender(g) {
+            currentCharGender = g;
+            document.getElementById('cg-m').classList.toggle('active', g === 'm');
+            document.getElementById('cg-f').classList.toggle('active', g === 'f');
+        }
+
+        async function saveCharDB() {
+            const n = document.getElementById('ich-name').value;
+            const img = document.getElementById('char-preview').src;
+            if(!n || img.includes('#')) return tg.showAlert("Имя и фото обязательны!");
+            
+            const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img };
+            
+            await fetch('/api/admin/create-char', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), charData: charData }) });
+            tg.showAlert("Создан!"); renderUserChars();
+        }
+
+        async function deleteChar() {
+            await fetch('/api/admin/delete-char', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), char_id: activeCharId }) });
+            tg.showAlert("Удален!"); renderUserChars(); back();
+        }
+
+        // ================= АДМИНКА И ПРОЧЕЕ =================
+        async function modFunds(t, a) {
+            let idField = t === 'shards' ? 'ish-id' : 'isu-id'; let valField = t === 'shards' ? 'ish-val' : 'isu-type';
+            const target_id = document.getElementById(idField).value; const v = document.getElementById(valField).value;
+            if(!target_id) return tg.showAlert("Введите ID!");
+            
+            const endpoint = t === 'shards' ? '/api/admin/manage-shards' : '/api/admin/manage-sub';
+            const body = { sender_id: getUid(), target_id: target_id, action: a };
+            if(t === 'shards') body.amount = v; else body.sub_type = v;
+
+            const res = await fetch(endpoint, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+            const data = await res.json(); tg.showAlert(data.message || "Ошибка");
+        }
+
+        async function createPromo() {
+            const code = document.getElementById('ip-code').value.toUpperCase().trim(); const rew = parseInt(document.getElementById('ip-rew').value);
+            if(!code || !rew) return;
+            await fetch('/api/admin/create-promo', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), promoData: {code, reward: rew} }) });
+            document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = ''; renderAdminPromos(); tg.showAlert("Создано!");
+        }
+
+        async function renderAdminPromos() {
+            try {
+                const res = await fetch('/api/get-promos'); const promos = await res.json();
+                document.getElementById('promo-list').innerHTML = promos.map(p => `<div class="task-item"><span>${p.code} (+${p.reward})</span></div>`).join('');
+            } catch(e){}
+        }
+
+        async function usePromo() {
+            const uid = getUid(); const input = document.getElementById('user-promo-input').value.toUpperCase().trim();
+            const res = await fetch('/api/get-promos'); const promos = await res.json();
+            const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]");
+            const found = promos.find(p => p.code === input);
+            if(!found) return tg.showAlert("Неверный код"); if(used.includes(input)) return tg.showAlert("Уже активирован");
+            
+            await fetch('/api/admin/manage-shards', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: found.reward }) });
+            
+            used.push(input); localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
+            if(uid !== OID) updateBalanceUI(userData.shards + found.reward);
+            tg.showAlert(`Получено ${found.reward} 🌙!`);
+        }
+
+        // ================= ЗАДАНИЯ =================
+        async function modTask(act, tid=null) {
+            if(act==='add') {
+                const n = document.getElementById('it-name').value; const rType = document.getElementById('it-rtype').value; if(!n) return;
+                const taskData = { id: Date.now(), name: n, link: document.getElementById('it-link').value, rType: rType, rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value };
+                await fetch('/api/admin/create-task', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), taskData: taskData }) });
+            }
+            renderTasks(); renderUserTasks();
+        }
+
+        async function renderTasks() {
+            const res = await fetch('/api/get-tasks'); const tasks = await res.json();
+            document.getElementById('task-list').innerHTML = tasks.map(x => `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span></div>`).join('');
+        }
+
+        async function renderUserTasks() {
+            const res = await fetch('/api/get-tasks'); const tasks = await res.json();
+            const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
+            const list = document.getElementById('user-task-list');
+            if (tasks.length === 0) { list.innerHTML = "<div class='info-card' style='text-align:center; color:#888;'>Пока нет доступных заданий</div>"; return; }
+            list.innerHTML = tasks.map(t => {
+                if(completed.includes(t.id)) return `<div class="task-item" style="opacity:0.5;"><span>${t.name}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
+                return `<div class="task-item" id="utask-${t.id}"><span>${t.name}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`;
+            }).join('');
+        }
+
+        function startTask(id, link) { tg.openLink(link); if(!clickedTasks.includes(id)) clickedTasks.push(id); const taskDiv = document.getElementById(`utask-${id}`); if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание проверки...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } }
+        function checkTask(id) { if(!clickedTasks.includes(id)) return; tg.showAlert("Проверка..."); setTimeout(() => { completeTaskAction(id); }, 1500); }
+        async function completeTaskAction(id) {
+            const uid = getUid(); const res = await fetch('/api/get-tasks'); const tasks = await res.json();
+            const t = tasks.find(x => x.id === id); if(!t) return;
+            let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); if(completed.includes(id)) return;
+            
+            if(t.rType === 'shards') {
+                await fetch('/api/admin/manage-shards', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: t.rVal }) });
+                if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal));
+            } else if(t.rType === 'sub7') {
+                await fetch('/api/admin/manage-sub', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', sub_type: "Premium" }) });
+            }
+            completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); tg.showAlert(`Задание выполнено! Награда получена.`); renderUserTasks();
+        }
+
+        // ================= НАСТРОЙКИ И УТИЛИТЫ =================
+        function updateLiveNick(v) { let n = v || "User"; document.getElementById('u-name').innerText = n; document.getElementById('prof-nick').innerText = n; localStorage.setItem('m_nick_' + getUid(), n); }
+        
+        function setGender(g, s=false) { 
+            document.getElementById('g-m')?.classList.toggle('active', g === 'm'); 
+            document.getElementById('g-f')?.classList.toggle('active', g === 'f'); 
+            if(!s) localStorage.setItem('m_gender_' + getUid(), g); 
+        }
+
+        function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
+        function updateSex(v, s=false) { const m = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; document.getElementById('sex-val').innerText = v; document.getElementById('sex-info').innerText = document.getElementById('sex-slider').max == 0 ? "Пошлость недоступна для вашей подписки" : "Уровень " + v + ": " + m[v]; document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; if(!s) localStorage.setItem('m_sex_' + getUid(), v); }
+        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); }
+        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
+        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(i.files[0]); } }
+        async function modAdmin(a) { const id = document.getElementById('ia-id').value; if(!id) return; await fetch('/api/owner/set-admin', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ owner_id: getUid(), target_id: id, status: a === 'add' }) }); tg.showAlert("Обновлено"); }
+        async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Цены сохранены!"); }
+        function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
+        
+        // ================= УПРАВЛЕНИЕ ОКНАМИ С КНОПКОЙ НАЗАД =================
+        function openPanel(id) { 
+            stack.push(id); 
+            document.getElementById(id).style.display = 'flex'; 
+            BackButton.show(); // Показываем нативную кнопку ТГ
+        }
+        function back() { 
+            if(stack.length > 0) { 
+                document.getElementById(stack.pop()).style.display = 'none'; 
+            }
+            if(stack.length === 0) { 
+                BackButton.hide(); // Скрываем, если мы на главном экране
+            }
+        }
+        
+        // Привязываем клик по системной кнопке
+        BackButton.onClick(() => back());
+        
+        window.onload = init;
+    </script>
+</body>
+</html>
