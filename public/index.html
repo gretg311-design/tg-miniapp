@@ -3,133 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project</title>
+    <title>Moon Project - Железобетон FULL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
-        html, body { 
-            background: #05010a; 
-            color: white; 
-            font-family: sans-serif; 
-            margin: 0; 
-            overflow: hidden; 
-            height: 100vh; 
-            width: 100vw; 
-            touch-action: none; 
-            overscroll-behavior: none; 
-        }
+        html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
         /* ПУЛЬСИРУЮЩАЯ БЕЛАЯ ЛУНА */
-        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
+        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .moon-logo { 
-            width: 100px; height: 100px; 
-            border-radius: 50%; 
-            box-shadow: 20px 10px 0 0 #ffffff; 
-            transform: rotate(-20deg);
-            animation: pulseMoon 1.5s infinite alternate ease-in-out; 
-            margin-bottom: 20px;
+            width: 120px; height: 120px; border-radius: 50%; 
+            background: radial-gradient(circle, #ffffff, #aaaaaa); 
+            box-shadow: 0 0 35px #ffffff; 
+            animation: pulseMoon 2s infinite ease-in-out; 
         }
-        @keyframes pulseMoon { 
-            0% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); transform: rotate(-20deg) scale(1); } 
-            100% { filter: drop-shadow(0 0 25px rgba(255,255,255,1)); transform: rotate(-20deg) scale(1.05); } 
-        }
+        @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 30px #ffffff; } 50% { transform: scale(1.1); box-shadow: 0 0 60px #ffffff; } 100% { transform: scale(1); box-shadow: 0 0 30px #ffffff; } }
 
-        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 50px; }
-        
-        /* ШАПКА */
+        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
-        .nick-ultra { font-size: 24px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* СЕТКА МЕНЮ */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .menu-item { 
-            background: #11081d; 
-            border: 1px solid #2d164d; 
-            border-radius: 12px; 
-            height: 70px; 
-            display: flex; align-items: center; justify-content: center; 
-            text-transform: uppercase; font-weight: bold; font-size: 11px; letter-spacing: 1px;
-            color: #fff; cursor: pointer; text-align: center; 
-            transition: 0.2s;
-        }
-        .menu-item:active { transform: scale(0.95); background: #1a0b2e; }
-        .menu-item.full { grid-column: span 2; }
-        .btn-adm { border-color: #00bcd4; color: #00bcd4; box-shadow: 0 0 10px rgba(0, 188, 212, 0.2) inset; }
-        .btn-con { border-color: #e91e63; color: #e91e63; box-shadow: 0 0 10px rgba(233, 30, 99, 0.2) inset; }
+        /* ТВОЯ СЕТКА МЕНЮ: 8 кнопок + Админка + Консоль */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
+        .btn-adm { border-color: #00bcd4; color: #00bcd4; }
+        .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* ВСПЛЫВАЮЩИЕ ОКНА (ЭКРАНЫ) */
-        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 50px; }
-        .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .header-bar h2 { margin: 0; color: #fff; font-size: 20px; text-transform: uppercase; font-weight: 900; }
-        .back-btn { background: none; border: none; color: #bc42f5; font-size: 14px; font-weight: bold; text-transform: uppercase; }
-
-        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 20px; margin-bottom: 15px; font-size: 15px; line-height: 1.8; color: #ccc; }
-        .info-card span { color: #00bcd4; font-weight: bold; float: right; }
+        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
+        .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
+        .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
         
-        .term-in { background: #000; border: 1px solid #2d164d; border-radius: 10px; padding: 15px; color: #fff; width: 100%; margin-bottom: 12px; font-size: 14px; outline: none; }
-        .term-btn { background: #1a0b2e; border: 1px solid #bc42f5; padding: 18px; border-radius: 12px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; transition: 0.1s; }
-        .term-btn:active { transform: scale(0.98); }
-
-        /* ЧАТ */
-        #chat-container { flex-grow: 1; overflow-y: auto; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px 16px; border-radius: 15px; max-width: 85%; word-wrap: break-word; font-size: 14px; line-height: 1.5; }
+        .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
+        
+        /* Стили для добавленного чата */
+        #chat-container { width: 100%; flex-grow: 1; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; word-wrap: break-word; font-size: 14px; line-height: 1.4; }
         .msg.user { align-self: flex-end; background: linear-gradient(90deg, #bc42f5, #7b1fa2); color: #fff; border-bottom-right-radius: 2px; }
         .msg.bot { align-self: flex-start; background: #1a0b2e; border: 1px solid #2d164d; color: #fff; border-bottom-left-radius: 2px; }
-        
-        .input-area { display: flex; gap: 10px; }
+        .input-area { display: flex; gap: 10px; width: 100%; }
         .input-area input { flex: 1; margin-bottom: 0; }
-        .input-area button { width: 60px; border-radius: 10px; border: 1px solid #00bcd4; background: rgba(0, 188, 212, 0.1); color: #00bcd4; font-size: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .input-area button { width: 50px; border-radius: 8px; border: none; background: #bc42f5; color: #fff; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div id="loading">
-        <div class="moon-logo"></div>
-        <div style="color: #fff; font-weight: bold; letter-spacing: 2px; font-size: 12px;">ЗАГРУЗКА БАЗЫ ДАННЫХ...</div>
-    </div>
+    <div id="loading"><div class="moon-logo"></div></div>
 
     <div id="app">
         <div class="u-header">
-            <div>
-                <div id="u-name" class="nick-ultra">Загрузка...</div>
-                <div style="font-size:13px; color:#a0a0b0; font-weight: bold; margin-top: 4px;">ID: <span id="u-id">...</span></div>
-            </div>
-            <div style="font-size: 24px; font-weight: bold;">🌙 <span id="shards-balance">...</span></div>
+            <div><div id="u-name" class="nick-ultra">...</div><div style="font-size:12px; color:#555;">ID: <span id="u-id">0</span></div></div>
+            <div style="font-size: 22px; font-weight: bold;">🌙 <span id="shards-balance">0</span></div>
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item full" onclick="openCharacters()">ВЫБРАТЬ ПЕРСОНАЖА</div>
-            <div class="menu-item" onclick="openProfile()">ПРОФИЛЬ</div>
-            <div class="menu-item" onclick="openShop()">МАГАЗИН</div>
-            <div class="menu-item" onclick="tg.showAlert('Задания в разработке')">ЗАДАНИЯ</div>
-            <div class="menu-item" onclick="tg.showAlert('Промокоды в разработке')">ПРОМОКОДЫ</div>
-            <div class="menu-item full" onclick="claimDaily()">ЕЖЕДНЕВНАЯ НАГРАДА</div>
+            <div class="menu-item" onclick="openCharacters()">Чаты</div>
+            <div class="menu-item" onclick="openCharacters()">Персонажи</div>
+            <div class="menu-item" onclick="claimDaily()">Ежедневка</div>
+            <div class="menu-item" onclick="tg.showAlert('В разработке')">Задания</div>
+            <div class="menu-item" onclick="openPanel('p-shop')">Магазин</div>
+            <div class="menu-item" onclick="tg.showAlert('В разработке')">Промокоды</div>
+            <div class="menu-item" onclick="openProfile()">Профиль</div>
+            <div class="menu-item" onclick="tg.showAlert('В разработке')">Настройка</div>
             
-            <div class="menu-item btn-adm full" id="nav-adm" style="display:none;" onclick="openAdmin()">АДМИН ПАНЕЛЬ</div>
-            <div class="menu-item btn-con full" id="nav-con" style="display:none;" onclick="openConsole()">КОНСОЛЬ ВЛАДЕЛЬЦА</div>
+            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
+            <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
     </div>
+    <div id="p-con" class="overlay">
+        <h2 style="color:#e91e63; text-align:center; font-weight:900; margin-bottom: 20px;">CONSOLE</h2>
+        <div class="con-grid">
+            <div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div>
+            <div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div>
+            <div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div>
+            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div>
+            <div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div>
+            <div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div>
+            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">УПРАВЛЕНИЕ ЗАДАНИЯМИ</div>
+        </div>
+        <div class="term-btn" style="margin-top:30px; border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
+    </div>
+
+    <div id="p-adm" class="overlay">
+        <h2 style="color:#00bcd4; text-align:center; font-weight:900; margin-bottom: 20px;">АДМИН ПАНЕЛЬ</h2>
+        <div class="con-grid">
+            <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-shards')">ВЫДАТЬ ОСКОЛКИ</div>
+            <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-subs')">ВЫДАТЬ SUB</div>
+            <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-char')">ДОБАВИТЬ ПЕРСА</div>
+            <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-promos')">СОЗДАТЬ ПРОМО</div>
+            <div class="con-btn" style="border-color:#00bcd4; grid-column: span 2;" onclick="openPanel('p-m-tasks')">ДОБАВИТЬ ЗАДАНИЕ</div>
+        </div>
+        <div class="term-btn" style="margin-top:20px" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-m-shards" class="overlay">
+        <h2 style="text-align:center;">ОСКОЛКИ</h2>
+        <div class="info-card">
+            <input type="number" id="ish-id" class="term-in" placeholder="TG ID">
+            <input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО">
+            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div>
+            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','remove')">ЗАБРАТЬ ОСКОЛКИ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-m-subs" class="overlay">
+        <h2 style="text-align:center;">ПОДПИСКИ</h2>
+        <div class="info-card">
+            <input type="number" id="isu-id" class="term-in" placeholder="TG ID">
+            <select id="isu-type" class="term-in">
+                <option value="Premium">Premium</option>
+                <option value="Pro">Pro</option>
+                <option value="VIP">VIP</option>
+                <option value="Ultra">Ultra</option>
+            </select>
+            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ (30д)</div>
+            <div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','remove')">АННУЛИРОВАТЬ SUB</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-m-char" class="overlay">
+        <h2 style="text-align:center;">ПЕРСОНАЖ</h2>
+        <div class="info-card" style="text-align: center;">
+            <input type="text" class="term-in" placeholder="Имя">
+            <input type="text" class="term-in" placeholder="Возраст">
+            <textarea class="term-in" placeholder="Легенда (Описание)" style="height: 100px; resize:none;"></textarea>
+            <div class="term-btn" style="border-color:#bc42f5">СОХРАНИТЬ В БД</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-m-admins" class="overlay">
+        <h2 style="text-align:center;">АДМИНЫ</h2>
+        <div class="info-card">
+            <input type="number" id="ia-id" class="term-in" placeholder="TG ID">
+            <div class="term-btn" style="border-color:#00ff00" onclick="modAdmin(true)">НАЗНАЧИТЬ</div>
+            <div class="term-btn" style="border-color:#ff4444" onclick="modAdmin(false)">СНЯТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
+    <div id="p-m-prices" class="overlay"><h2 style="text-align:center;">ЦЕНЫ</h2><div class="info-card"><input type="number" class="term-in" placeholder="Stars"><div class="term-btn">ОБНОВИТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-m-tasks" class="overlay"><h2 style="text-align:center;">ЗАДАНИЯ</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-m-promos" class="overlay"><h2 style="text-align:center;">ПРОМО</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-settings" class="overlay"><h2 style="text-align:center;">НАСТРОЙКИ</h2><div class="term-btn" onclick="back()">НАЗАД</div></div>
 
     <div id="p-profile" class="overlay">
-        <div class="header-bar"><button class="back-btn" onclick="back()">◀ Назад</button><h2>ПРОФИЛЬ</h2><div style="width: 50px;"></div></div>
-        <div class="info-card" id="prof-data">Загрузка данных...</div>
+        <h2 style="text-align:center; color:#bc42f5;">ПРОФИЛЬ</h2>
+        <div class="info-card" id="prof-data" style="line-height: 2.2;">Загрузка...</div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
     <div id="p-characters" class="overlay">
-        <div class="header-bar"><button class="back-btn" onclick="back()">◀ Назад</button><h2>ЧАТЫ</h2><div style="width: 50px;"></div></div>
-        <div id="chars-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <h2 style="text-align:center; color:#00bcd4;">ВЫБЕРИТЕ ЧАТ</h2>
+        <div id="chars-list" style="display: flex; flex-direction: column; gap: 10px; width: 100%;"></div>
+        <div class="term-btn" style="margin-top:20px;" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-chat" class="overlay">
-        <div class="header-bar"><button class="back-btn" onclick="back()">◀ Назад</button><h2 id="chat-title" style="color: #bc42f5;">ЧАТ</h2><div style="width: 50px;"></div></div>
-        <select id="chat-sex" class="term-in">
-            <option value="0">Уровень 0 (Без пошлости)</option>
-            <option value="1">Уровень 1 (Легкий флирт)</option>
-            <option value="2">Уровень 2 (Романтика, поцелуи)</option>
-            <option value="3">Уровень 3 (Сильный флирт)</option>
-            <option value="4">Уровень 4 (Страсть)</option>
-            <option value="5">Уровень 5 (Откровенный RP)</option>
-            <option value="6">Уровень 6 (Детальный RP / Ultra)</option>
+    <div id="p-chat" class="overlay" style="padding: 15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+            <button style="background:none; border:none; color:#bc42f5; font-weight:bold; font-size:16px;" onclick="back()">◀ НАЗАД</button>
+            <h2 id="chat-title" style="margin:0; font-size:16px;">...</h2>
+            <div style="width: 60px;"></div>
+        </div>
+        <select id="chat-sex" class="term-in" style="padding: 10px; font-size: 12px; margin-bottom: 10px;">
+            <option value="0">0: Без пошлости</option>
+            <option value="1">1: Легкий флирт</option>
+            <option value="2">2: Романтика</option>
+            <option value="3">3: Сильный флирт</option>
+            <option value="4">4: Страсть</option>
+            <option value="5">5: Откровенный RP</option>
+            <option value="6">6: Детальный RP / Ultra</option>
         </select>
         <div id="chat-container"></div>
         <div class="input-area">
@@ -139,108 +184,82 @@
     </div>
 
     <div id="p-shop" class="overlay">
-        <div class="header-bar"><button class="back-btn" onclick="back()">◀ Назад</button><h2>МАГАЗИН</h2><div style="width: 50px;"></div></div>
-        <h3 style="color: #00bcd4; margin-top: 0;">ОСКОЛКИ</h3>
-        <div class="term-btn" onclick="buyStars('shards', 100, 50)">КУПИТЬ 100 🌙 (50 Stars)</div>
-        <div class="term-btn" onclick="buyTon('shards', 500, 0.5)">КУПИТЬ 500 🌙 (0.5 TON)</div>
-        
-        <h3 style="color: #bc42f5; margin-top: 20px;">ПОДПИСКИ (30 ДНЕЙ)</h3>
-        <div class="term-btn" onclick="buyStars('sub', 'Premium', 100)">PREMIUM (100 Stars)</div>
-        <div class="term-btn" onclick="buyStars('sub', 'Pro', 250)">PRO (250 Stars)</div>
-        <div class="term-btn" style="border-color: #00bcd4;" onclick="buyTon('sub', 'VIP', 1)">VIP (1 TON)</div>
-        <div class="term-btn" style="border-color: #e91e63;" onclick="buyTon('sub', 'Ultra', 2)">ULTRA (2 TON)</div>
-    </div>
-
-    <div id="p-adm" class="overlay">
-        <div class="header-bar"><button class="back-btn" onclick="back()">◀ Назад</button><h2 style="color:#00bcd4;">АДМИНКА</h2><div style="width: 50px;"></div></div>
+        <h2 style="text-align:center; color:#e91e63;">МАГАЗИН</h2>
         <div class="info-card">
-            <div style="color: #00bcd4; font-weight: bold; margin-bottom: 10px;">УПРАВЛЕНИЕ РЕСУРСАМИ</div>
-            <input type="number" id="adm-target" class="term-in" placeholder="TG ID">
-            <input type="number" id="adm-amount" class="term-in" placeholder="Кол-во осколков">
-            <div style="display:flex; gap:10px;">
-                <div class="term-btn" style="flex:1; border-color:#00ff00;" onclick="manageShards('add')">ВЫДАТЬ 🌙</div>
-                <div id="adm-btn-rem" class="term-btn" style="flex:1; border-color:#ff4444; display:none;" onclick="manageShards('remove')">ЗАБРАТЬ 🌙</div>
-            </div>
+            <h3 style="color: #00bcd4; margin-top: 0;">ОСКОЛКИ</h3>
+            <div class="term-btn" onclick="buyStars('shards', 100, 50)">КУПИТЬ 100 🌙 (50 Stars)</div>
+            <div class="term-btn" onclick="buyTon('shards', 500, 0.5)">КУПИТЬ 500 🌙 (0.5 TON)</div>
             
-            <select id="adm-sub" class="term-in" style="margin-top: 15px;">
-                <option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option>
-            </select>
-            <div style="display:flex; gap:10px;">
-                <div class="term-btn" style="flex:1; border-color:#00ff00;" onclick="manageSub('add')">ВЫДАТЬ SUB</div>
-                <div id="adm-btn-sub-rem" class="term-btn" style="flex:1; border-color:#ff4444; display:none;" onclick="manageSub('remove')">СНЯТЬ SUB</div>
-            </div>
+            <h3 style="color: #bc42f5; margin-top: 20px;">ПОДПИСКИ</h3>
+            <div class="term-btn" onclick="buyStars('sub', 'Premium', 100)">PREMIUM (100 Stars)</div>
+            <div class="term-btn" onclick="buyStars('sub', 'Pro', 250)">PRO (250 Stars)</div>
+            <div class="term-btn" style="border-color: #00bcd4;" onclick="buyTon('sub', 'VIP', 1)">VIP (1 TON)</div>
+            <div class="term-btn" style="border-color: #e91e63;" onclick="buyTon('sub', 'Ultra', 2)">ULTRA (2 TON)</div>
         </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-con" class="overlay">
-        <div class="header-bar"><button class="back-btn" onclick="back()">◀ Назад</button><h2 style="color:#e91e63;">КОНСОЛЬ</h2><div style="width: 50px;"></div></div>
-        <div class="info-card">
-            <div style="color: #e91e63; font-weight: bold; margin-bottom: 10px;">ПРАВА АДМИНА</div>
-            <input type="number" id="cons-target" class="term-in" placeholder="TG ID">
-            <div style="display:flex; gap:10px;">
-                <div class="term-btn" style="flex:1; border-color:#00ff00;" onclick="setAdmin(true)">НАЗНАЧИТЬ</div>
-                <div class="term-btn" style="flex:1; border-color:#ff4444;" onclick="setAdmin(false)">СНЯТЬ</div>
-            </div>
-        </div>
-    </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#05010a'); // Цвет шапки под фон
+        tg.setHeaderColor('#05010a');
         
         let userData = null;
         let chatHistory = [];
         let currentChar = null;
-        let stack = []; // История открытых окон для кнопки Назад
+        let stack = [];
 
-        const OWNER_ID = 8287041036;
+        const OID = "8287041036";
 
-        // ================= НАВИГАЦИЯ =================
+        // --- НАВИГАЦИЯ ---
         function openPanel(id) { 
             stack.push(id); 
             document.getElementById(id).style.display = 'flex'; 
         }
         function back() { 
-            if(stack.length > 0) {
-                const id = stack.pop();
-                document.getElementById(id).style.display = 'none'; 
-            }
+            if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; 
         }
 
-        // ================= ИНИЦИАЛИЗАЦИЯ И МЕНЮ =================
+        // --- ИНИЦИАЛИЗАЦИЯ (СЕРВЕРНАЯ) ---
         async function init() {
-            const userId = tg.initDataUnsafe?.user?.id || OWNER_ID;
-            const tgName = tg.initDataUnsafe?.user?.first_name || "Пользователь";
-            
-            document.getElementById('u-name').innerText = tgName;
-            document.getElementById('u-id').innerText = userId;
+            const u = tg.initDataUnsafe?.user || { id: OID, first_name: "Пользователь" };
+            const uid = String(u.id);
+
+            document.getElementById('u-name').innerText = u.first_name;
+            document.getElementById('u-id').innerText = uid;
 
             try {
+                // Подключаемся к нашему серверу
                 const res = await fetch('/api/user/get-data', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tg_id: userId })
+                    body: JSON.stringify({ tg_id: uid })
                 });
                 
                 userData = await res.json();
                 
-                document.getElementById('shards-balance').innerText = (userId === OWNER_ID) ? "∞" : userData.shards;
+                // Обновляем баланс
+                document.getElementById('shards-balance').innerText = (uid === OID) ? "∞" : userData.shards;
 
-                // Права доступа
-                if (userData.is_admin || userId === OWNER_ID) {
+                // ДОСТУПЫ КАК В ТВОЕМ КОДЕ
+                if(uid === OID) {
                     document.getElementById('nav-adm').style.display = 'flex';
-                }
-                if (userId === OWNER_ID) {
                     document.getElementById('nav-con').style.display = 'flex';
-                    // Кнопки "Забрать/Снять" видны только Овнеру
-                    document.getElementById('adm-btn-rem').style.display = 'block';
-                    document.getElementById('adm-btn-sub-rem').style.display = 'block';
+                    document.getElementById('own-sh-rem').style.display = 'block';
+                    document.getElementById('own-su-rem').style.display = 'block';
+                } else {
+                    if(userData.is_admin) document.getElementById('nav-adm').style.display = 'flex';
+                    if(document.getElementById('own-sh-rem')) document.getElementById('own-sh-rem').remove(); 
+                    if(document.getElementById('own-su-rem')) document.getElementById('own-su-rem').remove();
                 }
 
-                setTimeout(() => {
+                updateProfile();
+
+                setTimeout(() => { 
                     document.getElementById('loading').style.opacity = '0';
                     setTimeout(() => {
-                        document.getElementById('loading').style.display = 'none';
-                        document.getElementById('app').style.display = 'flex';
+                        document.getElementById('loading').style.display = 'none'; 
+                        document.getElementById('app').style.display = 'flex'; 
                     }, 500);
                 }, 1500);
 
@@ -249,29 +268,24 @@
             }
         }
 
-        // ================= ПРОФИЛЬ (СТРОГО 6 СТРОК) =================
-        function openProfile() {
-            openPanel('p-profile');
-            const box = document.getElementById('prof-data');
+        // --- ПРОФИЛЬ (СТРОГО 6 СТРОК) ---
+        function updateProfile() {
             const tgName = tg.initDataUnsafe?.user?.first_name || "Неизвестный";
             const expText = userData.sub_exp > 0 ? new Date(userData.sub_exp).toLocaleDateString() : "Нет";
+            let status = userData.tg_id === Number(OID) ? "Владелец" : (userData.is_admin ? "Администратор" : "Пользователь");
             
-            let status = "Пользователь";
-            if (userData.is_admin) status = "Администратор";
-            if (userData.tg_id === OWNER_ID) status = "Владелец";
-
-            // Железобетонные 6 строк
-            box.innerHTML = `
-                Ник <span>${tgName}</span><br>
-                ID <span>${userData.tg_id}</span><br>
-                Подписка <span>${userData.subscription}</span><br>
+            document.getElementById('prof-data').innerHTML = `
+                Ник <span style="color:#bc42f5;">${tgName}</span><br>
+                User ID <span style="color:#00bcd4;">${userData.tg_id}</span><br>
+                Подписка <span style="color:#e91e63;">${userData.subscription}</span><br>
                 Истекает <span>${expText}</span><br>
-                Осколки <span>${userData.tg_id === OWNER_ID ? '∞' : userData.shards}</span><br>
+                Осколки <span>${userData.tg_id === Number(OID) ? '∞' : userData.shards}</span><br>
                 Статус <span>${status}</span>
             `;
         }
+        function openProfile() { openPanel('p-profile'); }
 
-        // ================= ЕЖЕДНЕВНАЯ НАГРАДА =================
+        // --- ЕЖЕДНЕВКА ---
         async function claimDaily() {
             try {
                 const res = await fetch('/api/user/claim-daily', {
@@ -282,17 +296,18 @@
                 if (data.error) tg.showAlert(data.error);
                 else {
                     userData.shards = data.new_balance;
-                    if (userData.tg_id !== OWNER_ID) document.getElementById('shards-balance').innerText = userData.shards;
+                    if (String(userData.tg_id) !== OID) document.getElementById('shards-balance').innerText = userData.shards;
+                    updateProfile();
                     tg.showAlert(`Награда получена: +${data.reward} 🌙\nВаш стрик: ${data.streak} дн.`);
                 }
-            } catch (e) { tg.showAlert("Ошибка соединения"); }
+            } catch (e) { tg.showAlert("Ошибка связи"); }
         }
 
-        // ================= ЧАТ И ПЕРСОНАЖИ =================
+        // --- ЧАТЫ (СВЯЗЬ С СЕРВЕРОМ) ---
         async function openCharacters() {
             openPanel('p-characters');
             const list = document.getElementById('chars-list');
-            list.innerHTML = '<div style="text-align:center;">Загрузка...</div>';
+            list.innerHTML = '<div style="text-align:center; color:#fff;">Загрузка...</div>';
             try {
                 const res = await fetch('/api/get-characters');
                 const chars = await res.json();
@@ -307,7 +322,7 @@
                     div.onclick = () => startChat(c);
                     list.appendChild(div);
                 });
-            } catch (e) { list.innerHTML = "Ошибка загрузки"; }
+            } catch (e) { list.innerHTML = "Ошибка базы данных"; }
         }
 
         function startChat(char) {
@@ -333,8 +348,8 @@
             const text = input.value.trim();
             if (!text || !currentChar) return;
 
-            if (userData.tg_id !== OWNER_ID && userData.shards < 1) {
-                return tg.showAlert("Недостаточно осколков! Купите их в магазине.");
+            if (String(userData.tg_id) !== OID && userData.shards < 1) {
+                return tg.showAlert("Недостаточно осколков! Купите в магазине.");
             }
 
             input.value = '';
@@ -360,14 +375,15 @@
                 });
 
                 document.getElementById(loadingId).remove();
-                
                 const data = await res.json();
+                
                 if (data.error) {
                     addMsg("Ошибка: " + data.error, 'bot');
                 } else {
                     addMsg(data.reply, 'bot');
                     userData.shards = data.new_balance;
-                    if (userData.tg_id !== OWNER_ID) document.getElementById('shards-balance').innerText = userData.shards;
+                    if (String(userData.tg_id) !== OID) document.getElementById('shards-balance').innerText = userData.shards;
+                    updateProfile();
                 }
             } catch (e) {
                 document.getElementById(loadingId).remove();
@@ -375,9 +391,7 @@
             }
         }
 
-        // ================= ОПЛАТА И МАГАЗИН =================
-        function openShop() { openPanel('p-shop'); }
-
+        // --- МАГАЗИН И ОПЛАТА ---
         async function buyStars(type, item, amount) {
             try {
                 const res = await fetch('/api/payment/stars-invoice', {
@@ -385,8 +399,7 @@
                     body: JSON.stringify({ tg_id: userData.tg_id, type, item, amount_stars: amount })
                 });
                 const data = await res.json();
-                if (data.invoice_url) tg.openInvoice(data.invoice_url, (status) => { if (status === 'paid') tg.showAlert('Оплата прошла успешно!'); });
-                else tg.showAlert("Ошибка счета");
+                if (data.invoice_url) tg.openInvoice(data.invoice_url, (status) => { if (status === 'paid') tg.showAlert('Оплата прошла!'); });
             } catch (e) { tg.showAlert("Сбой связи"); }
         }
 
@@ -394,37 +407,37 @@
              try {
                 const res = await fetch('/api/payment/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tg_id: userData.tg_id, type, item, amount_ton: amount }) });
                 const data = await res.json();
-                if (data.pay_url) tg.openLink(data.pay_url); else tg.showAlert("Ошибка ссылки");
+                if (data.pay_url) tg.openLink(data.pay_url);
             } catch (e) { tg.showAlert("Сбой связи"); }
         }
 
-        // ================= АДМИНКА =================
-        function openAdmin() { openPanel('p-adm'); }
+        // --- АДМИНКА (Твоя функция modFunds, переведенная на сервер) ---
+        async function modFunds(type, act) {
+            if(act === 'remove' && String(userData.tg_id) !== OID) {
+                return tg.showAlert("Только Овнер может забирать!");
+            }
+            
+            const targetId = document.getElementById(type === 'shards' ? 'ish-id' : 'isu-id').value;
+            if (!targetId) return tg.showAlert("Введите ID юзера!");
 
-        async function manageShards(action) {
-            const target = document.getElementById('adm-target').value;
-            const amount = document.getElementById('adm-amount').value;
-            if (!target || !amount) return tg.showAlert("Заполните все поля!");
-            const res = await fetch('/api/admin/manage-shards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sender_id: userData.tg_id, target_id: target, amount, action }) });
-            const data = await res.json(); tg.showAlert(data.message || data.error);
+            if (type === 'shards') {
+                const val = document.getElementById('ish-val').value;
+                if (!val) return tg.showAlert("Введите количество!");
+                const res = await fetch('/api/admin/manage-shards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sender_id: userData.tg_id, target_id: targetId, amount: val, action: act }) });
+                const data = await res.json(); tg.showAlert(data.message || data.error);
+            } else {
+                const subType = document.getElementById('isu-type').value;
+                const res = await fetch('/api/admin/manage-sub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sender_id: userData.tg_id, target_id: targetId, sub_type: subType, action: act }) });
+                const data = await res.json(); tg.showAlert(data.message || data.error);
+            }
         }
 
-        async function manageSub(action) {
-            const target = document.getElementById('adm-target').value;
-            const sub = document.getElementById('adm-sub').value;
-            if (!target) return tg.showAlert("Введите ID юзера!");
-            const res = await fetch('/api/admin/manage-sub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sender_id: userData.tg_id, target_id: target, sub_type: sub, action }) });
-            const data = await res.json(); tg.showAlert(data.message || data.error);
-        }
-
-        // ================= КОНСОЛЬ =================
-        function openConsole() { openPanel('p-con'); }
-
-        async function setAdmin(status) {
-            const target = document.getElementById('cons-target').value; 
+        // --- КОНСОЛЬ (modAdmin) ---
+        async function modAdmin(status) {
+            const target = document.getElementById('ia-id').value || document.getElementById('cons-target').value;
             if (!target) return tg.showAlert("Введите ID!");
             const res = await fetch('/api/owner/set-admin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner_id: userData.tg_id, target_id: target, status }) });
-            if(res.ok) tg.showAlert("Права успешно обновлены!"); else tg.showAlert("Ошибка доступа");
+            if(res.ok) tg.showAlert("Права обновлены!"); else tg.showAlert("Ошибка доступа");
         }
 
         // ЗАПУСК
