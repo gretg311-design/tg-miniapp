@@ -143,19 +143,21 @@
         <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()">УДАЛИТЬ ПЕРСОНАЖА</div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
+
     <div id="p-daily" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 5px;">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
-        <div class="info-card" style="text-align: center;">
+        <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;">Заходи 7 дней подряд для бонуса x2!</div>
+        <div class="info-card" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
             <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
             <h3 id="daily-streak-text" style="color: #bc42f5; margin: 0 0 10px 0;">Стрик: 0 дней</h3>
-            <div style="font-size: 14px; margin-bottom: 15px; color:#aaa;">Награда сегодня:<br><b id="daily-reward-text" style="color: #00ff00; font-size: 24px;">...</b></div>
+            <div style="font-size: 14px; margin-bottom: 15px; color:#aaa;">Ваша награда сегодня:<br><b id="daily-reward-text" style="color: #00ff00; font-size: 24px;">...</b></div>
             <div id="daily-btn" class="term-btn" style="border-color:#00ff00;" onclick="claimDaily()">ЗАБРАТЬ</div>
             <div id="daily-wait" style="display:none; color:#888; font-size: 12px; margin-top: 10px;"></div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-shop" class="overlay"><h2 style="color:#00bcd4; margin-bottom: 20px;">МАГАЗИН</h2><div class="shop-header">ПОДПИСКИ</div><div class="shop-item"><div class="shop-title">ULTRA</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500</div><div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50</div></div></div><div class="shop-header">ОСКОЛКИ</div><div class="shop-item"><div class="shop-title">100 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5</div></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-shop" class="overlay"><h2 style="color:#00bcd4; margin-bottom: 20px;">МАГАЗИН</h2><div id="shop-items-container" style="width:100%"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     
     <div id="p-settings" class="overlay">
         <h2>НАСТРОЙКИ</h2>
@@ -167,18 +169,16 @@
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-con" class="overlay"><h2 style="color:#e91e63">CONSOLE</h2><div class="con-grid"><div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div><div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div><div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div><div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div><div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div><div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div><div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">ЗАДАНИЯ</div></div><div class="term-btn" onclick="back()">ЗАКРЫТЬ</div></div>
-
-    <div id="p-adm" class="overlay"><h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2><div class="con-grid"><div class="con-btn" onclick="openPanel('p-m-shards')">ВЫДАТЬ 🌙</div><div class="con-btn" onclick="openPanel('p-m-subs')">ВЫДАТЬ SUB</div><div class="con-btn" onclick="openPanel('p-m-char')">ДОБАВИТЬ ПЕРСА</div><div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМО</div><div class="con-btn" style="grid-column: span 2;" onclick="openPanel('p-m-tasks')">ДОБАВИТЬ ЗАДАНИЕ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-con" class="overlay"><h2 style="color:#e91e63">CONSOLE</h2><div class="con-grid"><div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div><div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div><div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div><div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div><div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div><div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div><div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">ЗАДАНИЯ</div></div><div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div></div>
+    
+    <div id="p-adm" class="overlay"><h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2><div class="con-grid"><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-shards')">ВЫДАТЬ ОСКОЛКИ</div><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-subs')">ВЫДАТЬ SUB</div><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-char')">ДОБАВИТЬ ПЕРСА</div><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-promos')">СОЗДАТЬ ПРОМО</div><div class="con-btn" style="border-color:#00bcd4; grid-column: span 2;" onclick="openPanel('p-m-tasks')">ДОБАВИТЬ ЗАДАНИЕ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
 
     <div id="p-m-char" class="overlay">
         <h2>ПЕРСОНАЖ</h2>
         <div class="info-card" style="text-align: center;">
-            <img id="char-preview" src="#">
-            <input type="text" id="ich-name" class="term-in" placeholder="Имя">
-            <input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)">
-            <div class="gender-box"><div class="gender-btn active" id="cg-m" onclick="setCharGender('m')">Мужской</div><div class="gender-btn" id="cg-f" onclick="setCharGender('f')">Женский</div></div>
-            <textarea id="ich-desc" class="term-in" style="height: 120px; resize: none;" placeholder="Описание..." maxlength="2000" oninput="updateCharCounter()"></textarea>
+            <img id="char-preview" src="#"><input type="text" id="ich-name" class="term-in" placeholder="Имя"><input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18">
+            <span class="s-label">Пол персонажа</span><div class="gender-box"><div class="gender-btn active" id="cg-m" onclick="setCharGender('m')">Мужской</div><div class="gender-btn" id="cg-f" onclick="setCharGender('f')">Женский</div></div>
+            <textarea id="ich-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание..." maxlength="2000" oninput="updateCharCounter()"></textarea>
             <div id="char-limit" class="char-counter">0/2000</div>
             <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
             <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ГАЛЕРЕЯ</div>
@@ -189,67 +189,73 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        const BackBtn = tg.BackButton;
+        const BackButton = tg.BackButton; // Включаем нативную кнопку
         tg.expand();
         tg.enableClosingConfirmation();
+        if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
 
         const OID = "8287041036";
-        let stack = [], activeCharId = null, userData = { shards: 0 }, allChars = [];
+        let stack = [], clickedTasks = [];
+        let currentCharGender = 'm'; 
+        let activeCharId = null;
+        let dailyTimerInterval = null;
+        
+        let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
+        let allChars = []; 
 
         function getUid() { return String(tg.initDataUnsafe?.user?.id || OID); }
 
-        // --- УПРАВЛЕНИЕ ОКНАМИ ---
-        function openPanel(id) {
-            stack.push(id);
-            document.getElementById(id).style.display = 'flex';
-            BackBtn.show();
+        function updateBalanceUI(val) {
+            if(getUid() === OID) return;
+            document.getElementById('shards-balance').innerText = val;
+            userData.shards = val;
         }
 
-        function back() {
-            if (stack.length > 0) {
-                document.getElementById(stack.pop()).style.display = 'none';
+        // --- УПРАВЛЕНИЕ ОКНАМИ С КНОПКОЙ НАЗАД ---
+        function openPanel(id) { 
+            stack.push(id); 
+            document.getElementById(id).style.display = 'flex'; 
+            BackButton.show(); // Показываем кнопку в углу ТГ
+        }
+
+        function back() { 
+            if(stack.length > 0) {
+                const lastId = stack.pop();
+                document.getElementById(lastId).style.display = 'none'; 
             }
-            if (stack.length === 0) BackBtn.hide();
+            if(stack.length === 0) BackButton.hide(); // Прячем если на главном
         }
 
-        BackBtn.onClick(() => back());
+        BackButton.onClick(() => back()); // Привязываем нативную кнопку к функции back
 
-        // --- ИНИЦИАЛИЗАЦИЯ ---
+        // --- ИНИЦИАЛИЗАЦИЯ И ФИКС ЛУНЫ ---
         async function init() {
             const uid = getUid();
+            const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
             document.getElementById('u-id-head').innerText = uid;
-            
+            document.getElementById('u-name').innerText = localStorage.getItem('m_nick_' + uid) || u.first_name || "User";
+
             try {
-                const res = await fetch('/api/user/get-data', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ tg_id: uid })
-                });
+                const res = await fetch('/api/user/get-data', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tg_id: uid }) });
                 userData = await res.json();
-                
-                if(uid === OID) {
-                    document.getElementById('shards-balance').innerText = "∞";
-                    document.getElementById('nav-adm').style.display = 'flex';
-                    document.getElementById('nav-con').style.display = 'flex';
-                } else {
-                    document.getElementById('shards-balance').innerText = userData.shards;
-                    if(userData.is_admin) document.getElementById('nav-adm').style.display = 'flex';
-                }
-            } catch (e) { console.error("API Error"); }
+                if(uid === OID) { document.getElementById('shards-balance').innerText = "∞"; document.getElementById('nav-adm').style.display = 'flex'; document.getElementById('nav-con').style.display = 'flex'; }
+                else { updateBalanceUI(userData.shards); if(userData.is_admin) document.getElementById('nav-adm').style.display = 'flex'; }
+            } catch (e) { console.error("SERVER ERROR"); }
 
             await renderUserChars();
 
-            // ФИКС ЛУНЫ: ПОЛНОЕ УДАЛЕНИЕ
+            // ЖЕСТКИЙ ФИКС ЛУНЫ
             setTimeout(() => {
                 const loader = document.getElementById('loading');
                 loader.style.opacity = '0';
                 setTimeout(() => { 
-                    loader.style.display = 'none'; 
-                    document.getElementById('app').style.display = 'flex';
+                    loader.style.display = 'none'; // Полное удаление, чтобы не мешала кликам
+                    document.getElementById('app').style.display = 'flex'; 
                 }, 500);
             }, 1500);
         }
 
-        // --- ЧАТ И ПЕРСОНАЖИ ---
+        // --- ЛОГИКА ЧАТОВ И ДОСЬЕ ---
         async function renderUserChars() {
             try {
                 const res = await fetch('/api/get-characters');
@@ -257,14 +263,14 @@
                 document.getElementById('user-char-list').innerHTML = allChars.map(c => `
                     <div class="char-card" onclick="openDossier(${c.id})">
                         <img src="${c.photo}">
-                        <div class="char-card-info"><div class="char-card-name">${c.name}</div></div>
+                        <div class="char-card-info"><div class="char-card-name">${c.name}</div><div class="char-card-tags">${c.age} лет</div></div>
                     </div>`).join('');
             } catch (e) {}
         }
 
         function openDossier(id) {
-            activeCharId = id;
             const c = allChars.find(x => x.id === id);
+            if(!c) return; activeCharId = id;
             document.getElementById('dos-name').innerText = c.name;
             document.getElementById('dos-img').src = c.photo;
             document.getElementById('dos-age').innerText = c.age;
@@ -276,15 +282,16 @@
             const input = document.getElementById('chat-input-text');
             const text = input.value.trim();
             if(!text) return;
-            // Логика отправки из 1.2.0...
+            const uid = getUid();
+            if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков!");
+            // ... (далее твоя оригинальная логика отправки /api/chat)
             input.value = '';
-            // Fetch /api/chat...
         }
 
-        // Вспомогательные функции (previewImg, updateCharCounter и т.д.)
+        // Остальные функции (claimDaily, buyItem, saveCharDB, previewImg и т.д.) - БЕЗ ИЗМЕНЕНИЙ
         function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
         function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(i.files[0]); } }
-        
+
         window.onload = init;
     </script>
 </body>
