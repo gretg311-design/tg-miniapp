@@ -302,6 +302,32 @@ app.post('/api/payment/webhook', async (req, res) => {
 app.post('/api/tg-webhook', async (req, res) => {
     try {
         const update = req.body;
+
+        // --- НОВОЕ: Обработка команды /start в самом боте ---
+        if (update.message && update.message.text === '/start') {
+            const chatId = update.message.chat.id;
+            const welcomeText = `🎮 *Добро пожаловать!*\n\nТы в мире *AI-персонажей* — общайся с уникальными героями или создай своего! Каждый персонаж — со своим характером, стилем общения и историей.`;
+            
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    chat_id: chatId, 
+                    text: welcomeText,
+                    parse_mode: 'Markdown',
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "📱 Открыть приложение", web_app: { url: "https://tg-miniapp-blond.vercel.app/" } }],
+                            [{ text: "❓ Поддержка / Не открывается", url: "https://t.me/suppurtmoders_bot" }],
+                            [{ text: "📰 Наш канал", url: "https://t.me/Anime_ai_18" }]
+                        ]
+                    }
+                })
+            });
+            return res.sendStatus(200);
+        }
+        // --- КОНЕЦ ОБРАБОТЧИКА /START ---
+
         if (update.pre_checkout_query) {
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/answerPreCheckoutQuery`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pre_checkout_query_id: update.pre_checkout_query.id, ok: true }) });
             return res.sendStatus(200);
