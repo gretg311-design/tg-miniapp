@@ -316,10 +316,16 @@ app.post('/api/tg-webhook', async (req, res) => {
                     text: welcomeText,
                     parse_mode: 'Markdown',
                     reply_markup: {
+                        // Сетка 2x2: Первая строка - Приложение и Создание. Вторая строка - Канал и Поддержка.
                         inline_keyboard: [
-                            [{ text: "📱 Открыть приложение", web_app: { url: "https://tg-miniapp-blond.vercel.app/" } }],
-                            [{ text: "❓ Поддержка / Не открывается", url: "https://t.me/suppurtmoders_bot" }],
-                            [{ text: "📰 Наш канал", url: "https://t.me/Anime_ai_18" }]
+                            [
+                                { text: "📱 Открыть", web_app: { url: "https://tg-miniapp-blond.vercel.app/" } },
+                                { text: "📝 Создать перса", url: "https://t.me/anime_ai_charactersbot" }
+                            ],
+                            [
+                                { text: "📰 Наш канал", url: "https://t.me/Anime_ai_18" },
+                                { text: "❓ Поддержка", url: "https://t.me/suppurtmoders_bot" }
+                            ]
                         ]
                     }
                 })
