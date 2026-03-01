@@ -273,9 +273,11 @@
             document.getElementById('g-f').classList.toggle('active', uGender === 'f');
 
             try {
+                // ИЗМЕНЕНИЕ ДЛЯ РЕФЕРАЛКИ: Захватываем start_param и отправляем на сервер
+                const startParam = tg.initDataUnsafe?.start_param || null;
                 const res = await fetch('/api/user/get-data', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ tg_id: uid })
+                    body: JSON.stringify({ tg_id: uid, start_param: startParam })
                 });
                 userData = await res.json();
             } catch (e) {
