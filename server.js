@@ -319,7 +319,7 @@ app.post('/api/tg-webhook', async (req, res) => {
                             [
                                 // ВНИМАНИЕ: ЗАМЕНИ "ТВОЙ_ЮЗЕРНЕЙМ_БОТА" НА РЕАЛЬНЫЙ ЮЗЕРНЕЙМ ТВОЕГО БОТА (БЕЗ @). 
                                 // Слово play в конце - это твой short name из BotFather.
-                                { text: "📱 Открыть", url: "https://tg-miniapp-blond.vercel.app/" },
+                                { text: "📱 Открыть", url: "https://t.me/anime_ai_18_bot/PlayApp" },
                                 { text: "📝 Создать перса", url: "https://t.me/anime_ai_charactersbot" }
                             ],
                             [
