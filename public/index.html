@@ -9,9 +9,12 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
-        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
         @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 30px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 60px #fff; } 100% { transform: scale(1); box-shadow: 0 0 30px #fff; } }
+        
+        /* НОВЫЙ СТИЛЬ: Юридическая надпись под луной */
+        .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
 
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
@@ -82,7 +85,10 @@
     </style>
 </head>
 <body>
-    <div id="loading"><div class="moon-logo"></div></div>
+    <div id="loading">
+        <div class="moon-logo"></div>
+        <div class="legal-text">All characters are 18+.<br>Content is AI-generated and does not reflect real people.</div>
+    </div>
 
     <div id="app">
         <div class="u-header">
@@ -108,7 +114,6 @@
         <div id="chatlist-container" style="width:100%"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
     </div>
-
     <div id="p-chat" class="overlay" style="padding: 0;">
         <div style="width: 100%; background: #0d041a; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d164d;">
             <div style="font-weight: bold; color: #bc42f5; font-size: 18px;" id="chat-char-name">Имя Персонажа</div>
@@ -161,6 +166,7 @@
     </div>
 
     <div id="p-user-tasks" class="overlay"><h2 style="color:#00ff00; margin-bottom: 20px;">ЗАДАНИЯ</h2><div id="user-task-list" style="width:100%"></div><div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div></div>
+    
     <div id="p-shop" class="overlay"><h2 style="color:#00bcd4; margin-bottom: 5px;">МАГАЗИН</h2><div style="font-size: 11px; color: #888; margin-bottom: 20px;">Оплата через Telegram Stars или CryptoBot (TON)</div><div class="shop-header">ПОДПИСКИ (30 ДНЕЙ)</div><div class="shop-item"><div class="shop-title" style="color: #a8b8c8;">PREMIUM</div><div class="shop-desc">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ffd700;">PRO</div><div class="shop-desc">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ff00ff;">VIP</div><div class="shop-desc">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div><div class="shop-desc">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div></div></div><div class="shop-header">ОСКОЛКИ ЛУНЫ</div><div class="shop-item"><div class="shop-title">10 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div><div class="shop-item"><div class="shop-title">50 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div><div class="shop-item"><div class="shop-title">100 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div><div class="shop-item"><div class="shop-title">500 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div><div class="shop-item"><div class="shop-title">1000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ffaa00;">5000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 5000, 'stars', 2500)">⭐️ 2500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 5000, 'ton', 250)">💎 250 TON</div></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     
     <div id="p-user-promos" class="overlay"><h2 style="color:#bc42f5">ПРОМОКОД</h2><div class="info-card"><span class="s-label">Введите секретный код</span><input type="text" id="user-promo-input" class="term-in" placeholder="Напр: MOON2026"><div class="term-btn" style="border-color:#bc42f5" onclick="usePromo()">АКТИВИРОВАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
@@ -182,7 +188,7 @@
     <div id="p-m-admins" class="overlay"><h2>АДМИНЫ</h2><div class="info-card"><input type="number" id="ia-id" class="term-in" placeholder="TG ID"><div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div><div id="own-adm-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     <script>
         const tg = window.Telegram.WebApp;
-        const BackButton = tg.BackButton; // Нативная кнопка Телеграма
+        const BackButton = tg.BackButton; // Включаем кнопку "Назад" ТГ
         tg.expand();
         tg.enableClosingConfirmation();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
@@ -231,11 +237,16 @@
 
         // ================= ИНИЦИАЛИЗАЦИЯ =================
         async function init() {
-            // ЖЕЛЕЗОБЕТОННЫЙ ФИКС ЛУНЫ: Таймер запускается СРАЗУ. 
-            // Экран загрузки исчезнет 100%, даже если сервер будет отвечать долго.
-            setTimeout(() => { 
-                document.getElementById('loading').style.display = 'none'; 
-                document.getElementById('app').style.display = 'flex'; 
+            // ЖЕСТКИЙ ФИКС ЛУНЫ: Гарантированное удаление через 1.5 секунды
+            setTimeout(() => {
+                const loader = document.getElementById('loading');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => { 
+                        loader.style.display = 'none'; 
+                        document.getElementById('app').style.display = 'flex'; 
+                    }, 500);
+                }
             }, 1500);
 
             const uid = getUid();
@@ -261,7 +272,6 @@
                 userData = await res.json();
             } catch (e) {
                 console.error("SERVER ERROR:", e);
-                tg.showAlert("Ошибка подключения к серверу. Запущено в оффлайн-режиме.");
             }
 
             if(uid === OID) {
@@ -689,7 +699,6 @@
         async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Цены сохранены!"); }
         function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
         
-        // ================= УПРАВЛЕНИЕ ОКНАМИ С КНОПКОЙ НАЗАД =================
         function openPanel(id) { 
             stack.push(id); 
             document.getElementById(id).style.display = 'flex'; 
@@ -699,12 +708,11 @@
             if(stack.length > 0) { 
                 document.getElementById(stack.pop()).style.display = 'none'; 
             }
-            if(stack.length === 0) { 
-                BackButton.hide(); // Скрываем, если мы на главном экране
+            if(stack.length === 0) {
+                BackButton.hide(); // Прячем кнопку на главном экране
             }
         }
         
-        // Привязываем клик по системной кнопке
         BackButton.onClick(() => back());
         
         window.onload = init;
