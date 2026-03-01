@@ -13,8 +13,11 @@
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
         @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 30px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 60px #fff; } 100% { transform: scale(1); box-shadow: 0 0 30px #fff; } }
         
-        /* НОВЫЙ СТИЛЬ: Юридическая надпись под луной */
+        /* Юридическая надпись под луной */
         .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
+        
+        /* Версия приложения */
+        .app-version { font-size: 10px; color: #444; text-align: center; margin-top: 15px; font-family: monospace; }
 
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
@@ -88,6 +91,7 @@
     <div id="loading">
         <div class="moon-logo"></div>
         <div class="legal-text">All characters are 18+.<br>Content is AI-generated and does not reflect real people.</div>
+        <div class="app-version">v. 1.2.1.0(beta)</div>
     </div>
 
     <div id="app">
@@ -108,6 +112,7 @@
             <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
         </div>
+        <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
     </div>
     <div id="p-user-chatlist" class="overlay">
         <h2 style="color:#bc42f5; margin-bottom: 20px;">МОИ ЧАТЫ</h2>
@@ -695,7 +700,7 @@
         function shareRef() {
             const uid = getUid();
             // ВАЖНО: замени Anime_AI_18_bot на юзернейм своего бота, а play на твое короткое имя приложения
-            const refLink = `https://t.me/Anime_AI_18_bot/play?startapp=${uid}`;
+            const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`;
             const text = `Залетай в Anime AI! Общайся с ИИ-персонажами без цензуры. Переходи по моей ссылке и мы оба получим по 100 🌙!`;
             const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`;
             tg.openTelegramLink(shareUrl);
