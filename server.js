@@ -189,7 +189,6 @@ app.post('/api/chat', async (req, res) => {
             const timeoutId = setTimeout(() => controller.abort(), 8500);
 
             try {
-                // ВОЗВРАЩАЕМ АКТУАЛЬНЫЙ GEMINI 2.5 FLASH!
                 const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -303,10 +302,10 @@ app.post('/api/tg-webhook', async (req, res) => {
     try {
         const update = req.body;
 
-        // --- НОВОЕ: Обработка команды /start в самом боте ---
+        // --- ОБРАБОТКА КОМАНДЫ /START ---
         if (update.message && update.message.text === '/start') {
             const chatId = update.message.chat.id;
-            const welcomeText = `🎮 *Добро пожаловать!*\n\nВ мир *AI-персонажей* — общайся с с любыми персонажами или теми котороие тебе нравятся.`;
+            const welcomeText = `🎮 *Добро пожаловать!*\n\nВ мир *AI-персонажей* — общайся с любыми персонажами или теми, которые тебе нравятся.`;
             
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
                 method: 'POST', 
@@ -316,10 +315,11 @@ app.post('/api/tg-webhook', async (req, res) => {
                     text: welcomeText,
                     parse_mode: 'Markdown',
                     reply_markup: {
-                        // Сетка 2x2: Первая строка - Приложение и Создание. Вторая строка - Канал и Поддержка.
                         inline_keyboard: [
                             [
-                                { text: "📱 Открыть", web_app: { url: "https://tg-miniapp-blond.vercel.app/" } },
+                                // ВНИМАНИЕ: ЗАМЕНИ "ТВОЙ_ЮЗЕРНЕЙМ_БОТА" НА РЕАЛЬНЫЙ ЮЗЕРНЕЙМ ТВОЕГО БОТА (БЕЗ @). 
+                                // Слово play в конце - это твой short name из BotFather.
+                                { text: "📱 Открыть", url: "https://t.me/ТВОЙ_ЮЗЕРНЕЙМ_БОТА/play" },
                                 { text: "📝 Создать перса", url: "https://t.me/anime_ai_charactersbot" }
                             ],
                             [
