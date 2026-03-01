@@ -43,7 +43,8 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const userSchema = new mongoose.Schema({
     tg_id: { type: Number, unique: true }, shards: { type: Number, default: 0 },
     subscription: { type: String, default: "FREE" }, sub_exp: { type: Number, default: 0 },
-    is_admin: { type: Boolean, default: false }, last_daily: { type: Number, default: 0 }, daily_streak: { type: Number, default: 0 }
+    is_admin: { type: Boolean, default: false }, last_daily: { type: Number, default: 0 }, daily_streak: { type: Number, default: 0 },
+    invited_by: { type: Number, default: null } // НОВОЕ ПОЛЕ ДЛЯ РЕФЕРАЛКИ
 });
 const charSchema = new mongoose.Schema({ id: Number, name: String, age: Number, gender: String, desc: String, photo: String });
 const promoSchema = new mongoose.Schema({ code: { type: String, unique: true }, reward: Number });
@@ -65,8 +66,35 @@ const checkAdmin = async (sender_id) => {
 app.post('/api/user/get-data', async (req, res) => {
     try {
         const uid = Number(req.body.tg_id);
-        let user = await User.findOne({ tg_id: uid }); if (!user) user = new User({ tg_id: uid });
+        const inviterId = req.body.start_param ? Number(req.body.start_param) : null; // Получаем ID пригласившего
+
+        let user = await User.findOne({ tg_id: uid }); 
         let isModified = false;
+        let isNewUser = false;
+
+        // Если юзер новый, создаем его
+        if (!user) { 
+            user = new User({ tg_id: uid }); 
+            isNewUser = true; 
+        }
+
+        // --- ЛОГИКА РЕФЕРАЛКИ ---
+        if (isNewUser && inviterId && inviterId !== uid) {
+            // Запоминаем, кто пригласил
+            user.invited_by = inviterId;
+            // Даем бонус 100 осколков новичку
+            user.shards += 100;
+            isModified = true;
+
+            // Начисляем бонус 100 осколков пригласившему (в фоне)
+            User.findOneAndUpdate({ tg_id: inviterId }, { $inc: { shards: 100 } }).then(inviter => {
+                if (inviter) sendTgMessage(inviterId, `🎉 По вашей ссылке зарегистрировался новый пользователь! Вы получили 100 🌙.`);
+            }).catch(e => console.error("Ref Reward Error:", e));
+            
+            // Уведомляем новичка
+            sendTgMessage(uid, `🎉 Вы зарегистрировались по пригласительной ссылке и получили бонус 100 🌙!`);
+        }
+        // --- КОНЕЦ ЛОГИКИ РЕФЕРАЛКИ ---
 
         if (user.subscription) {
             let cleanSub = user.subscription.trim();
@@ -303,8 +331,16 @@ app.post('/api/tg-webhook', async (req, res) => {
         const update = req.body;
 
         // --- ОБРАБОТКА КОМАНДЫ /START ---
-        if (update.message && update.message.text === '/start') {
+        if (update.message && update.message.text && update.message.text.startsWith('/start')) {
             const chatId = update.message.chat.id;
+            
+            // Если в старте передан параметр (например /start 8287041036)
+            const textParts = update.message.text.split(' ');
+            const startParam = textParts.length > 1 ? textParts[1] : '';
+            
+            // Добавляем параметр в URL запуска, если он есть
+            const appUrl = startParam ? `https://t.me/anime_ai_18_bot/PlayApp?startapp=${startParam}` : `https://t.me/anime_ai_18_bot/PlayApp`;
+
             const welcomeText = `🎮 *Добро пожаловать!*\n\nВ мир *AI-персонажей* — общайся с любыми персонажами или теми, которые тебе нравятся.`;
             
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
@@ -317,9 +353,7 @@ app.post('/api/tg-webhook', async (req, res) => {
                     reply_markup: {
                         inline_keyboard: [
                             [
-                                // ВНИМАНИЕ: ЗАМЕНИ "ТВОЙ_ЮЗЕРНЕЙМ_БОТА" НА РЕАЛЬНЫЙ ЮЗЕРНЕЙМ ТВОЕГО БОТА (БЕЗ @). 
-                                // Слово play в конце - это твой short name из BotFather.
-                                { text: "📱 Открыть", url: "https://t.me/anime_ai_18_bot/PlayApp" },
+                                { text: "📱 Открыть", url: appUrl },
                                 { text: "📝 Создать перса", url: "https://t.me/anime_ai_charactersbot" }
                             ],
                             [
