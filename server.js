@@ -306,7 +306,7 @@ app.post('/api/tg-webhook', async (req, res) => {
         // --- НОВОЕ: Обработка команды /start в самом боте ---
         if (update.message && update.message.text === '/start') {
             const chatId = update.message.chat.id;
-            const welcomeText = `🎮 *Добро пожаловать!*\n\nТы в мире *AI-персонажей* — общайся с уникальными героями или создай своего! Каждый персонаж — со своим характером, стилем общения и историей.`;
+            const welcomeText = `🎮 *Добро пожаловать!*\n\nВ мир *AI-персонажей* — общайся с с любыми персонажами или теми котороие тебе нравятся.`;
             
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
                 method: 'POST', 
