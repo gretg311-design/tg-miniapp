@@ -676,6 +676,10 @@
             try {
                 const res = await fetch('/api/get-characters');
                 allChars = await res.json();
+                
+                // СОРТИРОВКА ПЕРСОНАЖЕЙ (новые сверху, т.к. ID = время создания)
+                allChars.sort((a, b) => b.id - a.id);
+
                 const list = document.getElementById('user-char-list');
                 if(allChars.length === 0) { list.innerHTML = "<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>"; return; }
                 list.innerHTML = allChars.map(c => `
