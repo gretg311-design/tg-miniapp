@@ -533,8 +533,19 @@
             chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">Персонаж печатает...</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
             try {
+                // ДОСТАЕМ ИМЯ И ПОЛ ДЛЯ ИИ
+                const uName = document.getElementById('u-name').innerText;
+                const uGender = localStorage.getItem('m_gender_' + uid) || 'm';
+
                 const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 45); const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
-                const res = await fetch('/api/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tg_id: uid, char_id: activeCharId, message: text, chat_history: allChats[activeCharId], len: lenSet, sex: sexSet }) });
+                const res = await fetch('/api/chat', { 
+                    method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ 
+                        tg_id: uid, char_id: activeCharId, message: text, 
+                        chat_history: allChats[activeCharId], len: lenSet, sex: sexSet,
+                        user_name: uName, user_gender: uGender // ОТПРАВЛЯЕМ ИМЯ И ПОЛ
+                    }) 
+                });
                 const data = await res.json(); document.getElementById('typing-indicator')?.remove();
                 if (data.error) { tg.showAlert("Ошибка ИИ: " + data.error); } 
                 else { allChats[activeCharId].push({sender: 'char', text: data.reply}); localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if (uid !== OID) updateBalanceUI(data.new_balance); renderChatMessages(); }
