@@ -72,20 +72,13 @@ app.post('/api/user/get-data', async (req, res) => {
         let isModified = false;
         let isNewUser = false;
 
-        if (!user) { 
-            user = new User({ tg_id: uid }); 
-            isNewUser = true; 
-        }
+        if (!user) { user = new User({ tg_id: uid }); isNewUser = true; }
 
         if (isNewUser && inviterId && inviterId !== uid) {
-            user.invited_by = inviterId;
-            user.shards += 100;
-            isModified = true;
-
+            user.invited_by = inviterId; user.shards += 100; isModified = true;
             User.findOneAndUpdate({ tg_id: inviterId }, { $inc: { shards: 100 } }).then(inviter => {
                 if (inviter) sendTgMessage(inviterId, `🎉 По вашей ссылке зарегистрировался новый пользователь! Вы получили 100 🌙.`);
             }).catch(e => console.error("Ref Reward Error:", e));
-            
             sendTgMessage(uid, `🎉 Вы зарегистрировались по пригласительной ссылке и получили бонус 100 🌙!`);
         }
 
@@ -140,13 +133,12 @@ app.post('/api/user/claim-daily', async (req, res) => {
         let actualRew = is7thDay ? baseRew * 2 : baseRew; 
 
         user.shards += actualRew; user.last_daily = now; let currentStreak = user.daily_streak;
-        if (is7thDay) user.daily_streak = 0; 
-        await user.save();
+        if (is7thDay) user.daily_streak = 0; await user.save();
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ =================
+// ================= API: ЧАТ (С УЧЕТОМ ИМЕНИ И ПОЛА) =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
@@ -179,18 +171,20 @@ app.post('/api/chat', async (req, res) => {
         
         let safeLen = Number(len) || 45;
         let uName = user_name || "Собеседник";
-        let uGender = user_gender || "Не указан";
+        let uGender = user_gender === 'f' ? "Женский" : "Мужской";
         
+        // ОБНОВЛЕННЫЙ ЖЕСТКИЙ ПРОМПТ
         let systemPrompt = `Ты в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}. Легенда: ${char.desc}.
-Твой собеседник: Имя - ${uName}, Пол - ${uGender}. Обращайся к нему по имени.
+Твой собеседник: Имя - ${uName}, Пол - ${uGender}.
 
 ПРАВИЛА, КОТОРЫЕ ТЫ ОБЯЗАН СТРОГО СОБЛЮДАТЬ:
-1. ЖИВАЯ РЕЧЬ: Ты живой человек! КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО вести себя как бот-помощник или ассистент.
-2. Тон общения: ${sexLevels[requestedSex]}.
-3. ДЛИНА ОТВЕТА: Пиши развернуто и красочно, описывай окружение. МИНИМУМ 3-4 предложения (не менее ${safeLen} слов). 
-4. ДЕЙСТВИЯ: Все свои действия, эмоции и мысли СТРОГО пиши внутри звездочек (например: *нежно улыбается*).
-5. РЕЧЬ: Прямую речь пиши обычным текстом без звездочек.
-6. ЗАПРЕТ: Не играй за пользователя. Пиши только за своего персонажа.`;
+1. ЖИВАЯ РЕЧЬ: Ты живой человек! КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО вести себя как ИИ или бот-помощник.
+2. ИМЯ И ПОЛ: Твоего собеседника зовут ${uName}. ОБЯЗАТЕЛЬНО используй это имя при обращении к нему, даже если оно на английском или состоит из необычных символов! СТРОГО учитывай его пол (${uGender}) при построении фраз. Если Мужчина - используй мужские окончания ("ты сказал"). Если Женщина - женские ("ты сказала").
+3. ТОН ОБЩЕНИЯ: ${sexLevels[requestedSex]}.
+4. ДЛИНА ОТВЕТА: Пиши развернуто и красочно, описывай окружение. МИНИМУМ 3-4 предложения (не менее ${safeLen} слов). 
+5. ДЕЙСТВИЯ: Все свои действия, эмоции и мысли СТРОГО пиши внутри звездочек (например: *нежно улыбается*).
+6. РЕЧЬ: Прямую речь пиши обычным текстом без звездочек.
+7. ЗАПРЕТ: Не играй за пользователя. Пиши только за своего персонажа.`;
 
         let historyText = "--- ИСТОРИЯ ДИАЛОГА ---\n";
         if (chat_history && chat_history.length > 0) {
@@ -211,8 +205,7 @@ app.post('/api/chat', async (req, res) => {
 
             try {
                 const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         systemInstruction: { parts: [{ text: systemPrompt }] },
                         contents: [{ role: "user", parts: [{ text: historyText }] }],
@@ -223,8 +216,7 @@ app.post('/api/chat', async (req, res) => {
                             { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                             { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                         ]
-                    }),
-                    signal: controller.signal
+                    }), signal: controller.signal
                 });
 
                 clearTimeout(timeoutId);
@@ -234,16 +226,12 @@ app.post('/api/chat', async (req, res) => {
                     if (attempt === 0) { await sleep(2000); continue; } 
                     else { finalError = "Лимит Гугла (15 в минуту). Подожди немного!"; break; }
                 }
-
                 if (!aiResponse.ok) { finalError = data.error?.message || `Ошибка API ${aiResponse.status}`; break; }
                 aiData = data; break; 
 
             } catch (err) {
                 clearTimeout(timeoutId);
-                if (err.name === 'AbortError') {
-                    if (attempt === 0) { await sleep(1000); continue; }
-                    finalError = "Сервер перегружен."; break;
-                }
+                if (err.name === 'AbortError') { if (attempt === 0) { await sleep(1000); continue; } finalError = "Сервер перегружен."; break; }
                 finalError = `Сбой сети: ${err.message}`; break;
             }
         }
@@ -346,53 +334,38 @@ app.get('/api/get-characters', async (req, res) => res.json(await Character.find
 app.get('/api/get-tasks', async (req, res) => res.json(await Task.find()));
 app.get('/api/get-promos', async (req, res) => res.json(await Promo.find()));
 
-// НОВЫЙ ЭНДПОИНТ: Проверка подписки на канал
 app.post('/api/check-task', async (req, res) => {
     try {
         const { tg_id, task_id } = req.body;
         const task = await Task.findOne({ id: task_id });
         if (!task) return res.json({ success: false, error: "Задание не найдено" });
 
-        // Ищем ссылку вида t.me/название_канала
         const match = task.link.match(/t\.me\/(?!\+)([a-zA-Z0-9_]+)/);
         if (match && match[1]) {
             const channel = "@" + match[1];
-            // Дергаем API Телеграма, чтобы узнать статус юзера в канале
             const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/getChatMember?chat_id=${channel}&user_id=${tg_id}`);
             const tgData = await tgRes.json();
             
-            if (tgData.ok && ['member', 'administrator', 'creator'].includes(tgData.result.status)) {
-                return res.json({ success: true });
-            } else {
-                return res.json({ success: false, error: "Сначала подпишись на канал! ❌" });
-            }
-        } else {
-            // Если это приватная ссылка (t.me/+) или сайт, бот не может проверить. Отдаем награду просто так.
-            return res.json({ success: true });
-        }
-    } catch (e) {
-        res.json({ success: false, error: "Ошибка сервера при проверке подписки" });
-    }
+            if (tgData.ok && ['member', 'administrator', 'creator'].includes(tgData.result.status)) { return res.json({ success: true }); } 
+            else { return res.json({ success: false, error: "Сначала подпишись на канал! ❌" }); }
+        } else { return res.json({ success: true }); }
+    } catch (e) { res.json({ success: false, error: "Ошибка сервера при проверке подписки" }); }
 });
 
 app.post('/api/admin/manage-shards', async (req, res) => {
     const sender_id = Number(req.body.sender_id); const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
     const action = (req.body.action || '').toLowerCase().trim(); let amount = Math.abs(Number(req.body.amount)); 
-
     if (action !== 'add' || Number(req.body.amount) < 0) {
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать осколки" });
         let user = await User.findOne({ tg_id: target_id }); if (user && user.shards < amount) amount = user.shards; 
         await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: -amount } }, { upsert: true }); await sendTgMessage(target_id, `Администратор забрал у вас ${amount} токенов`); res.json({ message: `Снято ${amount} осколков` });
-    } else {
-        await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: amount } }, { upsert: true }); await sendTgMessage(target_id, `Администратор выдал вам ${amount} токенов`); res.json({ message: `Выдано ${amount} осколков` });
-    }
+    } else { await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: amount } }, { upsert: true }); await sendTgMessage(target_id, `Администратор выдал вам ${amount} токенов`); res.json({ message: `Выдано ${amount} осколков` }); }
 });
 
 app.post('/api/admin/manage-sub', async (req, res) => {
     const sender_id = Number(req.body.sender_id); const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
-
     if (req.body.action === 'add') {
         let days = 30; if (isOwner && req.body.days) days = Number(req.body.days); 
         let user = await User.findOne({ tg_id: target_id }); let expDate = user && user.sub_exp > Date.now() ? new Date(user.sub_exp) : new Date(); expDate.setDate(expDate.getDate() + days);
