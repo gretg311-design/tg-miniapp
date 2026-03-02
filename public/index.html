@@ -39,7 +39,6 @@
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
         
-        /* Плавная пружинистая анимация для всех кнопок */
         .menu-item, .term-btn, .con-btn, .btn-stars, .btn-ton, .char-card, .chatlist-item, .gender-btn, .chat-send-btn, .task-item button {
             transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease;
         }
@@ -54,7 +53,6 @@
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* Добавили анимацию smoothOpen к overlay */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
@@ -150,6 +148,7 @@
         </div>
         <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
     </div>
+
     <div id="p-user-chatlist" class="overlay">
         <h2 style="color:#bc42f5; margin-bottom: 20px;">МОИ ЧАТЫ</h2>
         <div id="chatlist-container" style="width:100%"></div>
@@ -236,6 +235,7 @@
     <div id="p-m-tasks" class="overlay"><h2>ЗАДАНИЯ</h2><div class="info-card"><input type="text" id="it-name" class="term-in" placeholder="Название"><input type="text" id="it-link" class="term-in" placeholder="Ссылка (https://...)"><select id="it-rtype" class="term-in" onchange="toggleTaskInput()"><option value="shards">Осколки</option><option value="sub7">Подписка (7 дней)</option></select><input type="number" id="it-rew" class="term-in" placeholder="Кол-во осколков"><div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ ЗАДАНИЕ</div></div><div id="task-list" style="width:100%"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     <div id="p-m-promos" class="overlay"><h2>ПРОМОКОДЫ</h2><div class="info-card"><input type="text" id="ip-code" class="term-in" placeholder="КОД"><input type="number" id="ip-rew" class="term-in" placeholder="НАГРАДА"><div class="term-btn" onclick="createPromo()">СОЗДАТЬ ПРОМО</div></div><div id="promo-list" style="width:100%"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     <div id="p-m-admins" class="overlay"><h2>АДМИНЫ</h2><div class="info-card"><input type="number" id="ia-id" class="term-in" placeholder="TG ID"><div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div><div id="own-adm-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+
     <script>
         const tg = window.Telegram.WebApp;
         const BackButton = tg.BackButton;
@@ -266,7 +266,7 @@
         // === СМЕНА СТИЛЯ НИКА ===
         function applyNickStyle(sub) {
             const nameEl = document.getElementById('u-name');
-            nameEl.className = 'nick-base'; // Сбрасываем старые стили
+            nameEl.className = 'nick-base'; 
             let s = (sub || "FREE").trim().toLowerCase();
             if (s === 'ultra') nameEl.classList.add('nick-ultra');
             else if (s === 'vip') nameEl.classList.add('nick-vip');
@@ -283,7 +283,7 @@
             }
         });
 
-        // ================= ДВИЖОК РЕАЛЬНОГО ВРЕМЕНИ (POLLING) =================
+        // ================= ДВИЖОК РЕАЛЬНОГО ВРЕМЕНИ =================
         setInterval(async () => {
             const uid = getUid();
             if(!uid || document.getElementById('loading').style.display !== 'none') return;
@@ -302,7 +302,7 @@
                     if(document.getElementById('prof-sub').innerText !== data.subscription) {
                         document.getElementById('prof-sub').innerText = data.subscription;
                         userData.subscription = data.subscription;
-                        applyNickStyle(data.subscription); // Обновляем цвет ника
+                        applyNickStyle(data.subscription);
                     }
                 }
             } catch(e) {}
@@ -361,11 +361,9 @@
                 document.getElementById('own-su-rem').style.display = 'block';
                 document.getElementById('own-adm-rem').style.display = 'block';
 
-                // БЕЙДЖ ОВНЕРА
                 badgeEl.style.display = 'inline-block';
                 badgeEl.className = 'badge-base badge-owner';
                 badgeEl.innerText = 'OWNER';
-
             } else {
                 updateBalanceUI(userData.shards);
                 document.getElementById('prof-sub').innerText = userData.subscription;
@@ -379,17 +377,16 @@
                     document.getElementById('prof-status').innerText = "Админ";
                     document.getElementById('nav-adm').style.display = 'flex';
                     
-                    // БЕЙДЖ АДМИНА
                     badgeEl.style.display = 'inline-block';
                     badgeEl.className = 'badge-base badge-admin';
                     badgeEl.innerText = 'ADMIN';
                 } else { 
                     document.getElementById('prof-status').innerText = "Юзер"; 
-                    badgeEl.style.display = 'none'; // Юзеру бейдж не положен
+                    badgeEl.style.display = 'none';
                 }
             }
 
-            applyNickStyle(userData.subscription); // Красим ник при запуске
+            applyNickStyle(userData.subscription);
 
             let maxLen = 45; let maxSex = 0;
             if(userData.subscription === "Premium") { maxLen = 55; }
@@ -550,7 +547,6 @@
             chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">Персонаж печатает...</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
             try {
-                // ДОСТАЕМ ИМЯ И ПОЛ ДЛЯ ИИ
                 const uName = document.getElementById('u-name').innerText;
                 const uGender = localStorage.getItem('m_gender_' + uid) || 'm';
 
@@ -560,7 +556,7 @@
                     body: JSON.stringify({ 
                         tg_id: uid, char_id: activeCharId, message: text, 
                         chat_history: allChats[activeCharId], len: lenSet, sex: sexSet,
-                        user_name: uName, user_gender: uGender // ОТПРАВЛЯЕМ ИМЯ И ПОЛ
+                        user_name: uName, user_gender: uGender
                     }) 
                 });
                 const data = await res.json(); document.getElementById('typing-indicator')?.remove();
@@ -625,7 +621,7 @@
         async function renderUserChars() {
             try {
                 const res = await fetch('/api/get-characters'); allChars = await res.json();
-                allChars.sort((a, b) => b.id - a.id); // СОРТИРОВКА ПЕРСОНАЖЕЙ
+                allChars.sort((a, b) => b.id - a.id); 
                 const list = document.getElementById('user-char-list');
                 if(allChars.length === 0) { list.innerHTML = "<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>"; return; }
                 list.innerHTML = allChars.map(c => `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${c.name}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? 'Муж' : 'Жен'}</div></div></div>`).join('');
