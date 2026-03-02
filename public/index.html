@@ -179,9 +179,10 @@
         <div id="user-task-list" style="width:100%"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
     </div>
+    
     <div id="p-shop" class="overlay"><h2 style="color:#00bcd4; margin-bottom: 5px;">МАГАЗИН</h2><div style="font-size: 11px; color: #888; margin-bottom: 20px;">Оплата через Telegram Stars или CryptoBot (TON)</div><div class="shop-header">ПОДПИСКИ (30 ДНЕЙ)</div><div class="shop-item"><div class="shop-title" style="color: #a8b8c8;">PREMIUM</div><div class="shop-desc">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ffd700;">PRO</div><div class="shop-desc">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ff00ff;">VIP</div><div class="shop-desc">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div><div class="shop-desc">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div></div></div><div class="shop-header">ОСКОЛКИ ЛУНЫ</div><div class="shop-item"><div class="shop-title">10 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div><div class="shop-item"><div class="shop-title">50 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div><div class="shop-item"><div class="shop-title">100 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div><div class="shop-item"><div class="shop-title">500 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div><div class="shop-item"><div class="shop-title">1000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ffaa00;">5000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 5000, 'stars', 2500)">⭐️ 2500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 5000, 'ton', 250)">💎 250 TON</div></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     
-    <div id="p-user-promos" class="overlay"><h2 style="color:#bc42f5">ПРОМОКОД</h2><div class="info-card"><span class="s-label">Введите секретный код</span><input type="text" id="user-promo-input" class="term-in" placeholder="Напр: MOON2026"><div class="term-btn" style="border-color:#bc42f5" onclick="usePromo()">АКТИВИРОВАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
+    <div id="p-user-promos" class="overlay"><h2 style="color:#bc42f5">ПРОМОКОД</h2><div class="info-card"><span class="s-label">Введите секретный код</span><input type="text" id="user-promo-input" class="term-in" placeholder="Напр: MOON2026"><div class="term-btn" style="border-color:#bc42f5" id="promo-btn" onclick="usePromo()">АКТИВИРОВАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     
     <div id="p-profile" class="overlay"><h2 style="color:#bc42f5">ПРОФИЛЬ</h2><div class="info-card"><div class="p-row"><span class="p-label">Ник:</span> <span class="p-val" id="prof-nick">...</span></div><div class="p-row"><span class="p-label">Айди юз:</span> <span class="p-val" id="prof-id">0</span></div><div class="p-row"><span class="p-label">Подписка:</span> <span class="p-val" id="prof-sub">FREE</span></div><div class="p-row"><span class="p-label">Срок:</span> <span class="p-val" id="prof-exp">-</span></div><div class="p-row"><span class="p-label">Кол-во осколков:</span> <span class="p-val" id="prof-shards">0</span></div><div class="p-row" style="border:none;"><span class="p-label">Статус:</span> <span class="p-val" id="prof-status">Юзер</span></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     
@@ -210,6 +211,7 @@
         let currentCharGender = 'm'; 
         let activeCharId = null;
         let dailyTimerInterval = null;
+        let promoLock = false; // Блокировка от дюпов
         
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; 
@@ -277,7 +279,7 @@
             document.getElementById('g-f').classList.toggle('active', uGender === 'f');
 
             try {
-                // ИЗМЕНЕНИЕ ДЛЯ РЕФЕРАЛКИ: Захватываем start_param и отправляем на сервер
+                // Захватываем start_param и отправляем на сервер для рефералки
                 const startParam = tg.initDataUnsafe?.start_param || null;
                 const res = await fetch('/api/user/get-data', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -486,7 +488,6 @@
                     });
                     const data = await res.json();
                     if(data.invoice_url) {
-                        // Нативное окно оплаты Telegram Stars
                         tg.openInvoice(data.invoice_url, function(status) {
                             if (status === 'paid') {
                                 tg.showAlert("Оплата успешна! Награда скоро обновится на экране.");
@@ -639,18 +640,50 @@
             } catch(e){}
         }
 
+        // --- ОБНОВЛЕННАЯ ФУНКЦИЯ АКТИВАЦИИ ПРОМОКОДА (ФИКС ДЮПА) ---
         async function usePromo() {
-            const uid = getUid(); const input = document.getElementById('user-promo-input').value.toUpperCase().trim();
-            const res = await fetch('/api/get-promos'); const promos = await res.json();
-            const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]");
-            const found = promos.find(p => p.code === input);
-            if(!found) return tg.showAlert("Неверный код"); if(used.includes(input)) return tg.showAlert("Уже активирован");
+            if (promoLock) return; // Если процесс уже идет, игнорируем клик
+            promoLock = true;
             
-            await fetch('/api/admin/manage-shards', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: found.reward }) });
-            
-            used.push(input); localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
-            if(uid !== OID) updateBalanceUI(userData.shards + found.reward);
-            tg.showAlert(`Получено ${found.reward} 🌙!`);
+            const btn = document.getElementById('promo-btn');
+            const oldText = btn.innerText;
+            btn.innerText = "ПРОВЕРКА...";
+            btn.style.opacity = "0.5";
+
+            try {
+                const uid = getUid(); 
+                const inputField = document.getElementById('user-promo-input');
+                const input = inputField.value.toUpperCase().trim();
+                
+                if(!input) { promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; return; }
+
+                const res = await fetch('/api/get-promos'); 
+                const promos = await res.json();
+                const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]");
+                const found = promos.find(p => p.code === input);
+                
+                if(!found) {
+                    tg.showAlert("Неверный код");
+                } else if(used.includes(input)) {
+                    tg.showAlert("Уже активирован");
+                } else {
+                    await fetch('/api/admin/manage-shards', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: found.reward }) });
+                    
+                    used.push(input); 
+                    localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
+                    if(uid !== OID) updateBalanceUI(userData.shards + found.reward);
+                    
+                    inputField.value = ''; // Очищаем поле после успеха
+                    tg.showAlert(`Получено ${found.reward} 🌙!`);
+                }
+            } catch(e) {
+                tg.showAlert("Ошибка соединения с сервером");
+            }
+
+            // Снимаем блокировку после завершения всех процессов
+            promoLock = false;
+            btn.innerText = oldText;
+            btn.style.opacity = "1";
         }
 
         // ================= ЗАДАНИЯ И РЕФЕРАЛКА =================
@@ -698,7 +731,6 @@
         // Функция Реферальной ссылки
         function shareRef() {
             const uid = getUid();
-            // ВАЖНО: замени Anime_AI_18_bot на юзернейм своего бота, а PlayApp на твое короткое имя приложения
             const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`;
             const text = `Залетай в Anime AI! Общайся с ИИ-персонажами без цензуры. Переходи по моей ссылке и мы оба получим по 100 🌙!`;
             const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`;
