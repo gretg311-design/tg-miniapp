@@ -68,7 +68,6 @@
 
         .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
         
-        /* Исправление для мобильных телефонов, чтобы ползунок можно было тянуть пальцем! */
         input[type="range"] { touch-action: pan-y; }
         
         .slider-wrap { width: 100%; margin-top: 5px; }
@@ -139,23 +138,23 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="openChatList()">Чаты</div>
-            <div class="menu-item" onclick="openPanel('p-user-chars')">Персонажи</div>
-            <div class="menu-item" onclick="openPanel('p-daily')">Ежедневка</div>
-            <div class="menu-item" onclick="openPanel('p-user-tasks')">Задания</div>
-            <div class="menu-item" onclick="openPanel('p-shop')">Магазин</div>
-            <div class="menu-item" onclick="openPanel('p-user-promos')">Промокоды</div>
-            <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
-            <div class="menu-item" onclick="openPanel('p-settings')">Настройка</div>
-            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
-            <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
+            <div class="menu-item" onclick="openChatList()" data-i18n="m_chats">Чаты</div>
+            <div class="menu-item" onclick="openPanel('p-user-chars')" data-i18n="m_chars">Персонажи</div>
+            <div class="menu-item" onclick="openPanel('p-daily')" data-i18n="m_daily">Ежедневка</div>
+            <div class="menu-item" onclick="openPanel('p-user-tasks')" data-i18n="m_tasks">Задания</div>
+            <div class="menu-item" onclick="openPanel('p-shop')" data-i18n="m_shop">Магазин</div>
+            <div class="menu-item" onclick="openPanel('p-user-promos')" data-i18n="m_promos">Промокоды</div>
+            <div class="menu-item" onclick="openPanel('p-profile')" data-i18n="m_prof">Профиль</div>
+            <div class="menu-item" onclick="openPanel('p-settings')" data-i18n="m_set">Настройка</div>
+            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')" data-i18n="m_adm">Админка</div>
+            <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')" data-i18n="m_con">Консоль</div>
         </div>
         <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
     </div>
     <div id="p-user-chatlist" class="overlay">
-        <h2 style="color:#bc42f5; margin-bottom: 20px;">МОИ ЧАТЫ</h2>
+        <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chats">МОИ ЧАТЫ</h2>
         <div id="chatlist-container" style="width:100%"></div>
-        <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
 
     <div id="p-chat" class="overlay" style="padding: 0;">
@@ -165,7 +164,7 @@
         </div>
         <div class="chat-container">
             <div class="chat-messages" id="chat-messages-box">
-                <div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>
+                <div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;" id="chat-empty-msg">Начните диалог...<br>1 сообщение = 1 🌙</div>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="chat-input-text" class="chat-input" placeholder="Ваше сообщение...">
@@ -175,9 +174,9 @@
     </div>
 
     <div id="p-user-chars" class="overlay">
-        <h2 style="color:#bc42f5; margin-bottom: 20px;">ПЕРСОНАЖИ</h2>
+        <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chars">ПЕРСОНАЖИ</h2>
         <div id="user-char-list" class="char-grid"></div>
-        <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
 
     <div id="p-char-dossier" class="overlay">
@@ -185,55 +184,56 @@
         <div class="info-card">
             <img id="dos-img" src="" class="dossier-img">
             <div class="p-row">
-                <span class="p-label">Возраст:</span> 
+                <span class="p-label" data-i18n="dos_age">Возраст:</span> 
                 <span class="p-val" id="dos-age">18</span>
             </div>
             <div class="p-row">
-                <span class="p-label">Пол:</span> 
+                <span class="p-label" data-i18n="dos_gender">Пол:</span> 
                 <span class="p-val" id="dos-gender">М</span>
             </div>
             <div style="margin-top:15px; font-size:12px; color:#ccc; line-height:1.4;" id="dos-desc">Описание...</div>
         </div>
-        <div class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()">НАЧАТЬ ЧАТ</div>
-        <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()">УДАЛИТЬ ПЕРСОНАЖА</div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
+        <div class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()" data-i18n="b_start_chat">НАЧАТЬ ЧАТ</div>
+        <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()" data-i18n="b_del_char">УДАЛИТЬ ПЕРСОНАЖА</div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
 
     <div id="p-daily" class="overlay">
-        <h2 style="color:#00ff00; margin-bottom: 5px;">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
-        <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
+        <h2 style="color:#00ff00; margin-bottom: 5px;" data-i18n="h_daily">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
+        <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;" data-i18n="d_sub">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
         
         <div class="info-card" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
             <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
             <h3 id="daily-streak-text" style="color: #bc42f5; margin: 0 0 10px 0;">Стрик: 0 дней</h3>
-            <div style="font-size: 14px; margin-bottom: 15px; color:#aaa;">Ваша награда сегодня:<br>
+            <div style="font-size: 14px; margin-bottom: 15px; color:#aaa;">
+                <span data-i18n="d_today">Ваша награда сегодня:</span><br>
                 <b id="daily-reward-text" style="color: #00ff00; font-size: 24px;">...</b>
             </div>
-            <div id="daily-btn" class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00; width:80%;" onclick="claimDaily()">ЗАБРАТЬ</div>
+            <div id="daily-btn" class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00; width:80%;" onclick="claimDaily()" data-i18n="b_claim">ЗАБРАТЬ</div>
             <div id="daily-wait" style="display:none; color:#888; font-size: 12px; margin-top: 10px;">Следующая награда будет доступна завтра.</div>
         </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
 
     <div id="p-user-tasks" class="overlay">
-        <h2 style="color:#00ff00; margin-bottom: 20px;">ЗАДАНИЯ</h2>
+        <h2 style="color:#00ff00; margin-bottom: 20px;" data-i18n="h_tasks">ЗАДАНИЯ</h2>
         <div class="info-card" style="text-align: center; border-color: #bc42f5;">
-            <h3 style="color:#bc42f5; margin-top:0; margin-bottom:5px;">ПРИГЛАСИ ДРУГА</h3>
-            <div style="font-size:12px; color:#aaa; margin-bottom:10px;">Ты и твой друг получите по <b style="color:#00ff00">100 🌙</b> после его первого входа!</div>
-            <div class="term-btn" style="border-color:#bc42f5; background:rgba(188,66,245,0.1); color:#fff; font-size:12px; padding:10px;" onclick="shareRef()">ПОДЕЛИТЬСЯ ССЫЛКОЙ</div>
+            <h3 style="color:#bc42f5; margin-top:0; margin-bottom:5px;" data-i18n="t_invite">ПРИГЛАСИ ДРУГА</h3>
+            <div style="font-size:12px; color:#aaa; margin-bottom:10px;"><span data-i18n="t_invite_desc">Ты и твой друг получите по</span> <b style="color:#00ff00">100 🌙</b>!</div>
+            <div class="term-btn" style="border-color:#bc42f5; background:rgba(188,66,245,0.1); color:#fff; font-size:12px; padding:10px;" onclick="shareRef()" data-i18n="b_share">ПОДЕЛИТЬСЯ ССЫЛКОЙ</div>
         </div>
         <div id="user-task-list" style="width:100%"></div>
-        <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
     
     <div id="p-shop" class="overlay">
-        <h2 style="color:#00bcd4; margin-bottom: 5px;">МАГАЗИН</h2>
-        <div style="font-size: 11px; color: #888; margin-bottom: 20px;">Оплата через Telegram Stars или CryptoBot (TON)</div>
+        <h2 style="color:#00bcd4; margin-bottom: 5px;" data-i18n="h_shop">МАГАЗИН</h2>
+        <div style="font-size: 11px; color: #888; margin-bottom: 20px;" data-i18n="s_pay_info">Оплата через Telegram Stars или CryptoBot (TON)</div>
         
-        <div class="shop-header">ПОДПИСКИ (30 ДНЕЙ)</div>
+        <div class="shop-header" data-i18n="sh_subs">ПОДПИСКИ (30 ДНЕЙ)</div>
         <div class="shop-item">
             <div class="shop-title" style="color: #a8b8c8;">PREMIUM</div>
-            <div class="shop-desc">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="shop-desc" data-i18n="sd_prem">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div>
                 <div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div>
@@ -241,7 +241,7 @@
         </div>
         <div class="shop-item">
             <div class="shop-title" style="color: #ffd700;">PRO</div>
-            <div class="shop-desc">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="shop-desc" data-i18n="sd_pro">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div>
                 <div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div>
@@ -249,7 +249,7 @@
         </div>
         <div class="shop-item">
             <div class="shop-title" style="color: #ff00ff;">VIP</div>
-            <div class="shop-desc">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="shop-desc" data-i18n="sd_vip">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div>
                 <div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div>
@@ -257,99 +257,106 @@
         </div>
         <div class="shop-item">
             <div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div>
-            <div class="shop-desc">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="shop-desc" data-i18n="sd_ultra">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div>
                 <div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div>
             </div>
         </div>
 
-        <div class="shop-header">ОСКОЛКИ ЛУНЫ</div>
+        <div class="shop-header" data-i18n="sh_shards">ОСКОЛКИ ЛУНЫ</div>
         <div class="shop-item">
-            <div class="shop-title">10 Осколков 🌙</div>
+            <div class="shop-title">10 <span data-i18n="s_shards">Осколков</span> 🌙</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div>
                 <div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div>
             </div>
         </div>
         <div class="shop-item">
-            <div class="shop-title">50 Осколков 🌙</div>
+            <div class="shop-title">50 <span data-i18n="s_shards">Осколков</span> 🌙</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div>
                 <div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div>
             </div>
         </div>
         <div class="shop-item">
-            <div class="shop-title">100 Осколков 🌙</div>
+            <div class="shop-title">100 <span data-i18n="s_shards">Осколков</span> 🌙</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div>
                 <div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div>
             </div>
         </div>
         <div class="shop-item">
-            <div class="shop-title">500 Осколков 🌙</div>
+            <div class="shop-title">500 <span data-i18n="s_shards">Осколков</span> 🌙</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div>
                 <div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div>
             </div>
         </div>
         <div class="shop-item">
-            <div class="shop-title">1000 Осколков 🌙</div>
+            <div class="shop-title">1000 <span data-i18n="s_shards">Осколков</span> 🌙</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div>
                 <div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div>
             </div>
         </div>
         <div class="shop-item">
-            <div class="shop-title" style="color: #ffaa00;">5000 Осколков 🌙</div>
+            <div class="shop-title" style="color: #ffaa00;">5000 <span data-i18n="s_shards">Осколков</span> 🌙</div>
             <div class="buy-btns">
                 <div class="btn-stars" onclick="buyItem('shards', 5000, 'stars', 2500)">⭐️ 2500 Stars</div>
                 <div class="btn-ton" onclick="buyItem('shards', 5000, 'ton', 250)">💎 250 TON</div>
             </div>
         </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
     
     <div id="p-user-promos" class="overlay">
-        <h2 style="color:#bc42f5">ПРОМОКОД</h2>
+        <h2 style="color:#bc42f5" data-i18n="h_promos">ПРОМОКОД</h2>
         <div class="info-card">
-            <span class="s-label">Введите секретный код</span>
-            <input type="text" id="user-promo-input" class="term-in" placeholder="Напр: MOON2026">
-            <div class="term-btn" style="border-color:#bc42f5" id="promo-btn" onclick="usePromo()">АКТИВИРОВАТЬ</div>
+            <span class="s-label" data-i18n="p_enter">Введите секретный код</span>
+            <input type="text" id="user-promo-input" class="term-in" placeholder="MOON2026">
+            <div class="term-btn" style="border-color:#bc42f5" id="promo-btn" onclick="usePromo()" data-i18n="b_activate">АКТИВИРОВАТЬ</div>
         </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
     
     <div id="p-profile" class="overlay">
-        <h2 style="color:#bc42f5">ПРОФИЛЬ</h2>
+        <h2 style="color:#bc42f5" data-i18n="h_prof">ПРОФИЛЬ</h2>
         <div class="info-card">
-            <div class="p-row"><span class="p-label">Ник:</span> <span class="p-val" id="prof-nick">...</span></div>
-            <div class="p-row"><span class="p-label">Айди юз:</span> <span class="p-val" id="prof-id">0</span></div>
-            <div class="p-row"><span class="p-label">Подписка:</span> <span class="p-val" id="prof-sub">FREE</span></div>
-            <div class="p-row"><span class="p-label">Срок:</span> <span class="p-val" id="prof-exp">-</span></div>
-            <div class="p-row"><span class="p-label">Кол-во осколков:</span> <span class="p-val" id="prof-shards">0</span></div>
-            <div class="p-row" style="border:none;"><span class="p-label">Статус:</span> <span class="p-val" id="prof-status">Юзер</span></div>
+            <div class="p-row"><span class="p-label" data-i18n="pr_nick">Ник:</span> <span class="p-val" id="prof-nick">...</span></div>
+            <div class="p-row"><span class="p-label" data-i18n="pr_id">Айди юз:</span> <span class="p-val" id="prof-id">0</span></div>
+            <div class="p-row"><span class="p-label" data-i18n="pr_sub">Подписка:</span> <span class="p-val" id="prof-sub">FREE</span></div>
+            <div class="p-row"><span class="p-label" data-i18n="pr_exp">Срок:</span> <span class="p-val" id="prof-exp">-</span></div>
+            <div class="p-row"><span class="p-label" data-i18n="pr_shards">Кол-во осколков:</span> <span class="p-val" id="prof-shards">0</span></div>
+            <div class="p-row" style="border:none;"><span class="p-label" data-i18n="pr_status">Статус:</span> <span class="p-val" id="prof-status">Юзер</span></div>
         </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
     
     <div id="p-settings" class="overlay">
-        <h2 style="color:#bc42f5">НАСТРОЙКИ</h2>
+        <h2 style="color:#bc42f5" data-i18n="h_set">НАСТРОЙКИ</h2>
         <div class="info-card">
-            <span class="s-label">Ник в приложении</span>
-            <input type="text" id="set-nick" class="term-in" placeholder="Новый ник..." oninput="updateLiveNick(this.value)">
+            <span class="s-label" data-i18n="set_nick">Ник в приложении</span>
+            <input type="text" id="set-nick" class="term-in" placeholder="..." oninput="updateLiveNick(this.value)">
             
-            <span class="s-label">Ваш пол</span>
+            <span class="s-label" data-i18n="set_gender">Ваш пол</span>
             <div class="gender-box">
-                <div class="gender-btn active" id="g-m" onclick="setGender('m')">Мужчина</div>
-                <div class="gender-btn" id="g-f" onclick="setGender('f')">Женщина</div>
+                <div class="gender-btn active" id="g-m" onclick="setGender('m')" data-i18n="g_m">Мужчина</div>
+                <div class="gender-btn" id="g-f" onclick="setGender('f')" data-i18n="g_f">Женщина</div>
             </div>
             
-            <div class="term-btn" style="background:#000; border-color:#333; color:#444; font-size:9px;" onclick="troll()">СМЕНИТЬ ЯЗЫК (В РАЗРАБОТКЕ)</div>
+            <span class="s-label" style="margin-top:15px;" data-i18n="set_lang">Язык интерфейса</span>
+            <div class="con-grid" style="margin-bottom:0;">
+                <div class="con-btn lang-btn" id="lang-ru" style="border-color:#bc42f5;" onclick="setLang('ru')">🇷🇺 Русский</div>
+                <div class="con-btn lang-btn" id="lang-uk" style="border-color:#2d164d;" onclick="setLang('uk')">🇺🇦 Українська</div>
+                <div class="con-btn lang-btn" style="opacity:0.4; border-color:#2d164d;" onclick="devLang('English')">🇬🇧 English</div>
+                <div class="con-btn lang-btn" style="opacity:0.4; border-color:#2d164d;" onclick="devLang('Беларуская')">🇧🇾 Беларуская</div>
+                <div class="con-btn lang-btn" style="opacity:0.4; border-color:#2d164d; grid-column: span 2;" onclick="devLang('Deutsch')">🇩🇪 Deutsch</div>
+            </div>
         </div>
         
         <div class="info-card">
-            <span class="s-label">Длина сообщений <span class="slider-val" id="len-val">45</span></span>
+            <span class="s-label"><span data-i18n="set_len">Длина сообщений</span> <span class="slider-val" id="len-val">45</span></span>
             <div class="slider-wrap">
                 <input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)">
                 <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div>
@@ -357,13 +364,13 @@
         </div>
         
         <div class="info-card">
-            <span class="s-label">Пошлость персонажей <span class="slider-val" id="sex-val">0</span></span>
+            <span class="s-label"><span data-i18n="set_sex">Пошлость персонажей</span> <span class="slider-val" id="sex-val">0</span></span>
             <div class="slider-wrap">
                 <input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)">
                 <div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div>
             </div>
         </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
     
     <div id="p-con" class="overlay">
@@ -510,8 +517,77 @@
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; 
 
+        // === СЛОВАРЬ ПЕРЕВОДОВ ===
+        const translations = {
+            ru: {
+                m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль",
+                h_chats: "МОИ ЧАТЫ", h_chars: "ПЕРСОНАЖИ", h_daily: "ЕЖЕДНЕВНАЯ НАГРАДА", h_tasks: "ЗАДАНИЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФИЛЬ", h_set: "НАСТРОЙКИ",
+                b_back: "НАЗАД", b_start_chat: "НАЧАТЬ ЧАТ", b_del_char: "УДАЛИТЬ ПЕРСОНАЖА", b_claim: "ЗАБРАТЬ", b_share: "ПОДЕЛИТЬСЯ ССЫЛКОЙ", b_activate: "АКТИВИРОВАТЬ",
+                pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:",
+                set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей",
+                d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по",
+                s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код",
+                dos_age: "Возраст:", dos_gender: "Пол:"
+            },
+            uk: {
+                m_chats: "Чати", m_chars: "Персонажі", m_daily: "Щоденна", m_tasks: "Завдання", m_shop: "Магазин", m_promos: "Промокоди", m_prof: "Профіль", m_set: "Налаштування", m_adm: "Адмінка", m_con: "Консоль",
+                h_chats: "МОЇ ЧАТИ", h_chars: "ПЕРСОНАЖІ", h_daily: "ЩОДЕННА НАГОРОДА", h_tasks: "ЗАВДАННЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФІЛЬ", h_set: "НАЛАШТУВАННЯ",
+                b_back: "НАЗАД", b_start_chat: "ПОЧАТИ ЧАТ", b_del_char: "ВИДАЛИТИ ПЕРСОНАЖА", b_claim: "ЗАБРАТИ", b_share: "ПОДІЛИТИСЯ ПОСИЛАННЯМ", b_activate: "АКТИВУВАТИ",
+                pr_nick: "Нік:", pr_id: "Айді юз:", pr_sub: "Підписка:", pr_exp: "Термін:", pr_shards: "К-ть осколків:", pr_status: "Статус:",
+                set_nick: "Нік у додатку", set_gender: "Ваша стать", g_m: "Чоловік", g_f: "Жінка", set_lang: "Мова інтерфейсу", set_len: "Довжина повідомлень", set_sex: "Вульгарність персонажів",
+                d_sub: "Нагорода залежить від підписки. Заходь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
+                s_pay_info: "Оплата через Telegram Stars або CryptoBot (TON)", sh_subs: "ПІДПИСКИ (30 ДНІВ)", sd_prem: "50 осколків щодня<br>x2 бонус за стрік 7 днів", sd_pro: "150 осколків щодня<br>x2 бонус за стрік 7 днів", sd_vip: "250 осколків щодня<br>x2 бонус за стрік 7 днів", sd_ultra: "500 осколків щодня<br>x2 бонус за стрік 7 днів", sh_shards: "ОСКОЛКИ МІСЯЦЯ", s_shards: "Осколків", p_enter: "Введіть секретний код",
+                dos_age: "Вік:", dos_gender: "Стать:"
+            }
+        };
+
+        let currentLang = 'ru';
+
         function getUid() { 
             return String(tg.initDataUnsafe?.user?.id || OID); 
+        }
+
+        // === СИСТЕМА ПЕРЕВОДА ===
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('m_lang_' + getUid(), lang);
+            
+            // Выделяем активную кнопку
+            document.querySelectorAll('.lang-btn').forEach(btn => { btn.style.borderColor = '#2d164d'; });
+            const activeBtn = document.getElementById('lang-' + lang);
+            if (activeBtn) activeBtn.style.borderColor = '#bc42f5';
+
+            applyTranslations();
+        }
+
+        function applyTranslations() {
+            const t = translations[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) {
+                    if (el.tagName === 'INPUT') el.placeholder = t[key];
+                    else el.innerHTML = t[key];
+                }
+            });
+
+            // Обновляем тексты, которые зависят от переменных
+            updateLen(document.getElementById('len-slider').value, true);
+            updateSex(document.getElementById('sex-slider').value, true);
+            
+            let lS = document.getElementById('len-slider');
+            if(lS) {
+                let maxLen = parseInt(lS.max);
+                document.getElementById('len-info').innerText = currentLang === 'uk' ? `Твій ліміт (${userData.subscription}): ${maxLen} слів` : `Твой лимит (${userData.subscription}): ${maxLen} слов`;
+            }
+
+            const chatBox = document.getElementById('chat-messages-box');
+            if(chatBox && (chatBox.innerHTML.includes('Начните диалог') || chatBox.innerHTML.includes('Почніть діалог'))) {
+                chatBox.innerHTML = currentLang === 'uk' ? '<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Почніть діалог...<br>1 повідомлення = 1 🌙</div>' : '<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>';
+            }
+        }
+
+        function devLang(langName) {
+            tg.showAlert(currentLang === 'uk' ? `Мова ${langName} у розробці! 🛠` : `Язык ${langName} в разработке! 🛠`);
         }
 
         function updateBalanceUI(val) {
@@ -524,7 +600,7 @@
         // === СМЕНА СТИЛЯ НИКА ===
         function applyNickStyle(sub) {
             const nameEl = document.getElementById('u-name');
-            nameEl.className = 'nick-base'; // Сбрасываем старые стили
+            nameEl.className = 'nick-base'; 
             let s = (sub || "FREE").trim().toLowerCase();
             
             if (s === 'ultra') nameEl.classList.add('nick-ultra');
@@ -534,7 +610,6 @@
             else nameEl.classList.add('nick-free');
         }
 
-        // Закрытие выпадающих меню при клике в пустое место
         document.addEventListener('click', () => {
             if(openDropdownId !== null) {
                 let el = document.getElementById('chat-dd-' + openDropdownId);
@@ -543,11 +618,10 @@
             }
         });
 
-        // ================= ДВИЖОК РЕАЛЬНОГО ВРЕМЕНИ (POLLING) =================
+        // ================= ДВИЖОК РЕАЛЬНОГО ВРЕМЕНИ =================
         setInterval(async () => {
             const uid = getUid();
             if(!uid || document.getElementById('loading').style.display !== 'none') return;
-            
             try {
                 const res = await fetch('/api/user/sync', {
                     method: 'POST', 
@@ -565,7 +639,7 @@
                     if(document.getElementById('prof-sub').innerText !== data.subscription) {
                         document.getElementById('prof-sub').innerText = data.subscription;
                         userData.subscription = data.subscription;
-                        applyNickStyle(data.subscription); // Обновляем цвет ника
+                        applyNickStyle(data.subscription);
                     }
                 }
             } catch(e) {}
@@ -586,6 +660,10 @@
 
             const uid = getUid();
             const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
+
+            // Инициализация языка
+            currentLang = localStorage.getItem('m_lang_' + uid) || 'ru';
+            setLang(currentLang);
 
             document.getElementById('u-id-head').innerText = uid;
             document.getElementById('prof-id').innerText = uid;
@@ -617,7 +695,7 @@
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('prof-shards').innerText = "∞";
                 document.getElementById('prof-sub').innerText = "ULTRA";
-                document.getElementById('prof-exp').innerText = "Без ограничений";
+                document.getElementById('prof-exp').innerText = currentLang === 'uk' ? "Без обмежень" : "Без ограничений";
                 document.getElementById('prof-status').innerText = "Овнер";
                 userData.subscription = "ULTRA";
                 
@@ -627,11 +705,9 @@
                 document.getElementById('own-su-rem').style.display = 'block';
                 document.getElementById('own-adm-rem').style.display = 'block';
 
-                // БЕЙДЖ ОВНЕРА
                 badgeEl.style.display = 'inline-block';
                 badgeEl.className = 'badge-base badge-owner';
                 badgeEl.innerText = 'OWNER';
-
             } else {
                 updateBalanceUI(userData.shards);
                 document.getElementById('prof-sub').innerText = userData.subscription;
@@ -644,23 +720,21 @@
                 }
 
                 if(userData.is_admin) {
-                    document.getElementById('prof-status').innerText = "Админ";
+                    document.getElementById('prof-status').innerText = currentLang === 'uk' ? "Адмін" : "Админ";
                     document.getElementById('nav-adm').style.display = 'flex';
                     
-                    // БЕЙДЖ АДМИНА
                     badgeEl.style.display = 'inline-block';
                     badgeEl.className = 'badge-base badge-admin';
                     badgeEl.innerText = 'ADMIN';
                 } else { 
-                    document.getElementById('prof-status').innerText = "Юзер"; 
+                    document.getElementById('prof-status').innerText = currentLang === 'uk' ? "Юзер" : "Юзер"; 
                     badgeEl.style.display = 'none'; 
                 }
             }
 
             applyNickStyle(userData.subscription);
 
-            // ИСПРАВЛЕННАЯ ЛОГИКА ДЛЯ ПОЛЗУНКОВ! 
-            // Переводим подписку в нижний регистр, чтобы ULTRA и Ultra воспринимались одинаково!
+            // === ИСПРАВЛЕННЫЕ ЛИМИТЫ ПОЛЗУНКОВ ===
             let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
             
             let maxLen = 45; 
@@ -669,7 +743,7 @@
             if(currentSub === "premium") { maxLen = 55; }
             else if(currentSub === "pro") { maxLen = 65; maxSex = 3; }
             else if(currentSub === "vip") { maxLen = 80; maxSex = 5; }
-            else if(currentSub === "ultra") { maxLen = 100; maxSex = 6; } // ТЕПЕРЬ ОВНЕР ПОЛУЧИТ СВОИ 100 И 6!
+            else if(currentSub === "ultra") { maxLen = 100; maxSex = 6; } // ОВНЕР ТЕПЕРЬ С ПРАВИЛЬНЫМИ ЛИМИТАМИ
 
             const lS = document.getElementById('len-slider');
             const sS = document.getElementById('sex-slider');
@@ -678,8 +752,8 @@
                 lS.max = maxLen; 
                 sS.max = maxSex;
                 
-                document.getElementById('len-info').innerText = `Твой лимит (${userData.subscription}): ${maxLen} слов`;
-                document.getElementById('sex-info').innerText = maxSex === 0 ? "Пошлость недоступна для вашей подписки" : `Доступно уровней: ${maxSex}`;
+                document.getElementById('len-info').innerText = currentLang === 'uk' ? `Твій ліміт (${userData.subscription}): ${maxLen} слів` : `Твой лимит (${userData.subscription}): ${maxLen} слов`;
+                document.getElementById('sex-info').innerText = maxSex === 0 ? (currentLang === 'uk' ? "Вульгарність недоступна для вашої підписки" : "Пошлость недоступна для вашей подписки") : (currentLang === 'uk' ? `Доступно рівнів: ${maxSex}` : `Доступно уровней: ${maxSex}`);
 
                 let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 45);
                 if(savedLen > maxLen) savedLen = maxLen;
@@ -735,10 +809,10 @@
             
             if(pinned.includes(charId)) { 
                 pinned = pinned.filter(id => id != charId); 
-                tg.showAlert("Чат откреплен"); 
+                tg.showAlert(currentLang === 'uk' ? "Чат відкріплено" : "Чат откреплен"); 
             } else { 
                 pinned.push(charId); 
-                tg.showAlert("Чат закреплен 📌"); 
+                tg.showAlert(currentLang === 'uk' ? "Чат закріплено 📌" : "Чат закреплен 📌"); 
             }
             
             localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); 
@@ -747,21 +821,23 @@
 
         function clearChatAction(charId, e) {
             e.stopPropagation();
-            tg.showConfirm("Очистить память? Персонаж забудет весь диалог, но останется в списке чатов.", (yes) => {
+            let text = currentLang === 'uk' ? "Очистити пам'ять? Персонаж забуде весь діалог, але залишиться в списку чатів." : "Очистить память? Персонаж забудет весь диалог, но останется в списке чатов.";
+            tg.showConfirm(text, (yes) => {
                 if(yes) {
                     const uid = getUid(); 
                     let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
                     allChats[charId] = []; 
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
                     openChatList(); 
-                    tg.showAlert("Память персонажа стерта 🧹");
+                    tg.showAlert(currentLang === 'uk' ? "Пам'ять персонажа стерта 🧹" : "Память персонажа стерта 🧹");
                 }
             });
         }
 
         function deleteChatAction(charId, e) {
             e.stopPropagation();
-            tg.showConfirm("Удалить чат полностью? Это действие нельзя отменить.", (yes) => {
+            let text = currentLang === 'uk' ? "Видалити чат повністю? Це дію не можна скасувати." : "Удалить чат полностью? Это действие нельзя отменить.";
+            tg.showConfirm(text, (yes) => {
                 if(yes) {
                     const uid = getUid(); 
                     let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
@@ -793,7 +869,7 @@
                 const char = allChars.find(c => c.id == charId);
                 if(!char) continue;
                 const msgs = allChats[charId];
-                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : "Нет сообщений";
+                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : (currentLang === 'uk' ? "Немає повідомлень" : "Нет сообщений");
                 chatObjects.push({ 
                     id: char.id, 
                     char: char, 
@@ -811,11 +887,15 @@
 
             let html = ""; 
             if(chatObjects.length === 0) {
-                html = "<div class='info-card' style='text-align:center; color:#888;'>У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!</div>";
+                let emptyText = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
+                html = `<div class='info-card' style='text-align:center; color:#888;'>${emptyText}</div>`;
             } else {
                 chatObjects.forEach(obj => {
                     let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
-                    let pinText = obj.isPinned ? "Открепить" : "Закрепить";
+                    let pinText = obj.isPinned ? (currentLang === 'uk' ? "Відкріпити" : "Открепить") : (currentLang === 'uk' ? "Закріпити" : "Закрепить");
+                    let clearText = currentLang === 'uk' ? "Очистити пам'ять" : "Очистить память";
+                    let delText = currentLang === 'uk' ? "Видалити чат" : "Удалить чат";
+
                     html += `
                     <div class="chatlist-item" onclick="resumeChat(${obj.id})">
                         <img src="${obj.char.photo}" class="chatlist-img">
@@ -826,8 +906,8 @@
                         <button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button>
                         <div class="chat-dropdown" id="chat-dd-${obj.id}">
                             <div class="chat-dropdown-item" onclick="pinChatAction(${obj.id}, event)">📌 ${pinText}</div>
-                            <div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 Очистить память</div>
-                            <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 Удалить чат</div>
+                            <div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 ${clearText}</div>
+                            <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 ${delText}</div>
                         </div>
                     </div>`;
                 });
@@ -871,7 +951,7 @@
             const chatBox = document.getElementById('chat-messages-box');
             
             if(msgs.length === 0) { 
-                chatBox.innerHTML = '<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>'; 
+                chatBox.innerHTML = currentLang === 'uk' ? '<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Почніть діалог...<br>1 повідомлення = 1 🌙</div>' : '<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>'; 
             } else { 
                 chatBox.innerHTML = msgs.map(m => `<div class="msg-box ${m.sender === 'user' ? 'msg-user' : 'msg-char'}">${m.text}</div>`).join(''); 
             }
@@ -885,7 +965,7 @@
             if(!text) return;
             
             const uid = getUid(); 
-            if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков (нужен 1 🌙)!");
+            if(uid !== OID && userData.shards < 1) return tg.showAlert(currentLang === 'uk' ? "Недостатньо осколків (потрібен 1 🌙)!" : "Недостаточно осколков (нужен 1 🌙)!");
             
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             if(!allChats[activeCharId]) allChats[activeCharId] = [];
@@ -898,7 +978,8 @@
             renderChatMessages();
             
             const chatBox = document.getElementById('chat-messages-box');
-            chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">Персонаж печатает...</div>`;
+            let typingText = currentLang === 'uk' ? "Персонаж друкує..." : "Персонаж печатает...";
+            chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">${typingText}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
             
             try {
@@ -938,7 +1019,7 @@
                 }
             } catch (e) { 
                 document.getElementById('typing-indicator')?.remove(); 
-                tg.showAlert("Ошибка связи с сервером."); 
+                tg.showAlert(currentLang === 'uk' ? "Помилка зв'язку з сервером." : "Ошибка связи с сервером."); 
             }
         }
         
@@ -948,7 +1029,7 @@
         async function buyItem(type, item, currency, price) {
             const uid = getUid();
             if (currency === 'ton') {
-                tg.showAlert("Генерация счета CryptoBot...");
+                tg.showAlert(currentLang === 'uk' ? "Генерація рахунку CryptoBot..." : "Генерация счета CryptoBot...");
                 try {
                     const res = await fetch('/api/payment/create', { 
                         method: 'POST', 
@@ -958,11 +1039,11 @@
                     const data = await res.json(); 
                     
                     if(data.pay_url) { tg.openLink(data.pay_url); } 
-                    else { tg.showAlert("Ошибка создания счета CryptoBot"); }
+                    else { tg.showAlert(currentLang === 'uk' ? "Помилка створення рахунку CryptoBot" : "Ошибка создания счета CryptoBot"); }
                 } catch (e) { tg.showAlert("Ошибка сервера оплат"); }
                 
             } else if (currency === 'stars') {
-                tg.showAlert("Подготовка оплаты Stars...");
+                tg.showAlert(currentLang === 'uk' ? "Підготовка оплати Stars..." : "Подготовка оплаты Stars...");
                 try {
                     const res = await fetch('/api/payment/stars-invoice', { 
                         method: 'POST', 
@@ -973,8 +1054,8 @@
                     
                     if(data.invoice_url) { 
                         tg.openInvoice(data.invoice_url, function(status) { 
-                            if (status === 'paid') { tg.showAlert("Оплата успешна! Награда скоро обновится на экране."); } 
-                            else if (status === 'failed') { tg.showAlert("Ошибка при оплате Stars."); } 
+                            if (status === 'paid') { tg.showAlert(currentLang === 'uk' ? "Оплата успішна! Нагорода скоро оновиться на екрані." : "Оплата успешна! Награда скоро обновится на экране."); } 
+                            else if (status === 'failed') { tg.showAlert(currentLang === 'uk' ? "Помилка при оплаті Stars." : "Ошибка при оплате Stars."); } 
                         }); 
                     } else { tg.showAlert("Ошибка API Telegram Stars"); }
                 } catch (e) { tg.showAlert("Ошибка сервера оплат"); }
@@ -991,8 +1072,11 @@
             let baseRew = userData.daily_reward || 10; 
             let actualRew = is7thDay ? baseRew * 2 : baseRew;
             
-            document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`;
-            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? " (БОНУС x2!)" : "");
+            let streakText = currentLang === 'uk' ? "Стрік" : "Стрик";
+            let bonusText = currentLang === 'uk' ? "БОНУС" : "БОНУС";
+
+            document.getElementById('daily-streak-text').innerText = `${streakText}: ${userData.daily_streak} ` + (currentLang === 'uk' ? "днів" : "дней");
+            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (${bonusText} x2!)` : "");
             
             clearInterval(dailyTimerInterval);
             
@@ -1014,7 +1098,8 @@
                         m = m < 10 ? "0" + m : m; 
                         s = s < 10 ? "0" + s : s;
                         
-                        document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
+                        let waitTitle = currentLang === 'uk' ? "Наступна нагорода через:" : "Следующая награда через:";
+                        document.getElementById('daily-wait').innerHTML = `${waitTitle}<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
                     }
                 }, 1000);
             } else { 
@@ -1035,7 +1120,8 @@
                 if (data.error) { 
                     tg.showAlert(data.error); 
                 } else { 
-                    tg.showAlert(`Получено: ${data.reward} 🌙!`); 
+                    let rText = currentLang === 'uk' ? "Отримано" : "Получено";
+                    tg.showAlert(`${rText}: ${data.reward} 🌙!`); 
                     userData.shards = data.new_balance; 
                     userData.daily_streak = data.streak; 
                     userData.last_daily = Date.now(); 
@@ -1057,16 +1143,21 @@
                 const list = document.getElementById('user-char-list');
                 
                 if(allChars.length === 0) { 
-                    list.innerHTML = "<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>"; 
+                    let emptyText = currentLang === 'uk' ? "Немає персонажів" : "Нет персонажей";
+                    list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>${emptyText}</div>`; 
                     return; 
                 }
                 
+                let yText = currentLang === 'uk' ? "років" : "лет";
+                let mText = currentLang === 'uk' ? "Чол" : "Муж";
+                let fText = currentLang === 'uk' ? "Жін" : "Жен";
+
                 list.innerHTML = allChars.map(c => `
                     <div class="char-card" onclick="openDossier(${c.id})">
                         <img src="${c.photo}">
                         <div class="char-card-info">
                             <div class="char-card-name">${c.name}</div>
-                            <div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? 'Муж' : 'Жен'}</div>
+                            <div class="char-card-tags">${c.age} ${yText} | ${c.gender === 'm' ? mText : fText}</div>
                         </div>
                     </div>`).join('');
             } catch (e) {}
@@ -1080,7 +1171,11 @@
             document.getElementById('dos-name').innerText = c.name; 
             document.getElementById('dos-img').src = c.photo; 
             document.getElementById('dos-age').innerText = c.age;
-            document.getElementById('dos-gender').innerText = c.gender === 'm' ? 'Мужской' : 'Женский'; 
+            
+            let mText = currentLang === 'uk' ? "Чоловіча" : "Мужской";
+            let fText = currentLang === 'uk' ? "Жіноча" : "Женский";
+
+            document.getElementById('dos-gender').innerText = c.gender === 'm' ? mText : fText; 
             document.getElementById('dos-desc').innerText = c.desc;
             
             if(getUid() === OID) { 
@@ -1206,7 +1301,7 @@
             
             const btn = document.getElementById('promo-btn'); 
             const oldText = btn.innerText; 
-            btn.innerText = "ПРОВЕРКА..."; 
+            btn.innerText = currentLang === 'uk' ? "ПЕРЕВІРКА..." : "ПРОВЕРКА..."; 
             btn.style.opacity = "0.5";
             
             try {
@@ -1223,9 +1318,9 @@
                 const found = promos.find(p => p.code === input);
                 
                 if(!found) { 
-                    tg.showAlert("Неверный код"); 
+                    tg.showAlert(currentLang === 'uk' ? "Невірний код" : "Неверный код"); 
                 } else if(used.includes(input)) { 
-                    tg.showAlert("Уже активирован"); 
+                    tg.showAlert(currentLang === 'uk' ? "Вже активовано" : "Уже активирован"); 
                 } else {
                     await fetch('/api/admin/manage-shards', { 
                         method: 'POST', 
@@ -1239,7 +1334,8 @@
                     if(uid !== OID) updateBalanceUI(userData.shards + found.reward);
                     
                     inputField.value = ''; 
-                    tg.showAlert(`Получено ${found.reward} 🌙!`);
+                    let rText = currentLang === 'uk' ? "Отримано" : "Получено";
+                    tg.showAlert(`${rText} ${found.reward} 🌙!`);
                 }
             } catch(e) { tg.showAlert("Ошибка соединения"); }
             
@@ -1305,18 +1401,23 @@
             const list = document.getElementById('user-task-list');
             
             if (tasks.length === 0) { 
-                list.innerHTML = "<div class='info-card' style='text-align:center; color:#888;'>Пока нет доступных заданий</div>"; 
+                let emptyText = currentLang === 'uk' ? "Поки немає доступних завдань" : "Пока нет доступных заданий";
+                list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyText}</div>`; 
                 return; 
             }
             
+            let doneText = currentLang === 'uk' ? "Виконано" : "Выполнено";
+            let rewText = currentLang === 'uk' ? "Нагорода" : "Награда";
+            let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : "ВЫПОЛНИТЬ";
+
             list.innerHTML = tasks.map(t => {
                 if(completed.includes(t.id)) {
-                    return `<div class="task-item" style="opacity:0.5;"><span>${t.name}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
+                    return `<div class="task-item" style="opacity:0.5;"><span>${t.name}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
                 }
                 return `
                 <div class="task-item" id="utask-${t.id}">
-                    <span>${t.name}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
-                    <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button>
+                    <span>${t.name}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
+                    <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
                 </div>`;
             }).join('');
         }
@@ -1325,16 +1426,19 @@
             tg.openLink(link); 
             if(!clickedTasks.includes(id)) clickedTasks.push(id); 
             
+            let waitText = currentLang === 'uk' ? "Очікування перевірки..." : "Ожидание проверки...";
+            let btnText = currentLang === 'uk' ? "ПЕРЕВІРИТИ" : "ПРОВЕРИТЬ";
+
             const taskDiv = document.getElementById(`utask-${id}`); 
             if(taskDiv) { 
-                taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание проверки...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; 
+                taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">${waitText}</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>`; 
             } 
         }
 
         async function checkTask(id) { 
             if(!clickedTasks.includes(id)) return; 
             const uid = getUid(); 
-            tg.showAlert("Проверка подписки..."); 
+            tg.showAlert(currentLang === 'uk' ? "Перевірка підписки..." : "Проверка подписки..."); 
             
             try {
                 const res = await fetch('/api/check-task', { 
@@ -1347,9 +1451,9 @@
                 if(data.success) { 
                     completeTaskAction(id); 
                 } else { 
-                    tg.showAlert(data.error || "Условие не выполнено! Сначала подпишись."); 
+                    tg.showAlert(data.error || (currentLang === 'uk' ? "Умова не виконана! Спершу підпишись." : "Условие не выполнено! Сначала подпишись.")); 
                 }
-            } catch(e) { tg.showAlert("Ошибка проверки. Попробуй позже."); }
+            } catch(e) { tg.showAlert(currentLang === 'uk' ? "Помилка перевірки. Спробуй пізніше." : "Ошибка проверки. Попробуй позже."); }
         }
 
         async function completeTaskAction(id) {
@@ -1380,14 +1484,17 @@
             
             completed.push(id); 
             localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); 
-            tg.showAlert(`Задание выполнено! Награда получена.`); 
+            tg.showAlert(currentLang === 'uk' ? `Завдання виконано! Нагороду отримано.` : `Задание выполнено! Награда получена.`); 
             renderUserTasks();
         }
 
         function shareRef() {
             const uid = getUid(); 
             const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`;
-            const text = `Залетай в Anime AI! Общайся с ИИ-персонажами без цензуры. Переходи по моей ссылке и мы оба получим по 100 🌙!`;
+            const text_ru = `Залетай в Anime AI! Общайся с ИИ-персонажами без цензуры. Переходи по моей ссылке и мы оба получим по 100 🌙!`;
+            const text_uk = `Залітай в Anime AI! Спілкуйся з ШІ-персонажами без цензури. Переходь за моїм посиланням і ми обидва отримаємо по 100 🌙!`;
+            const text = currentLang === 'uk' ? text_uk : text_ru;
+            
             const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`;
             tg.openTelegramLink(shareUrl);
         }
@@ -1412,19 +1519,20 @@
         }
 
         function updateSex(v, s=false) { 
-            const m = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; 
+            const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; 
+            const m_uk = ["Без вульгарності", "Слабка", "Нормальна", "Сильна", "Висока", "V-Вульгарна", "HOT 🔥"];
+            const m = currentLang === 'uk' ? m_uk : m_ru;
+            
             document.getElementById('sex-val').innerText = v; 
             
             let sliderMax = document.getElementById('sex-slider').max;
-            document.getElementById('sex-info').innerText = sliderMax == 0 ? "Пошлость недоступна для вашей подписки" : "Уровень " + v + ": " + m[v]; 
+            let infoStr = currentLang === 'uk' ? "Вульгарність недоступна для вашої підписки" : "Пошлость недоступна для вашей подписки";
+            let lvlStr = currentLang === 'uk' ? "Рівень" : "Уровень";
+
+            document.getElementById('sex-info').innerText = sliderMax == 0 ? infoStr : `${lvlStr} ${v}: ${m[v]}`; 
             
             document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; 
             if(!s) localStorage.setItem('m_sex_' + getUid(), v); 
-        }
-
-        function troll() { 
-            trollCount++; 
-            tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); 
         }
 
         function updateCharCounter() { 
