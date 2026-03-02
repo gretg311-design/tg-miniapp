@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema({
     tg_id: { type: Number, unique: true }, shards: { type: Number, default: 0 },
     subscription: { type: String, default: "FREE" }, sub_exp: { type: Number, default: 0 },
     is_admin: { type: Boolean, default: false }, last_daily: { type: Number, default: 0 }, daily_streak: { type: Number, default: 0 },
-    invited_by: { type: Number, default: null } // НОВОЕ ПОЛЕ ДЛЯ РЕФЕРАЛКИ
+    invited_by: { type: Number, default: null } 
 });
 const charSchema = new mongoose.Schema({ id: Number, name: String, age: Number, gender: String, desc: String, photo: String });
 const promoSchema = new mongoose.Schema({ code: { type: String, unique: true }, reward: Number });
@@ -66,35 +66,28 @@ const checkAdmin = async (sender_id) => {
 app.post('/api/user/get-data', async (req, res) => {
     try {
         const uid = Number(req.body.tg_id);
-        const inviterId = req.body.start_param ? Number(req.body.start_param) : null; // Получаем ID пригласившего
+        const inviterId = req.body.start_param ? Number(req.body.start_param) : null; 
 
         let user = await User.findOne({ tg_id: uid }); 
         let isModified = false;
         let isNewUser = false;
 
-        // Если юзер новый, создаем его
         if (!user) { 
             user = new User({ tg_id: uid }); 
             isNewUser = true; 
         }
 
-        // --- ЛОГИКА РЕФЕРАЛКИ ---
         if (isNewUser && inviterId && inviterId !== uid) {
-            // Запоминаем, кто пригласил
             user.invited_by = inviterId;
-            // Даем бонус 100 осколков новичку
             user.shards += 100;
             isModified = true;
 
-            // Начисляем бонус 100 осколков пригласившему (в фоне)
             User.findOneAndUpdate({ tg_id: inviterId }, { $inc: { shards: 100 } }).then(inviter => {
                 if (inviter) sendTgMessage(inviterId, `🎉 По вашей ссылке зарегистрировался новый пользователь! Вы получили 100 🌙.`);
             }).catch(e => console.error("Ref Reward Error:", e));
             
-            // Уведомляем новичка
             sendTgMessage(uid, `🎉 Вы зарегистрировались по пригласительной ссылке и получили бонус 100 🌙!`);
         }
-        // --- КОНЕЦ ЛОГИКИ РЕФЕРАЛКИ ---
 
         if (user.subscription) {
             let cleanSub = user.subscription.trim();
@@ -153,7 +146,7 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (ВОЗВРАЩАЕМ РАБОЧИЙ GEMINI 2.5 FLASH) =================
+// ================= API: ЧАТ =================
 app.post('/api/chat', async (req, res) => {
     try {
         const { tg_id, char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
@@ -238,53 +231,36 @@ app.post('/api/chat', async (req, res) => {
                 const data = await aiResponse.json();
 
                 if (aiResponse.status === 429) {
-                    if (attempt === 0) {
-                        await sleep(2000); 
-                        continue; 
-                    } else {
-                        finalError = "Лимит Гугла (15 в минуту). Подожди немного!";
-                        break;
-                    }
+                    if (attempt === 0) { await sleep(2000); continue; } 
+                    else { finalError = "Лимит Гугла (15 в минуту). Подожди немного!"; break; }
                 }
 
-                if (!aiResponse.ok) {
-                    finalError = data.error?.message || `Ошибка API ${aiResponse.status}`;
-                    break; 
-                }
-
-                aiData = data;
-                break; 
+                if (!aiResponse.ok) { finalError = data.error?.message || `Ошибка API ${aiResponse.status}`; break; }
+                aiData = data; break; 
 
             } catch (err) {
                 clearTimeout(timeoutId);
                 if (err.name === 'AbortError') {
                     if (attempt === 0) { await sleep(1000); continue; }
-                    finalError = "Сервер перегружен.";
-                    break;
+                    finalError = "Сервер перегружен."; break;
                 }
-                finalError = `Сбой сети: ${err.message}`;
-                break;
+                finalError = `Сбой сети: ${err.message}`; break;
             }
         }
 
         if (aiData && aiData.candidates && aiData.candidates[0]) {
             let candidate = aiData.candidates[0];
-            
             if (candidate.finishReason === 'SAFETY' || !candidate.content) {
                 if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
                 return res.status(500).json({ error: "ИИ отказался отвечать на эту тему." });
             }
-
             const replyText = candidate.content.parts[0].text;
             res.json({ reply: replyText, new_balance: user.shards });
         } else {
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
             res.status(500).json({ error: finalError });
         }
-
-    } catch (e) { 
-        res.status(500).json({ error: "Критическая ошибка: " + e.message }); 
-    }
+    } catch (e) { res.status(500).json({ error: "Критическая ошибка: " + e.message }); }
 });
 
 // ================= API: ОПЛАТА =================
@@ -329,44 +305,28 @@ app.post('/api/payment/webhook', async (req, res) => {
 app.post('/api/tg-webhook', async (req, res) => {
     try {
         const update = req.body;
-
-        // --- ОБРАБОТКА КОМАНДЫ /START ---
         if (update.message && update.message.text && update.message.text.startsWith('/start')) {
             const chatId = update.message.chat.id;
-            
-            // Если в старте передан параметр (например /start 8287041036)
             const textParts = update.message.text.split(' ');
             const startParam = textParts.length > 1 ? textParts[1] : '';
-            
-            // Добавляем параметр в URL запуска, если он есть
             const appUrl = startParam ? `https://t.me/anime_ai_18_bot/PlayApp?startapp=${startParam}` : `https://t.me/anime_ai_18_bot/PlayApp`;
 
             const welcomeText = `🎮 *Добро пожаловать!*\n\nВ мир *AI-персонажей* — общайся с любыми персонажами или теми, которые тебе нравятся.`;
             
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    chat_id: chatId, 
-                    text: welcomeText,
-                    parse_mode: 'Markdown',
+                    chat_id: chatId, text: welcomeText, parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
-                            [
-                                { text: "📱 Открыть", url: appUrl },
-                                { text: "📝 Создать перса", url: "https://t.me/anime_ai_charactersbot" }
-                            ],
-                            [
-                                { text: "📰 Наш канал", url: "https://t.me/Anime_ai_18" },
-                                { text: "❓ Поддержка", url: "https://t.me/suppurtmoders_bot" }
-                            ]
+                            [ { text: "📱 Открыть", url: appUrl }, { text: "📝 Создать перса", url: "https://t.me/anime_ai_charactersbot" } ],
+                            [ { text: "📰 Наш канал", url: "https://t.me/Anime_ai_18" }, { text: "❓ Поддержка", url: "https://t.me/suppurtmoders_bot" } ]
                         ]
                     }
                 })
             });
             return res.sendStatus(200);
         }
-        // --- КОНЕЦ ОБРАБОТЧИКА /START ---
 
         if (update.pre_checkout_query) {
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/answerPreCheckoutQuery`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pre_checkout_query_id: update.pre_checkout_query.id, ok: true }) });
@@ -381,10 +341,39 @@ app.post('/api/tg-webhook', async (req, res) => {
     } catch (e) { res.sendStatus(500); }
 });
 
-// ================= АДМИНКА =================
+// ================= АДМИНКА И ПРОВЕРКА ЗАДАНИЙ =================
 app.get('/api/get-characters', async (req, res) => res.json(await Character.find()));
 app.get('/api/get-tasks', async (req, res) => res.json(await Task.find()));
 app.get('/api/get-promos', async (req, res) => res.json(await Promo.find()));
+
+// НОВЫЙ ЭНДПОИНТ: Проверка подписки на канал
+app.post('/api/check-task', async (req, res) => {
+    try {
+        const { tg_id, task_id } = req.body;
+        const task = await Task.findOne({ id: task_id });
+        if (!task) return res.json({ success: false, error: "Задание не найдено" });
+
+        // Ищем ссылку вида t.me/название_канала
+        const match = task.link.match(/t\.me\/(?!\+)([a-zA-Z0-9_]+)/);
+        if (match && match[1]) {
+            const channel = "@" + match[1];
+            // Дергаем API Телеграма, чтобы узнать статус юзера в канале
+            const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/getChatMember?chat_id=${channel}&user_id=${tg_id}`);
+            const tgData = await tgRes.json();
+            
+            if (tgData.ok && ['member', 'administrator', 'creator'].includes(tgData.result.status)) {
+                return res.json({ success: true });
+            } else {
+                return res.json({ success: false, error: "Сначала подпишись на канал! ❌" });
+            }
+        } else {
+            // Если это приватная ссылка (t.me/+) или сайт, бот не может проверить. Отдаем награду просто так.
+            return res.json({ success: true });
+        }
+    } catch (e) {
+        res.json({ success: false, error: "Ошибка сервера при проверке подписки" });
+    }
+});
 
 app.post('/api/admin/manage-shards', async (req, res) => {
     const sender_id = Number(req.body.sender_id); const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
