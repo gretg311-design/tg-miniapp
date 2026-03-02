@@ -20,22 +20,18 @@
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         
         /* === ВИЗУАЛКА НИКОВ ДЛЯ ПОДПИСОК === */
-        @keyframes shimmerNick {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        @keyframes shimmerNick { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .nick-base { font-size: 22px; font-weight: 900; transition: all 0.3s ease; }
-        /* Ultra: Бешеный неон фиолетовый+бирюзовый */
         .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5, #00bcd4); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 2.5s infinite linear; filter: drop-shadow(0px 0px 8px rgba(188,66,245,0.7)); }
-        /* VIP: Золото и Платина */
         .nick-vip { background: linear-gradient(90deg, #FFD700, #F5F5DC, #FFAA00, #F5F5DC); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 3s infinite linear; filter: drop-shadow(0px 0px 6px rgba(255,215,0,0.6)); }
-        /* Pro: Красивая строгая неоновая надпись */
         .nick-pro { color: #00bcd4; text-shadow: 0 0 5px rgba(0,188,212,0.5), 0 0 10px rgba(0,188,212,0.8); letter-spacing: 1px; }
-        /* Premium: Кибер-Закат (сочный розовый перелив) */
         .nick-premium { background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff7eb3); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 4s infinite ease-in-out; filter: drop-shadow(0px 0px 5px rgba(255,117,140,0.5)); }
-        /* Free: Обычный белый */
         .nick-free { color: #ffffff; }
+        
+        /* === БЕЙДЖИ СТАТУСА (OWNER / ADMIN) === */
+        .badge-base { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; margin-bottom: 2px; letter-spacing: 1px; text-transform: uppercase; }
+        .badge-owner { background: linear-gradient(90deg, #ff0044, #ff0000); color: #fff; box-shadow: 0 0 8px rgba(255,0,0,0.6); border: 1px solid #ffaa88; text-shadow: 0 0 3px #fff; }
+        .badge-admin { background: linear-gradient(90deg, #00bcd4, #0055ff); color: #fff; box-shadow: 0 0 8px rgba(0,188,212,0.6); border: 1px solid #88ddff; }
         /* =================================== */
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -115,7 +111,11 @@
 
     <div id="app">
         <div class="u-header">
-            <div><div id="u-name" class="nick-base nick-free">...</div><div style="font-size:12px; color:#555;">ID: <span id="u-id-head">0</span></div></div>
+            <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                <div id="u-name" class="nick-base nick-free">...</div>
+                <div id="u-badge" style="display:none;"></div>
+                <div style="font-size:12px; color:#555; margin-top: 3px;">ID: <span id="u-id-head">0</span></div>
+            </div>
             <div style="font-size: 22px; font-weight: bold;">🌙 <span id="shards-balance">0</span></div>
         </div>
 
@@ -285,7 +285,7 @@
                     if(document.getElementById('prof-sub').innerText !== data.subscription) {
                         document.getElementById('prof-sub').innerText = data.subscription;
                         userData.subscription = data.subscription;
-                        applyNickStyle(data.subscription); // Обновляем цвет ника в реальном времени
+                        applyNickStyle(data.subscription); // Обновляем цвет ника
                     }
                 }
             } catch(e) {}
@@ -328,6 +328,8 @@
                 userData = await res.json();
             } catch (e) { console.error("SERVER ERROR:", e); }
 
+            const badgeEl = document.getElementById('u-badge');
+
             if(uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('prof-shards').innerText = "∞";
@@ -341,6 +343,12 @@
                 document.getElementById('own-sh-rem').style.display = 'block';
                 document.getElementById('own-su-rem').style.display = 'block';
                 document.getElementById('own-adm-rem').style.display = 'block';
+
+                // БЕЙДЖ ОВНЕРА
+                badgeEl.style.display = 'inline-block';
+                badgeEl.className = 'badge-base badge-owner';
+                badgeEl.innerText = 'OWNER';
+
             } else {
                 updateBalanceUI(userData.shards);
                 document.getElementById('prof-sub').innerText = userData.subscription;
@@ -353,7 +361,15 @@
                 if(userData.is_admin) {
                     document.getElementById('prof-status').innerText = "Админ";
                     document.getElementById('nav-adm').style.display = 'flex';
-                } else { document.getElementById('prof-status').innerText = "Юзер"; }
+                    
+                    // БЕЙДЖ АДМИНА
+                    badgeEl.style.display = 'inline-block';
+                    badgeEl.className = 'badge-base badge-admin';
+                    badgeEl.innerText = 'ADMIN';
+                } else { 
+                    document.getElementById('prof-status').innerText = "Юзер"; 
+                    badgeEl.style.display = 'none'; // Юзеру бейдж не положен
+                }
             }
 
             applyNickStyle(userData.subscription); // Красим ник при запуске
