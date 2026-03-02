@@ -18,8 +18,26 @@
 
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
-        .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
+        /* === ВИЗУАЛКА НИКОВ ДЛЯ ПОДПИСОК === */
+        @keyframes shimmerNick {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .nick-base { font-size: 22px; font-weight: 900; transition: all 0.3s ease; }
+        /* Ultra: Бешеный неон фиолетовый+бирюзовый */
+        .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5, #00bcd4); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 2.5s infinite linear; filter: drop-shadow(0px 0px 8px rgba(188,66,245,0.7)); }
+        /* VIP: Золото и Платина */
+        .nick-vip { background: linear-gradient(90deg, #FFD700, #F5F5DC, #FFAA00, #F5F5DC); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 3s infinite linear; filter: drop-shadow(0px 0px 6px rgba(255,215,0,0.6)); }
+        /* Pro: Красивая строгая неоновая надпись */
+        .nick-pro { color: #00bcd4; text-shadow: 0 0 5px rgba(0,188,212,0.5), 0 0 10px rgba(0,188,212,0.8); letter-spacing: 1px; }
+        /* Premium: Кибер-Закат (сочный розовый перелив) */
+        .nick-premium { background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff7eb3); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 4s infinite ease-in-out; filter: drop-shadow(0px 0px 5px rgba(255,117,140,0.5)); }
+        /* Free: Обычный белый */
+        .nick-free { color: #ffffff; }
+        /* =================================== */
+
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
@@ -97,7 +115,7 @@
 
     <div id="app">
         <div class="u-header">
-            <div><div id="u-name" class="nick-ultra">...</div><div style="font-size:12px; color:#555;">ID: <span id="u-id-head">0</span></div></div>
+            <div><div id="u-name" class="nick-base nick-free">...</div><div style="font-size:12px; color:#555;">ID: <span id="u-id-head">0</span></div></div>
             <div style="font-size: 22px; font-weight: bold;">🌙 <span id="shards-balance">0</span></div>
         </div>
 
@@ -228,6 +246,18 @@
             userData.shards = val;
         }
 
+        // === СМЕНА СТИЛЯ НИКА ===
+        function applyNickStyle(sub) {
+            const nameEl = document.getElementById('u-name');
+            nameEl.className = 'nick-base'; // Сбрасываем старые стили
+            let s = (sub || "FREE").trim().toLowerCase();
+            if (s === 'ultra') nameEl.classList.add('nick-ultra');
+            else if (s === 'vip') nameEl.classList.add('nick-vip');
+            else if (s === 'pro') nameEl.classList.add('nick-pro');
+            else if (s === 'premium') nameEl.classList.add('nick-premium');
+            else nameEl.classList.add('nick-free');
+        }
+
         document.addEventListener('click', () => {
             if(openDropdownId !== null) {
                 let el = document.getElementById('chat-dd-' + openDropdownId);
@@ -255,6 +285,7 @@
                     if(document.getElementById('prof-sub').innerText !== data.subscription) {
                         document.getElementById('prof-sub').innerText = data.subscription;
                         userData.subscription = data.subscription;
+                        applyNickStyle(data.subscription); // Обновляем цвет ника в реальном времени
                     }
                 }
             } catch(e) {}
@@ -303,6 +334,7 @@
                 document.getElementById('prof-sub').innerText = "ULTRA";
                 document.getElementById('prof-exp').innerText = "Без ограничений";
                 document.getElementById('prof-status').innerText = "Овнер";
+                userData.subscription = "ULTRA";
                 
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
@@ -323,6 +355,8 @@
                     document.getElementById('nav-adm').style.display = 'flex';
                 } else { document.getElementById('prof-status').innerText = "Юзер"; }
             }
+
+            applyNickStyle(userData.subscription); // Красим ник при запуске
 
             let maxLen = 45; let maxSex = 0;
             if(userData.subscription === "Premium") { maxLen = 55; }
@@ -547,7 +581,7 @@
         async function renderUserChars() {
             try {
                 const res = await fetch('/api/get-characters'); allChars = await res.json();
-                allChars.sort((a, b) => b.id - a.id); // СОРТИРОВКА
+                allChars.sort((a, b) => b.id - a.id); // СОРТИРОВКА ПЕРСОНАЖЕЙ
                 const list = document.getElementById('user-char-list');
                 if(allChars.length === 0) { list.innerHTML = "<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>"; return; }
                 list.innerHTML = allChars.map(c => `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${c.name}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? 'Муж' : 'Жен'}</div></div></div>`).join('');
@@ -673,44 +707,27 @@
             if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание проверки...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } 
         }
 
-        // ОБНОВЛЕННАЯ ЛОГИКА ПРОВЕРКИ ЗАДАНИЯ (ЗАЩИТА ОТ ХАЛЯВЫ)
         async function checkTask(id) { 
             if(!clickedTasks.includes(id)) return; 
-            const uid = getUid();
-            tg.showAlert("Проверка подписки..."); 
+            const uid = getUid(); tg.showAlert("Проверка подписки..."); 
             try {
-                const res = await fetch('/api/check-task', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ tg_id: uid, task_id: id })
-                });
+                const res = await fetch('/api/check-task', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tg_id: uid, task_id: id }) });
                 const data = await res.json();
-                if(data.success) {
-                    completeTaskAction(id);
-                } else {
-                    tg.showAlert(data.error || "Условие не выполнено! Сначала подпишись.");
-                }
-            } catch(e) {
-                tg.showAlert("Ошибка проверки. Попробуй позже.");
-            }
+                if(data.success) { completeTaskAction(id); } else { tg.showAlert(data.error || "Условие не выполнено! Сначала подпишись."); }
+            } catch(e) { tg.showAlert("Ошибка проверки. Попробуй позже."); }
         }
 
         async function completeTaskAction(id) {
             const uid = getUid(); const res = await fetch('/api/get-tasks'); const tasks = await res.json();
             const t = tasks.find(x => x.id === id); if(!t) return;
             let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); if(completed.includes(id)) return;
-            
-            if(t.rType === 'shards') {
-                await fetch('/api/admin/manage-shards', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: t.rVal }) });
-                if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal));
-            } else if(t.rType === 'sub7') {
-                await fetch('/api/admin/manage-sub', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', sub_type: "Premium" }) });
-            }
+            if(t.rType === 'shards') { await fetch('/api/admin/manage-shards', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: t.rVal }) }); if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal)); } 
+            else if(t.rType === 'sub7') { await fetch('/api/admin/manage-sub', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', sub_type: "Premium" }) }); }
             completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); tg.showAlert(`Задание выполнено! Награда получена.`); renderUserTasks();
         }
 
         function shareRef() {
-            const uid = getUid();
-            const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`;
+            const uid = getUid(); const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`;
             const text = `Залетай в Anime AI! Общайся с ИИ-персонажами без цензуры. Переходи по моей ссылке и мы оба получим по 100 🌙!`;
             const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`;
             tg.openTelegramLink(shareUrl);
