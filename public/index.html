@@ -46,6 +46,7 @@
             transform: scale(0.94);
             filter: brightness(0.8);
         }
+        /* =================================== */
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
@@ -66,6 +67,10 @@
         .p-val { color: #fff; font-weight: bold; }
 
         .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
+        
+        /* Исправление для мобильных телефонов, чтобы ползунок можно было тянуть пальцем! */
+        input[type="range"] { touch-action: pan-y; }
+        
         .slider-wrap { width: 100%; margin-top: 5px; }
         .slider { width: 100%; -webkit-appearance: none; height: 4px; background: #2d164d; border-radius: 2px; outline: none; }
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #bc42f5; box-shadow: 0 0 10px #bc42f5; }
@@ -648,20 +653,23 @@
                     badgeEl.innerText = 'ADMIN';
                 } else { 
                     document.getElementById('prof-status').innerText = "Юзер"; 
-                    badgeEl.style.display = 'none'; // Юзеру бейдж не положен
+                    badgeEl.style.display = 'none'; 
                 }
             }
 
-            applyNickStyle(userData.subscription); // Красим ник при запуске
+            applyNickStyle(userData.subscription);
 
-            // НАСТРОЙКИ ЛИМИТОВ И ПОЛЗУНКОВ ПОШЛОСТИ
+            // ИСПРАВЛЕННАЯ ЛОГИКА ДЛЯ ПОЛЗУНКОВ! 
+            // Переводим подписку в нижний регистр, чтобы ULTRA и Ultra воспринимались одинаково!
+            let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
+            
             let maxLen = 45; 
             let maxSex = 0;
             
-            if(userData.subscription === "Premium") { maxLen = 55; }
-            else if(userData.subscription === "Pro") { maxLen = 65; maxSex = 3; }
-            else if(userData.subscription === "VIP") { maxLen = 80; maxSex = 5; }
-            else if(userData.subscription === "Ultra") { maxLen = 100; maxSex = 6; }
+            if(currentSub === "premium") { maxLen = 55; }
+            else if(currentSub === "pro") { maxLen = 65; maxSex = 3; }
+            else if(currentSub === "vip") { maxLen = 80; maxSex = 5; }
+            else if(currentSub === "ultra") { maxLen = 100; maxSex = 6; } // ТЕПЕРЬ ОВНЕР ПОЛУЧИТ СВОИ 100 И 6!
 
             const lS = document.getElementById('len-slider');
             const sS = document.getElementById('sex-slider');
@@ -894,7 +902,6 @@
             chatBox.scrollTop = chatBox.scrollHeight;
             
             try {
-                // ДОСТАЕМ ИМЯ И ПОЛ ДЛЯ ИИ
                 const uName = document.getElementById('u-name').innerText;
                 const uGender = localStorage.getItem('m_gender_' + uid) || 'm';
 
@@ -911,8 +918,8 @@
                         chat_history: allChats[activeCharId], 
                         len: lenSet, 
                         sex: sexSet,
-                        user_name: uName,     // ОТПРАВЛЯЕМ ИМЯ
-                        user_gender: uGender  // ОТПРАВЛЯЕМ ПОЛ
+                        user_name: uName,     
+                        user_gender: uGender  
                     }) 
                 });
                 
@@ -1045,7 +1052,6 @@
                 const res = await fetch('/api/get-characters'); 
                 allChars = await res.json();
                 
-                // СОРТИРОВКА ПЕРСОНАЖЕЙ (Новые сверху)
                 allChars.sort((a, b) => b.id - a.id); 
                 
                 const list = document.getElementById('user-char-list');
