@@ -154,7 +154,7 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="openPanel('p-user-chatlist')" data-i18n="m_chats">Чаты</div>
+            <div class="menu-item" onclick="openChatList()" data-i18n="m_chats">Чаты</div>
             <div class="menu-item" onclick="openPanel('p-user-chars')" data-i18n="m_chars">Персонажи</div>
             <div class="menu-item" onclick="openPanel('p-daily')" data-i18n="m_daily">Ежедневка</div>
             <div class="menu-item" onclick="openPanel('p-user-tasks')" data-i18n="m_tasks">Задания</div>
@@ -977,15 +977,18 @@
             if(stack.includes(id)) return; // Защита от двойного клика
             stack.push(id); 
             let el = document.getElementById(id);
-            el.style.zIndex = baseZ + stack.length; // Накладываем окно ПОВЕРХ старого
-            el.style.display = 'flex'; 
+            if(el) {
+                el.style.zIndex = baseZ + stack.length; // Накладываем окно ПОВЕРХ старого
+                el.style.display = 'flex'; 
+            }
             BackButton.show(); 
         }
 
         function back() { 
             if(stack.length > 0) { 
                 let id = stack.pop();
-                document.getElementById(id).style.display = 'none'; // Просто прячем верхний слой
+                let el = document.getElementById(id);
+                if(el) el.style.display = 'none'; // Просто прячем верхний слой
             } 
             if(stack.length === 0) { 
                 BackButton.hide(); 
@@ -1123,7 +1126,7 @@
                     let pinText = obj.isPinned ? p1 : p2;
                     
                     let clearText = currentLang === 'uk' ? "Очистити пам'ять" : currentLang === 'en' ? "Clear memory" : currentLang === 'be' ? "Ачысціць памяць" : "Очистить память";
-                    let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Видалиць чат" : "Удалить чат";
+                    let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Выдаліць чат" : "Удалить чат";
 
                     let tName = await neuroTranslate(obj.char.name, currentLang); 
 
@@ -1393,15 +1396,18 @@
             } catch (e) { tg.showAlert("Error"); }
         }
 
-        // ================= ПЕРСОНАЖИ =================
+        // ================= ПЕРСОНАЖИ (БРОНЕБОЙНАЯ ЗАГРУЗКА) =================
         async function renderUserChars() {
+            const list = document.getElementById('user-char-list');
             try {
                 const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
-                allChars = await res.json();
+                const data = await res.json();
                 
+                // ЗАЩИТА: Если пришла ошибка или не массив, не крашим код
+                if(!Array.isArray(data)) throw new Error("Data is not an array");
+                
+                allChars = data;
                 allChars.sort((a, b) => b.id - a.id); 
-                
-                const list = document.getElementById('user-char-list');
                 
                 if(allChars.length === 0) { 
                     let emptyText = currentLang === 'uk' ? "Немає персонажів" : currentLang === 'en' ? "No characters" : currentLang === 'be' ? "Няма персанажаў" : "Нет персонажей";
@@ -1426,7 +1432,9 @@
                 }));
                 
                 list.innerHTML = charCards.join('');
-            } catch (e) {}
+            } catch (e) {
+                list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#ff4444;'>Ошибка загрузки данных</div>`;
+            }
         }
 
         async function openDossier(id) {
@@ -1541,9 +1549,10 @@
         async function renderAdminPromos() {
             try {
                 const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
-                const promos = await res.json();
+                const data = await res.json();
+                if(!Array.isArray(data)) return;
                 
-                document.getElementById('promo-list').innerHTML = promos.map(p => {
+                document.getElementById('promo-list').innerHTML = data.map(p => {
                     let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : '';
                     return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`;
                 }).join('');
@@ -1582,6 +1591,7 @@
                 
                 const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
                 const promos = await res.json();
+                if(!Array.isArray(promos)) throw new Error("Server error");
                 
                 const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]"); 
                 const found = promos.find(p => p.code === input);
@@ -1613,7 +1623,7 @@
             btn.style.opacity = "1";
         }
 
-        // ================= ЗАДАНИЯ =================
+        // ================= ЗАДАНИЯ (БРОНЕБОЙНАЯ ЗАГРУЗКА) =================
         async function modTask(act, tid=null) {
             if(act==='add') {
                 const n = document.getElementById('it-name').value; 
@@ -1639,13 +1649,16 @@
         }
 
         async function renderTasks() {
-            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-            const tasks = await res.json();
-            
-            document.getElementById('task-list').innerHTML = tasks.map(x => {
-                let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : '';
-                return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`;
-            }).join('');
+            try {
+                const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
+                const data = await res.json();
+                if(!Array.isArray(data)) return;
+                
+                document.getElementById('task-list').innerHTML = data.map(x => {
+                    let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : '';
+                    return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`;
+                }).join('');
+            } catch(e){}
         }
 
         async function deleteTask(id) {
@@ -1664,34 +1677,40 @@
         }
 
         async function renderUserTasks() {
-            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-            const tasks = await res.json();
-            const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
             const list = document.getElementById('user-task-list');
-            
-            if (tasks.length === 0) { 
-                let emptyText = currentLang === 'uk' ? "Поки немає доступних завдань" : currentLang === 'en' ? "No available tasks" : currentLang === 'be' ? "Пакуль няма даступных заданняў" : "Пока нет доступных заданий";
-                list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyText}</div>`; 
-                return; 
-            }
-            
-            let doneText = currentLang === 'uk' ? "Виконано" : currentLang === 'en' ? "Completed" : currentLang === 'be' ? "Выканана" : "Выполнено";
-            let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
-            let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
-
-            const taskCards = await Promise.all(tasks.map(async (t) => {
-                let tName = await neuroTranslate(t.name, currentLang);
-                if(completed.includes(t.id)) {
-                    return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
+            try {
+                const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
+                const tasks = await res.json();
+                if(!Array.isArray(tasks)) throw new Error("Not array");
+                
+                const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
+                
+                if (tasks.length === 0) { 
+                    let emptyText = currentLang === 'uk' ? "Поки немає доступних завдань" : currentLang === 'en' ? "No available tasks" : currentLang === 'be' ? "Пакуль няма даступных заданняў" : "Пока нет доступных заданий";
+                    list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyText}</div>`; 
+                    return; 
                 }
-                return `
-                <div class="task-item" id="utask-${t.id}">
-                    <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
-                    <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
-                </div>`;
-            }));
+                
+                let doneText = currentLang === 'uk' ? "Виконано" : currentLang === 'en' ? "Completed" : currentLang === 'be' ? "Выканана" : "Выполнено";
+                let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
+                let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
 
-            list.innerHTML = taskCards.join('');
+                const taskCards = await Promise.all(tasks.map(async (t) => {
+                    let tName = await neuroTranslate(t.name, currentLang);
+                    if(completed.includes(t.id)) {
+                        return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
+                    }
+                    return `
+                    <div class="task-item" id="utask-${t.id}">
+                        <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
+                        <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
+                    </div>`;
+                }));
+
+                list.innerHTML = taskCards.join('');
+            } catch(e) {
+                list.innerHTML = `<div style='text-align:center; color:#ff4444;'>Ошибка сервера</div>`;
+            }
         }
 
         function startTask(id, link) { 
@@ -1734,6 +1753,7 @@
             const uid = getUid(); 
             const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
             const tasks = await res.json();
+            if(!Array.isArray(tasks)) return;
             const t = tasks.find(x => x.id === id); 
             if(!t) return;
             
