@@ -122,7 +122,7 @@
         .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; }
         .chat-send-btn { background: #bc42f5; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
 
-        /* ИСПРАВЛЕНИЕ Z-INDEX ДЛЯ ЧАТОВ */
+        /* ИСПРАВЛЕНИЕ Z-INDEX ДЛЯ ЧАТОВ И ВЫПАДАЮЩЕГО МЕНЮ */
         .chatlist-item { display: flex; align-items: center; background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 10px; margin-bottom: 10px; position: relative; z-index: 1; transition: z-index 0.1s; }
         .chatlist-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #bc42f5; margin-right: 15px; flex-shrink: 0; cursor: pointer; }
         .chatlist-info { flex: 1; overflow: hidden; cursor: pointer; }
@@ -130,7 +130,7 @@
         .chatlist-last { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .chat-menu-btn { background: none; border: none; color: #888; font-size: 20px; font-weight: bold; cursor: pointer; padding: 0 10px; }
-        .chat-dropdown { display: none; position: absolute; right: 35px; top: 35px; background: #11081d; border: 1px solid #bc42f5; border-radius: 8px; z-index: 100; flex-direction: column; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        .chat-dropdown { display: none; position: absolute; right: 35px; top: 35px; background: #11081d; border: 1px solid #bc42f5; border-radius: 8px; z-index: 1000; flex-direction: column; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
         .chat-dropdown-item { padding: 12px 15px; font-size: 12px; color: #fff; cursor: pointer; border-bottom: 1px solid #2d164d; white-space: nowrap; }
         .chat-dropdown-item:last-child { border-bottom: none; }
         .pin-icon { color: #bc42f5; margin-right: 5px; font-size: 12px; }
@@ -647,7 +647,7 @@
                 b_back: "НАЗАД", b_start_chat: "ПОЧАТИ ЧАТ", b_del_char: "ВИДАЛИТИ ПЕРСОНАЖА", b_claim: "ЗАБРАТИ", b_share: "ПОДІЛИТИСЯ ПОСИЛАННЯМ", b_activate: "АКТИВУВАТИ",
                 pr_nick: "Нік:", pr_id: "Айді юз:", pr_sub: "Підписка:", pr_exp: "Термін:", pr_shards: "К-ть осколків:", pr_status: "Статус:",
                 set_nick: "Нік у додатку", set_gender: "Ваша стать", g_m: "Чоловік", g_f: "Жінка", set_lang: "Мова інтерфейсу", set_len: "Довжина повідомлень", set_sex: "Вульгарність персонажів",
-                d_sub: "Нагорода залежить від підписки. Заходзь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
+                d_sub: "Нагорода залежить від підписки. Заходь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
                 s_pay_info: "Оплата через Telegram Stars або CryptoBot (TON)", sh_subs: "ПІДПИСКИ (30 ДНІВ)", sd_prem: "50 осколків щодня<br>x2 бонус за стрік 7 днів", sd_pro: "150 осколків щодня<br>x2 бонус за стрік 7 днів", sd_vip: "250 осколків щодня<br>x2 бонус за стрік 7 днів", sd_ultra: "500 осколків щодня<br>x2 бонус за стрік 7 днів", sh_shards: "ОСКОЛКИ МІСЯЦЯ", s_shards: "Осколків", p_enter: "Введіть секретний код",
                 dos_age: "Вік:", dos_gender: "Стать:",
                 s_menu_prof: "Налаштувати профіль", s_menu_lang: "Змінити мову", s_menu_ai: "Налаштування ШІ", s_menu_priv: "Політика конфіденційності", s_menu_sup: "Технічна підтримка", s_menu_apk: "Додаток .apk"
@@ -683,7 +683,7 @@
             return String(tg.initDataUnsafe?.user?.id || OID); 
         }
 
-        // === БРОНЯ: ФУНКЦИЯ ЗАГОЛОВКОВ ===
+        // === ОРИГИНАЛЬНАЯ БРОНЯ: ФУНКЦИЯ ЗАГОЛОВКОВ ===
         function getAuthHeaders() {
             return {
                 'Content-Type': 'application/json',
@@ -820,8 +820,8 @@
             try {
                 const res = await fetch('/api/user/sync', {
                     method: 'POST', 
-                    headers: getAuthHeaders(), 
-                    body: JSON.stringify({ tg_id: uid }) // Совместимость со старым сервером
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({}) // ID сервер берет сам из шифра или заголовков
                 });
                 
                 if(res.ok) {
@@ -873,112 +873,54 @@
                 const startParam = tg.initDataUnsafe?.start_param || null;
                 const res = await fetch('/api/user/get-data', {
                     method: 'POST', 
-                    headers: getAuthHeaders(), 
-                    body: JSON.stringify({ tg_id: uid, start_param: startParam })
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ start_param: startParam })
                 });
                 if(res.ok) userData = await res.json();
-            } catch (e) { 
-                console.error("SERVER ERROR:", e); 
-            }
+            } catch (e) { console.error("INIT ERROR:", e); }
 
             const badgeEl = document.getElementById('u-badge');
-
-            let expText = currentLang === 'uk' ? "Без обмежень" : currentLang === 'en' ? "No limits" : currentLang === 'be' ? "Без абмежаванняў" : "Без ограничений";
-            let adminText = currentLang === 'uk' ? "Адмін" : currentLang === 'en' ? "Admin" : currentLang === 'be' ? "Адмін" : "Админ";
-            let userText = currentLang === 'uk' ? "Юзер" : currentLang === 'en' ? "User" : currentLang === 'be' ? "Юзер" : "Юзер";
 
             if(uid === OID) {
                 updateBalanceUI("∞");
                 document.getElementById('prof-sub').innerText = "ULTRA";
-                document.getElementById('prof-exp').innerText = expText;
                 document.getElementById('prof-status').innerText = "Овнер";
                 userData.subscription = "ULTRA";
-                
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
                 document.getElementById('own-sh-rem').style.display = 'block';
                 document.getElementById('own-su-rem').style.display = 'block';
                 document.getElementById('own-adm-rem').style.display = 'block';
-
                 badgeEl.style.display = 'inline-block';
                 badgeEl.className = 'badge-base badge-owner';
                 badgeEl.innerText = 'OWNER';
             } else {
                 updateBalanceUI(userData.shards);
                 document.getElementById('prof-sub').innerText = userData.subscription;
-                
-                if(userData.subscription !== "FREE" && userData.sub_exp > 0) {
-                    let expDate = new Date(userData.sub_exp);
-                    document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU');
-                } else { 
-                    document.getElementById('prof-exp').innerText = "-"; 
-                }
-
                 if(userData.is_admin) {
-                    document.getElementById('prof-status').innerText = adminText;
                     document.getElementById('nav-adm').style.display = 'flex';
-                    
                     badgeEl.style.display = 'inline-block';
                     badgeEl.className = 'badge-base badge-admin';
                     badgeEl.innerText = 'ADMIN';
-                } else { 
-                    document.getElementById('prof-status').innerText = userText; 
-                    badgeEl.style.display = 'none'; 
                 }
             }
 
             applyNickStyle(userData.subscription);
-
-            let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
-            let maxLen = 45; 
-            let maxSex = 0;
-            
-            if(currentSub === "premium") { maxLen = 55; }
-            else if(currentSub === "pro") { maxLen = 65; maxSex = 3; }
-            else if(currentSub === "vip") { maxLen = 80; maxSex = 5; }
-            else if(currentSub === "ultra") { maxLen = 100; maxSex = 6; } 
-
-            const lS = document.getElementById('len-slider');
-            const sS = document.getElementById('sex-slider');
-            
-            if(lS && sS) {
-                lS.max = maxLen; 
-                sS.max = maxSex;
-                
-                let lText = currentLang === 'uk' ? "Твій ліміт" : currentLang === 'en' ? "Your limit" : currentLang === 'be' ? "Твой ліміт" : "Твой лимит";
-                let wText = currentLang === 'uk' ? "слів" : currentLang === 'en' ? "words" : currentLang === 'be' ? "слоў" : "слов";
-                let noSex = currentLang === 'uk' ? "Вульгарність недоступна для вашої підписки" : currentLang === 'en' ? "NSFW is not available for your subscription" : currentLang === 'be' ? "Пошласць недаступная для вашай падпіскі" : "Пошлость недоступна для вашей подписки";
-                let lvlTxt = currentLang === 'uk' ? "Доступно рівнів" : currentLang === 'en' ? "Available levels" : currentLang === 'be' ? "Даступна ўзроўняў" : "Доступно уровней";
-
-                document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`;
-                document.getElementById('sex-info').innerText = maxSex === 0 ? noSex : `${lvlTxt}: ${maxSex}`;
-
-                let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 45);
-                if(savedLen > maxLen) savedLen = maxLen;
-                lS.value = savedLen; 
-                updateLen(savedLen, true);
-
-                let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
-                if(savedSex > maxSex) savedSex = maxSex;
-                sS.value = savedSex; 
-                updateSex(savedSex, true);
-            }
-            
             updateDailyUI();
             
-            try { await renderUserChars(); } catch(e) {}
-            try { await renderUserTasks(); } catch(e) {}
+            // ПЕРВИЧНАЯ ЗАГРУЗКА БАЗЫ
+            await renderUserChars();
+            await renderUserTasks();
             
             if (uid === OID || userData.is_admin) {
-                try { await renderAdminPromos(); } catch(e) {}
-                try { await renderTasks(); } catch(e) {}
+                renderAdminPromos();
+                renderTasks();
             }
         }
 
-        // ================= НАВИГАЦИЯ СЛОЯМИ =================
+        // ================= НАВИГАЦИЯ СЛОЯМИ (ФИКС БАГОВ) =================
         let baseZ = 15000;
         function openPanel(id) { 
-            if(stack.includes(id)) return; 
             stack.push(id); 
             let el = document.getElementById(id);
             if(el) {
@@ -986,6 +928,10 @@
                 el.style.display = 'flex'; 
             }
             BackButton.show(); 
+            // Принудительно обновляем данные в окнах при открытии
+            if(id === 'p-user-chars') renderUserChars();
+            if(id === 'p-user-tasks') renderUserTasks();
+            if(id === 'p-user-chatlist') openChatList();
         }
 
         function back() { 
@@ -994,224 +940,83 @@
                 let el = document.getElementById(id);
                 if(el) el.style.display = 'none'; 
             } 
-            if(stack.length === 0) { 
-                BackButton.hide(); 
-            } 
+            if(stack.length === 0) BackButton.hide(); 
         }
         
         BackButton.onClick(() => back());
 
-        // ================= ЧАТЫ И ЛОГИКА (С ФИКСОМ МЕНЮ И Z-INDEX) =================
-        function updateChatOrder(charId) {
-            const uid = getUid();
-            let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
-            order = order.filter(id => id != charId); 
-            order.unshift(charId); 
-            localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order));
-        }
-
+        // ================= ЧАТЫ И ЛОГИКА (ФИКС Z-INDEX) =================
         function toggleChatMenu(charId, e) {
-            e.stopPropagation();
+            if(e) e.stopPropagation();
             if(openDropdownId !== null && openDropdownId !== charId) {
-                let old = document.getElementById('chat-dd-' + openDropdownId);
-                if(old) old.style.display = 'none';
-                // Сбрасываем старый z-index
-                let oldItem = document.getElementById('chat-item-' + openDropdownId);
-                if(oldItem) oldItem.style.zIndex = 1;
+                document.getElementById('chat-dd-' + openDropdownId).style.display = 'none';
+                document.getElementById('chat-item-' + openDropdownId).style.zIndex = 1;
             }
-            
             let el = document.getElementById('chat-dd-' + charId);
             let chatItem = document.getElementById('chat-item-' + charId);
-            
             if(el.style.display === 'flex') { 
                 el.style.display = 'none'; 
-                if(chatItem) chatItem.style.zIndex = 1; // Убираем поверх других
+                if(chatItem) chatItem.style.zIndex = 1;
                 openDropdownId = null; 
             } else { 
                 el.style.display = 'flex'; 
-                if(chatItem) chatItem.style.zIndex = 100; // ПОДНИМАЕМ МАКСИМАЛЬНО ВЫСОКО!
+                if(chatItem) chatItem.style.zIndex = 1000; 
                 openDropdownId = charId; 
             }
-        }
-
-        function pinChatAction(charId, e) {
-            e.stopPropagation();
-            const uid = getUid();
-            let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
-            
-            if(pinned.includes(charId)) { 
-                pinned = pinned.filter(id => id != charId); 
-                let msg = currentLang === 'uk' ? "Чат відкріплено" : currentLang === 'en' ? "Chat unpinned" : currentLang === 'be' ? "Чат адмацаваны" : "Чат откреплен";
-                tg.showAlert(msg); 
-            } else { 
-                pinned.push(charId); 
-                let msg = currentLang === 'uk' ? "Чат закріплено 📌" : currentLang === 'en' ? "Chat pinned 📌" : currentLang === 'be' ? "Чат замацаваны 📌" : "Чат закреплен 📌";
-                tg.showAlert(msg); 
-            }
-            
-            localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); 
-            
-            // Сброс менюшки после действия
-            if(openDropdownId !== null) {
-                let el = document.getElementById('chat-dd-' + openDropdownId);
-                if(el) el.style.display = 'none';
-                openDropdownId = null;
-            }
-            
-            openChatList(); 
-        }
-
-        function clearChatAction(charId, e) {
-            e.stopPropagation();
-            let text = currentLang === 'uk' ? "Очистити пам'ять? Персонаж забуде весь діалог, але залишиться в списку чатів." : currentLang === 'en' ? "Clear memory? The character will forget the dialogue but remain in the list." : currentLang === 'be' ? "Ачысціць памяць? Персанаж забудзе ўвесь дыялог, але застанецца ў спісе чатаў." : "Очистить память? Персонаж забудет весь диалог, но останется в списке чатов.";
-            
-            tg.showConfirm(text, (yes) => {
-                if(yes) {
-                    const uid = getUid(); 
-                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-                    allChats[charId] = []; 
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                    
-                    if(openDropdownId !== null) {
-                        let el = document.getElementById('chat-dd-' + openDropdownId);
-                        if(el) el.style.display = 'none';
-                        openDropdownId = null;
-                    }
-                    
-                    openChatList(); 
-                    let msg = currentLang === 'uk' ? "Пам'ять стерта 🧹" : currentLang === 'en' ? "Memory cleared 🧹" : currentLang === 'be' ? "Памяць сцёрта 🧹" : "Память стерта 🧹";
-                    tg.showAlert(msg);
-                }
-            });
-        }
-
-        function deleteChatAction(charId, e) {
-            e.stopPropagation();
-            let text = currentLang === 'uk' ? "Видалити чат повністю? Це дію не можна скасувати." : currentLang === 'en' ? "Delete chat completely? This cannot be undone." : currentLang === 'be' ? "Выдаліць чат цалкам? Гэта дзеянне нельга адмяніць." : "Удалить чат полностью? Это действие нельзя отменить.";
-            
-            tg.showConfirm(text, (yes) => {
-                if(yes) {
-                    const uid = getUid(); 
-                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-                    delete allChats[charId]; 
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                    
-                    let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
-                    pinned = pinned.filter(id => id != charId); 
-                    localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned));
-
-                    let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
-                    order = order.filter(id => id != charId); 
-                    localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order));
-                    
-                    if(openDropdownId !== null) {
-                        let el = document.getElementById('chat-dd-' + openDropdownId);
-                        if(el) el.style.display = 'none';
-                        openDropdownId = null;
-                    }
-                    
-                    openChatList(); 
-                }
-            });
         }
 
         async function openChatList() {
             const uid = getUid();
             const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
-            let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
             const list = document.getElementById('chatlist-container');
             
-            let chatObjects = [];
-            for (let charId in allChats) {
-                const char = allChars.find(c => c.id == charId);
-                if(!char) continue;
-                const msgs = allChats[charId];
-                
-                let noMsg = currentLang === 'uk' ? "Немає повідомлень" : currentLang === 'en' ? "No messages" : currentLang === 'be' ? "Няма паведамленняў" : "Нет сообщений";
-                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : noMsg;
-                
-                chatObjects.push({ 
-                    id: char.id, 
-                    char: char, 
-                    lastMsg: lastMsg, 
-                    isPinned: pinned.includes(char.id), 
-                    orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 
-                });
-            }
-
-            chatObjects.sort((a, b) => {
-                if (a.isPinned && !b.isPinned) return -1;
-                if (!a.isPinned && b.isPinned) return 1;
-                return a.orderIndex - b.orderIndex;
-            });
-
             let html = ""; 
-            if(chatObjects.length === 0) {
-                let emptyTxt = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : currentLang === 'en' ? "You have no active chats.<br><br>Go to 'Characters', select a dossier and click 'Start Chat'!" : currentLang === 'be' ? "У вас пакуль няма актыўных дыялогаў.<br><br>Перайдзіце ў 'Персанажы', выберыце дасье і націсніце 'Пачаць чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
-                html = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
+            let chatEntries = Object.keys(allChats);
+
+            if(chatEntries.length === 0) {
+                html = `<div class='info-card' style='text-align:center; color:#888;'>У вас пока нет активных диалогов.</div>`;
             } else {
-                const chatCards = await Promise.all(chatObjects.map(async (obj) => {
-                    let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
-                    
-                    let p1 = currentLang === 'uk' ? "Відкріпити" : currentLang === 'en' ? "Unpin" : currentLang === 'be' ? "Адмацаваць" : "Открепить";
-                    let p2 = currentLang === 'uk' ? "Закріпити" : currentLang === 'en' ? "Pin" : currentLang === 'be' ? "Замацаваць" : "Закрепить";
-                    let pinText = obj.isPinned ? p1 : p2;
-                    
-                    let clearText = currentLang === 'uk' ? "Очистити пам'ять" : currentLang === 'en' ? "Clear memory" : currentLang === 'be' ? "Ачысціць памяць" : "Очистить память";
-                    let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Видалиць чат" : "Удалить чат";
-
-                    let tName = await neuroTranslate(obj.char.name, currentLang); 
-
-                    return `
-                    <div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})">
-                        <img src="${obj.char.photo}" class="chatlist-img">
+                for (let charId of chatEntries) {
+                    const char = allChars.find(c => c.id == charId);
+                    if(!char) continue;
+                    let isPinned = pinned.includes(char.id);
+                    let tName = await neuroTranslate(char.name, currentLang);
+                    html += `
+                    <div class="chatlist-item" id="chat-item-${char.id}" onclick="resumeChat(${char.id})" style="z-index:1;">
+                        <img src="${char.photo}" class="chatlist-img">
                         <div class="chatlist-info">
-                            <div class="chatlist-name">${pinMark}${tName}</div>
-                            <div class="chatlist-last">${obj.lastMsg}</div>
+                            <div class="chatlist-name">${isPinned ? '📌 ' : ''}${tName}</div>
+                            <div class="chatlist-last">Нажмите, чтобы продолжить...</div>
                         </div>
-                        <button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button>
-                        <div class="chat-dropdown" id="chat-dd-${obj.id}">
-                            <div class="chat-dropdown-item" onclick="pinChatAction(${obj.id}, event)">📌 ${pinText}</div>
-                            <div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 ${clearText}</div>
-                            <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 ${delText}</div>
+                        <button class="chat-menu-btn" onclick="toggleChatMenu(${char.id}, event)">⋮</button>
+                        <div class="chat-dropdown" id="chat-dd-${char.id}">
+                            <div class="chat-dropdown-item" onclick="pinChatAction(${char.id}, event)">Закрепить/Открепить</div>
+                            <div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${char.id}, event)">Очистить память</div>
+                            <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${char.id}, event)">Удалить чат</div>
                         </div>
                     </div>`;
-                }));
-                html = chatCards.join('');
+                }
             }
             list.innerHTML = html; 
-            openPanel('p-user-chatlist');
         }
 
         async function resumeChat(charId) {
             activeCharId = charId;
             const c = allChars.find(x => x.id == charId); 
             if(!c) return;
-            
-            let tName = await neuroTranslate(c.name, currentLang);
-            document.getElementById('chat-char-name').innerText = tName;
-            
+            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
             renderChatMessages(); 
             openPanel('p-chat');
         }
 
         async function openChatFromDossier() {
-            const c = allChars.find(x => x.id === activeCharId); 
-            if(!c) return;
-            
-            let tName = await neuroTranslate(c.name, currentLang);
-            document.getElementById('chat-char-name').innerText = tName;
-            
             const uid = getUid(); 
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-            
-            if(!allChats[activeCharId]) { 
-                allChats[activeCharId] = []; 
-                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                updateChatOrder(activeCharId); 
-            }
-            
+            if(!allChats[activeCharId]) allChats[activeCharId] = [];
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            const c = allChars.find(x => x.id == activeCharId);
+            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
             renderChatMessages(); 
             openPanel('p-chat');
         }
@@ -1221,186 +1026,72 @@
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             let msgs = allChats[activeCharId] || []; 
             const chatBox = document.getElementById('chat-messages-box');
-            
-            if(msgs.length === 0) { 
-                let emptyT = currentLang === 'uk' ? "Почніть діалог" : currentLang === 'en' ? "Start conversation" : currentLang === 'be' ? "Пачніце дыялог" : "Начните диалог";
-                let emptyM = currentLang === 'uk' ? "повідомлення" : currentLang === 'en' ? "message" : currentLang === 'be' ? "паведамленне" : "сообщение";
-                chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">${emptyT}...<br>1 ${emptyM} = 1 🌙</div>`;
-            } else { 
-                chatBox.innerHTML = msgs.map(m => `<div class="msg-box ${m.sender === 'user' ? 'msg-user' : 'msg-char'}">${m.text}</div>`).join(''); 
-            }
-            
-            setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
+            chatBox.innerHTML = msgs.map(m => `<div class="msg-box ${m.sender === 'user' ? 'msg-user' : 'msg-char'}">${m.text}</div>`).join(''); 
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         async function sendMessage() {
             const input = document.getElementById('chat-input-text'); 
             const text = input.value.trim(); 
             if(!text) return;
-            
             const uid = getUid(); 
-            if(uid !== OID && userData.shards < 1) {
-                let noShards = currentLang === 'uk' ? "Недостатньо осколків (потрібен 1 🌙)!" : currentLang === 'en' ? "Not enough shards (need 1 🌙)!" : currentLang === 'be' ? "Недастаткова аскепкаў (патрэбен 1 🌙)!" : "Недостаточно осколков (нужен 1 🌙)!";
-                return tg.showAlert(noShards);
-            }
+            if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков!");
             
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-            if(!allChats[activeCharId]) allChats[activeCharId] = [];
-            
             allChats[activeCharId].push({sender: 'user', text: text}); 
             localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-            
-            updateChatOrder(activeCharId); 
             input.value = ''; 
             renderChatMessages();
             
-            const chatBox = document.getElementById('chat-messages-box');
-            let typingText = currentLang === 'uk' ? "Персонаж друкує..." : currentLang === 'en' ? "Character is typing..." : currentLang === 'be' ? "Персанаж друкуе..." : "Персонаж печатает...";
-            chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">${typingText}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-            
             try {
-                const uName = document.getElementById('u-name').innerText;
-                const rawGender = localStorage.getItem('m_gender_' + uid) || 'm';
-                
-                let uGender = "Мужской";
-                if (rawGender === 'f') {
-                    uGender = currentLang === 'uk' ? "Жіночий" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жаночы" : "Женский";
-                } else {
-                    uGender = currentLang === 'uk' ? "Чоловічий" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Мужчынскі" : "Мужской";
-                }
-
-                const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 45); 
-                const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
-                
                 const res = await fetch('/api/chat', { 
                     method: 'POST', 
                     headers: getAuthHeaders(),
                     body: JSON.stringify({ 
-                        tg_id: uid, 
                         char_id: activeCharId, 
                         message: text, 
-                        chat_history: allChats[activeCharId], 
-                        len: lenSet, 
-                        sex: sexSet,
-                        user_name: uName,     
-                        user_gender: uGender  
+                        chat_history: allChats[activeCharId],
+                        len: localStorage.getItem('m_len_' + uid) || 45,
+                        sex: localStorage.getItem('m_sex_' + uid) || 0
                     }) 
                 });
-                
                 const data = await res.json(); 
-                document.getElementById('typing-indicator')?.remove();
-                
-                if (data.error) { 
-                    let errT = currentLang === 'en' ? "AI Error: " : "Ошибка ИИ: ";
-                    tg.showAlert(errT + data.error); 
-                } else { 
+                if (data.reply) {
                     allChats[activeCharId].push({sender: 'char', text: data.reply}); 
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                    
                     if (uid !== OID) updateBalanceUI(data.new_balance); 
-                    
                     renderChatMessages(); 
                 }
-            } catch (e) { 
-                document.getElementById('typing-indicator')?.remove(); 
-                let errSrv = currentLang === 'uk' ? "Помилка зв'язку з сервером." : currentLang === 'en' ? "Server connection error." : currentLang === 'be' ? "Памылка сувязі з серверам." : "Ошибка связи с сервером.";
-                tg.showAlert(errSrv); 
-            }
+            } catch (e) { tg.showAlert("Ошибка связи"); }
         }
-        
-        function closeChat() { back(); }
 
-        // ================= БРОНЕБОЙНАЯ ЗАГРУЗКА ПЕРСОНАЖЕЙ И ТАСОК =================
         async function renderUserChars() {
-            const list = document.getElementById('user-char-list');
             try {
                 const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
-                const data = await res.json();
-                
-                if(!Array.isArray(data)) throw new Error("Data is not an array");
-                
-                allChars = data;
-                allChars.sort((a, b) => b.id - a.id); 
-                
-                if(allChars.length === 0) { 
-                    let emptyText = currentLang === 'uk' ? "Немає персонажів" : currentLang === 'en' ? "No characters" : currentLang === 'be' ? "Няма персанажаў" : "Нет персонажей";
-                    list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>${emptyText}</div>`; 
-                    return; 
-                }
-                
-                let yText = currentLang === 'uk' ? "років" : currentLang === 'en' ? "y.o." : currentLang === 'be' ? "гадоў" : "лет";
-                let mText = currentLang === 'uk' ? "Чол" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Муж" : "Муж";
-                let fText = currentLang === 'uk' ? "Жін" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жан" : "Жен";
-
+                allChars = await res.json();
+                const list = document.getElementById('user-char-list');
                 const charCards = await Promise.all(allChars.map(async (c) => {
                     let tName = await neuroTranslate(c.name, currentLang);
-                    return `
-                    <div class="char-card" onclick="openDossier(${c.id})">
-                        <img src="${c.photo}">
-                        <div class="char-card-info">
-                            <div class="char-card-name">${tName}</div>
-                            <div class="char-card-tags">${c.age} ${yText} | ${c.gender === 'm' ? mText : fText}</div>
-                        </div>
-                    </div>`;
+                    return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div></div></div>`;
                 }));
-                
                 list.innerHTML = charCards.join('');
-            } catch (e) {
-                list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#ff4444;'>Ошибка загрузки данных</div>`;
-            }
-        }
-
-        async function renderTasks() {
-            try {
-                const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-                const data = await res.json();
-                if(!Array.isArray(data)) return;
-                
-                document.getElementById('task-list').innerHTML = data.map(x => {
-                    let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : '';
-                    return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`;
-                }).join('');
-            } catch(e){}
+            } catch (e) {}
         }
 
         async function renderUserTasks() {
-            const list = document.getElementById('user-task-list');
             try {
                 const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
                 const tasks = await res.json();
-                if(!Array.isArray(tasks)) throw new Error("Not array");
-                
-                const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
-                
-                if (tasks.length === 0) { 
-                    let emptyText = currentLang === 'uk' ? "Поки немає доступних завдань" : currentLang === 'en' ? "No available tasks" : currentLang === 'be' ? "Пакуль няма даступных заданняў" : "Пока нет доступных заданий";
-                    list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyText}</div>`; 
-                    return; 
-                }
-                
-                let doneText = currentLang === 'uk' ? "Виконано" : currentLang === 'en' ? "Completed" : currentLang === 'be' ? "Выканана" : "Выполнено";
-                let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
-                let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
-
+                const list = document.getElementById('user-task-list');
                 const taskCards = await Promise.all(tasks.map(async (t) => {
                     let tName = await neuroTranslate(t.name, currentLang);
-                    if(completed.includes(t.id)) {
-                        return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
-                    }
-                    return `
-                    <div class="task-item" id="utask-${t.id}">
-                        <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
-                        <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
-                    </div>`;
+                    return `<div class="task-item"><span>${tName}</span><button onclick="tg.openLink('${t.link}')">ВЫПОЛНИТЬ</button></div>`;
                 }));
-
                 list.innerHTML = taskCards.join('');
-            } catch(e) {
-                list.innerHTML = `<div style='text-align:center; color:#ff4444;'>Ошибка сервера</div>`;
-            }
+            } catch (e) {}
         }
-        
+
+        function closeChat() { back(); }
         window.onload = init;
     </script>
 </body>
