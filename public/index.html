@@ -47,7 +47,7 @@
             filter: brightness(0.8);
         }
 
-        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК (iOS/Telegram стиль) === */
+        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК И АДМИНКИ (iOS/Telegram стиль) === */
         .set-list { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; margin-bottom: 15px; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
         .set-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #2d164d; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; }
         .set-item:active { transform: scale(0.97); filter: brightness(0.8); }
@@ -56,13 +56,12 @@
         .set-text { flex: 1; font-size: 15px; color: #fff; font-weight: 500; }
         .set-arrow { color: #555; font-size: 18px; font-weight: bold; }
 
-        .ic-prof { background: #0A84FF; } /* Синий */
-        .ic-lang { background: #30D158; } /* Зеленый */
-        .ic-ai { background: #8E8E93; }   /* Серый */
-        .ic-priv { background: #FF9F0A; } /* Оранжевый */
-        .ic-sup { background: #BF5AF2; }  /* Фиолетовый */
-        .ic-apk { background: #FF453A; }  /* Красный */
-        /* ================================================== */
+        .ic-prof { background: #0A84FF; } 
+        .ic-lang { background: #30D158; } 
+        .ic-ai { background: #8E8E93; }   
+        .ic-priv { background: #FF9F0A; } 
+        .ic-sup { background: #BF5AF2; }  
+        .ic-apk { background: #FF453A; }  
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
@@ -123,14 +122,15 @@
         .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; }
         .chat-send-btn { background: #bc42f5; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
 
-        .chatlist-item { display: flex; align-items: center; background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 10px; margin-bottom: 10px; position: relative; }
+        /* ИСПРАВЛЕНИЕ Z-INDEX ДЛЯ ЧАТОВ */
+        .chatlist-item { display: flex; align-items: center; background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 10px; margin-bottom: 10px; position: relative; z-index: 1; transition: z-index 0.1s; }
         .chatlist-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #bc42f5; margin-right: 15px; flex-shrink: 0; cursor: pointer; }
         .chatlist-info { flex: 1; overflow: hidden; cursor: pointer; }
         .chatlist-name { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 5px; }
         .chatlist-last { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .chat-menu-btn { background: none; border: none; color: #888; font-size: 20px; font-weight: bold; cursor: pointer; padding: 0 10px; }
-        .chat-dropdown { display: none; position: absolute; right: 35px; top: 35px; background: #11081d; border: 1px solid #bc42f5; border-radius: 8px; z-index: 100; flex-direction: column; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        .chat-dropdown { display: none; position: absolute; right: 35px; top: 35px; background: #11081d; border: 1px solid #bc42f5; border-radius: 8px; z-index: 1000; flex-direction: column; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
         .chat-dropdown-item { padding: 12px 15px; font-size: 12px; color: #fff; cursor: pointer; border-bottom: 1px solid #2d164d; white-space: nowrap; }
         .chat-dropdown-item:last-child { border-bottom: none; }
         .pin-icon { color: #bc42f5; margin-right: 5px; font-size: 12px; }
@@ -154,7 +154,7 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="openChatList()" data-i18n="m_chats">Чаты</div>
+            <div class="menu-item" onclick="openPanel('p-user-chatlist')" data-i18n="m_chats">Чаты</div>
             <div class="menu-item" onclick="openPanel('p-user-chars')" data-i18n="m_chars">Персонажи</div>
             <div class="menu-item" onclick="openPanel('p-daily')" data-i18n="m_daily">Ежедневка</div>
             <div class="menu-item" onclick="openPanel('p-user-tasks')" data-i18n="m_tasks">Задания</div>
@@ -167,6 +167,7 @@
         </div>
         <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
     </div>
+
     <div id="p-user-chatlist" class="overlay">
         <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chats">МОИ ЧАТЫ</h2>
         <div id="chatlist-container" style="width:100%"></div>
@@ -176,7 +177,10 @@
     <div id="p-chat" class="overlay" style="padding: 0;">
         <div style="width: 100%; background: #0d041a; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d164d;">
             <div style="font-weight: bold; color: #bc42f5; font-size: 18px;" id="chat-char-name">Имя Персонажа</div>
-            <div style="color: #888; font-size: 24px; cursor: pointer; padding: 0 10px;" onclick="closeChat()">×</div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="font-weight: bold; color: #fff; font-size: 16px;">🌙 <span id="chat-shards-balance">0</span></div>
+                <div style="color: #888; font-size: 28px; cursor: pointer; padding: 0 5px; line-height: 1;" onclick="closeChat()">×</div>
+            </div>
         </div>
         <div class="chat-container">
             <div class="chat-messages" id="chat-messages-box">
@@ -679,11 +683,11 @@
             return String(tg.initDataUnsafe?.user?.id || OID); 
         }
 
-        // === БРОНЯ: ФУНКЦИЯ ЗАГОЛОВКОВ С ЗАЩИТОЙ TELEGRAM ===
+        // === ОРИГИНАЛЬНАЯ БРОНЯ: ФУНКЦИЯ ЗАГОЛОВКОВ ===
         function getAuthHeaders() {
             return {
                 'Content-Type': 'application/json',
-                'x-tg-data': tg.initData || "dev_mode" // Передаем крипто-строку на сервер!
+                'x-tg-data': tg.initData || "dev_mode" 
             };
         }
 
@@ -768,10 +772,19 @@
             tg.showAlert(errText);
         }
 
+        // === ОБНОВЛЕНИЕ БАЛАНСА ВЕЗДЕ (ВКЛЮЧАЯ ЧАТ) ===
         function updateBalanceUI(val) {
-            if(getUid() === OID) return;
+            if(getUid() === OID) {
+                document.getElementById('shards-balance').innerText = "∞";
+                document.getElementById('prof-shards').innerText = "∞";
+                let cb = document.getElementById('chat-shards-balance');
+                if(cb) cb.innerText = "∞";
+                return;
+            }
             document.getElementById('shards-balance').innerText = val;
             document.getElementById('prof-shards').innerText = val;
+            let cb = document.getElementById('chat-shards-balance');
+            if(cb) cb.innerText = val;
             userData.shards = val;
         }
 
@@ -788,10 +801,15 @@
             else nameEl.classList.add('nick-free');
         }
 
+        // СБРОС МЕНЮШЕК И Z-INDEX ПРИ КЛИКЕ В ПУСТОТУ
         document.addEventListener('click', () => {
             if(openDropdownId !== null) {
                 let el = document.getElementById('chat-dd-' + openDropdownId);
                 if(el) el.style.display = 'none';
+                
+                let chatItem = document.getElementById('chat-item-' + openDropdownId);
+                if(chatItem) chatItem.style.zIndex = 1;
+                
                 openDropdownId = null;
             }
         });
@@ -802,16 +820,14 @@
             try {
                 const res = await fetch('/api/user/sync', {
                     method: 'POST', 
-                    headers: getAuthHeaders(), // ЗАЩИТА ТЕЛЕГРАМА
-                    body: JSON.stringify({}) // ID сервер берет сам из шифра!
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({}) 
                 });
                 
                 if(res.ok) {
                     const data = await res.json();
                     if(uid !== OID) {
-                        document.getElementById('shards-balance').innerText = data.shards;
-                        document.getElementById('prof-shards').innerText = data.shards;
-                        userData.shards = data.shards;
+                        updateBalanceUI(data.shards);
                     }
                     if(document.getElementById('prof-sub').innerText !== data.subscription) {
                         document.getElementById('prof-sub').innerText = data.subscription;
@@ -857,7 +873,7 @@
                 const startParam = tg.initDataUnsafe?.start_param || null;
                 const res = await fetch('/api/user/get-data', {
                     method: 'POST', 
-                    headers: getAuthHeaders(), // ЗАЩИТА
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({ start_param: startParam })
                 });
                 if(res.ok) userData = await res.json();
@@ -872,8 +888,7 @@
             let userText = currentLang === 'uk' ? "Юзер" : currentLang === 'en' ? "User" : currentLang === 'be' ? "Юзер" : "Юзер";
 
             if(uid === OID) {
-                document.getElementById('shards-balance').innerText = "∞";
-                document.getElementById('prof-shards').innerText = "∞";
+                updateBalanceUI("∞");
                 document.getElementById('prof-sub').innerText = "ULTRA";
                 document.getElementById('prof-exp').innerText = expText;
                 document.getElementById('prof-status').innerText = "Овнер";
@@ -960,7 +975,33 @@
             }
         }
 
-        // ================= ЧАТЫ И МЕНЮ =================
+        // ================= НАВИГАЦИЯ СЛОЯМИ (ФИКС БАГА С ЧАТОМ) =================
+        let baseZ = 15000;
+        function openPanel(id) { 
+            if(stack.includes(id)) return; 
+            stack.push(id); 
+            let el = document.getElementById(id);
+            if(el) {
+                el.style.zIndex = baseZ + stack.length; 
+                el.style.display = 'flex'; 
+            }
+            BackButton.show(); 
+        }
+
+        function back() { 
+            if(stack.length > 0) { 
+                let id = stack.pop();
+                let el = document.getElementById(id);
+                if(el) el.style.display = 'none'; 
+            } 
+            if(stack.length === 0) { 
+                BackButton.hide(); 
+            } 
+        }
+        
+        BackButton.onClick(() => back());
+
+        // ================= ЧАТЫ И ЛОГИКА (С ФИКСОМ МЕНЮ И Z-INDEX) =================
         function updateChatOrder(charId) {
             const uid = getUid();
             let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
@@ -970,23 +1011,30 @@
         }
 
         function toggleChatMenu(charId, e) {
-            e.stopPropagation();
+            if(e) e.stopPropagation();
             if(openDropdownId !== null && openDropdownId !== charId) {
                 let old = document.getElementById('chat-dd-' + openDropdownId);
                 if(old) old.style.display = 'none';
+                let oldItem = document.getElementById('chat-item-' + openDropdownId);
+                if(oldItem) oldItem.style.zIndex = 1;
             }
+            
             let el = document.getElementById('chat-dd-' + charId);
+            let chatItem = document.getElementById('chat-item-' + charId);
+            
             if(el.style.display === 'flex') { 
                 el.style.display = 'none'; 
+                if(chatItem) chatItem.style.zIndex = 1; 
                 openDropdownId = null; 
             } else { 
                 el.style.display = 'flex'; 
+                if(chatItem) chatItem.style.zIndex = 1000; 
                 openDropdownId = charId; 
             }
         }
 
         function pinChatAction(charId, e) {
-            e.stopPropagation();
+            if(e) e.stopPropagation();
             const uid = getUid();
             let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
             
@@ -1001,11 +1049,17 @@
             }
             
             localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); 
+            
+            if(openDropdownId !== null) {
+                let el = document.getElementById('chat-dd-' + openDropdownId);
+                if(el) el.style.display = 'none';
+                openDropdownId = null;
+            }
             openChatList(); 
         }
 
         function clearChatAction(charId, e) {
-            e.stopPropagation();
+            if(e) e.stopPropagation();
             let text = currentLang === 'uk' ? "Очистити пам'ять? Персонаж забуде весь діалог, але залишиться в списку чатів." : currentLang === 'en' ? "Clear memory? The character will forget the dialogue but remain in the list." : currentLang === 'be' ? "Ачысціць памяць? Персанаж забудзе ўвесь дыялог, але застанецца ў спісе чатаў." : "Очистить память? Персонаж забудет весь диалог, но останется в списке чатов.";
             
             tg.showConfirm(text, (yes) => {
@@ -1014,6 +1068,12 @@
                     let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
                     allChats[charId] = []; 
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    
+                    if(openDropdownId !== null) {
+                        let el = document.getElementById('chat-dd-' + openDropdownId);
+                        if(el) el.style.display = 'none';
+                        openDropdownId = null;
+                    }
                     openChatList(); 
                     let msg = currentLang === 'uk' ? "Пам'ять стерта 🧹" : currentLang === 'en' ? "Memory cleared 🧹" : currentLang === 'be' ? "Памяць сцёрта 🧹" : "Память стерта 🧹";
                     tg.showAlert(msg);
@@ -1022,7 +1082,7 @@
         }
 
         function deleteChatAction(charId, e) {
-            e.stopPropagation();
+            if(e) e.stopPropagation();
             let text = currentLang === 'uk' ? "Видалити чат повністю? Це дію не можна скасувати." : currentLang === 'en' ? "Delete chat completely? This cannot be undone." : currentLang === 'be' ? "Выдаліць чат цалкам? Гэта дзеянне нельга адмяніць." : "Удалить чат полностью? Это действие нельзя отменить.";
             
             tg.showConfirm(text, (yes) => {
@@ -1040,6 +1100,11 @@
                     order = order.filter(id => id != charId); 
                     localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order));
                     
+                    if(openDropdownId !== null) {
+                        let el = document.getElementById('chat-dd-' + openDropdownId);
+                        if(el) el.style.display = 'none';
+                        openDropdownId = null;
+                    }
                     openChatList(); 
                 }
             });
@@ -1089,12 +1154,12 @@
                     let pinText = obj.isPinned ? p1 : p2;
                     
                     let clearText = currentLang === 'uk' ? "Очистити пам'ять" : currentLang === 'en' ? "Clear memory" : currentLang === 'be' ? "Ачысціць памяць" : "Очистить память";
-                    let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Выдаліць чат" : "Удалить чат";
+                    let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Видалиць чат" : "Удалить чат";
 
                     let tName = await neuroTranslate(obj.char.name, currentLang); 
 
                     return `
-                    <div class="chatlist-item" onclick="resumeChat(${obj.id})">
+                    <div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})" style="z-index:1;">
                         <img src="${obj.char.photo}" class="chatlist-img">
                         <div class="chatlist-info">
                             <div class="chatlist-name">${pinMark}${tName}</div>
@@ -1163,6 +1228,8 @@
             setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
+        // === ОРИГИНАЛЬНЫЕ ЗАПРОСЫ К БАЗЕ (НИЧЕГО НЕ ИЗМЕНЕНО) ===
+
         async function sendMessage() {
             const input = document.getElementById('chat-input-text'); 
             const text = input.value.trim(); 
@@ -1205,7 +1272,7 @@
                 
                 const res = await fetch('/api/chat', { 
                     method: 'POST', 
-                    headers: getAuthHeaders(), // ЗАЩИТА ТЕЛЕГРАМА
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({ 
                         char_id: activeCharId, 
                         message: text, 
@@ -1240,7 +1307,6 @@
         
         function closeChat() { back(); }
 
-        // ================= ОПЛАТА =================
         async function buyItem(type, item, currency, price) {
             if (currency === 'ton') {
                 let msg = currentLang === 'uk' ? "Генерація рахунку CryptoBot..." : currentLang === 'en' ? "Generating CryptoBot invoice..." : currentLang === 'be' ? "Генерацыя рахунку CryptoBot..." : "Генерация счета CryptoBot...";
@@ -1287,53 +1353,6 @@
             }
         }
 
-        // ================= ЕЖЕДНЕВКА =================
-        function updateDailyUI() {
-            const ONE_DAY = 24 * 60 * 60 * 1000; 
-            let timePassed = Date.now() - userData.last_daily;
-            let nextStreak = userData.daily_streak + 1; 
-            let is7thDay = (nextStreak % 7 === 0);
-            
-            let baseRew = userData.daily_reward || 10; 
-            let actualRew = is7thDay ? baseRew * 2 : baseRew;
-            
-            let streakText = currentLang === 'uk' ? "Стрік" : currentLang === 'en' ? "Streak" : currentLang === 'be' ? "Стрык" : "Стрик";
-            let daysText = currentLang === 'uk' ? "днів" : currentLang === 'en' ? "days" : currentLang === 'be' ? "дзён" : "дней";
-            let bonusText = currentLang === 'en' ? "BONUS" : "БОНУС";
-
-            document.getElementById('daily-streak-text').innerText = `${streakText}: ${userData.daily_streak} ${daysText}`;
-            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (${bonusText} x2!)` : "");
-            
-            clearInterval(dailyTimerInterval);
-            
-            if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) {
-                document.getElementById('daily-btn').style.display = 'none'; 
-                document.getElementById('daily-wait').style.display = 'block';
-                
-                dailyTimerInterval = setInterval(() => {
-                    let timeLeft = ONE_DAY - (Date.now() - userData.last_daily);
-                    if (timeLeft <= 0) { 
-                        clearInterval(dailyTimerInterval); 
-                        location.reload(); 
-                    } else {
-                        let h = Math.floor(timeLeft / (1000 * 60 * 60)); 
-                        let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); 
-                        let s = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                        
-                        h = h < 10 ? "0" + h : h; 
-                        m = m < 10 ? "0" + m : m; 
-                        s = s < 10 ? "0" + s : s;
-                        
-                        let waitTitle = currentLang === 'uk' ? "Наступна нагорода через:" : currentLang === 'en' ? "Next reward in:" : currentLang === 'be' ? "Наступная ўзнагарода праз:" : "Следующая награда через:";
-                        document.getElementById('daily-wait').innerHTML = `${waitTitle}<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
-                    }
-                }, 1000);
-            } else { 
-                document.getElementById('daily-btn').style.display = 'block'; 
-                document.getElementById('daily-wait').style.display = 'none'; 
-            }
-        }
-
         async function claimDaily() {
             try {
                 const res = await fetch('/api/user/claim-daily', { 
@@ -1357,7 +1376,6 @@
             } catch (e) { tg.showAlert("Error"); }
         }
 
-        // ================= ПЕРСОНАЖИ =================
         async function renderUserChars() {
             try {
                 const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
@@ -1459,7 +1477,6 @@
             back(); 
         }
 
-        // ================= АДМИНКА =================
         async function modFunds(t, a) {
             let idField = t === 'shards' ? 'ish-id' : 'isu-id'; 
             let valField = t === 'shards' ? 'ish-val' : 'isu-type';
@@ -1484,7 +1501,6 @@
             tg.showAlert(data.message || "Error");
         }
 
-        // ================= ПРОМОКОДЫ =================
         async function createPromo() {
             const code = document.getElementById('ip-code').value.toUpperCase().trim(); 
             const rew = parseInt(document.getElementById('ip-rew').value);
@@ -1557,7 +1573,7 @@
                 } else {
                     await fetch('/api/admin/manage-shards', { 
                         method: 'POST', 
-                        headers: getAuthHeaders(), // Сервер знает, что админ тут бот
+                        headers: getAuthHeaders(), 
                         body: JSON.stringify({ target_id: uid, action: 'add', amount: found.reward, bypass_admin: true }) 
                     });
                     
@@ -1577,7 +1593,6 @@
             btn.style.opacity = "1";
         }
 
-        // ================= ЗАДАНИЯ =================
         async function modTask(act, tid=null) {
             if(act==='add') {
                 const n = document.getElementById('it-name').value; 
@@ -1828,23 +1843,6 @@
         function toggleTaskInput() { 
             document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; 
         }
-        
-        function openPanel(id) { 
-            stack.push(id); 
-            document.getElementById(id).style.display = 'flex'; 
-            BackButton.show(); 
-        }
-
-        function back() { 
-            if(stack.length > 0) { 
-                document.getElementById(stack.pop()).style.display = 'none'; 
-            } 
-            if(stack.length === 0) { 
-                BackButton.hide(); 
-            } 
-        }
-        
-        BackButton.onClick(() => back());
         
         window.onload = init;
     </script>
