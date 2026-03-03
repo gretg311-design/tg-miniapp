@@ -47,7 +47,7 @@
             filter: brightness(0.8);
         }
 
-        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК И АДМИНКИ (iOS/Telegram стиль) === */
+        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК (iOS/Telegram стиль) === */
         .set-list { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; margin-bottom: 15px; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
         .set-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #2d164d; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; }
         .set-item:active { transform: scale(0.97); filter: brightness(0.8); }
@@ -167,7 +167,6 @@
         </div>
         <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
     </div>
-
     <div id="p-user-chatlist" class="overlay">
         <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chats">МОИ ЧАТЫ</h2>
         <div id="chatlist-container" style="width:100%"></div>
@@ -217,6 +216,7 @@
         <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()" data-i18n="b_del_char">УДАЛИТЬ ПЕРСОНАЖА</div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
+
     <div id="p-daily" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 5px;" data-i18n="h_daily">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
         <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;" data-i18n="d_sub">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
@@ -666,7 +666,7 @@
             be: {
                 m_chats: "Чаты", m_chars: "Персанажы", m_daily: "Штодзёнка", m_tasks: "Заданні", m_shop: "Крама", m_promos: "Прамакоды", m_prof: "Профіль", m_set: "Налады", m_adm: "Адмінка", m_con: "Кансоль",
                 h_chats: "МАЕ ЧАТЫ", h_chars: "ПЕРСАНАЖЫ", h_daily: "ШТОДЗЁННАЯ ЎЗНАГАРОДА", h_tasks: "ЗАДАННІ", h_shop: "КРАМА", h_promos: "ПРАМАКОД", h_prof: "ПРОФІЛЬ", h_set: "НАЛАДЫ",
-                b_back: "НАЗАД", b_start_chat: "ПАЧАЦЬ ЧАТ", b_del_char: "ВЫДАЛІЦЬ ПЕРСАНАЖА", b_claim: "ЗАБРАЦЬ", b_share: "ПАДЗЯЛІЦЦА СПАСЫЛКАЙ", b_activate: "АКТЫВАВАЦЬ",
+                b_back: "НАЗАД", b_start_chat: "ПАЧАЦЬ ЧАТ", b_del_char: "Выдаліць ПЕРСАНАЖА", b_claim: "ЗАБРАЦЬ", b_share: "ПАДЗЯЛІЦЦА СПАСЫЛКАЙ", b_activate: "АКТЫВАВАЦЬ",
                 pr_nick: "Нік:", pr_id: "Айдзі юз:", pr_sub: "Падпіска:", pr_exp: "Тэрмін:", pr_shards: "Аскепкаў:", pr_status: "Статус:",
                 set_nick: "Нік у дадатку", set_gender: "Ваш пол", g_m: "Мужчына", g_f: "Жанчына", set_lang: "Мова інтэрфейсу", set_len: "Даўжыня паведамленняў", set_sex: "Пошласць персанажаў",
                 d_sub: "Узнагарода залежыць ад падпіскі. Заходзь 7 дзён запар для бонусу x2!", d_today: "Ваша ўзнагарода сёння:", t_invite: "ЗАПРАСІ СЯБРА", t_invite_desc: "Ты і твой сябар атрымаеце па",
@@ -821,7 +821,7 @@
                 const res = await fetch('/api/user/sync', {
                     method: 'POST', 
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({}) 
+                    body: JSON.stringify({ tg_id: uid }) 
                 });
                 
                 if(res.ok) {
@@ -874,7 +874,7 @@
                 const res = await fetch('/api/user/get-data', {
                     method: 'POST', 
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ start_param: startParam })
+                    body: JSON.stringify({ tg_id: uid, start_param: startParam })
                 });
                 if(res.ok) userData = await res.json();
             } catch (e) { 
@@ -930,8 +930,7 @@
             applyNickStyle(userData.subscription);
 
             let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
-            let maxLen = 45; 
-            let maxSex = 0;
+            let maxLen = 45; let maxSex = 0;
             
             if(currentSub === "premium") { maxLen = 55; }
             else if(currentSub === "pro") { maxLen = 65; maxSex = 3; }
@@ -942,8 +941,7 @@
             const sS = document.getElementById('sex-slider');
             
             if(lS && sS) {
-                lS.max = maxLen; 
-                sS.max = maxSex;
+                lS.max = maxLen; sS.max = maxSex;
                 
                 let lText = currentLang === 'uk' ? "Твій ліміт" : currentLang === 'en' ? "Your limit" : currentLang === 'be' ? "Твой ліміт" : "Твой лимит";
                 let wText = currentLang === 'uk' ? "слів" : currentLang === 'en' ? "words" : currentLang === 'be' ? "слоў" : "слов";
@@ -975,7 +973,7 @@
             }
         }
 
-        // ================= НАВИГАЦИЯ СЛОЯМИ (ФИКС БАГА С ЧАТОМ) =================
+        // ================= НАВИГАЦИЯ СЛОЯМИ (ФИКС МЕРЦАНИЯ И БАГОВ) =================
         let baseZ = 15000;
         function openPanel(id) { 
             if(stack.includes(id)) return; 
@@ -1001,7 +999,7 @@
         
         BackButton.onClick(() => back());
 
-        // ================= ЧАТЫ И ЛОГИКА (С ФИКСОМ МЕНЮ И Z-INDEX) =================
+        // ================= ЧАТЫ И ЛОГИКА (ФИКС Z-INDEX ДЛЯ МЕНЮ) =================
         function updateChatOrder(charId) {
             const uid = getUid();
             let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
@@ -1049,7 +1047,6 @@
             }
             
             localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); 
-            
             if(openDropdownId !== null) {
                 let el = document.getElementById('chat-dd-' + openDropdownId);
                 if(el) el.style.display = 'none';
@@ -1068,7 +1065,6 @@
                     let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
                     allChats[charId] = []; 
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                    
                     if(openDropdownId !== null) {
                         let el = document.getElementById('chat-dd-' + openDropdownId);
                         if(el) el.style.display = 'none';
@@ -1127,11 +1123,8 @@
                 const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : noMsg;
                 
                 chatObjects.push({ 
-                    id: char.id, 
-                    char: char, 
-                    lastMsg: lastMsg, 
-                    isPinned: pinned.includes(char.id), 
-                    orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 
+                    id: char.id, char: char, lastMsg: lastMsg, 
+                    isPinned: pinned.includes(char.id), orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 
                 });
             }
 
@@ -1148,14 +1141,11 @@
             } else {
                 const chatCards = await Promise.all(chatObjects.map(async (obj) => {
                     let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
-                    
                     let p1 = currentLang === 'uk' ? "Відкріпити" : currentLang === 'en' ? "Unpin" : currentLang === 'be' ? "Адмацаваць" : "Открепить";
                     let p2 = currentLang === 'uk' ? "Закріпити" : currentLang === 'en' ? "Pin" : currentLang === 'be' ? "Замацаваць" : "Закрепить";
                     let pinText = obj.isPinned ? p1 : p2;
-                    
                     let clearText = currentLang === 'uk' ? "Очистити пам'ять" : currentLang === 'en' ? "Clear memory" : currentLang === 'be' ? "Ачысціць памяць" : "Очистить память";
                     let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Видалиць чат" : "Удалить чат";
-
                     let tName = await neuroTranslate(obj.char.name, currentLang); 
 
                     return `
@@ -1183,10 +1173,7 @@
             activeCharId = charId;
             const c = allChars.find(x => x.id == charId); 
             if(!c) return;
-            
-            let tName = await neuroTranslate(c.name, currentLang);
-            document.getElementById('chat-char-name').innerText = tName;
-            
+            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
             renderChatMessages(); 
             openPanel('p-chat');
         }
@@ -1194,19 +1181,14 @@
         async function openChatFromDossier() {
             const c = allChars.find(x => x.id === activeCharId); 
             if(!c) return;
-            
-            let tName = await neuroTranslate(c.name, currentLang);
-            document.getElementById('chat-char-name').innerText = tName;
-            
+            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
             const uid = getUid(); 
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-            
             if(!allChats[activeCharId]) { 
                 allChats[activeCharId] = []; 
                 localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
                 updateChatOrder(activeCharId); 
             }
-            
             renderChatMessages(); 
             openPanel('p-chat');
         }
@@ -1224,167 +1206,22 @@
             } else { 
                 chatBox.innerHTML = msgs.map(m => `<div class="msg-box ${m.sender === 'user' ? 'msg-user' : 'msg-char'}">${m.text}</div>`).join(''); 
             }
-            
             setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
-        // === ОРИГИНАЛЬНЫЕ ЗАПРОСЫ К БАЗЕ (НИЧЕГО НЕ ИЗМЕНЕНО) ===
-
-        async function sendMessage() {
-            const input = document.getElementById('chat-input-text'); 
-            const text = input.value.trim(); 
-            if(!text) return;
-            
-            const uid = getUid(); 
-            if(uid !== OID && userData.shards < 1) {
-                let noShards = currentLang === 'uk' ? "Недостатньо осколків (потрібен 1 🌙)!" : currentLang === 'en' ? "Not enough shards (need 1 🌙)!" : currentLang === 'be' ? "Недастаткова аскепкаў (патрэбен 1 🌙)!" : "Недостаточно осколков (нужен 1 🌙)!";
-                return tg.showAlert(noShards);
-            }
-            
-            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-            if(!allChats[activeCharId]) allChats[activeCharId] = [];
-            
-            allChats[activeCharId].push({sender: 'user', text: text}); 
-            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-            
-            updateChatOrder(activeCharId); 
-            input.value = ''; 
-            renderChatMessages();
-            
-            const chatBox = document.getElementById('chat-messages-box');
-            let typingText = currentLang === 'uk' ? "Персонаж друкує..." : currentLang === 'en' ? "Character is typing..." : currentLang === 'be' ? "Персанаж друкуе..." : "Персонаж печатает...";
-            chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">${typingText}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-            
-            try {
-                const uName = document.getElementById('u-name').innerText;
-                const rawGender = localStorage.getItem('m_gender_' + uid) || 'm';
-                
-                let uGender = "Мужской";
-                if (rawGender === 'f') {
-                    uGender = currentLang === 'uk' ? "Жіночий" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жаночы" : "Женский";
-                } else {
-                    uGender = currentLang === 'uk' ? "Чоловічий" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Мужчынскі" : "Мужской";
-                }
-
-                const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 45); 
-                const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
-                
-                const res = await fetch('/api/chat', { 
-                    method: 'POST', 
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ 
-                        char_id: activeCharId, 
-                        message: text, 
-                        chat_history: allChats[activeCharId], 
-                        len: lenSet, 
-                        sex: sexSet,
-                        user_name: uName,     
-                        user_gender: uGender  
-                    }) 
-                });
-                
-                const data = await res.json(); 
-                document.getElementById('typing-indicator')?.remove();
-                
-                if (data.error) { 
-                    let errT = currentLang === 'en' ? "AI Error: " : "Ошибка ИИ: ";
-                    tg.showAlert(errT + data.error); 
-                } else { 
-                    allChats[activeCharId].push({sender: 'char', text: data.reply}); 
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                    
-                    if (uid !== OID) updateBalanceUI(data.new_balance); 
-                    
-                    renderChatMessages(); 
-                }
-            } catch (e) { 
-                document.getElementById('typing-indicator')?.remove(); 
-                let errSrv = currentLang === 'uk' ? "Помилка зв'язку з сервером." : currentLang === 'en' ? "Server connection error." : currentLang === 'be' ? "Памылка сувязі з серверам." : "Ошибка связи с сервером.";
-                tg.showAlert(errSrv); 
-            }
-        }
-        
-        function closeChat() { back(); }
-
-        async function buyItem(type, item, currency, price) {
-            if (currency === 'ton') {
-                let msg = currentLang === 'uk' ? "Генерація рахунку CryptoBot..." : currentLang === 'en' ? "Generating CryptoBot invoice..." : currentLang === 'be' ? "Генерацыя рахунку CryptoBot..." : "Генерация счета CryptoBot...";
-                tg.showAlert(msg);
-                try {
-                    const res = await fetch('/api/payment/create', { 
-                        method: 'POST', 
-                        headers: getAuthHeaders(),
-                        body: JSON.stringify({ type: type, item: item, amount_ton: price }) 
-                    });
-                    const data = await res.json(); 
-                    
-                    if(data.pay_url) { tg.openLink(data.pay_url); } 
-                    else { 
-                        let err = currentLang === 'en' ? "CryptoBot error" : "Ошибка CryptoBot";
-                        tg.showAlert(err); 
-                    }
-                } catch (e) { tg.showAlert("Error"); }
-                
-            } else if (currency === 'stars') {
-                let msg = currentLang === 'uk' ? "Підготовка оплати Stars..." : currentLang === 'en' ? "Preparing Stars payment..." : currentLang === 'be' ? "Падрыхтоўка аплаты Stars..." : "Подготовка оплаты Stars...";
-                tg.showAlert(msg);
-                try {
-                    const res = await fetch('/api/payment/stars-invoice', { 
-                        method: 'POST', 
-                        headers: getAuthHeaders(),
-                        body: JSON.stringify({ type: type, item: item, amount_stars: price }) 
-                    });
-                    const data = await res.json();
-                    
-                    if(data.invoice_url) { 
-                        tg.openInvoice(data.invoice_url, function(status) { 
-                            if (status === 'paid') { 
-                                let succ = currentLang === 'uk' ? "Оплата успішна!" : currentLang === 'en' ? "Payment successful!" : currentLang === 'be' ? "Аплата паспяховая!" : "Оплата успешна!";
-                                tg.showAlert(succ); 
-                            } 
-                            else if (status === 'failed') { 
-                                let fail = currentLang === 'uk' ? "Помилка при оплаті Stars." : currentLang === 'en' ? "Stars payment failed." : currentLang === 'be' ? "Памылка пры аплаце Stars." : "Ошибка при оплате Stars.";
-                                tg.showAlert(fail); 
-                            } 
-                        }); 
-                    } else { tg.showAlert("API Error"); }
-                } catch (e) { tg.showAlert("Error"); }
-            }
-        }
-
-        async function claimDaily() {
-            try {
-                const res = await fetch('/api/user/claim-daily', { 
-                    method: 'POST', 
-                    headers: getAuthHeaders()
-                });
-                const data = await res.json();
-                
-                if (data.error) { 
-                    tg.showAlert(data.error); 
-                } else { 
-                    let rText = currentLang === 'uk' ? "Отримано" : currentLang === 'en' ? "Received" : currentLang === 'be' ? "Атрымана" : "Получено";
-                    tg.showAlert(`${rText}: ${data.reward} 🌙!`); 
-                    userData.shards = data.new_balance; 
-                    userData.daily_streak = data.streak; 
-                    userData.last_daily = Date.now(); 
-                    
-                    updateBalanceUI(userData.shards); 
-                    updateDailyUI(); 
-                }
-            } catch (e) { tg.showAlert("Error"); }
-        }
+        // ================= ОРИГИНАЛЬНЫЕ ЗАПРОСЫ К БАЗЕ ДАННЫХ (POST + TG_ID) =================
 
         async function renderUserChars() {
             try {
-                const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
+                const res = await fetch('/api/get-characters', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ tg_id: getUid() }) 
+                }); 
                 allChars = await res.json();
-                
                 allChars.sort((a, b) => b.id - a.id); 
                 
                 const list = document.getElementById('user-char-list');
-                
                 if(allChars.length === 0) { 
                     let emptyText = currentLang === 'uk' ? "Немає персонажів" : currentLang === 'en' ? "No characters" : currentLang === 'be' ? "Няма персанажаў" : "Нет персонажей";
                     list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>${emptyText}</div>`; 
@@ -1406,32 +1243,220 @@
                         </div>
                     </div>`;
                 }));
-                
                 list.innerHTML = charCards.join('');
             } catch (e) {}
         }
 
+        async function renderTasks() {
+            try {
+                const res = await fetch('/api/get-tasks', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ tg_id: getUid() }) 
+                }); 
+                const tasks = await res.json();
+                document.getElementById('task-list').innerHTML = tasks.map(x => {
+                    let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : '';
+                    return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`;
+                }).join('');
+            } catch(e) {}
+        }
+
+        async function renderUserTasks() {
+            try {
+                const res = await fetch('/api/get-tasks', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ tg_id: getUid() }) 
+                }); 
+                const tasks = await res.json();
+                const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
+                const list = document.getElementById('user-task-list');
+                
+                if (tasks.length === 0) { 
+                    let emptyText = currentLang === 'uk' ? "Поки немає доступних завдань" : currentLang === 'en' ? "No available tasks" : currentLang === 'be' ? "Пакуль няма даступных заданняў" : "Пока нет доступных заданий";
+                    list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyText}</div>`; 
+                    return; 
+                }
+                
+                let doneText = currentLang === 'uk' ? "Виконано" : currentLang === 'en' ? "Completed" : currentLang === 'be' ? "Выканана" : "Выполнено";
+                let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
+                let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
+
+                const taskCards = await Promise.all(tasks.map(async (t) => {
+                    let tName = await neuroTranslate(t.name, currentLang);
+                    if(completed.includes(t.id)) {
+                        return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
+                    }
+                    return `
+                    <div class="task-item" id="utask-${t.id}">
+                        <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
+                        <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
+                    </div>`;
+                }));
+                list.innerHTML = taskCards.join('');
+            } catch(e) {}
+        }
+
+        async function renderAdminPromos() {
+            try {
+                const res = await fetch('/api/get-promos', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ tg_id: getUid() }) 
+                }); 
+                const promos = await res.json();
+                document.getElementById('promo-list').innerHTML = promos.map(p => {
+                    let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : '';
+                    return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`;
+                }).join('');
+            } catch(e) {}
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input-text'); 
+            const text = input.value.trim(); 
+            if(!text) return;
+            const uid = getUid(); 
+            if(uid !== OID && userData.shards < 1) {
+                let noShards = currentLang === 'uk' ? "Недостатньо осколків!" : currentLang === 'en' ? "Not enough shards!" : "Недостаточно осколков!";
+                return tg.showAlert(noShards);
+            }
+            
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            if(!allChats[activeCharId]) allChats[activeCharId] = [];
+            allChats[activeCharId].push({sender: 'user', text: text}); 
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            
+            updateChatOrder(activeCharId); input.value = ''; renderChatMessages();
+            
+            const chatBox = document.getElementById('chat-messages-box');
+            let typingText = currentLang === 'uk' ? "Персонаж друкує..." : currentLang === 'en' ? "Character is typing..." : "Персонаж печатает...";
+            chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">${typingText}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            try {
+                const uName = document.getElementById('u-name').innerText;
+                const rawGender = localStorage.getItem('m_gender_' + uid) || 'm';
+                let uGender = rawGender === 'f' ? (currentLang === 'en' ? "Female" : "Женский") : (currentLang === 'en' ? "Male" : "Мужской");
+                const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 45); 
+                const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
+                
+                const res = await fetch('/api/chat', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ 
+                        tg_id: uid, char_id: activeCharId, message: text, 
+                        chat_history: allChats[activeCharId], len: lenSet, sex: sexSet,
+                        user_name: uName, user_gender: uGender  
+                    }) 
+                });
+                const data = await res.json(); 
+                document.getElementById('typing-indicator')?.remove();
+                if (data.reply) { 
+                    allChats[activeCharId].push({sender: 'char', text: data.reply}); 
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
+                    if (uid !== OID) updateBalanceUI(data.new_balance); 
+                    renderChatMessages(); 
+                } else if (data.error) { tg.showAlert(data.error); }
+            } catch (e) { document.getElementById('typing-indicator')?.remove(); tg.showAlert("Ошибка сервера"); }
+        }
+
+        // ================= ОПЛАТА И ЕЖЕДНЕВКА =================
+        async function buyItem(type, item, currency, price) {
+            if (currency === 'ton') {
+                tg.showAlert("Генерация счета CryptoBot...");
+                try {
+                    const res = await fetch('/api/payment/create', { 
+                        method: 'POST', headers: getAuthHeaders(),
+                        body: JSON.stringify({ tg_id: getUid(), type: type, item: item, amount_ton: price }) 
+                    });
+                    const data = await res.json(); 
+                    if(data.pay_url) { tg.openLink(data.pay_url); } 
+                    else { tg.showAlert("Ошибка CryptoBot"); }
+                } catch (e) { tg.showAlert("Error"); }
+            } else if (currency === 'stars') {
+                tg.showAlert("Подготовка оплаты Stars...");
+                try {
+                    const res = await fetch('/api/payment/stars-invoice', { 
+                        method: 'POST', headers: getAuthHeaders(),
+                        body: JSON.stringify({ tg_id: getUid(), type: type, item: item, amount_stars: price }) 
+                    });
+                    const data = await res.json();
+                    if(data.invoice_url) { 
+                        tg.openInvoice(data.invoice_url, function(status) { 
+                            if (status === 'paid') { tg.showAlert("Оплата успешна!"); } 
+                            else if (status === 'failed') { tg.showAlert("Ошибка при оплате Stars."); } 
+                        }); 
+                    } else { tg.showAlert("API Error"); }
+                } catch (e) { tg.showAlert("Error"); }
+            }
+        }
+
+        function updateDailyUI() {
+            const ONE_DAY = 24 * 60 * 60 * 1000; 
+            let timePassed = Date.now() - userData.last_daily;
+            let nextStreak = userData.daily_streak + 1; 
+            let is7thDay = (nextStreak % 7 === 0);
+            let baseRew = userData.daily_reward || 10; 
+            let actualRew = is7thDay ? baseRew * 2 : baseRew;
+            
+            let streakText = currentLang === 'en' ? "Streak" : "Стрик";
+            let daysText = currentLang === 'en' ? "days" : "дней";
+            let bonusText = currentLang === 'en' ? "BONUS" : "БОНУС";
+
+            document.getElementById('daily-streak-text').innerText = `${streakText}: ${userData.daily_streak} ${daysText}`;
+            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (${bonusText} x2!)` : "");
+            
+            clearInterval(dailyTimerInterval);
+            
+            if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) {
+                document.getElementById('daily-btn').style.display = 'none'; 
+                document.getElementById('daily-wait').style.display = 'block';
+                
+                dailyTimerInterval = setInterval(() => {
+                    let timeLeft = ONE_DAY - (Date.now() - userData.last_daily);
+                    if (timeLeft <= 0) { 
+                        clearInterval(dailyTimerInterval); location.reload(); 
+                    } else {
+                        let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s;
+                        document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
+                    }
+                }, 1000);
+            } else { 
+                document.getElementById('daily-btn').style.display = 'block'; 
+                document.getElementById('daily-wait').style.display = 'none'; 
+            }
+        }
+
+        async function claimDaily() {
+            try {
+                const res = await fetch('/api/user/claim-daily', { 
+                    method: 'POST', headers: getAuthHeaders(),
+                    body: JSON.stringify({ tg_id: getUid() }) 
+                });
+                const data = await res.json();
+                if (data.error) { tg.showAlert(data.error); } 
+                else { 
+                    tg.showAlert(`Получено: ${data.reward} 🌙!`); 
+                    userData.shards = data.new_balance; userData.daily_streak = data.streak; userData.last_daily = Date.now(); 
+                    updateBalanceUI(userData.shards); updateDailyUI(); 
+                }
+            } catch (e) { tg.showAlert("Error"); }
+        }
+
+        // ================= АДМИНСКИЕ ЗАПРОСЫ =================
         async function openDossier(id) {
             const c = allChars.find(x => x.id === id); 
             if(!c) return; 
             activeCharId = id;
-            
-            let tName = await neuroTranslate(c.name, currentLang);
-            let tDesc = await neuroTranslate(c.desc, currentLang);
-
-            document.getElementById('dos-name').innerText = tName; 
+            document.getElementById('dos-name').innerText = await neuroTranslate(c.name, currentLang); 
             document.getElementById('dos-img').src = c.photo; 
             document.getElementById('dos-age').innerText = c.age;
-            
-            let mText = currentLang === 'uk' ? "Чоловіча" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Мужчынскі" : "Мужской";
-            let fText = currentLang === 'uk' ? "Жіноча" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жаночы" : "Женский";
-
-            document.getElementById('dos-gender').innerText = c.gender === 'm' ? mText : fText; 
-            document.getElementById('dos-desc').innerText = tDesc;
-            
-            if(getUid() === OID) { 
-                document.getElementById('dos-del-btn').style.display = 'block'; 
-            } 
+            document.getElementById('dos-gender').innerText = c.gender === 'm' ? "Мужской" : "Женский"; 
+            document.getElementById('dos-desc').innerText = await neuroTranslate(c.desc, currentLang);
+            if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } 
             openPanel('p-char-dossier');
         }
 
@@ -1442,104 +1467,40 @@
         }
 
         async function saveCharDB() {
-            const n = document.getElementById('ich-name').value; 
-            const img = document.getElementById('char-preview').src;
+            const n = document.getElementById('ich-name').value; const img = document.getElementById('char-preview').src;
             if(!n || img.includes('#')) return tg.showAlert("Name and photo are required!");
-            
-            const charData = { 
-                id: Date.now(), 
-                name: n, 
-                age: document.getElementById('ich-age').value, 
-                gender: currentCharGender, 
-                desc: document.getElementById('ich-desc').value, 
-                photo: img 
-            };
-            
-            await fetch('/api/admin/create-char', { 
-                method: 'POST', 
-                headers: getAuthHeaders(), 
-                body: JSON.stringify({ charData: charData }) 
-            });
-            
-            tg.showAlert("Created!"); 
-            renderUserChars();
+            const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img };
+            await fetch('/api/admin/create-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: getUid(), charData: charData }) });
+            tg.showAlert("Created!"); renderUserChars();
         }
 
         async function deleteChar() { 
-            await fetch('/api/admin/delete-char', { 
-                method: 'POST', 
-                headers: getAuthHeaders(), 
-                body: JSON.stringify({ char_id: activeCharId }) 
-            }); 
-            
-            tg.showAlert("Deleted!"); 
-            renderUserChars(); 
-            back(); 
+            await fetch('/api/admin/delete-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: getUid(), char_id: activeCharId }) }); 
+            tg.showAlert("Deleted!"); renderUserChars(); back(); 
         }
 
         async function modFunds(t, a) {
-            let idField = t === 'shards' ? 'ish-id' : 'isu-id'; 
-            let valField = t === 'shards' ? 'ish-val' : 'isu-type';
-            const target_id = document.getElementById(idField).value; 
-            const v = document.getElementById(valField).value;
-            
+            let idField = t === 'shards' ? 'ish-id' : 'isu-id'; let valField = t === 'shards' ? 'ish-val' : 'isu-type';
+            const target_id = document.getElementById(idField).value; const v = document.getElementById(valField).value;
             if(!target_id) return tg.showAlert("Enter ID!");
-            
-            const endpoint = t === 'shards' ? '/api/admin/manage-shards' : '/api/admin/manage-sub';
-            const body = { target_id: target_id, action: a }; 
-            
-            if(t === 'shards') body.amount = v; 
-            else body.sub_type = v;
-            
-            const res = await fetch(endpoint, { 
-                method: 'POST', 
-                headers: getAuthHeaders(), 
-                body: JSON.stringify(body) 
-            });
-            
-            const data = await res.json(); 
-            tg.showAlert(data.message || "Error");
+            const body = { sender_id: getUid(), target_id: target_id, action: a }; 
+            if(t === 'shards') body.amount = v; else body.sub_type = v;
+            const res = await fetch(t === 'shards' ? '/api/admin/manage-shards' : '/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(body) });
+            const data = await res.json(); tg.showAlert(data.message || "Error");
         }
 
         async function createPromo() {
-            const code = document.getElementById('ip-code').value.toUpperCase().trim(); 
-            const rew = parseInt(document.getElementById('ip-rew').value);
+            const code = document.getElementById('ip-code').value.toUpperCase().trim(); const rew = parseInt(document.getElementById('ip-rew').value);
             if(!code || !rew) return;
-            
-            await fetch('/api/admin/create-promo', { 
-                method: 'POST', 
-                headers: getAuthHeaders(), 
-                body: JSON.stringify({ promoData: {code, reward: rew} }) 
-            });
-            
-            document.getElementById('ip-code').value = ''; 
-            document.getElementById('ip-rew').value = ''; 
-            renderAdminPromos(); 
-            tg.showAlert("Created!");
-        }
-
-        async function renderAdminPromos() {
-            try {
-                const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
-                const promos = await res.json();
-                
-                document.getElementById('promo-list').innerHTML = promos.map(p => {
-                    let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : '';
-                    return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`;
-                }).join('');
-            } catch(e){}
+            await fetch('/api/admin/create-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: getUid(), promoData: {code, reward: rew} }) });
+            document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = ''; renderAdminPromos(); tg.showAlert("Created!");
         }
 
         async function deletePromo(code) {
             tg.showConfirm("Delete promo " + code + "?", async (yes) => {
                 if(yes) {
-                    await fetch('/api/admin/delete-promo', { 
-                        method: 'POST', 
-                        headers: getAuthHeaders(), 
-                        body: JSON.stringify({ code: code }) 
-                    });
-                    renderAdminPromos(); 
-                    tg.showAlert("Deleted!");
+                    await fetch('/api/admin/delete-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: getUid(), code: code }) });
+                    renderAdminPromos(); tg.showAlert("Deleted!");
                 }
             });
         }
@@ -1547,303 +1508,116 @@
         async function usePromo() {
             if (promoLock) return;
             promoLock = true;
-            
-            const btn = document.getElementById('promo-btn'); 
-            const oldText = btn.innerText; 
-            btn.innerText = currentLang === 'en' ? "CHECKING..." : "ПРОВЕРКА..."; 
-            btn.style.opacity = "0.5";
-            
+            const btn = document.getElementById('promo-btn'); const oldText = btn.innerText; btn.innerText = "ПРОВЕРКА..."; btn.style.opacity = "0.5";
             try {
-                const uid = getUid(); 
-                const inputField = document.getElementById('user-promo-input'); 
-                const input = inputField.value.toUpperCase().trim();
-                
+                const uid = getUid(); const inputField = document.getElementById('user-promo-input'); const input = inputField.value.toUpperCase().trim();
                 if(!input) { promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; return; }
-                
-                const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
+                const res = await fetch('/api/get-promos', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ tg_id: uid }) }); 
                 const promos = await res.json();
-                
                 const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]"); 
                 const found = promos.find(p => p.code === input);
                 
-                if(!found) { 
-                    tg.showAlert(currentLang === 'en' ? "Invalid code" : "Неверный код"); 
-                } else if(used.includes(input)) { 
-                    tg.showAlert(currentLang === 'en' ? "Already used" : "Уже активирован"); 
-                } else {
-                    await fetch('/api/admin/manage-shards', { 
-                        method: 'POST', 
-                        headers: getAuthHeaders(), 
-                        body: JSON.stringify({ target_id: uid, action: 'add', amount: found.reward, bypass_admin: true }) 
-                    });
-                    
-                    used.push(input); 
-                    localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
-                    
+                if(!found) { tg.showAlert("Неверный код"); } else if(used.includes(input)) { tg.showAlert("Уже активирован"); } 
+                else {
+                    await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: found.reward, bypass_admin: true }) });
+                    used.push(input); localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
                     if(uid !== OID) updateBalanceUI(userData.shards + found.reward);
-                    
-                    inputField.value = ''; 
-                    let rText = currentLang === 'en' ? "Received" : "Получено";
-                    tg.showAlert(`${rText} ${found.reward} 🌙!`);
+                    inputField.value = ''; tg.showAlert(`Получено ${found.reward} 🌙!`);
                 }
-            } catch(e) { tg.showAlert("Connection Error"); }
-            
-            promoLock = false; 
-            btn.innerText = oldText; 
-            btn.style.opacity = "1";
+            } catch(e) {}
+            promoLock = false; btn.innerText = oldText; btn.style.opacity = "1";
         }
 
         async function modTask(act, tid=null) {
             if(act==='add') {
-                const n = document.getElementById('it-name').value; 
-                const rType = document.getElementById('it-rtype').value; 
+                const n = document.getElementById('it-name').value; const rType = document.getElementById('it-rtype').value; 
                 if(!n) return;
-                
-                const taskData = { 
-                    id: Date.now(), 
-                    name: n, 
-                    link: document.getElementById('it-link').value, 
-                    rType: rType, 
-                    rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value 
-                };
-                
-                await fetch('/api/admin/create-task', { 
-                    method: 'POST', 
-                    headers: getAuthHeaders(), 
-                    body: JSON.stringify({ taskData: taskData }) 
-                });
+                const taskData = { id: Date.now(), name: n, link: document.getElementById('it-link').value, rType: rType, rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value };
+                await fetch('/api/admin/create-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: getUid(), taskData: taskData }) });
             }
-            renderTasks(); 
-            renderUserTasks();
-        }
-
-        async function renderTasks() {
-            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-            const tasks = await res.json();
-            
-            document.getElementById('task-list').innerHTML = tasks.map(x => {
-                let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : '';
-                return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`;
-            }).join('');
+            renderTasks(); renderUserTasks();
         }
 
         async function deleteTask(id) {
             tg.showConfirm("Delete task?", async (yes) => {
                 if(yes) {
-                    await fetch('/api/admin/delete-task', { 
-                        method: 'POST', 
-                        headers: getAuthHeaders(), 
-                        body: JSON.stringify({ task_id: id }) 
-                    });
-                    renderTasks(); 
-                    renderUserTasks(); 
-                    tg.showAlert("Deleted!");
+                    await fetch('/api/admin/delete-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: getUid(), task_id: id }) });
+                    renderTasks(); renderUserTasks(); tg.showAlert("Deleted!");
                 }
             });
-        }
-
-        async function renderUserTasks() {
-            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-            const tasks = await res.json();
-            const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
-            const list = document.getElementById('user-task-list');
-            
-            if (tasks.length === 0) { 
-                let emptyText = currentLang === 'uk' ? "Поки немає доступних завдань" : currentLang === 'en' ? "No available tasks" : currentLang === 'be' ? "Пакуль няма даступных заданняў" : "Пока нет доступных заданий";
-                list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyText}</div>`; 
-                return; 
-            }
-            
-            let doneText = currentLang === 'uk' ? "Виконано" : currentLang === 'en' ? "Completed" : currentLang === 'be' ? "Выканана" : "Выполнено";
-            let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
-            let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
-
-            const taskCards = await Promise.all(tasks.map(async (t) => {
-                let tName = await neuroTranslate(t.name, currentLang);
-                if(completed.includes(t.id)) {
-                    return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
-                }
-                return `
-                <div class="task-item" id="utask-${t.id}">
-                    <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
-                    <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
-                </div>`;
-            }));
-
-            list.innerHTML = taskCards.join('');
         }
 
         function startTask(id, link) { 
             tg.openLink(link); 
             if(!clickedTasks.includes(id)) clickedTasks.push(id); 
-            
-            let waitText = currentLang === 'uk' ? "Очікування перевірки..." : currentLang === 'en' ? "Waiting for verification..." : currentLang === 'be' ? "Чаканне праверкі..." : "Ожидание проверки...";
-            let btnText = currentLang === 'uk' ? "ПЕРЕВІРИТИ" : currentLang === 'en' ? "CHECK" : currentLang === 'be' ? "ПРАВЕРЫЦЬ" : "ПРОВЕРИТЬ";
-
             const taskDiv = document.getElementById(`utask-${id}`); 
-            if(taskDiv) { 
-                taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">${waitText}</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>`; 
-            } 
+            if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } 
         }
 
         async function checkTask(id) { 
             if(!clickedTasks.includes(id)) return; 
-            
-            let checkText = currentLang === 'uk' ? "Перевірка підписки..." : currentLang === 'en' ? "Checking subscription..." : currentLang === 'be' ? "Праверка падпіскі..." : "Проверка подписки...";
-            tg.showAlert(checkText); 
-            
+            tg.showAlert("Проверка подписки..."); 
             try {
-                const res = await fetch('/api/check-task', { 
-                    method: 'POST', 
-                    headers: getAuthHeaders(), 
-                    body: JSON.stringify({ task_id: id }) 
-                });
+                const res = await fetch('/api/check-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ tg_id: getUid(), task_id: id }) });
                 const data = await res.json();
-                
-                if(data.success) { 
-                    completeTaskAction(id); 
-                } else { 
-                    let err = currentLang === 'uk' ? "Умова не виконана! Спершу підпишись." : currentLang === 'en' ? "Condition not met! Subscribe first." : currentLang === 'be' ? "Умова не выканана! Спачатку падпішыся." : "Условие не выполнено! Сначала подпишись.";
-                    tg.showAlert(data.error || err); 
-                }
+                if(data.success) { completeTaskAction(id); } else { tg.showAlert(data.error || "Условие не выполнено!"); }
             } catch(e) { tg.showAlert("Error"); }
         }
 
         async function completeTaskAction(id) {
             const uid = getUid(); 
-            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
+            const res = await fetch('/api/get-tasks', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ tg_id: uid }) }); 
             const tasks = await res.json();
             const t = tasks.find(x => x.id === id); 
             if(!t) return;
-            
             let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); 
             if(completed.includes(id)) return;
             
             if(t.rType === 'shards') { 
-                await fetch('/api/admin/manage-shards', { 
-                    method: 'POST', 
-                    headers: getAuthHeaders(), 
-                    body: JSON.stringify({ target_id: uid, action: 'add', amount: t.rVal, bypass_admin: true }) 
-                }); 
+                await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: t.rVal, bypass_admin: true }) }); 
                 if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal)); 
-            } 
-            else if(t.rType === 'sub7') { 
-                await fetch('/api/admin/manage-sub', { 
-                    method: 'POST', 
-                    headers: getAuthHeaders(), 
-                    body: JSON.stringify({ target_id: uid, action: 'add', sub_type: "Premium", bypass_admin: true }) 
-                }); 
+            } else if(t.rType === 'sub7') { 
+                await fetch('/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', sub_type: "Premium", bypass_admin: true }) }); 
             }
-            
-            completed.push(id); 
-            localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); 
-            
-            let msg = currentLang === 'uk' ? "Завдання виконано! Нагороду отримано." : currentLang === 'en' ? "Task completed! Reward received." : currentLang === 'be' ? "Заданне выканана! Узнагарода атрымана." : "Задание выполнено! Награда получена.";
-            tg.showAlert(msg); 
-            
-            renderUserTasks();
+            completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); 
+            tg.showAlert("Награда получена!"); renderUserTasks();
         }
 
         function shareRef() {
-            const uid = getUid(); 
-            const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`;
-            
-            const text_ru = `Залетай в Anime AI! Общайся с ИИ-персонажами без цензуры. Переходи по моей ссылке и мы оба получим по 100 🌙!`;
-            const text_uk = `Залітай в Anime AI! Спілкуйся з ШІ-персонажами без цензури. Переходь за моїм посиланням і ми обидва отримаємо по 100 🌙!`;
-            const text_en = `Join Anime AI! Chat with AI characters without censorship. Follow my link and we both get 100 🌙!`;
-            const text_be = `Залятай у Anime AI! Размаўляй з ШІ-персанажамі без цэнзуры. Пераходзь па маёй спасылцы і мы абодва атрымаем па 100 🌙!`;
-            
-            let text = currentLang === 'uk' ? text_uk : currentLang === 'en' ? text_en : currentLang === 'be' ? text_be : text_ru;
-            
+            const uid = getUid(); const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`;
+            const text = `Залетай в Anime AI! Общайся с ИИ-персонажами без цензуры. Переходи по моей ссылке и мы оба получим по 100 🌙!`;
             const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`;
             tg.openTelegramLink(shareUrl);
         }
 
         // ================= НАСТРОЙКИ И УТИЛИТЫ =================
-        function updateLiveNick(v) { 
-            let n = v || "User"; 
-            document.getElementById('u-name').innerText = n; 
-            document.getElementById('prof-nick').innerText = n; 
-            localStorage.setItem('m_nick_' + getUid(), n); 
-        }
-
-        function setGender(g, s=false) { 
-            document.getElementById('g-m')?.classList.toggle('active', g === 'm'); 
-            document.getElementById('g-f')?.classList.toggle('active', g === 'f'); 
-            if(!s) localStorage.setItem('m_gender_' + getUid(), g); 
-        }
-
-        function updateLen(v, s=false) { 
-            document.getElementById('len-val').innerText = v; 
-            if(!s) localStorage.setItem('m_len_' + getUid(), v); 
-        }
-
+        function updateLiveNick(v) { let n = v || "User"; document.getElementById('u-name').innerText = n; document.getElementById('prof-nick').innerText = n; localStorage.setItem('m_nick_' + getUid(), n); }
+        function setGender(g, s=false) { document.getElementById('g-m')?.classList.toggle('active', g === 'm'); document.getElementById('g-f')?.classList.toggle('active', g === 'f'); if(!s) localStorage.setItem('m_gender_' + getUid(), g); }
+        function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
         function updateSex(v, s=false) { 
             const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; 
-            const m_uk = ["Без вульгарності", "Слабка", "Нормальна", "Сильна", "Висока", "V-Вульгарна", "HOT 🔥"];
-            const m_en = ["No NSFW", "Weak", "Normal", "Strong", "High", "V-NSFW", "HOT 🔥"];
-            const m_be = ["Без пошласці", "Слабая", "Нармальная", "Моцная", "Высокая", "V-Пошлая", "HOT 🔥"];
-            
-            const m = currentLang === 'uk' ? m_uk : currentLang === 'en' ? m_en : currentLang === 'be' ? m_be : m_ru;
-            
             document.getElementById('sex-val').innerText = v; 
-            
             let sliderMax = document.getElementById('sex-slider').max;
-            
-            let infoStr = currentLang === 'uk' ? "Вульгарність недоступна для вашої підписки" : currentLang === 'en' ? "NSFW is not available for your subscription" : currentLang === 'be' ? "Пошласць недаступная для вашай падпіскі" : "Пошлость недоступна для вашей подписки";
-            let lvlStr = currentLang === 'uk' ? "Рівень" : currentLang === 'en' ? "Level" : currentLang === 'be' ? "Узровень" : "Уровень";
-
-            document.getElementById('sex-info').innerText = sliderMax == 0 ? infoStr : `${lvlStr} ${v}: ${m[v]}`; 
-            
+            document.getElementById('sex-info').innerText = sliderMax == 0 ? "Недоступно для вашей подписки" : `Уровень ${v}: ${m_ru[v]}`; 
             document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; 
             if(!s) localStorage.setItem('m_sex_' + getUid(), v); 
         }
-
-        function updateCharCounter() { 
-            document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; 
-        }
-
-        function previewImg(i) { 
-            if (i.files && i.files[0]) { 
-                const r = new FileReader(); 
-                r.onload = (e) => { 
-                    const p = document.getElementById('char-preview'); 
-                    p.src = e.target.result; 
-                    p.style.display = 'block'; 
-                }; 
-                r.readAsDataURL(i.files[0]); 
-            } 
-        }
-
+        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
+        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(i.files[0]); } }
+        
         async function modAdmin(a) { 
-            const id = document.getElementById('ia-id').value; 
-            if(!id) return; 
-            await fetch('/api/owner/set-admin', { 
-                method: 'POST', 
-                headers: getAuthHeaders(), 
-                body: JSON.stringify({ target_id: id, status: a === 'add' }) 
-            }); 
+            const id = document.getElementById('ia-id').value; if(!id) return; 
+            await fetch('/api/owner/set-admin', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ owner_id: getUid(), target_id: id, status: a === 'add' }) }); 
             tg.showAlert("Updated!"); 
         }
-
         async function savePrices(type) { 
             const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; 
-            await fetch('/api/owner/set-price', { 
-                method: 'POST', 
-                headers: getAuthHeaders(), 
-                body: JSON.stringify({ 
-                    item_id: type, 
-                    stars: document.getElementById(prefix+'stars').value, 
-                    ton: document.getElementById(prefix+'ton').value 
-                }) 
-            }); 
+            await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ sender_id: getUid(), item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); 
             tg.showAlert("Saved!"); 
         }
-
-        function toggleTaskInput() { 
-            document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; 
-        }
+        function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
         
+        function closeChat() { back(); }
         window.onload = init;
     </script>
 </body>
