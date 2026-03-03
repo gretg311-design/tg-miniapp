@@ -47,6 +47,23 @@
             filter: brightness(0.8);
         }
 
+        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК (iOS/Telegram стиль) === */
+        .set-list { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; margin-bottom: 15px; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
+        .set-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #2d164d; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; }
+        .set-item:active { transform: scale(0.97); filter: brightness(0.8); }
+        .set-item:last-child { border-bottom: none; }
+        .set-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 15px; flex-shrink: 0; }
+        .set-text { flex: 1; font-size: 15px; color: #fff; font-weight: 500; }
+        .set-arrow { color: #555; font-size: 18px; font-weight: bold; }
+
+        .ic-prof { background: #0A84FF; } /* Синий */
+        .ic-lang { background: #30D158; } /* Зеленый */
+        .ic-ai { background: #8E8E93; }   /* Серый */
+        .ic-priv { background: #FF9F0A; } /* Оранжевый */
+        .ic-sup { background: #BF5AF2; }  /* Фиолетовый */
+        .ic-apk { background: #FF453A; }  /* Красный */
+        /* ================================================== */
+
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
@@ -334,6 +351,50 @@
     
     <div id="p-settings" class="overlay">
         <h2 style="color:#bc42f5" data-i18n="h_set">НАСТРОЙКИ</h2>
+        
+        <div class="set-list">
+            <div class="set-item" onclick="openPanel('p-set-prof')">
+                <div class="set-icon ic-prof">👤</div>
+                <div class="set-text" data-i18n="s_menu_prof">Настроить профиль</div>
+                <div class="set-arrow">›</div>
+            </div>
+            
+            <div class="set-item" onclick="openPanel('p-set-lang')">
+                <div class="set-icon ic-lang">🌐</div>
+                <div class="set-text" data-i18n="s_menu_lang">Сменить язык</div>
+                <div class="set-arrow">›</div>
+            </div>
+            
+            <div class="set-item" onclick="openPanel('p-set-ai')">
+                <div class="set-icon ic-ai">🤖</div>
+                <div class="set-text" data-i18n="s_menu_ai">Настройка ИИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            
+            <div class="set-item" onclick="tg.openLink('https://telegra.ph/Privacy-Policy-03-03-61')">
+                <div class="set-icon ic-priv">🔒</div>
+                <div class="set-text" data-i18n="s_menu_priv">Политика конфиденциальности</div>
+                <div class="set-arrow">›</div>
+            </div>
+            
+            <div class="set-item" onclick="tg.openTelegramLink('https://t.me/suppurtmoders_bot')">
+                <div class="set-icon ic-sup">💬</div>
+                <div class="set-text" data-i18n="s_menu_sup">Техническая поддержка</div>
+                <div class="set-arrow">›</div>
+            </div>
+            
+            <div class="set-item" onclick="devApk()">
+                <div class="set-icon ic-apk">📱</div>
+                <div class="set-text" data-i18n="s_menu_apk">Приложение .apk</div>
+                <div class="set-arrow">›</div>
+            </div>
+        </div>
+        
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+
+    <div id="p-set-prof" class="overlay">
+        <h2 style="color:#0A84FF" data-i18n="s_menu_prof">Настроить профиль</h2>
         <div class="info-card">
             <span class="s-label" data-i18n="set_nick">Ник в приложении</span>
             <input type="text" id="set-nick" class="term-in" placeholder="..." oninput="updateLiveNick(this.value)">
@@ -343,8 +404,13 @@
                 <div class="gender-btn active" id="g-m" onclick="setGender('m')" data-i18n="g_m">Мужчина</div>
                 <div class="gender-btn" id="g-f" onclick="setGender('f')" data-i18n="g_f">Женщина</div>
             </div>
-            
-            <span class="s-label" style="margin-top:15px;" data-i18n="set_lang">Язык интерфейса</span>
+        </div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+
+    <div id="p-set-lang" class="overlay">
+        <h2 style="color:#30D158" data-i18n="s_menu_lang">Сменить язык</h2>
+        <div class="info-card">
             <div class="con-grid" style="margin-bottom:0;">
                 <div class="con-btn lang-btn" id="lang-ru" style="border-color:#bc42f5;" onclick="setLang('ru')">🇷🇺 Русский</div>
                 <div class="con-btn lang-btn" id="lang-uk" style="border-color:#2d164d;" onclick="setLang('uk')">🇺🇦 Українська</div>
@@ -353,7 +419,11 @@
                 <div class="con-btn lang-btn" style="opacity:0.4; border-color:#2d164d; grid-column: span 2;" onclick="devLang('Deutsch')">🇩🇪 Deutsch</div>
             </div>
         </div>
-        
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+
+    <div id="p-set-ai" class="overlay">
+        <h2 style="color:#8E8E93" data-i18n="s_menu_ai">Настройка ИИ</h2>
         <div class="info-card">
             <span class="s-label"><span data-i18n="set_len">Длина сообщений</span> <span class="slider-val" id="len-val">45</span></span>
             <div class="slider-wrap">
@@ -516,7 +586,7 @@
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; 
 
-        // === ОГРОМНЫЙ СЛОВАРЬ СТАТИКИ (4 ЯЗЫКА) ===
+        // === ОГРОМНЫЙ СЛОВАРЬ СТАТИКИ (4 ЯЗЫКА + НОВЫЕ НАСТРОЙКИ) ===
         const translations = {
             ru: {
                 m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль",
@@ -526,7 +596,8 @@
                 set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей",
                 d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по",
                 s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код",
-                dos_age: "Возраст:", dos_gender: "Пол:"
+                dos_age: "Возраст:", dos_gender: "Пол:",
+                s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk"
             },
             uk: {
                 m_chats: "Чати", m_chars: "Персонажі", m_daily: "Щоденна", m_tasks: "Завдання", m_shop: "Магазин", m_promos: "Промокоди", m_prof: "Профіль", m_set: "Налаштування", m_adm: "Адмінка", m_con: "Консоль",
@@ -536,7 +607,8 @@
                 set_nick: "Нік у додатку", set_gender: "Ваша стать", g_m: "Чоловік", g_f: "Жінка", set_lang: "Мова інтерфейсу", set_len: "Довжина повідомлень", set_sex: "Вульгарність персонажів",
                 d_sub: "Нагорода залежить від підписки. Заходь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
                 s_pay_info: "Оплата через Telegram Stars або CryptoBot (TON)", sh_subs: "ПІДПИСКИ (30 ДНІВ)", sd_prem: "50 осколків щодня<br>x2 бонус за стрік 7 днів", sd_pro: "150 осколків щодня<br>x2 бонус за стрік 7 днів", sd_vip: "250 осколків щодня<br>x2 бонус за стрік 7 днів", sd_ultra: "500 осколків щодня<br>x2 бонус за стрік 7 днів", sh_shards: "ОСКОЛКИ МІСЯЦЯ", s_shards: "Осколків", p_enter: "Введіть секретний код",
-                dos_age: "Вік:", dos_gender: "Стать:"
+                dos_age: "Вік:", dos_gender: "Стать:",
+                s_menu_prof: "Налаштувати профіль", s_menu_lang: "Змінити мову", s_menu_ai: "Налаштування ШІ", s_menu_priv: "Політика конфіденційності", s_menu_sup: "Технічна підтримка", s_menu_apk: "Додаток .apk"
             },
             en: {
                 m_chats: "Chats", m_chars: "Characters", m_daily: "Daily", m_tasks: "Tasks", m_shop: "Shop", m_promos: "Promocodes", m_prof: "Profile", m_set: "Settings", m_adm: "Admin", m_con: "Console",
@@ -546,7 +618,8 @@
                 set_nick: "App Nickname", set_gender: "Your gender", g_m: "Male", g_f: "Female", set_lang: "App Language", set_len: "Message length", set_sex: "NSFW Level",
                 d_sub: "Reward depends on subscription. Log in 7 days for x2 bonus!", d_today: "Your reward today:", t_invite: "INVITE A FRIEND", t_invite_desc: "You and your friend get",
                 s_pay_info: "Pay via Telegram Stars or CryptoBot (TON)", sh_subs: "SUBSCRIPTIONS (30 DAYS)", sd_prem: "50 shards daily<br>x2 bonus for 7-day streak", sd_pro: "150 shards daily<br>x2 bonus for 7-day streak", sd_vip: "250 shards daily<br>x2 bonus for 7-day streak", sd_ultra: "500 shards daily<br>x2 bonus for 7-day streak", sh_shards: "MOON SHARDS", s_shards: "Shards", p_enter: "Enter secret code",
-                dos_age: "Age:", dos_gender: "Gender:"
+                dos_age: "Age:", dos_gender: "Gender:",
+                s_menu_prof: "Edit Profile", s_menu_lang: "Change Language", s_menu_ai: "AI Settings", s_menu_priv: "Privacy Policy", s_menu_sup: "Technical Support", s_menu_apk: "App .apk"
             },
             be: {
                 m_chats: "Чаты", m_chars: "Персанажы", m_daily: "Штодзёнка", m_tasks: "Заданні", m_shop: "Крама", m_promos: "Прамакоды", m_prof: "Профіль", m_set: "Налады", m_adm: "Адмінка", m_con: "Кансоль",
@@ -556,23 +629,22 @@
                 set_nick: "Нік у дадатку", set_gender: "Ваш пол", g_m: "Мужчына", g_f: "Жанчына", set_lang: "Мова інтэрфейсу", set_len: "Даўжыня паведамленняў", set_sex: "Пошласць персанажаў",
                 d_sub: "Узнагарода залежыць ад падпіскі. Заходзь 7 дзён запар для бонусу x2!", d_today: "Ваша ўзнагарода сёння:", t_invite: "ЗАПРАСІ СЯБРА", t_invite_desc: "Ты і твой сябар атрымаеце па",
                 s_pay_info: "Аплата праз Telegram Stars або CryptoBot (TON)", sh_subs: "ПАДПІСКІ (30 ДЗЁН)", sd_prem: "50 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_pro: "150 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_vip: "250 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_ultra: "500 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sh_shards: "АСКЕПКІ МЕСЯЦА", s_shards: "Аскепкаў", p_enter: "Увядзіце сакрэтны код",
-                dos_age: "Узрост:", dos_gender: "Пол:"
+                dos_age: "Узрост:", dos_gender: "Пол:",
+                s_menu_prof: "Наладзіць профіль", s_menu_lang: "Змяніць мову", s_menu_ai: "Налады ШІ", s_menu_priv: "Палітыка прыватнасці", s_menu_sup: "Тэхнічная падтрымка", s_menu_apk: "Дадатак .apk"
             }
         };
 
         let currentLang = 'ru';
-        const transCache = {}; // Кэш нейро-переводчика, чтобы не тормозить апп
+        const transCache = {}; 
 
         function getUid() { 
             return String(tg.initDataUnsafe?.user?.id || OID); 
         }
 
         // === НЕЙРО-ПЕРЕВОДЧИК (Google API) ===
-        // Эта штука на лету переводит имена, описания и названия тасок без перезагрузки
         async function neuroTranslate(text, targetLang) {
-            if (!text || targetLang === 'ru') return text; // Оригинал у нас на русском
+            if (!text || targetLang === 'ru') return text; 
             
-            // Защита от дублей: если уже переводили, берем из кэша
             const cacheKey = text + '_' + targetLang;
             if (transCache[cacheKey]) return transCache[cacheKey];
 
@@ -584,11 +656,11 @@
                 let translatedText = '';
                 data[0].forEach(item => { translatedText += item[0]; });
                 
-                transCache[cacheKey] = translatedText; // Запоминаем перевод
+                transCache[cacheKey] = translatedText; 
                 return translatedText;
             } catch (e) {
                 console.error("NeuroTranslate Error:", e);
-                return text; // Если Гугл отвалился, возвращаем оригинал, чтобы не ломать апп
+                return text; 
             }
         }
 
@@ -597,7 +669,6 @@
             currentLang = lang;
             localStorage.setItem('m_lang_' + getUid(), lang);
             
-            // Выделяем активную кнопку
             document.querySelectorAll('.lang-btn').forEach(btn => { btn.style.borderColor = '#2d164d'; btn.style.opacity = '1'; });
             const activeBtn = document.getElementById('lang-' + lang);
             if (activeBtn) activeBtn.style.borderColor = '#bc42f5';
@@ -606,7 +677,6 @@
 
             applyTranslations();
 
-            // === МАГИЯ: МГНОВЕННЫЙ НЕЙРО-ПЕРЕВОД ОТКРЫТЫХ ОКОН ===
             if(document.getElementById('p-user-chars').style.display === 'flex') await renderUserChars();
             if(document.getElementById('p-char-dossier').style.display === 'flex') await openDossier(activeCharId);
             if(document.getElementById('p-user-tasks').style.display === 'flex') await renderUserTasks();
@@ -644,6 +714,11 @@
 
         function devLang(langName) {
             let errText = currentLang === 'uk' ? `Мова ${langName} у розробці! 🛠` : currentLang === 'en' ? `Language ${langName} is in development! 🛠` : currentLang === 'be' ? `Мова ${langName} у распрацоўцы! 🛠` : `Язык ${langName} в разработке! 🛠`;
+            tg.showAlert(errText);
+        }
+
+        function devApk() {
+            let errText = currentLang === 'uk' ? `Додаток APK ще в розробці! 🛠` : currentLang === 'en' ? `APK App is still in development! 🛠` : currentLang === 'be' ? `Дадатак APK яшчэ ў распрацоўцы! 🛠` : `Приложение APK еще в разработке! 🛠`;
             tg.showAlert(errText);
         }
 
@@ -960,7 +1035,6 @@
                 let emptyTxt = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : currentLang === 'en' ? "You have no active chats.<br><br>Go to 'Characters', select a dossier and click 'Start Chat'!" : currentLang === 'be' ? "У вас пакуль няма актыўных дыялогаў.<br><br>Перайдзіце ў 'Персанажы', выберыце дасье і націсніце 'Пачаць чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
                 html = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
             } else {
-                // === НЕЙРО-ПЕРЕВОД ИМЕН В ЧАТАХ НА ЛЕТУ ===
                 const chatCards = await Promise.all(chatObjects.map(async (obj) => {
                     let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
                     
@@ -999,7 +1073,6 @@
             const c = allChars.find(x => x.id == charId); 
             if(!c) return;
             
-            // Нейро-перевод имени для шапки чата
             let tName = await neuroTranslate(c.name, currentLang);
             document.getElementById('chat-char-name').innerText = tName;
             
@@ -1261,7 +1334,6 @@
                 let mText = currentLang === 'uk' ? "Чол" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Муж" : "Муж";
                 let fText = currentLang === 'uk' ? "Жін" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жан" : "Жен";
 
-                // === НЕЙРО-ПЕРЕВОД ИМЕН ПЕРСОНАЖЕЙ НА ЛЕТУ ===
                 const charCards = await Promise.all(allChars.map(async (c) => {
                     let tName = await neuroTranslate(c.name, currentLang);
                     return `
@@ -1283,7 +1355,6 @@
             if(!c) return; 
             activeCharId = id;
             
-            // === НЕЙРО-ПЕРЕВОД ИМЕНИ И ОПИСАНИЯ ===
             let tName = await neuroTranslate(c.name, currentLang);
             let tDesc = await neuroTranslate(c.desc, currentLang);
 
@@ -1529,7 +1600,6 @@
             let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
             let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
 
-            // === НЕЙРО-ПЕРЕВОД ТАСОК ===
             const taskCards = await Promise.all(tasks.map(async (t) => {
                 let tName = await neuroTranslate(t.name, currentLang);
                 if(completed.includes(t.id)) {
