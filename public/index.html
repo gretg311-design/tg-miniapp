@@ -67,7 +67,6 @@
 
         .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
         
-        /* Исправление ползунков для тапов на телефонах */
         input[type="range"] { touch-action: pan-y; }
         
         .slider-wrap { width: 100%; margin-top: 5px; }
@@ -517,7 +516,7 @@
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; 
 
-        // === ОГРОМНЫЙ СЛОВАРЬ (4 ЯЗЫКА) ===
+        // === ОГРОМНЫЙ СЛОВАРЬ СТАТИКИ (4 ЯЗЫКА) ===
         const translations = {
             ru: {
                 m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль",
@@ -553,7 +552,7 @@
                 m_chats: "Чаты", m_chars: "Персанажы", m_daily: "Штодзёнка", m_tasks: "Заданні", m_shop: "Крама", m_promos: "Прамакоды", m_prof: "Профіль", m_set: "Налады", m_adm: "Адмінка", m_con: "Кансоль",
                 h_chats: "МАЕ ЧАТЫ", h_chars: "ПЕРСАНАЖЫ", h_daily: "ШТОДЗЁННАЯ ЎЗНАГАРОДА", h_tasks: "ЗАДАННІ", h_shop: "КРАМА", h_promos: "ПРАМАКОД", h_prof: "ПРОФІЛЬ", h_set: "НАЛАДЫ",
                 b_back: "НАЗАД", b_start_chat: "ПАЧАЦЬ ЧАТ", b_del_char: "ВЫДАЛІЦЬ ПЕРСАНАЖА", b_claim: "ЗАБРАЦЬ", b_share: "ПАДЗЯЛІЦЦА СПАСЫЛКАЙ", b_activate: "АКТЫВАВАЦЬ",
-                pr_nick: "Нік:", pr_id: "Айдзі юз:", pr_sub: "Падпіска:", pr_exp: "Тэрмін:", pr_shards: "Колькасць аскепкаў:", pr_status: "Статус:",
+                pr_nick: "Нік:", pr_id: "Айдзі юз:", pr_sub: "Падпіска:", pr_exp: "Тэрмін:", pr_shards: "Аскепкаў:", pr_status: "Статус:",
                 set_nick: "Нік у дадатку", set_gender: "Ваш пол", g_m: "Мужчына", g_f: "Жанчына", set_lang: "Мова інтэрфейсу", set_len: "Даўжыня паведамленняў", set_sex: "Пошласць персанажаў",
                 d_sub: "Узнагарода залежыць ад падпіскі. Заходзь 7 дзён запар для бонусу x2!", d_today: "Ваша ўзнагарода сёння:", t_invite: "ЗАПРАСІ СЯБРА", t_invite_desc: "Ты і твой сябар атрымаеце па",
                 s_pay_info: "Аплата праз Telegram Stars або CryptoBot (TON)", sh_subs: "ПАДПІСКІ (30 ДЗЁН)", sd_prem: "50 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_pro: "150 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_vip: "250 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_ultra: "500 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sh_shards: "АСКЕПКІ МЕСЯЦА", s_shards: "Аскепкаў", p_enter: "Увядзіце сакрэтны код",
@@ -562,13 +561,39 @@
         };
 
         let currentLang = 'ru';
+        const transCache = {}; // Кэш нейро-переводчика, чтобы не тормозить апп
 
         function getUid() { 
             return String(tg.initDataUnsafe?.user?.id || OID); 
         }
 
-        // === СИСТЕМА ПЕРЕВОДА ===
-        function setLang(lang) {
+        // === НЕЙРО-ПЕРЕВОДЧИК (Google API) ===
+        // Эта штука на лету переводит имена, описания и названия тасок без перезагрузки
+        async function neuroTranslate(text, targetLang) {
+            if (!text || targetLang === 'ru') return text; // Оригинал у нас на русском
+            
+            // Защита от дублей: если уже переводили, берем из кэша
+            const cacheKey = text + '_' + targetLang;
+            if (transCache[cacheKey]) return transCache[cacheKey];
+
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                let translatedText = '';
+                data[0].forEach(item => { translatedText += item[0]; });
+                
+                transCache[cacheKey] = translatedText; // Запоминаем перевод
+                return translatedText;
+            } catch (e) {
+                console.error("NeuroTranslate Error:", e);
+                return text; // Если Гугл отвалился, возвращаем оригинал, чтобы не ломать апп
+            }
+        }
+
+        // === СИСТЕМА ПЕРЕВОДА ИНТЕРФЕЙСА ===
+        async function setLang(lang) {
             currentLang = lang;
             localStorage.setItem('m_lang_' + getUid(), lang);
             
@@ -577,9 +602,15 @@
             const activeBtn = document.getElementById('lang-' + lang);
             if (activeBtn) activeBtn.style.borderColor = '#bc42f5';
             
-            document.querySelector('[onclick="devLang(\'Deutsch\')"]').style.opacity = '0.4'; // Немецкий пока в прозрачности
+            document.querySelector('[onclick="devLang(\'Deutsch\')"]').style.opacity = '0.4'; 
 
             applyTranslations();
+
+            // === МАГИЯ: МГНОВЕННЫЙ НЕЙРО-ПЕРЕВОД ОТКРЫТЫХ ОКОН ===
+            if(document.getElementById('p-user-chars').style.display === 'flex') await renderUserChars();
+            if(document.getElementById('p-char-dossier').style.display === 'flex') await openDossier(activeCharId);
+            if(document.getElementById('p-user-tasks').style.display === 'flex') await renderUserTasks();
+            if(document.getElementById('p-user-chatlist').style.display === 'flex') openChatList();
         }
 
         function applyTranslations() {
@@ -686,7 +717,6 @@
             const uid = getUid();
             const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
 
-            // Инициализация языка
             currentLang = localStorage.getItem('m_lang_' + uid) || 'ru';
             setLang(currentLang);
 
@@ -763,16 +793,14 @@
 
             applyNickStyle(userData.subscription);
 
-            // === ИСПРАВЛЕННЫЕ ЛИМИТЫ ПОЛЗУНКОВ ===
             let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
-            
             let maxLen = 45; 
             let maxSex = 0;
             
             if(currentSub === "premium") { maxLen = 55; }
             else if(currentSub === "pro") { maxLen = 65; maxSex = 3; }
             else if(currentSub === "vip") { maxLen = 80; maxSex = 5; }
-            else if(currentSub === "ultra") { maxLen = 100; maxSex = 6; } // ОВНЕР ТЕПЕРЬ С ПРАВИЛЬНЫМИ ЛИМИТАМИ
+            else if(currentSub === "ultra") { maxLen = 100; maxSex = 6; } 
 
             const lS = document.getElementById('len-slider');
             const sS = document.getElementById('sex-slider');
@@ -896,7 +924,7 @@
             });
         }
 
-        function openChatList() {
+        async function openChatList() {
             const uid = getUid();
             const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
@@ -932,7 +960,8 @@
                 let emptyTxt = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : currentLang === 'en' ? "You have no active chats.<br><br>Go to 'Characters', select a dossier and click 'Start Chat'!" : currentLang === 'be' ? "У вас пакуль няма актыўных дыялогаў.<br><br>Перайдзіце ў 'Персанажы', выберыце дасье і націсніце 'Пачаць чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
                 html = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
             } else {
-                chatObjects.forEach(obj => {
+                // === НЕЙРО-ПЕРЕВОД ИМЕН В ЧАТАХ НА ЛЕТУ ===
+                const chatCards = await Promise.all(chatObjects.map(async (obj) => {
                     let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
                     
                     let p1 = currentLang === 'uk' ? "Відкріпити" : currentLang === 'en' ? "Unpin" : currentLang === 'be' ? "Адмацаваць" : "Открепить";
@@ -942,11 +971,13 @@
                     let clearText = currentLang === 'uk' ? "Очистити пам'ять" : currentLang === 'en' ? "Clear memory" : currentLang === 'be' ? "Ачысціць памяць" : "Очистить память";
                     let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Выдаліць чат" : "Удалить чат";
 
-                    html += `
+                    let tName = await neuroTranslate(obj.char.name, currentLang); 
+
+                    return `
                     <div class="chatlist-item" onclick="resumeChat(${obj.id})">
                         <img src="${obj.char.photo}" class="chatlist-img">
                         <div class="chatlist-info">
-                            <div class="chatlist-name">${pinMark}${obj.char.name}</div>
+                            <div class="chatlist-name">${pinMark}${tName}</div>
                             <div class="chatlist-last">${obj.lastMsg}</div>
                         </div>
                         <button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button>
@@ -956,27 +987,33 @@
                             <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 ${delText}</div>
                         </div>
                     </div>`;
-                });
+                }));
+                html = chatCards.join('');
             }
             list.innerHTML = html; 
             openPanel('p-user-chatlist');
         }
 
-        function resumeChat(charId) {
+        async function resumeChat(charId) {
             activeCharId = charId;
             const c = allChars.find(x => x.id == charId); 
             if(!c) return;
             
-            document.getElementById('chat-char-name').innerText = c.name;
+            // Нейро-перевод имени для шапки чата
+            let tName = await neuroTranslate(c.name, currentLang);
+            document.getElementById('chat-char-name').innerText = tName;
+            
             renderChatMessages(); 
             openPanel('p-chat');
         }
 
-        function openChatFromDossier() {
+        async function openChatFromDossier() {
             const c = allChars.find(x => x.id === activeCharId); 
             if(!c) return;
             
-            document.getElementById('chat-char-name').innerText = c.name;
+            let tName = await neuroTranslate(c.name, currentLang);
+            document.getElementById('chat-char-name').innerText = tName;
+            
             const uid = getUid(); 
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             
@@ -1037,7 +1074,6 @@
                 const uName = document.getElementById('u-name').innerText;
                 const rawGender = localStorage.getItem('m_gender_' + uid) || 'm';
                 
-                // Перевод пола для нейросети, чтобы она понимала, кто с ней говорит
                 let uGender = "Мужской";
                 if (rawGender === 'f') {
                     uGender = currentLang === 'uk' ? "Жіночий" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жаночы" : "Женский";
@@ -1225,23 +1261,33 @@
                 let mText = currentLang === 'uk' ? "Чол" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Муж" : "Муж";
                 let fText = currentLang === 'uk' ? "Жін" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жан" : "Жен";
 
-                list.innerHTML = allChars.map(c => `
+                // === НЕЙРО-ПЕРЕВОД ИМЕН ПЕРСОНАЖЕЙ НА ЛЕТУ ===
+                const charCards = await Promise.all(allChars.map(async (c) => {
+                    let tName = await neuroTranslate(c.name, currentLang);
+                    return `
                     <div class="char-card" onclick="openDossier(${c.id})">
                         <img src="${c.photo}">
                         <div class="char-card-info">
-                            <div class="char-card-name">${c.name}</div>
+                            <div class="char-card-name">${tName}</div>
                             <div class="char-card-tags">${c.age} ${yText} | ${c.gender === 'm' ? mText : fText}</div>
                         </div>
-                    </div>`).join('');
+                    </div>`;
+                }));
+                
+                list.innerHTML = charCards.join('');
             } catch (e) {}
         }
 
-        function openDossier(id) {
+        async function openDossier(id) {
             const c = allChars.find(x => x.id === id); 
             if(!c) return; 
             activeCharId = id;
             
-            document.getElementById('dos-name').innerText = c.name; 
+            // === НЕЙРО-ПЕРЕВОД ИМЕНИ И ОПИСАНИЯ ===
+            let tName = await neuroTranslate(c.name, currentLang);
+            let tDesc = await neuroTranslate(c.desc, currentLang);
+
+            document.getElementById('dos-name').innerText = tName; 
             document.getElementById('dos-img').src = c.photo; 
             document.getElementById('dos-age').innerText = c.age;
             
@@ -1249,7 +1295,7 @@
             let fText = currentLang === 'uk' ? "Жіноча" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жаночы" : "Женский";
 
             document.getElementById('dos-gender').innerText = c.gender === 'm' ? mText : fText; 
-            document.getElementById('dos-desc').innerText = c.desc;
+            document.getElementById('dos-desc').innerText = tDesc;
             
             if(getUid() === OID) { 
                 document.getElementById('dos-del-btn').style.display = 'block'; 
@@ -1483,16 +1529,20 @@
             let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
             let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
 
-            list.innerHTML = tasks.map(t => {
+            // === НЕЙРО-ПЕРЕВОД ТАСОК ===
+            const taskCards = await Promise.all(tasks.map(async (t) => {
+                let tName = await neuroTranslate(t.name, currentLang);
                 if(completed.includes(t.id)) {
-                    return `<div class="task-item" style="opacity:0.5;"><span>${t.name}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
+                    return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
                 }
                 return `
                 <div class="task-item" id="utask-${t.id}">
-                    <span>${t.name}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
+                    <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
                     <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
                 </div>`;
-            }).join('');
+            }));
+
+            list.innerHTML = taskCards.join('');
         }
 
         function startTask(id, link) { 
