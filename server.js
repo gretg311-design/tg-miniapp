@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
+const crypto = require('crypto'); // ТА САМАЯ КРИПТОГРАФИЯ ДЛЯ ЗАЩИТЫ
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -12,9 +13,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// БЕЗОПАСНЫЙ КЛЮЧ VERCEL ДЛЯ GOOGLE GEMINI
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "no-key"; 
-
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
 
@@ -62,10 +61,44 @@ const checkAdmin = async (sender_id) => {
     const sender = await User.findOne({ tg_id: Number(sender_id) }); return sender && sender.is_admin;
 };
 
-// ================= API: ПРОФИЛЬ И ЮЗЕРЫ =================
-app.post('/api/user/get-data', async (req, res) => {
+// ================= ЗАЩИТНАЯ ТАМОЖНЯ (MIDDLEWARE) =================
+// Эта функция перехватывает запросы и проверяет крипто-подпись Телеграма.
+const checkTgAuth = (req, res, next) => {
     try {
-        const uid = Number(req.body.tg_id);
+        const initData = req.headers['x-tg-data'];
+        if (!initData) return res.status(401).json({ error: "Нет подписи Telegram" });
+
+        const urlParams = new URLSearchParams(initData);
+        const hash = urlParams.get('hash');
+        urlParams.delete('hash');
+        urlParams.sort();
+
+        let dataCheckString = '';
+        for (const [key, value] of urlParams.entries()) {
+            dataCheckString += `${key}=${value}\n`;
+        }
+        dataCheckString = dataCheckString.slice(0, -1);
+
+        const secret = crypto.createHmac('sha256', 'WebAppData').update(TG_BOT_TOKEN);
+        const calculatedHash = crypto.createHmac('sha256', secret.digest()).update(dataCheckString).digest('hex');
+
+        if (calculatedHash === hash) {
+            const userObj = JSON.parse(urlParams.get('user'));
+            req.tg_user_id = Number(userObj.id); // СЕРВЕР САМ ДОСТАЕТ НАСТОЯЩИЙ ID. ЕГО НЕ ПОДДЕЛАТЬ.
+            next();
+        } else {
+            console.log(`[ВЗЛОМ] Попытка подделки запроса отклонена.`);
+            return res.status(403).json({ error: "Фальшивый запрос! Попытка взлома." });
+        }
+    } catch (e) {
+        return res.status(403).json({ error: "Ошибка авторизации" });
+    }
+};
+
+// ================= API: ПРОФИЛЬ И ЮЗЕРЫ =================
+app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
+    try {
+        const uid = req.tg_user_id; // Берем защищенный ID
         const inviterId = req.body.start_param ? Number(req.body.start_param) : null; 
 
         let user = await User.findOne({ tg_id: uid }); 
@@ -104,9 +137,9 @@ app.post('/api/user/get-data', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/user/sync', async (req, res) => {
+app.post('/api/user/sync', checkTgAuth, async (req, res) => {
     try {
-        const uid = Number(req.body.tg_id); let user = await User.findOne({ tg_id: uid });
+        const uid = req.tg_user_id; let user = await User.findOne({ tg_id: uid });
         if (!user) return res.json({ shards: 0, subscription: "FREE" });
         let cleanSub = user.subscription ? user.subscription.trim() : "FREE";
         if (/^ultra$/i.test(cleanSub)) cleanSub = "Ultra"; else if (/^vip$/i.test(cleanSub)) cleanSub = "VIP";
@@ -116,9 +149,9 @@ app.post('/api/user/sync', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/user/claim-daily', async (req, res) => {
+app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
     try {
-        const uid = Number(req.body.tg_id); let user = await User.findOne({ tg_id: uid });
+        const uid = req.tg_user_id; let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден" });
         const now = Date.now(); const ONE_DAY = 24 * 60 * 60 * 1000; const timePassed = now - user.last_daily;
 
@@ -138,11 +171,11 @@ app.post('/api/user/claim-daily', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (С УЧЕТОМ ИМЕНИ И ПОЛА) =================
-app.post('/api/chat', async (req, res) => {
+// ================= API: ЧАТ =================
+app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
-        const { tg_id, char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
-        const uid = Number(tg_id);
+        const { char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
+        const uid = req.tg_user_id; // Только настоящий ID
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден в БД" });
 
@@ -173,7 +206,6 @@ app.post('/api/chat', async (req, res) => {
         let uName = user_name || "Собеседник";
         let uGender = user_gender === 'f' ? "Женский" : "Мужской";
         
-        // ОБНОВЛЕННЫЙ ЖЕСТКИЙ ПРОМПТ
         let systemPrompt = `Ты в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}. Легенда: ${char.desc}.
 Твой собеседник: Имя - ${uName}, Пол - ${uGender}.
 
@@ -252,10 +284,11 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // ================= API: ОПЛАТА =================
-app.post('/api/payment/stars-invoice', async (req, res) => {
+app.post('/api/payment/stars-invoice', checkTgAuth, async (req, res) => {
     try {
-        const { tg_id, type, item, amount_stars } = req.body;
-        const customPayload = JSON.stringify({ tg_id: Number(tg_id), type, item });
+        const { type, item, amount_stars } = req.body;
+        const uid = req.tg_user_id;
+        const customPayload = JSON.stringify({ tg_id: uid, type, item });
         const response = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/createInvoiceLink`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ title: type === 'shards' ? `Осколки Луны x${item}` : `Подписка ${item}`, description: type === 'shards' ? `Начисление ${item} 🌙 на ваш баланс` : `Премиум функции и награды на 30 дней`, payload: customPayload, provider_token: "", currency: "XTR", prices: [{ label: "Цена", amount: Number(amount_stars) }] })
@@ -265,10 +298,11 @@ app.post('/api/payment/stars-invoice', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/payment/create', async (req, res) => {
+app.post('/api/payment/create', checkTgAuth, async (req, res) => {
     try {
-        const { tg_id, type, item, amount_ton } = req.body;
-        const customPayload = JSON.stringify({ tg_id: Number(tg_id), type, item });
+        const { type, item, amount_ton } = req.body;
+        const uid = req.tg_user_id;
+        const customPayload = JSON.stringify({ tg_id: uid, type, item });
         const response = await fetch("https://pay.crypt.bot/api/createInvoice", {
             method: "POST", headers: { "Crypto-Pay-API-Token": CRYPTOBOT_TOKEN, "Content-Type": "application/json" },
             body: JSON.stringify({ asset: "TON", amount: amount_ton, payload: customPayload, expires_in: 3600 })
@@ -278,6 +312,7 @@ app.post('/api/payment/create', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ЭТИ ДВА РОУТА ОСТАВЛЯЕМ ОТКРЫТЫМИ, ТАК КАК ИХ ВЫЗЫВАЕТ НЕ MINI APP, А СЕРВЕРА TELEGRAM И CRYPTOBOT
 app.post('/api/payment/webhook', async (req, res) => {
     try {
         const update = req.body;
@@ -330,20 +365,21 @@ app.post('/api/tg-webhook', async (req, res) => {
 });
 
 // ================= АДМИНКА И ПРОВЕРКА ЗАДАНИЙ =================
-app.get('/api/get-characters', async (req, res) => res.json(await Character.find()));
-app.get('/api/get-tasks', async (req, res) => res.json(await Task.find()));
-app.get('/api/get-promos', async (req, res) => res.json(await Promo.find()));
+app.get('/api/get-characters', checkTgAuth, async (req, res) => res.json(await Character.find()));
+app.get('/api/get-tasks', checkTgAuth, async (req, res) => res.json(await Task.find()));
+app.get('/api/get-promos', checkTgAuth, async (req, res) => res.json(await Promo.find()));
 
-app.post('/api/check-task', async (req, res) => {
+app.post('/api/check-task', checkTgAuth, async (req, res) => {
     try {
-        const { tg_id, task_id } = req.body;
+        const { task_id } = req.body;
+        const uid = req.tg_user_id;
         const task = await Task.findOne({ id: task_id });
         if (!task) return res.json({ success: false, error: "Задание не найдено" });
 
         const match = task.link.match(/t\.me\/(?!\+)([a-zA-Z0-9_]+)/);
         if (match && match[1]) {
             const channel = "@" + match[1];
-            const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/getChatMember?chat_id=${channel}&user_id=${tg_id}`);
+            const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/getChatMember?chat_id=${channel}&user_id=${uid}`);
             const tgData = await tgRes.json();
             
             if (tgData.ok && ['member', 'administrator', 'creator'].includes(tgData.result.status)) { return res.json({ success: true }); } 
@@ -352,8 +388,8 @@ app.post('/api/check-task', async (req, res) => {
     } catch (e) { res.json({ success: false, error: "Ошибка сервера при проверке подписки" }); }
 });
 
-app.post('/api/admin/manage-shards', async (req, res) => {
-    const sender_id = Number(req.body.sender_id); const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
+app.post('/api/admin/manage-shards', checkTgAuth, async (req, res) => {
+    const sender_id = req.tg_user_id; const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
     const action = (req.body.action || '').toLowerCase().trim(); let amount = Math.abs(Number(req.body.amount)); 
     if (action !== 'add' || Number(req.body.amount) < 0) {
@@ -363,8 +399,8 @@ app.post('/api/admin/manage-shards', async (req, res) => {
     } else { await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: amount } }, { upsert: true }); await sendTgMessage(target_id, `Администратор выдал вам ${amount} токенов`); res.json({ message: `Выдано ${amount} осколков` }); }
 });
 
-app.post('/api/admin/manage-sub', async (req, res) => {
-    const sender_id = Number(req.body.sender_id); const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
+app.post('/api/admin/manage-sub', checkTgAuth, async (req, res) => {
+    const sender_id = req.tg_user_id; const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
     if (req.body.action === 'add') {
         let days = 30; if (isOwner && req.body.days) days = Number(req.body.days); 
@@ -377,22 +413,22 @@ app.post('/api/admin/manage-sub', async (req, res) => {
     }
 });
 
-app.post('/api/admin/create-char', async (req, res) => { if (!(await checkAdmin(req.body.sender_id))) return res.status(403).json({ error: "Нет доступа" }); await new Character(req.body.charData).save(); res.json({ message: "Персонаж добавлен!" }); });
-app.post('/api/admin/delete-char', async (req, res) => { if (Number(req.body.sender_id) !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять" }); await Character.findOneAndDelete({ id: req.body.char_id }); res.json({ message: "Удален" }); });
-app.post('/api/admin/create-promo', async (req, res) => { if (!(await checkAdmin(req.body.sender_id))) return res.status(403).json({ error: "Нет доступа" }); await new Promo(req.body.promoData).save(); res.json({ message: "Промо создан" }); });
-app.post('/api/admin/delete-promo', async (req, res) => { if (!(await checkAdmin(req.body.sender_id))) return res.status(403).json({ error: "Нет доступа" }); await Promo.findOneAndDelete({ code: req.body.code }); res.json({ message: "Промо удален" }); });
-app.post('/api/admin/create-task', async (req, res) => { if (!(await checkAdmin(req.body.sender_id))) return res.status(403).json({ error: "Нет доступа" }); await new Task(req.body.taskData).save(); res.json({ message: "Задание добавлено" }); });
-app.post('/api/admin/delete-task', async (req, res) => { if (Number(req.body.sender_id) !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять" }); await Task.findOneAndDelete({ id: req.body.task_id }); res.json({ message: "Задание удалено" }); });
+app.post('/api/admin/create-char', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Character(req.body.charData).save(); res.json({ message: "Персонаж добавлен!" }); });
+app.post('/api/admin/delete-char', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять" }); await Character.findOneAndDelete({ id: req.body.char_id }); res.json({ message: "Удален" }); });
+app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Promo(req.body.promoData).save(); res.json({ message: "Промо создан" }); });
+app.post('/api/admin/delete-promo', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await Promo.findOneAndDelete({ code: req.body.code }); res.json({ message: "Промо удален" }); });
+app.post('/api/admin/create-task', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Task(req.body.taskData).save(); res.json({ message: "Задание добавлено" }); });
+app.post('/api/admin/delete-task', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять" }); await Task.findOneAndDelete({ id: req.body.task_id }); res.json({ message: "Задание удалено" }); });
 
-app.post('/api/owner/set-admin', async (req, res) => {
-    if (Number(req.body.owner_id) !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
+app.post('/api/owner/set-admin', checkTgAuth, async (req, res) => {
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
     await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true });
     if (req.body.status) await sendTgMessage(req.body.target_id, `Администратор сделал вас админом`); else await sendTgMessage(req.body.target_id, `Администратор забрал у вас права админа`);
     res.json({ message: "Статус обновлен" });
 });
 
-app.post('/api/owner/set-price', async (req, res) => {
-    if (Number(req.body.sender_id) !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
+app.post('/api/owner/set-price', checkTgAuth, async (req, res) => {
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
     const { item_id, stars, ton } = req.body;
     await Price.findOneAndUpdate({ item_id }, { stars: Number(stars), ton: Number(ton) }, { upsert: true });
     res.json({ message: "Прайс-лист успешно обновлен!" });
