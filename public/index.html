@@ -3,26 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Moon Project - Железобетон 1.2.0 FULL (SERVER API)</title>
+    <title>Moon Project - Железобетон 1.2.1.0 FULL (SERVER API)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
-        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
         @keyframes pulseMoon { 0% { transform: scale(1); box-shadow: 0 0 30px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 60px #fff; } 100% { transform: scale(1); box-shadow: 0 0 30px #fff; } }
+        
+        .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
+        .app-version { font-size: 10px; color: #444; text-align: center; margin-top: 15px; font-family: monospace; }
 
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
-        .nick-ultra { font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
+        /* === ВИЗУАЛКА НИКОВ ДЛЯ ПОДПИСОК === */
+        @keyframes shimmerNick { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .nick-base { font-size: 22px; font-weight: 900; transition: all 0.3s ease; }
+        .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5, #00bcd4); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 2.5s infinite linear; filter: drop-shadow(0px 0px 8px rgba(188,66,245,0.7)); }
+        .nick-vip { background: linear-gradient(90deg, #FFD700, #F5F5DC, #FFAA00, #F5F5DC); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 3s infinite linear; filter: drop-shadow(0px 0px 6px rgba(255,215,0,0.6)); }
+        .nick-pro { color: #00bcd4; text-shadow: 0 0 5px rgba(0,188,212,0.5), 0 0 10px rgba(0,188,212,0.8); letter-spacing: 1px; }
+        .nick-premium { background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff7eb3); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 4s infinite ease-in-out; filter: drop-shadow(0px 0px 5px rgba(255,117,140,0.5)); }
+        .nick-free { color: #ffffff; }
+        
+        /* === БЕЙДЖИ СТАТУСА (OWNER / ADMIN) === */
+        .badge-base { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; margin-bottom: 2px; letter-spacing: 1px; text-transform: uppercase; }
+        .badge-owner { background: linear-gradient(90deg, #ff0044, #ff0000); color: #fff; box-shadow: 0 0 8px rgba(255,0,0,0.6); border: 1px solid #ffaa88; text-shadow: 0 0 3px #fff; }
+        .badge-admin { background: linear-gradient(90deg, #00bcd4, #0055ff); color: #fff; box-shadow: 0 0 8px rgba(0,188,212,0.6); border: 1px solid #88ddff; }
+        
+        /* === АНИМАЦИИ ПЕРЕХОДОВ И КНОПОК === */
+        @keyframes smoothOpen {
+            0% { opacity: 0; transform: translateY(15px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .menu-item, .term-btn, .con-btn, .btn-stars, .btn-ton, .char-card, .chatlist-item, .gender-btn, .chat-send-btn, .task-item button {
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease;
+        }
+        .menu-item:active, .term-btn:active, .con-btn:active, .btn-stars:active, .btn-ton:active, .char-card:active, .chatlist-item:active, .gender-btn:active, .chat-send-btn:active, .task-item button:active {
+            transform: scale(0.94);
+            filter: brightness(0.8);
+        }
+
+        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК (iOS/Telegram стиль) === */
+        .set-list { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; margin-bottom: 15px; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
+        .set-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #2d164d; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; }
+        .set-item:active { transform: scale(0.97); filter: brightness(0.8); }
+        .set-item:last-child { border-bottom: none; }
+        .set-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 15px; flex-shrink: 0; }
+        .set-text { flex: 1; font-size: 15px; color: #fff; font-weight: 500; }
+        .set-arrow { color: #555; font-size: 18px; font-weight: bold; }
+
+        .ic-prof { background: #0A84FF; } /* Синий */
+        .ic-lang { background: #30D158; } /* Зеленый */
+        .ic-ai { background: #8E8E93; }   /* Серый */
+        .ic-priv { background: #FF9F0A; } /* Оранжевый */
+        .ic-sup { background: #BF5AF2; }  /* Фиолетовый */
+        .ic-apk { background: #FF453A; }  /* Красный */
+        /* ================================================== */
+
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
@@ -35,6 +83,9 @@
         .p-val { color: #fff; font-weight: bold; }
 
         .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
+        
+        input[type="range"] { touch-action: pan-y; }
+        
         .slider-wrap { width: 100%; margin-top: 5px; }
         .slider { width: 100%; -webkit-appearance: none; height: 4px; background: #2d164d; border-radius: 2px; outline: none; }
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #bc42f5; box-shadow: 0 0 10px #bc42f5; }
@@ -63,7 +114,6 @@
         .char-card-tags { font-size: 10px; color: #00bcd4; }
         .dossier-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; border: 1px solid #bc42f5; margin-bottom: 15px; }
 
-        /* ИНТЕРФЕЙС ЧАТА */
         .chat-container { flex: 1; width: 100%; background: #05010a; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
         .msg-box { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
@@ -73,41 +123,54 @@
         .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; }
         .chat-send-btn { background: #bc42f5; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
 
-        /* СПИСОК ЧАТОВ */
-        .chatlist-item { display: flex; align-items: center; background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 10px; margin-bottom: 10px; cursor: pointer; }
-        .chatlist-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #bc42f5; margin-right: 15px; flex-shrink: 0; }
-        .chatlist-info { flex: 1; overflow: hidden; }
+        .chatlist-item { display: flex; align-items: center; background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 10px; margin-bottom: 10px; position: relative; }
+        .chatlist-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #bc42f5; margin-right: 15px; flex-shrink: 0; cursor: pointer; }
+        .chatlist-info { flex: 1; overflow: hidden; cursor: pointer; }
         .chatlist-name { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 5px; }
         .chatlist-last { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .chat-menu-btn { background: none; border: none; color: #888; font-size: 20px; font-weight: bold; cursor: pointer; padding: 0 10px; }
+        .chat-dropdown { display: none; position: absolute; right: 35px; top: 35px; background: #11081d; border: 1px solid #bc42f5; border-radius: 8px; z-index: 100; flex-direction: column; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        .chat-dropdown-item { padding: 12px 15px; font-size: 12px; color: #fff; cursor: pointer; border-bottom: 1px solid #2d164d; white-space: nowrap; }
+        .chat-dropdown-item:last-child { border-bottom: none; }
+        .pin-icon { color: #bc42f5; margin-right: 5px; font-size: 12px; }
     </style>
 </head>
 <body>
-    <div id="loading"><div class="moon-logo"></div></div>
+    <div id="loading">
+        <div class="moon-logo"></div>
+        <div class="legal-text">All characters are 18+.<br>Content is AI-generated and does not reflect real people.</div>
+        <div class="app-version">v. 1.2.1.0(beta)</div>
+    </div>
 
     <div id="app">
         <div class="u-header">
-            <div><div id="u-name" class="nick-ultra">...</div><div style="font-size:12px; color:#555;">ID: <span id="u-id-head">0</span></div></div>
+            <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                <div id="u-name" class="nick-base nick-free">...</div>
+                <div id="u-badge" style="display:none;"></div>
+                <div style="font-size:12px; color:#555; margin-top: 3px;">ID: <span id="u-id-head">0</span></div>
+            </div>
             <div style="font-size: 22px; font-weight: bold;">🌙 <span id="shards-balance">0</span></div>
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="openChatList()">Чаты</div>
-            <div class="menu-item" onclick="openPanel('p-user-chars')">Персонажи</div>
-            <div class="menu-item" onclick="openPanel('p-daily')">Ежедневка</div>
-            <div class="menu-item" onclick="openPanel('p-user-tasks')">Задания</div>
-            <div class="menu-item" onclick="openPanel('p-shop')">Магазин</div>
-            <div class="menu-item" onclick="openPanel('p-user-promos')">Промокоды</div>
-            <div class="menu-item" onclick="openPanel('p-profile')">Профиль</div>
-            <div class="menu-item" onclick="openPanel('p-settings')">Настройка</div>
-            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')">Админка</div>
-            <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')">Консоль</div>
+            <div class="menu-item" onclick="openChatList()" data-i18n="m_chats">Чаты</div>
+            <div class="menu-item" onclick="openPanel('p-user-chars')" data-i18n="m_chars">Персонажи</div>
+            <div class="menu-item" onclick="openPanel('p-daily')" data-i18n="m_daily">Ежедневка</div>
+            <div class="menu-item" onclick="openPanel('p-user-tasks')" data-i18n="m_tasks">Задания</div>
+            <div class="menu-item" onclick="openPanel('p-shop')" data-i18n="m_shop">Магазин</div>
+            <div class="menu-item" onclick="openPanel('p-user-promos')" data-i18n="m_promos">Промокоды</div>
+            <div class="menu-item" onclick="openPanel('p-profile')" data-i18n="m_prof">Профиль</div>
+            <div class="menu-item" onclick="openPanel('p-settings')" data-i18n="m_set">Настройка</div>
+            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')" data-i18n="m_adm">Админка</div>
+            <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')" data-i18n="m_con">Консоль</div>
         </div>
+        <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
     </div>
-
     <div id="p-user-chatlist" class="overlay">
-        <h2 style="color:#bc42f5; margin-bottom: 20px;">МОИ ЧАТЫ</h2>
+        <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chats">МОИ ЧАТЫ</h2>
         <div id="chatlist-container" style="width:100%"></div>
-        <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
 
     <div id="p-chat" class="overlay" style="padding: 0;">
@@ -117,7 +180,7 @@
         </div>
         <div class="chat-container">
             <div class="chat-messages" id="chat-messages-box">
-                <div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>
+                <div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;" id="chat-empty-msg">Начните диалог...<br>1 сообщение = 1 🌙</div>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="chat-input-text" class="chat-input" placeholder="Ваше сообщение...">
@@ -127,77 +190,583 @@
     </div>
 
     <div id="p-user-chars" class="overlay">
-        <h2 style="color:#bc42f5; margin-bottom: 20px;">ПЕРСОНАЖИ</h2>
+        <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chars">ПЕРСОНАЖИ</h2>
         <div id="user-char-list" class="char-grid"></div>
-        <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
 
     <div id="p-char-dossier" class="overlay">
         <h2 style="color:#bc42f5; margin-bottom: 10px;" id="dos-name">Имя</h2>
         <div class="info-card">
             <img id="dos-img" src="" class="dossier-img">
-            <div class="p-row"><span class="p-label">Возраст:</span> <span class="p-val" id="dos-age">18</span></div>
-            <div class="p-row"><span class="p-label">Пол:</span> <span class="p-val" id="dos-gender">М</span></div>
+            <div class="p-row">
+                <span class="p-label" data-i18n="dos_age">Возраст:</span> 
+                <span class="p-val" id="dos-age">18</span>
+            </div>
+            <div class="p-row">
+                <span class="p-label" data-i18n="dos_gender">Пол:</span> 
+                <span class="p-val" id="dos-gender">М</span>
+            </div>
             <div style="margin-top:15px; font-size:12px; color:#ccc; line-height:1.4;" id="dos-desc">Описание...</div>
         </div>
-        <div class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()">НАЧАТЬ ЧАТ</div>
-        <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()">УДАЛИТЬ ПЕРСОНАЖА</div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
+        <div class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()" data-i18n="b_start_chat">НАЧАТЬ ЧАТ</div>
+        <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()" data-i18n="b_del_char">УДАЛИТЬ ПЕРСОНАЖА</div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
-
     <div id="p-daily" class="overlay">
-        <h2 style="color:#00ff00; margin-bottom: 5px;">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
-        <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
+        <h2 style="color:#00ff00; margin-bottom: 5px;" data-i18n="h_daily">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
+        <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;" data-i18n="d_sub">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
         
         <div class="info-card" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
             <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
             <h3 id="daily-streak-text" style="color: #bc42f5; margin: 0 0 10px 0;">Стрик: 0 дней</h3>
-            <div style="font-size: 14px; margin-bottom: 15px; color:#aaa;">Ваша награда сегодня:<br>
+            <div style="font-size: 14px; margin-bottom: 15px; color:#aaa;">
+                <span data-i18n="d_today">Ваша награда сегодня:</span><br>
                 <b id="daily-reward-text" style="color: #00ff00; font-size: 24px;">...</b>
             </div>
-            <div id="daily-btn" class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00; width:80%;" onclick="claimDaily()">ЗАБРАТЬ</div>
+            <div id="daily-btn" class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00; width:80%;" onclick="claimDaily()" data-i18n="b_claim">ЗАБРАТЬ</div>
             <div id="daily-wait" style="display:none; color:#888; font-size: 12px; margin-top: 10px;">Следующая награда будет доступна завтра.</div>
+        </div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+
+    <div id="p-user-tasks" class="overlay">
+        <h2 style="color:#00ff00; margin-bottom: 20px;" data-i18n="h_tasks">ЗАДАНИЯ</h2>
+        <div class="info-card" style="text-align: center; border-color: #bc42f5;">
+            <h3 style="color:#bc42f5; margin-top:0; margin-bottom:5px;" data-i18n="t_invite">ПРИГЛАСИ ДРУГА</h3>
+            <div style="font-size:12px; color:#aaa; margin-bottom:10px;"><span data-i18n="t_invite_desc">Ты и твой друг получите по</span> <b style="color:#00ff00">100 🌙</b>!</div>
+            <div class="term-btn" style="border-color:#bc42f5; background:rgba(188,66,245,0.1); color:#fff; font-size:12px; padding:10px;" onclick="shareRef()" data-i18n="b_share">ПОДЕЛИТЬСЯ ССЫЛКОЙ</div>
+        </div>
+        <div id="user-task-list" style="width:100%"></div>
+        <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+    
+    <div id="p-shop" class="overlay">
+        <h2 style="color:#00bcd4; margin-bottom: 5px;" data-i18n="h_shop">МАГАЗИН</h2>
+        <div style="font-size: 11px; color: #888; margin-bottom: 20px;" data-i18n="s_pay_info">Оплата через Telegram Stars или CryptoBot (TON)</div>
+        
+        <div class="shop-header" data-i18n="sh_subs">ПОДПИСКИ (30 ДНЕЙ)</div>
+        <div class="shop-item">
+            <div class="shop-title" style="color: #a8b8c8;">PREMIUM</div>
+            <div class="shop-desc" data-i18n="sd_prem">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div>
+                <div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title" style="color: #ffd700;">PRO</div>
+            <div class="shop-desc" data-i18n="sd_pro">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div>
+                <div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title" style="color: #ff00ff;">VIP</div>
+            <div class="shop-desc" data-i18n="sd_vip">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div>
+                <div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div>
+            <div class="shop-desc" data-i18n="sd_ultra">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div>
+                <div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div>
+            </div>
+        </div>
+
+        <div class="shop-header" data-i18n="sh_shards">ОСКОЛКИ ЛУНЫ</div>
+        <div class="shop-item">
+            <div class="shop-title">10 <span data-i18n="s_shards">Осколков</span> 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title">50 <span data-i18n="s_shards">Осколков</span> 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title">100 <span data-i18n="s_shards">Осколков</span> 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title">500 <span data-i18n="s_shards">Осколков</span> 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title">1000 <span data-i18n="s_shards">Осколков</span> 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div>
+            </div>
+        </div>
+        <div class="shop-item">
+            <div class="shop-title" style="color: #ffaa00;">5000 <span data-i18n="s_shards">Осколков</span> 🌙</div>
+            <div class="buy-btns">
+                <div class="btn-stars" onclick="buyItem('shards', 5000, 'stars', 2500)">⭐️ 2500 Stars</div>
+                <div class="btn-ton" onclick="buyItem('shards', 5000, 'ton', 250)">💎 250 TON</div>
+            </div>
+        </div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+    
+    <div id="p-user-promos" class="overlay">
+        <h2 style="color:#bc42f5" data-i18n="h_promos">ПРОМОКОД</h2>
+        <div class="info-card">
+            <span class="s-label" data-i18n="p_enter">Введите секретный код</span>
+            <input type="text" id="user-promo-input" class="term-in" placeholder="MOON2026">
+            <div class="term-btn" style="border-color:#bc42f5" id="promo-btn" onclick="usePromo()" data-i18n="b_activate">АКТИВИРОВАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+    
+    <div id="p-profile" class="overlay">
+        <h2 style="color:#bc42f5" data-i18n="h_prof">ПРОФИЛЬ</h2>
+        <div class="info-card">
+            <div class="p-row"><span class="p-label" data-i18n="pr_nick">Ник:</span> <span class="p-val" id="prof-nick">...</span></div>
+            <div class="p-row"><span class="p-label" data-i18n="pr_id">Айди юз:</span> <span class="p-val" id="prof-id">0</span></div>
+            <div class="p-row"><span class="p-label" data-i18n="pr_sub">Подписка:</span> <span class="p-val" id="prof-sub">FREE</span></div>
+            <div class="p-row"><span class="p-label" data-i18n="pr_exp">Срок:</span> <span class="p-val" id="prof-exp">-</span></div>
+            <div class="p-row"><span class="p-label" data-i18n="pr_shards">Кол-во осколков:</span> <span class="p-val" id="prof-shards">0</span></div>
+            <div class="p-row" style="border:none;"><span class="p-label" data-i18n="pr_status">Статус:</span> <span class="p-val" id="prof-status">Юзер</span></div>
+        </div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+    
+    <div id="p-settings" class="overlay">
+        <h2 style="color:#bc42f5" data-i18n="h_set">НАСТРОЙКИ</h2>
+        <div class="set-list">
+            <div class="set-item" onclick="openPanel('p-set-prof')">
+                <div class="set-icon ic-prof">👤</div>
+                <div class="set-text" data-i18n="s_menu_prof">Настроить профиль</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-set-lang')">
+                <div class="set-icon ic-lang">🌐</div>
+                <div class="set-text" data-i18n="s_menu_lang">Сменить язык</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-set-ai')">
+                <div class="set-icon ic-ai">🤖</div>
+                <div class="set-text" data-i18n="s_menu_ai">Настройка ИИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="tg.openLink('https://telegra.ph/Privacy-Policy-03-03-61')">
+                <div class="set-icon ic-priv">🔒</div>
+                <div class="set-text" data-i18n="s_menu_priv">Политика конфиденциальности</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="tg.openTelegramLink('https://t.me/suppurtmoders_bot')">
+                <div class="set-icon ic-sup">💬</div>
+                <div class="set-text" data-i18n="s_menu_sup">Техническая поддержка</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="devApk()">
+                <div class="set-icon ic-apk">📱</div>
+                <div class="set-text" data-i18n="s_menu_apk">Приложение .apk</div>
+                <div class="set-arrow">›</div>
+            </div>
+        </div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+
+    <div id="p-set-prof" class="overlay">
+        <h2 style="color:#0A84FF" data-i18n="s_menu_prof">Настроить профиль</h2>
+        <div class="info-card">
+            <span class="s-label" data-i18n="set_nick">Ник в приложении</span>
+            <input type="text" id="set-nick" class="term-in" placeholder="..." oninput="updateLiveNick(this.value)">
+            <span class="s-label" data-i18n="set_gender">Ваш пол</span>
+            <div class="gender-box">
+                <div class="gender-btn active" id="g-m" onclick="setGender('m')" data-i18n="g_m">Мужчина</div>
+                <div class="gender-btn" id="g-f" onclick="setGender('f')" data-i18n="g_f">Женщина</div>
+            </div>
+        </div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+
+    <div id="p-set-lang" class="overlay">
+        <h2 style="color:#30D158" data-i18n="s_menu_lang">Сменить язык</h2>
+        <div class="info-card">
+            <div class="con-grid" style="margin-bottom:0;">
+                <div class="con-btn lang-btn" id="lang-ru" style="border-color:#bc42f5;" onclick="setLang('ru')">🇷🇺 Русский</div>
+                <div class="con-btn lang-btn" id="lang-uk" style="border-color:#2d164d;" onclick="setLang('uk')">🇺🇦 Українська</div>
+                <div class="con-btn lang-btn" id="lang-en" style="border-color:#2d164d;" onclick="setLang('en')">🇬🇧 English</div>
+                <div class="con-btn lang-btn" id="lang-be" style="border-color:#2d164d;" onclick="setLang('be')">🇧🇾 Беларуская</div>
+                <div class="con-btn lang-btn" style="opacity:0.4; border-color:#2d164d; grid-column: span 2;" onclick="devLang('Deutsch')">🇩🇪 Deutsch</div>
+            </div>
+        </div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+
+    <div id="p-set-ai" class="overlay">
+        <h2 style="color:#8E8E93" data-i18n="s_menu_ai">Настройка ИИ</h2>
+        <div class="info-card">
+            <span class="s-label"><span data-i18n="set_len">Длина сообщений</span> <span class="slider-val" id="len-val">45</span></span>
+            <div class="slider-wrap">
+                <input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)">
+                <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div>
+            </div>
+        </div>
+        <div class="info-card">
+            <span class="s-label"><span data-i18n="set_sex">Пошлость персонажей</span> <span class="slider-val" id="sex-val">0</span></span>
+            <div class="slider-wrap">
+                <input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)">
+                <div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div>
+            </div>
+        </div>
+        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+    </div>
+    
+    <div id="p-con" class="overlay">
+        <h2 style="color:#e91e63">КОНСОЛЬ (OWNER)</h2>
+        <div class="set-list">
+            <div class="set-item" onclick="openPanel('p-m-shards')">
+                <div class="set-icon" style="background:#e91e63;">💎</div>
+                <div class="set-text">ОСКОЛКИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-subs')">
+                <div class="set-icon" style="background:#e91e63;">👑</div>
+                <div class="set-text">ПОДПИСКИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-char')">
+                <div class="set-icon" style="background:#e91e63;">🎭</div>
+                <div class="set-text">ПЕРСОНАЖИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-prices')">
+                <div class="set-icon" style="background:#e91e63;">💲</div>
+                <div class="set-text">ЦЕНЫ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-admins')">
+                <div class="set-icon" style="background:#e91e63;">🛡️</div>
+                <div class="set-text">АДМИНЫ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-promos')">
+                <div class="set-icon" style="background:#e91e63;">🎫</div>
+                <div class="set-text">ПРОМОКОДЫ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-tasks')">
+                <div class="set-icon" style="background:#bc42f5;">🎯</div>
+                <div class="set-text">ЗАДАНИЯ</div>
+                <div class="set-arrow">›</div>
+            </div>
+        </div>
+        <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
+    </div>
+    
+    <div id="p-adm" class="overlay">
+        <h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2>
+        <div class="set-list">
+            <div class="set-item" onclick="openPanel('p-m-shards')">
+                <div class="set-icon" style="background:#00bcd4;">💎</div>
+                <div class="set-text">ВЫДАТЬ ОСКОЛКИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-subs')">
+                <div class="set-icon" style="background:#00bcd4;">👑</div>
+                <div class="set-text">ВЫДАТЬ SUB</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-char')">
+                <div class="set-icon" style="background:#00bcd4;">🎭</div>
+                <div class="set-text">ДОБАВИТЬ ПЕРСА</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-promos')">
+                <div class="set-icon" style="background:#00bcd4;">🎫</div>
+                <div class="set-text">СОЗДАТЬ ПРОМО</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-tasks')">
+                <div class="set-icon" style="background:#00bcd4;">🎯</div>
+                <div class="set-text">ДОБАВИТЬ ЗАДАНИЕ</div>
+                <div class="set-arrow">›</div>
+            </div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+    <div id="p-m-shards" class="overlay">
+        <h2 style="color:#00bcd4">ОСКОЛКИ</h2>
+        <div class="info-card">
+            <input type="number" id="ish-id" class="term-in" placeholder="TG ID">
+            <input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО">
+            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div>
+            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+    
+    <div id="p-m-subs" class="overlay">
+        <h2 style="color:#00bcd4">ПОДПИСКИ (30д)</h2>
+        <div class="info-card">
+            <input type="number" id="isu-id" class="term-in" placeholder="TG ID">
+            <select id="isu-type" class="term-in">
+                <option value="Premium">Premium</option>
+                <option value="Pro">Pro</option>
+                <option value="VIP">VIP</option>
+                <option value="Ultra">Ultra</option>
+            </select>
+            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div>
+            <div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+    
+    <div id="p-m-prices" class="overlay">
+        <h2 style="color:#e91e63">УПРАВЛЕНИЕ ЦЕНАМИ</h2>
+        <div class="info-card">
+            <h4 style="margin:0 0 10px 0; color:#00bcd4">ОСКОЛКИ</h4>
+            <input type="number" id="pr-sh-stars" class="term-in" placeholder="Цена Stars">
+            <input type="number" id="pr-sh-ton" class="term-in" placeholder="Цена TON">
+            <div class="term-btn" style="border-color:#00ff00" onclick="savePrices('shards')">СОХРАНИТЬ ЦЕНУ ОСКОЛКОВ</div>
+        </div>
+        <div class="info-card">
+            <h4 style="margin:0 0 10px 0; color:#bc42f5">ПОДПИСКИ (30д)</h4>
+            <input type="number" id="pr-sub-stars" class="term-in" placeholder="Цена Stars">
+            <input type="number" id="pr-sub-ton" class="term-in" placeholder="Цена TON">
+            <div class="term-btn" style="border-color:#00ff00" onclick="savePrices('subs')">СОХРАНИТЬ ЦЕНУ ПОДПИСОК</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+    
+    <div id="p-m-char" class="overlay">
+        <h2 style="color:#00bcd4">ПЕРСОНАЖ</h2>
+        <div class="info-card" style="text-align: center;">
+            <img id="char-preview" src="#">
+            <input type="text" id="ich-name" class="term-in" placeholder="Имя">
+            <input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18">
+            <span class="s-label">Пол персонажа</span>
+            <div class="gender-box">
+                <div class="gender-btn active" id="cg-m" onclick="setCharGender('m')">Мужской</div>
+                <div class="gender-btn" id="cg-f" onclick="setCharGender('f')">Женский</div>
+            </div>
+            <textarea id="ich-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание..." maxlength="2000" oninput="updateCharCounter()"></textarea>
+            <div id="char-limit" class="char-counter">0/2000</div>
+            <input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)">
+            <div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
+            <div class="term-btn" style="border-color:#bc42f5" onclick="saveCharDB()">В БАЗУ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+    
+    <div id="p-m-tasks" class="overlay">
+        <h2 style="color:#00bcd4">ЗАДАНИЯ</h2>
+        <div class="info-card">
+            <input type="text" id="it-name" class="term-in" placeholder="Название">
+            <input type="text" id="it-link" class="term-in" placeholder="Ссылка (https://...)">
+            <select id="it-rtype" class="term-in" onchange="toggleTaskInput()">
+                <option value="shards">Осколки</option>
+                <option value="sub7">Подписка (7 дней)</option>
+            </select>
+            <input type="number" id="it-rew" class="term-in" placeholder="Кол-во осколков">
+            <div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ ЗАДАНИЕ</div>
+        </div>
+        <div id="task-list" style="width:100%"></div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+    
+    <div id="p-m-promos" class="overlay">
+        <h2 style="color:#00bcd4">ПРОМОКОДЫ</h2>
+        <div class="info-card">
+            <input type="text" id="ip-code" class="term-in" placeholder="КОД">
+            <input type="number" id="ip-rew" class="term-in" placeholder="НАГРАДА">
+            <div class="term-btn" onclick="createPromo()">СОЗДАТЬ ПРОМО</div>
+        </div>
+        <div id="promo-list" style="width:100%"></div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+    
+    <div id="p-m-admins" class="overlay">
+        <h2 style="color:#e91e63">АДМИНЫ</h2>
+        <div class="info-card">
+            <input type="number" id="ia-id" class="term-in" placeholder="TG ID">
+            <div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div>
+            <div id="own-adm-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
 
-    <div id="p-user-tasks" class="overlay"><h2 style="color:#00ff00; margin-bottom: 20px;">ЗАДАНИЯ</h2><div id="user-task-list" style="width:100%"></div><div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div></div>
-    
-    <div id="p-shop" class="overlay"><h2 style="color:#00bcd4; margin-bottom: 5px;">МАГАЗИН</h2><div style="font-size: 11px; color: #888; margin-bottom: 20px;">Оплата через Telegram Stars или CryptoBot (TON)</div><div class="shop-header">ПОДПИСКИ (30 ДНЕЙ)</div><div class="shop-item"><div class="shop-title" style="color: #a8b8c8;">PREMIUM</div><div class="shop-desc">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ffd700;">PRO</div><div class="shop-desc">100 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ff00ff;">VIP</div><div class="shop-desc">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div><div class="shop-desc">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div></div></div><div class="shop-header">ОСКОЛКИ ЛУНЫ</div><div class="shop-item"><div class="shop-title">10 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div><div class="shop-item"><div class="shop-title">50 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div><div class="shop-item"><div class="shop-title">100 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div><div class="shop-item"><div class="shop-title">500 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div><div class="shop-item"><div class="shop-title">1000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div><div class="shop-item"><div class="shop-title" style="color: #ffaa00;">5000 Осколков 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 5000, 'stars', 2500)">⭐️ 2500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 5000, 'ton', 250)">💎 250 TON</div></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    
-    <div id="p-user-promos" class="overlay"><h2 style="color:#bc42f5">ПРОМОКОД</h2><div class="info-card"><span class="s-label">Введите секретный код</span><input type="text" id="user-promo-input" class="term-in" placeholder="Напр: MOON2026"><div class="term-btn" style="border-color:#bc42f5" onclick="usePromo()">АКТИВИРОВАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    
-    <div id="p-profile" class="overlay"><h2 style="color:#bc42f5">ПРОФИЛЬ</h2><div class="info-card"><div class="p-row"><span class="p-label">Ник:</span> <span class="p-val" id="prof-nick">...</span></div><div class="p-row"><span class="p-label">Айди юз:</span> <span class="p-val" id="prof-id">0</span></div><div class="p-row"><span class="p-label">Подписка:</span> <span class="p-val" id="prof-sub">FREE</span></div><div class="p-row"><span class="p-label">Срок:</span> <span class="p-val" id="prof-exp">-</span></div><div class="p-row"><span class="p-label">Кол-во осколков:</span> <span class="p-val" id="prof-shards">0</span></div><div class="p-row" style="border:none;"><span class="p-label">Статус:</span> <span class="p-val" id="prof-status">Юзер</span></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    
-    <div id="p-settings" class="overlay"><h2 style="color:#bc42f5">НАСТРОЙКИ</h2><div class="info-card"><span class="s-label">Ник в приложении</span><input type="text" id="set-nick" class="term-in" placeholder="Новый ник..." oninput="updateLiveNick(this.value)"><span class="s-label">Ваш пол</span><div class="gender-box"><div class="gender-btn active" id="g-m" onclick="setGender('m')">Мужчина</div><div class="gender-btn" id="g-f" onclick="setGender('f')">Женщина</div></div><div class="term-btn" style="background:#000; border-color:#333; color:#444; font-size:9px;" onclick="troll()">СМЕНИТЬ ЯЗЫК (В РАЗРАБОТКЕ)</div></div><div class="info-card"><span class="s-label">Длина сообщений <span class="slider-val" id="len-val">45</span></span><div class="slider-wrap"><input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div></div></div><div class="info-card"><span class="s-label">Пошлость персонажей <span class="slider-val" id="sex-val">0</span></span><div class="slider-wrap"><input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)"><div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div></div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    
-    <div id="p-con" class="overlay"><h2 style="color:#e91e63">CONSOLE</h2><div class="con-grid"><div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div><div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div><div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div><div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div><div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div><div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div><div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">ЗАДАНИЯ</div></div><div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div></div>
-    
-    <div id="p-adm" class="overlay"><h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2><div class="con-grid"><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-shards')">ВЫДАТЬ ОСКОЛКИ</div><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-subs')">ВЫДАТЬ SUB</div><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-char')">ДОБАВИТЬ ПЕРСА</div><div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-promos')">СОЗДАТЬ ПРОМО</div><div class="con-btn" style="border-color:#00bcd4; grid-column: span 2;" onclick="openPanel('p-m-tasks')">ДОБАВИТЬ ЗАДАНИЕ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    
-    <div id="p-m-shards" class="overlay"><h2>ОСКОЛКИ</h2><div class="info-card"><input type="number" id="ish-id" class="term-in" placeholder="TG ID"><input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО"><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div><div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-m-subs" class="overlay"><h2>ПОДПИСКИ (30д)</h2><div class="info-card"><input type="number" id="isu-id" class="term-in" placeholder="TG ID"><select id="isu-type" class="term-in"><option value="Premium">Premium</option><option value="Pro">Pro</option><option value="VIP">VIP</option><option value="Ultra">Ultra</option></select><div class="term-btn" style="border-color:#00ff00" onclick="modFunds('sub','add')">ВЫДАТЬ</div><div id="own-su-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('sub','rem')">АННУЛИРОВАТЬ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-m-prices" class="overlay"><h2 style="color:#e91e63">УПРАВЛЕНИЕ ЦЕНАМИ</h2><div class="info-card"><h4 style="margin:0 0 10px 0; color:#00bcd4">ОСКОЛКИ</h4><input type="number" id="pr-sh-stars" class="term-in" placeholder="Цена Stars"><input type="number" id="pr-sh-ton" class="term-in" placeholder="Цена TON"><div class="term-btn" style="border-color:#00ff00" onclick="savePrices('shards')">СОХРАНИТЬ ЦЕНУ ОСКОЛКОВ</div></div><div class="info-card"><h4 style="margin:0 0 10px 0; color:#bc42f5">ПОДПИСКИ (30д)</h4><input type="number" id="pr-sub-stars" class="term-in" placeholder="Цена Stars"><input type="number" id="pr-sub-ton" class="term-in" placeholder="Цена TON"><div class="term-btn" style="border-color:#00ff00" onclick="savePrices('subs')">СОХРАНИТЬ ЦЕНУ ПОДПИСОК</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-m-char" class="overlay"><h2>ПЕРСОНАЖ</h2><div class="info-card" style="text-align: center;"><img id="char-preview" src="#"><input type="text" id="ich-name" class="term-in" placeholder="Имя"><input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18"><span class="s-label">Пол персонажа</span><div class="gender-box"><div class="gender-btn active" id="cg-m" onclick="setCharGender('m')">Мужской</div><div class="gender-btn" id="cg-f" onclick="setCharGender('f')">Женский</div></div><textarea id="ich-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание..." maxlength="2000" oninput="updateCharCounter()"></textarea><div id="char-limit" class="char-counter">0/2000</div><input type="file" id="char-file" accept="image/*" style="display:none;" onchange="previewImg(this)"><div class="term-btn" style="border-color:#00bcd4" onclick="document.getElementById('char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div><div class="term-btn" style="border-color:#bc42f5" onclick="saveCharDB()">В БАЗУ</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-m-tasks" class="overlay"><h2>ЗАДАНИЯ</h2><div class="info-card"><input type="text" id="it-name" class="term-in" placeholder="Название"><input type="text" id="it-link" class="term-in" placeholder="Ссылка (https://...)"><select id="it-rtype" class="term-in" onchange="toggleTaskInput()"><option value="shards">Осколки</option><option value="sub7">Подписка (7 дней)</option></select><input type="number" id="it-rew" class="term-in" placeholder="Кол-во осколков"><div class="term-btn" style="border-color:#00ff00" onclick="modTask('add')">ДОБАВИТЬ ЗАДАНИЕ</div></div><div id="task-list" style="width:100%"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-m-promos" class="overlay"><h2>ПРОМОКОДЫ</h2><div class="info-card"><input type="text" id="ip-code" class="term-in" placeholder="КОД"><input type="number" id="ip-rew" class="term-in" placeholder="НАГРАДА"><div class="term-btn" onclick="createPromo()">СОЗДАТЬ ПРОМО</div></div><div id="promo-list" style="width:100%"></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
-    <div id="p-m-admins" class="overlay"><h2>АДМИНЫ</h2><div class="info-card"><input type="number" id="ia-id" class="term-in" placeholder="TG ID"><div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div><div id="own-adm-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modAdmin('rem')">СНЯТЬ ПРАВА</div></div><div class="term-btn" onclick="back()">НАЗАД</div></div>
     <script>
         const tg = window.Telegram.WebApp;
+        const BackButton = tg.BackButton;
         tg.expand();
         tg.enableClosingConfirmation();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
 
         const OID = "8287041036";
         let stack = [], trollCount = 0, clickedTasks = [];
-        let currentCharGender = 'm';
+        let currentCharGender = 'm'; 
         let activeCharId = null;
         let dailyTimerInterval = null;
+        let promoLock = false; 
+        let openDropdownId = null; 
         
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
-        let allChars = []; // Кэш персонажей с сервера
+        let allChars = []; 
 
-        function getUid() { return String(tg.initDataUnsafe?.user?.id || OID); }
+        // === ОГРОМНЫЙ СЛОВАРЬ СТАТИКИ (4 ЯЗЫКА + НОВЫЕ НАСТРОЙКИ) ===
+        const translations = {
+            ru: {
+                m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль",
+                h_chats: "МОИ ЧАТЫ", h_chars: "ПЕРСОНАЖИ", h_daily: "ЕЖЕДНЕВНАЯ НАГРАДА", h_tasks: "ЗАДАНИЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФИЛЬ", h_set: "НАСТРОЙКИ",
+                b_back: "НАЗАД", b_start_chat: "НАЧАТЬ ЧАТ", b_del_char: "УДАЛИТЬ ПЕРСОНАЖА", b_claim: "ЗАБРАТЬ", b_share: "ПОДЕЛИТЬСЯ ССЫЛКОЙ", b_activate: "АКТИВИРОВАТЬ",
+                pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:",
+                set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей",
+                d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по",
+                s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код",
+                dos_age: "Возраст:", dos_gender: "Пол:",
+                s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk"
+            },
+            uk: {
+                m_chats: "Чати", m_chars: "Персонажі", m_daily: "Щоденна", m_tasks: "Завдання", m_shop: "Магазин", m_promos: "Промокоди", m_prof: "Профіль", m_set: "Налаштування", m_adm: "Адмінка", m_con: "Консоль",
+                h_chats: "МОЇ ЧАТИ", h_chars: "ПЕРСОНАЖІ", h_daily: "ЩОДЕННА НАГОРОДА", h_tasks: "ЗАВДАННЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФІЛЬ", h_set: "НАЛАШТУВАННЯ",
+                b_back: "НАЗАД", b_start_chat: "ПОЧАТИ ЧАТ", b_del_char: "ВИДАЛИТИ ПЕРСОНАЖА", b_claim: "ЗАБРАТИ", b_share: "ПОДІЛИТИСЯ ПОСИЛАННЯМ", b_activate: "АКТИВУВАТИ",
+                pr_nick: "Нік:", pr_id: "Айді юз:", pr_sub: "Підписка:", pr_exp: "Термін:", pr_shards: "К-ть осколків:", pr_status: "Статус:",
+                set_nick: "Нік у додатку", set_gender: "Ваша стать", g_m: "Чоловік", g_f: "Жінка", set_lang: "Мова інтерфейсу", set_len: "Довжина повідомлень", set_sex: "Вульгарність персонажів",
+                d_sub: "Нагорода залежить від підписки. Заходь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
+                s_pay_info: "Оплата через Telegram Stars або CryptoBot (TON)", sh_subs: "ПІДПИСКИ (30 ДНІВ)", sd_prem: "50 осколків щодня<br>x2 бонус за стрік 7 днів", sd_pro: "150 осколків щодня<br>x2 бонус за стрік 7 днів", sd_vip: "250 осколків щодня<br>x2 бонус за стрік 7 днів", sd_ultra: "500 осколків щодня<br>x2 бонус за стрік 7 днів", sh_shards: "ОСКОЛКИ МІСЯЦЯ", s_shards: "Осколків", p_enter: "Введіть секретний код",
+                dos_age: "Вік:", dos_gender: "Стать:",
+                s_menu_prof: "Налаштувати профіль", s_menu_lang: "Змінити мову", s_menu_ai: "Налаштування ШІ", s_menu_priv: "Політика конфіденційності", s_menu_sup: "Технічна підтримка", s_menu_apk: "Додаток .apk"
+            },
+            en: {
+                m_chats: "Chats", m_chars: "Characters", m_daily: "Daily", m_tasks: "Tasks", m_shop: "Shop", m_promos: "Promocodes", m_prof: "Profile", m_set: "Settings", m_adm: "Admin", m_con: "Console",
+                h_chats: "MY CHATS", h_chars: "CHARACTERS", h_daily: "DAILY REWARD", h_tasks: "TASKS", h_shop: "SHOP", h_promos: "PROMOCODE", h_prof: "PROFILE", h_set: "SETTINGS",
+                b_back: "BACK", b_start_chat: "START CHAT", b_del_char: "DELETE CHARACTER", b_claim: "CLAIM", b_share: "SHARE LINK", b_activate: "ACTIVATE",
+                pr_nick: "Nick:", pr_id: "User ID:", pr_sub: "Sub:", pr_exp: "Exp:", pr_shards: "Shards:", pr_status: "Status:",
+                set_nick: "App Nickname", set_gender: "Your gender", g_m: "Male", g_f: "Female", set_lang: "App Language", set_len: "Message length", set_sex: "NSFW Level",
+                d_sub: "Reward depends on subscription. Log in 7 days for x2 bonus!", d_today: "Your reward today:", t_invite: "INVITE A FRIEND", t_invite_desc: "You and your friend get",
+                s_pay_info: "Pay via Telegram Stars or CryptoBot (TON)", sh_subs: "SUBSCRIPTIONS (30 DAYS)", sd_prem: "50 shards daily<br>x2 bonus for 7-day streak", sd_pro: "150 shards daily<br>x2 bonus for 7-day streak", sd_vip: "250 shards daily<br>x2 bonus for 7-day streak", sd_ultra: "500 shards daily<br>x2 bonus for 7-day streak", sh_shards: "MOON SHARDS", s_shards: "Shards", p_enter: "Enter secret code",
+                dos_age: "Age:", dos_gender: "Gender:",
+                s_menu_prof: "Edit Profile", s_menu_lang: "Change Language", s_menu_ai: "AI Settings", s_menu_priv: "Privacy Policy", s_menu_sup: "Technical Support", s_menu_apk: "App .apk"
+            },
+            be: {
+                m_chats: "Чаты", m_chars: "Персанажы", m_daily: "Штодзёнка", m_tasks: "Заданні", m_shop: "Крама", m_promos: "Прамакоды", m_prof: "Профіль", m_set: "Налады", m_adm: "Адмінка", m_con: "Кансоль",
+                h_chats: "МАЕ ЧАТЫ", h_chars: "ПЕРСАНАЖЫ", h_daily: "ШТОДЗЁННАЯ ЎЗНАГАРОДА", h_tasks: "ЗАДАННІ", h_shop: "КРАМА", h_promos: "ПРАМАКОД", h_prof: "ПРОФІЛЬ", h_set: "НАЛАДЫ",
+                b_back: "НАЗАД", b_start_chat: "ПАЧАЦЬ ЧАТ", b_del_char: "ВЫДАЛІЦЬ ПЕРСАНАЖА", b_claim: "ЗАБРАЦЬ", b_share: "ПАДЗЯЛІЦЦА СПАСЫЛКАЙ", b_activate: "АКТЫВАВАЦЬ",
+                pr_nick: "Нік:", pr_id: "Айдзі юз:", pr_sub: "Падпіска:", pr_exp: "Тэрмін:", pr_shards: "Аскепкаў:", pr_status: "Статус:",
+                set_nick: "Нік у дадатку", set_gender: "Ваш пол", g_m: "Мужчына", g_f: "Жанчына", set_lang: "Мова інтэрфейсу", set_len: "Даўжыня паведамленняў", set_sex: "Пошласць персанажаў",
+                d_sub: "Узнагарода залежыць ад падпіскі. Заходзь 7 дзён запар для бонусу x2!", d_today: "Ваша ўзнагарода сёння:", t_invite: "ЗАПРАСІ СЯБРА", t_invite_desc: "Ты і твой сябар атрымаеце па",
+                s_pay_info: "Аплата праз Telegram Stars або CryptoBot (TON)", sh_subs: "ПАДПІСКІ (30 ДЗЁН)", sd_prem: "50 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_pro: "150 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_vip: "250 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_ultra: "500 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sh_shards: "АСКЕПКІ МЕСЯЦА", s_shards: "Аскепкаў", p_enter: "Увядзіце сакрэтны код",
+                dos_age: "Узрост:", dos_gender: "Пол:",
+                s_menu_prof: "Наладзіць профіль", s_menu_lang: "Змяніць мову", s_menu_ai: "Налады ШІ", s_menu_priv: "Палітыка прыватнасці", s_menu_sup: "Тэхнічная падтрымка", s_menu_apk: "Дадатак .apk"
+            }
+        };
+
+        let currentLang = 'ru';
+        const transCache = {}; 
+
+        function getUid() { 
+            return String(tg.initDataUnsafe?.user?.id || OID); 
+        }
+
+        // === БРОНЯ: ФУНКЦИЯ ЗАГОЛОВКОВ С ЗАЩИТОЙ TELEGRAM ===
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'x-tg-data': tg.initData || "dev_mode" // Передаем крипто-строку на сервер!
+            };
+        }
+
+        // === НЕЙРО-ПЕРЕВОДЧИК (Google API) ===
+        async function neuroTranslate(text, targetLang) {
+            if (!text || targetLang === 'ru') return text; 
+            
+            const cacheKey = text + '_' + targetLang;
+            if (transCache[cacheKey]) return transCache[cacheKey];
+
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                let translatedText = '';
+                data[0].forEach(item => { translatedText += item[0]; });
+                
+                transCache[cacheKey] = translatedText; 
+                return translatedText;
+            } catch (e) {
+                console.error("NeuroTranslate Error:", e);
+                return text; 
+            }
+        }
+
+        // === СИСТЕМА ПЕРЕВОДА ИНТЕРФЕЙСА ===
+        async function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('m_lang_' + getUid(), lang);
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => { btn.style.borderColor = '#2d164d'; btn.style.opacity = '1'; });
+            const activeBtn = document.getElementById('lang-' + lang);
+            if (activeBtn) activeBtn.style.borderColor = '#bc42f5';
+            
+            document.querySelector('[onclick="devLang(\'Deutsch\')"]').style.opacity = '0.4'; 
+
+            applyTranslations();
+
+            if(document.getElementById('p-user-chars').style.display === 'flex') await renderUserChars();
+            if(document.getElementById('p-char-dossier').style.display === 'flex') await openDossier(activeCharId);
+            if(document.getElementById('p-user-tasks').style.display === 'flex') await renderUserTasks();
+            if(document.getElementById('p-user-chatlist').style.display === 'flex') openChatList();
+        }
+
+        function applyTranslations() {
+            const t = translations[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) {
+                    if (el.tagName === 'INPUT') el.placeholder = t[key];
+                    else el.innerHTML = t[key];
+                }
+            });
+
+            updateLen(document.getElementById('len-slider').value, true);
+            updateSex(document.getElementById('sex-slider').value, true);
+            
+            let lS = document.getElementById('len-slider');
+            if(lS) {
+                let maxLen = parseInt(lS.max);
+                let lText = currentLang === 'uk' ? "Твій ліміт" : currentLang === 'en' ? "Your limit" : currentLang === 'be' ? "Твой ліміт" : "Твой лимит";
+                let wText = currentLang === 'uk' ? "слів" : currentLang === 'en' ? "words" : currentLang === 'be' ? "слоў" : "слов";
+                document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`;
+            }
+
+            const chatBox = document.getElementById('chat-messages-box');
+            if(chatBox && (chatBox.innerHTML.includes('1 ') || chatBox.innerHTML.includes('...'))) {
+                let emptyT = currentLang === 'uk' ? "Почніть діалог" : currentLang === 'en' ? "Start conversation" : currentLang === 'be' ? "Пачніце дыялог" : "Начните диалог";
+                let emptyM = currentLang === 'uk' ? "повідомлення" : currentLang === 'en' ? "message" : currentLang === 'be' ? "паведамленне" : "сообщение";
+                chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">${emptyT}...<br>1 ${emptyM} = 1 🌙</div>`;
+            }
+        }
+
+        function devLang(langName) {
+            let errText = currentLang === 'uk' ? `Мова ${langName} у розробці! 🛠` : currentLang === 'en' ? `Language ${langName} is in development! 🛠` : currentLang === 'be' ? `Мова ${langName} у распрацоўцы! 🛠` : `Язык ${langName} в разработке! 🛠`;
+            tg.showAlert(errText);
+        }
+
+        function devApk() {
+            let errText = currentLang === 'uk' ? `Додаток APK ще в розробці! 🛠` : currentLang === 'en' ? `APK App is still in development! 🛠` : currentLang === 'be' ? `Дадатак APK яшчэ ў распрацоўцы! 🛠` : `Приложение APK еще в разработке! 🛠`;
+            tg.showAlert(errText);
+        }
 
         function updateBalanceUI(val) {
             if(getUid() === OID) return;
@@ -206,10 +775,71 @@
             userData.shards = val;
         }
 
-        // ================= ИНИЦИАЛИЗАЦИЯ И СВЯЗЬ С СЕРВЕРОМ =================
+        // === СМЕНА СТИЛЯ НИКА ===
+        function applyNickStyle(sub) {
+            const nameEl = document.getElementById('u-name');
+            nameEl.className = 'nick-base'; 
+            let s = (sub || "FREE").trim().toLowerCase();
+            
+            if (s === 'ultra') nameEl.classList.add('nick-ultra');
+            else if (s === 'vip') nameEl.classList.add('nick-vip');
+            else if (s === 'pro') nameEl.classList.add('nick-pro');
+            else if (s === 'premium') nameEl.classList.add('nick-premium');
+            else nameEl.classList.add('nick-free');
+        }
+
+        document.addEventListener('click', () => {
+            if(openDropdownId !== null) {
+                let el = document.getElementById('chat-dd-' + openDropdownId);
+                if(el) el.style.display = 'none';
+                openDropdownId = null;
+            }
+        });
+        // ================= ДВИЖОК РЕАЛЬНОГО ВРЕМЕНИ =================
+        setInterval(async () => {
+            const uid = getUid();
+            if(!uid || document.getElementById('loading').style.display !== 'none') return;
+            try {
+                const res = await fetch('/api/user/sync', {
+                    method: 'POST', 
+                    headers: getAuthHeaders(), // ЗАЩИТА ТЕЛЕГРАМА
+                    body: JSON.stringify({}) // ID сервер берет сам из шифра!
+                });
+                
+                if(res.ok) {
+                    const data = await res.json();
+                    if(uid !== OID) {
+                        document.getElementById('shards-balance').innerText = data.shards;
+                        document.getElementById('prof-shards').innerText = data.shards;
+                        userData.shards = data.shards;
+                    }
+                    if(document.getElementById('prof-sub').innerText !== data.subscription) {
+                        document.getElementById('prof-sub').innerText = data.subscription;
+                        userData.subscription = data.subscription;
+                        applyNickStyle(data.subscription);
+                    }
+                }
+            } catch(e) {}
+        }, 3000);
+
+        // ================= ИНИЦИАЛИЗАЦИЯ =================
         async function init() {
+            setTimeout(() => {
+                const loader = document.getElementById('loading');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => { 
+                        loader.style.display = 'none'; 
+                        document.getElementById('app').style.display = 'flex'; 
+                    }, 500);
+                }
+            }, 1500);
+
             const uid = getUid();
             const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
+
+            currentLang = localStorage.getItem('m_lang_' + uid) || 'ru';
+            setLang(currentLang);
 
             document.getElementById('u-id-head').innerText = uid;
             document.getElementById('prof-id').innerText = uid;
@@ -219,33 +849,45 @@
             document.getElementById('prof-nick').innerText = savedNick;
             document.getElementById('set-nick').value = savedNick;
 
-            setGender(localStorage.getItem('m_gender_' + uid) || 'm', true);
+            let uGender = localStorage.getItem('m_gender_' + uid) || 'm';
+            document.getElementById('g-m').classList.toggle('active', uGender === 'm'); 
+            document.getElementById('g-f').classList.toggle('active', uGender === 'f');
 
-            // 1. ЗАГРУЗКА ДАННЫХ ИЗ БАЗЫ (MongoDB через Server.js)
             try {
+                const startParam = tg.initDataUnsafe?.start_param || null;
                 const res = await fetch('/api/user/get-data', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ tg_id: uid })
+                    method: 'POST', 
+                    headers: getAuthHeaders(), // ЗАЩИТА
+                    body: JSON.stringify({ start_param: startParam })
                 });
-                userData = await res.json();
-            } catch (e) {
-                console.error("SERVER ERROR:", e);
-                tg.showAlert("Ошибка подключения к серверу. Запущено в оффлайн-режиме.");
+                if(res.ok) userData = await res.json();
+            } catch (e) { 
+                console.error("SERVER ERROR:", e); 
             }
 
-            // 2. НАСТРОЙКА ИНТЕРФЕЙСА
+            const badgeEl = document.getElementById('u-badge');
+
+            let expText = currentLang === 'uk' ? "Без обмежень" : currentLang === 'en' ? "No limits" : currentLang === 'be' ? "Без абмежаванняў" : "Без ограничений";
+            let adminText = currentLang === 'uk' ? "Адмін" : currentLang === 'en' ? "Admin" : currentLang === 'be' ? "Адмін" : "Админ";
+            let userText = currentLang === 'uk' ? "Юзер" : currentLang === 'en' ? "User" : currentLang === 'be' ? "Юзер" : "Юзер";
+
             if(uid === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
                 document.getElementById('prof-shards').innerText = "∞";
                 document.getElementById('prof-sub').innerText = "ULTRA";
-                document.getElementById('prof-exp').innerText = "Без ограничений";
+                document.getElementById('prof-exp').innerText = expText;
                 document.getElementById('prof-status').innerText = "Овнер";
+                userData.subscription = "ULTRA";
                 
                 document.getElementById('nav-adm').style.display = 'flex';
                 document.getElementById('nav-con').style.display = 'flex';
                 document.getElementById('own-sh-rem').style.display = 'block';
                 document.getElementById('own-su-rem').style.display = 'block';
                 document.getElementById('own-adm-rem').style.display = 'block';
+
+                badgeEl.style.display = 'inline-block';
+                badgeEl.className = 'badge-base badge-owner';
+                badgeEl.innerText = 'OWNER';
             } else {
                 updateBalanceUI(userData.shards);
                 document.getElementById('prof-sub').innerText = userData.subscription;
@@ -253,386 +895,956 @@
                 if(userData.subscription !== "FREE" && userData.sub_exp > 0) {
                     let expDate = new Date(userData.sub_exp);
                     document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU');
-                } else {
-                    document.getElementById('prof-exp').innerText = "-";
+                } else { 
+                    document.getElementById('prof-exp').innerText = "-"; 
                 }
 
                 if(userData.is_admin) {
-                    document.getElementById('prof-status').innerText = "Админ";
+                    document.getElementById('prof-status').innerText = adminText;
                     document.getElementById('nav-adm').style.display = 'flex';
-                } else {
-                    document.getElementById('prof-status').innerText = "Юзер";
+                    
+                    badgeEl.style.display = 'inline-block';
+                    badgeEl.className = 'badge-base badge-admin';
+                    badgeEl.innerText = 'ADMIN';
+                } else { 
+                    document.getElementById('prof-status').innerText = userText; 
+                    badgeEl.style.display = 'none'; 
                 }
             }
 
-            // Настройка ползунков (Длина и Пошлость)
-            let maxLen = 45; let maxSex = 0;
-            if(userData.subscription === "Premium") { maxLen = 55; }
-            else if(userData.subscription === "Pro") { maxLen = 65; maxSex = 3; }
-            else if(userData.subscription === "VIP") { maxLen = 80; maxSex = 5; }
-            else if(userData.subscription === "ULTRA" || userData.subscription === "Ultra") { maxLen = 100; maxSex = 6; }
+            applyNickStyle(userData.subscription);
 
-            const lS = document.getElementById('len-slider'), sS = document.getElementById('sex-slider');
-            lS.max = maxLen; sS.max = maxSex;
-            document.getElementById('len-info').innerText = `Твой лимит (${userData.subscription}): ${maxLen} слов`;
-            document.getElementById('sex-info').innerText = maxSex === 0 ? "Пошлость недоступна для вашей подписки" : `Доступно уровней: ${maxSex}`;
-
-            let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 45);
-            if(savedLen > maxLen) savedLen = maxLen;
-            lS.value = savedLen; updateLen(savedLen, true);
-
-            let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
-            if(savedSex > maxSex) savedSex = maxSex;
-            sS.value = savedSex; updateSex(savedSex, true);
+            let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
+            let maxLen = 45; 
+            let maxSex = 0;
             
-            // Запуск модулей
-            updateDailyUI();
-            await renderUserChars();
-            await renderUserTasks();
-            if (uid === OID || userData.is_admin) {
-                await renderAdminPromos();
-                await renderTasks();
-            }
+            if(currentSub === "premium") { maxLen = 55; }
+            else if(currentSub === "pro") { maxLen = 65; maxSex = 3; }
+            else if(currentSub === "vip") { maxLen = 80; maxSex = 5; }
+            else if(currentSub === "ultra") { maxLen = 100; maxSex = 6; } 
 
-            setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 1500);
+            const lS = document.getElementById('len-slider');
+            const sS = document.getElementById('sex-slider');
+            
+            if(lS && sS) {
+                lS.max = maxLen; 
+                sS.max = maxSex;
+                
+                let lText = currentLang === 'uk' ? "Твій ліміт" : currentLang === 'en' ? "Your limit" : currentLang === 'be' ? "Твой ліміт" : "Твой лимит";
+                let wText = currentLang === 'uk' ? "слів" : currentLang === 'en' ? "words" : currentLang === 'be' ? "слоў" : "слов";
+                let noSex = currentLang === 'uk' ? "Вульгарність недоступна для вашої підписки" : currentLang === 'en' ? "NSFW is not available for your subscription" : currentLang === 'be' ? "Пошласць недаступная для вашай падпіскі" : "Пошлость недоступна для вашей подписки";
+                let lvlTxt = currentLang === 'uk' ? "Доступно рівнів" : currentLang === 'en' ? "Available levels" : currentLang === 'be' ? "Даступна ўзроўняў" : "Доступно уровней";
+
+                document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`;
+                document.getElementById('sex-info').innerText = maxSex === 0 ? noSex : `${lvlTxt}: ${maxSex}`;
+
+                let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 45);
+                if(savedLen > maxLen) savedLen = maxLen;
+                lS.value = savedLen; 
+                updateLen(savedLen, true);
+
+                let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
+                if(savedSex > maxSex) savedSex = maxSex;
+                sS.value = savedSex; 
+                updateSex(savedSex, true);
+            }
+            
+            updateDailyUI();
+            
+            try { await renderUserChars(); } catch(e) {}
+            try { await renderUserTasks(); } catch(e) {}
+            
+            if (uid === OID || userData.is_admin) {
+                try { await renderAdminPromos(); } catch(e) {}
+                try { await renderTasks(); } catch(e) {}
+            }
         }
 
-        // ================= ЧАТЫ И НЕЙРОСЕТЬ (OPENROUTER) =================
-        function openChatList() {
+        // ================= ЧАТЫ И МЕНЮ =================
+        function updateChatOrder(charId) {
+            const uid = getUid();
+            let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
+            order = order.filter(id => id != charId); 
+            order.unshift(charId); 
+            localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order));
+        }
+
+        function toggleChatMenu(charId, e) {
+            e.stopPropagation();
+            if(openDropdownId !== null && openDropdownId !== charId) {
+                let old = document.getElementById('chat-dd-' + openDropdownId);
+                if(old) old.style.display = 'none';
+            }
+            let el = document.getElementById('chat-dd-' + charId);
+            if(el.style.display === 'flex') { 
+                el.style.display = 'none'; 
+                openDropdownId = null; 
+            } else { 
+                el.style.display = 'flex'; 
+                openDropdownId = charId; 
+            }
+        }
+
+        function pinChatAction(charId, e) {
+            e.stopPropagation();
+            const uid = getUid();
+            let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
+            
+            if(pinned.includes(charId)) { 
+                pinned = pinned.filter(id => id != charId); 
+                let msg = currentLang === 'uk' ? "Чат відкріплено" : currentLang === 'en' ? "Chat unpinned" : currentLang === 'be' ? "Чат адмацаваны" : "Чат откреплен";
+                tg.showAlert(msg); 
+            } else { 
+                pinned.push(charId); 
+                let msg = currentLang === 'uk' ? "Чат закріплено 📌" : currentLang === 'en' ? "Chat pinned 📌" : currentLang === 'be' ? "Чат замацаваны 📌" : "Чат закреплен 📌";
+                tg.showAlert(msg); 
+            }
+            
+            localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); 
+            openChatList(); 
+        }
+
+        function clearChatAction(charId, e) {
+            e.stopPropagation();
+            let text = currentLang === 'uk' ? "Очистити пам'ять? Персонаж забуде весь діалог, але залишиться в списку чатів." : currentLang === 'en' ? "Clear memory? The character will forget the dialogue but remain in the list." : currentLang === 'be' ? "Ачысціць памяць? Персанаж забудзе ўвесь дыялог, але застанецца ў спісе чатаў." : "Очистить память? Персонаж забудет весь диалог, но останется в списке чатов.";
+            
+            tg.showConfirm(text, (yes) => {
+                if(yes) {
+                    const uid = getUid(); 
+                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                    allChats[charId] = []; 
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    openChatList(); 
+                    let msg = currentLang === 'uk' ? "Пам'ять стерта 🧹" : currentLang === 'en' ? "Memory cleared 🧹" : currentLang === 'be' ? "Памяць сцёрта 🧹" : "Память стерта 🧹";
+                    tg.showAlert(msg);
+                }
+            });
+        }
+
+        function deleteChatAction(charId, e) {
+            e.stopPropagation();
+            let text = currentLang === 'uk' ? "Видалити чат повністю? Це дію не можна скасувати." : currentLang === 'en' ? "Delete chat completely? This cannot be undone." : currentLang === 'be' ? "Выдаліць чат цалкам? Гэта дзеянне нельга адмяніць." : "Удалить чат полностью? Это действие нельзя отменить.";
+            
+            tg.showConfirm(text, (yes) => {
+                if(yes) {
+                    const uid = getUid(); 
+                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                    delete allChats[charId]; 
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    
+                    let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
+                    pinned = pinned.filter(id => id != charId); 
+                    localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned));
+
+                    let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
+                    order = order.filter(id => id != charId); 
+                    localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order));
+                    
+                    openChatList(); 
+                }
+            });
+        }
+
+        async function openChatList() {
             const uid = getUid();
             const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
+            let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
             const list = document.getElementById('chatlist-container');
             
-            let html = ""; let hasChats = false;
+            let chatObjects = [];
             for (let charId in allChats) {
                 const char = allChars.find(c => c.id == charId);
                 if(!char) continue;
-                hasChats = true;
                 const msgs = allChats[charId];
-                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : "Нет сообщений";
                 
-                html += `<div class="chatlist-item" onclick="resumeChat(${char.id})">
-                    <img src="${char.photo}" class="chatlist-img">
-                    <div class="chatlist-info"><div class="chatlist-name">${char.name}</div><div class="chatlist-last">${lastMsg}</div></div>
-                </div>`;
+                let noMsg = currentLang === 'uk' ? "Немає повідомлень" : currentLang === 'en' ? "No messages" : currentLang === 'be' ? "Няма паведамленняў" : "Нет сообщений";
+                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : noMsg;
+                
+                chatObjects.push({ 
+                    id: char.id, 
+                    char: char, 
+                    lastMsg: lastMsg, 
+                    isPinned: pinned.includes(char.id), 
+                    orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 
+                });
             }
-            if(!hasChats) html = "<div class='info-card' style='text-align:center; color:#888;'>У вас пока нет активных диалогов.</div>";
-            list.innerHTML = html; openPanel('p-user-chatlist');
+
+            chatObjects.sort((a, b) => {
+                if (a.isPinned && !b.isPinned) return -1;
+                if (!a.isPinned && b.isPinned) return 1;
+                return a.orderIndex - b.orderIndex;
+            });
+
+            let html = ""; 
+            if(chatObjects.length === 0) {
+                let emptyTxt = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : currentLang === 'en' ? "You have no active chats.<br><br>Go to 'Characters', select a dossier and click 'Start Chat'!" : currentLang === 'be' ? "У вас пакуль няма актыўных дыялогаў.<br><br>Перайдзіце ў 'Персанажы', выберыце дасье і націсніце 'Пачаць чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
+                html = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
+            } else {
+                const chatCards = await Promise.all(chatObjects.map(async (obj) => {
+                    let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
+                    
+                    let p1 = currentLang === 'uk' ? "Відкріпити" : currentLang === 'en' ? "Unpin" : currentLang === 'be' ? "Адмацаваць" : "Открепить";
+                    let p2 = currentLang === 'uk' ? "Закріпити" : currentLang === 'en' ? "Pin" : currentLang === 'be' ? "Замацаваць" : "Закрепить";
+                    let pinText = obj.isPinned ? p1 : p2;
+                    
+                    let clearText = currentLang === 'uk' ? "Очистити пам'ять" : currentLang === 'en' ? "Clear memory" : currentLang === 'be' ? "Ачысціць памяць" : "Очистить память";
+                    let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Выдаліць чат" : "Удалить чат";
+
+                    let tName = await neuroTranslate(obj.char.name, currentLang); 
+
+                    return `
+                    <div class="chatlist-item" onclick="resumeChat(${obj.id})">
+                        <img src="${obj.char.photo}" class="chatlist-img">
+                        <div class="chatlist-info">
+                            <div class="chatlist-name">${pinMark}${tName}</div>
+                            <div class="chatlist-last">${obj.lastMsg}</div>
+                        </div>
+                        <button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button>
+                        <div class="chat-dropdown" id="chat-dd-${obj.id}">
+                            <div class="chat-dropdown-item" onclick="pinChatAction(${obj.id}, event)">📌 ${pinText}</div>
+                            <div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 ${clearText}</div>
+                            <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 ${delText}</div>
+                        </div>
+                    </div>`;
+                }));
+                html = chatCards.join('');
+            }
+            list.innerHTML = html; 
+            openPanel('p-user-chatlist');
         }
 
-        function resumeChat(charId) {
+        async function resumeChat(charId) {
             activeCharId = charId;
-            const c = allChars.find(x => x.id == charId);
+            const c = allChars.find(x => x.id == charId); 
             if(!c) return;
-            document.getElementById('chat-char-name').innerText = c.name;
-            renderChatMessages(); openPanel('p-chat');
+            
+            let tName = await neuroTranslate(c.name, currentLang);
+            document.getElementById('chat-char-name').innerText = tName;
+            
+            renderChatMessages(); 
+            openPanel('p-chat');
         }
 
-        function openChatFromDossier() {
-            const c = allChars.find(x => x.id === activeCharId);
+        async function openChatFromDossier() {
+            const c = allChars.find(x => x.id === activeCharId); 
             if(!c) return;
-            document.getElementById('chat-char-name').innerText = c.name;
             
-            const uid = getUid();
+            let tName = await neuroTranslate(c.name, currentLang);
+            document.getElementById('chat-char-name').innerText = tName;
+            
+            const uid = getUid(); 
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-            if(!allChats[activeCharId]) {
-                allChats[activeCharId] = [];
-                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            
+            if(!allChats[activeCharId]) { 
+                allChats[activeCharId] = []; 
+                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
+                updateChatOrder(activeCharId); 
             }
-            renderChatMessages(); openPanel('p-chat');
+            
+            renderChatMessages(); 
+            openPanel('p-chat');
         }
 
         function renderChatMessages() {
-            const uid = getUid();
+            const uid = getUid(); 
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-            let msgs = allChats[activeCharId] || [];
+            let msgs = allChats[activeCharId] || []; 
             const chatBox = document.getElementById('chat-messages-box');
             
-            if(msgs.length === 0) {
-                chatBox.innerHTML = '<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>';
-            } else {
-                chatBox.innerHTML = msgs.map(m => `<div class="msg-box ${m.sender === 'user' ? 'msg-user' : 'msg-char'}">${m.text}</div>`).join('');
+            if(msgs.length === 0) { 
+                let emptyT = currentLang === 'uk' ? "Почніть діалог" : currentLang === 'en' ? "Start conversation" : currentLang === 'be' ? "Пачніце дыялог" : "Начните диалог";
+                let emptyM = currentLang === 'uk' ? "повідомлення" : currentLang === 'en' ? "message" : currentLang === 'be' ? "паведамленне" : "сообщение";
+                chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">${emptyT}...<br>1 ${emptyM} = 1 🌙</div>`;
+            } else { 
+                chatBox.innerHTML = msgs.map(m => `<div class="msg-box ${m.sender === 'user' ? 'msg-user' : 'msg-char'}">${m.text}</div>`).join(''); 
             }
+            
             setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
         async function sendMessage() {
-            const input = document.getElementById('chat-input-text');
-            const text = input.value.trim();
+            const input = document.getElementById('chat-input-text'); 
+            const text = input.value.trim(); 
             if(!text) return;
             
-            const uid = getUid();
-            if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков (нужен 1 🌙)!");
-
-            // 1. Сохраняем сообщение юзера локально
+            const uid = getUid(); 
+            if(uid !== OID && userData.shards < 1) {
+                let noShards = currentLang === 'uk' ? "Недостатньо осколків (потрібен 1 🌙)!" : currentLang === 'en' ? "Not enough shards (need 1 🌙)!" : currentLang === 'be' ? "Недастаткова аскепкаў (патрэбен 1 🌙)!" : "Недостаточно осколков (нужен 1 🌙)!";
+                return tg.showAlert(noShards);
+            }
+            
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             if(!allChats[activeCharId]) allChats[activeCharId] = [];
-            allChats[activeCharId].push({sender: 'user', text: text});
+            
+            allChats[activeCharId].push({sender: 'user', text: text}); 
             localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
             
-            input.value = ''; renderChatMessages();
+            updateChatOrder(activeCharId); 
+            input.value = ''; 
+            renderChatMessages();
+            
             const chatBox = document.getElementById('chat-messages-box');
-            chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">Персонаж печатает...</div>`;
+            let typingText = currentLang === 'uk' ? "Персонаж друкує..." : currentLang === 'en' ? "Character is typing..." : currentLang === 'be' ? "Персанаж друкуе..." : "Персонаж печатает...";
+            chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">${typingText}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
-
-            // 2. Отправляем запрос на наш СЕРВЕР (к ИИ)
+            
             try {
-                const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 45);
-                const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
-
-                const res = await fetch('/api/chat', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        tg_id: uid, char_id: activeCharId, message: text,
-                        chat_history: allChats[activeCharId], len: lenSet, sex: sexSet
-                    })
-                });
-
-                const data = await res.json();
-                document.getElementById('typing-indicator')?.remove();
-
-                if (data.error) {
-                    tg.showAlert("Ошибка ИИ: " + data.error);
+                const uName = document.getElementById('u-name').innerText;
+                const rawGender = localStorage.getItem('m_gender_' + uid) || 'm';
+                
+                let uGender = "Мужской";
+                if (rawGender === 'f') {
+                    uGender = currentLang === 'uk' ? "Жіночий" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жаночы" : "Женский";
                 } else {
-                    // ИИ ответил!
-                    allChats[activeCharId].push({sender: 'char', text: data.reply});
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                    if (uid !== OID) updateBalanceUI(data.new_balance); // Сервер списал баланс
-                    renderChatMessages();
+                    uGender = currentLang === 'uk' ? "Чоловічий" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Мужчынскі" : "Мужской";
                 }
-            } catch (e) {
+
+                const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 45); 
+                const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
+                
+                const res = await fetch('/api/chat', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(), // ЗАЩИТА ТЕЛЕГРАМА
+                    body: JSON.stringify({ 
+                        char_id: activeCharId, 
+                        message: text, 
+                        chat_history: allChats[activeCharId], 
+                        len: lenSet, 
+                        sex: sexSet,
+                        user_name: uName,     
+                        user_gender: uGender  
+                    }) 
+                });
+                
+                const data = await res.json(); 
                 document.getElementById('typing-indicator')?.remove();
-                tg.showAlert("Ошибка связи с сервером.");
+                
+                if (data.error) { 
+                    let errT = currentLang === 'en' ? "AI Error: " : "Ошибка ИИ: ";
+                    tg.showAlert(errT + data.error); 
+                } else { 
+                    allChats[activeCharId].push({sender: 'char', text: data.reply}); 
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
+                    
+                    if (uid !== OID) updateBalanceUI(data.new_balance); 
+                    
+                    renderChatMessages(); 
+                }
+            } catch (e) { 
+                document.getElementById('typing-indicator')?.remove(); 
+                let errSrv = currentLang === 'uk' ? "Помилка зв'язку з сервером." : currentLang === 'en' ? "Server connection error." : currentLang === 'be' ? "Памылка сувязі з серверам." : "Ошибка связи с сервером.";
+                tg.showAlert(errSrv); 
             }
         }
+        
         function closeChat() { back(); }
 
-        // ================= МАГАЗИН И CRYPTOBOT =================
+        // ================= ОПЛАТА =================
         async function buyItem(type, item, currency, price) {
-            const uid = getUid();
             if (currency === 'ton') {
-                tg.showAlert("Генерация счета CryptoBot...");
+                let msg = currentLang === 'uk' ? "Генерація рахунку CryptoBot..." : currentLang === 'en' ? "Generating CryptoBot invoice..." : currentLang === 'be' ? "Генерацыя рахунку CryptoBot..." : "Генерация счета CryptoBot...";
+                tg.showAlert(msg);
                 try {
-                    const res = await fetch('/api/payment/create', {
-                        method: 'POST', headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ tg_id: uid, type: type, item: item, amount_ton: price })
+                    const res = await fetch('/api/payment/create', { 
+                        method: 'POST', 
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ type: type, item: item, amount_ton: price }) 
+                    });
+                    const data = await res.json(); 
+                    
+                    if(data.pay_url) { tg.openLink(data.pay_url); } 
+                    else { 
+                        let err = currentLang === 'en' ? "CryptoBot error" : "Ошибка CryptoBot";
+                        tg.showAlert(err); 
+                    }
+                } catch (e) { tg.showAlert("Error"); }
+                
+            } else if (currency === 'stars') {
+                let msg = currentLang === 'uk' ? "Підготовка оплати Stars..." : currentLang === 'en' ? "Preparing Stars payment..." : currentLang === 'be' ? "Падрыхтоўка аплаты Stars..." : "Подготовка оплаты Stars...";
+                tg.showAlert(msg);
+                try {
+                    const res = await fetch('/api/payment/stars-invoice', { 
+                        method: 'POST', 
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ type: type, item: item, amount_stars: price }) 
                     });
                     const data = await res.json();
-                    if(data.pay_url) {
-                        tg.openLink(data.pay_url); // Открываем счет в Телеге
-                    } else {
-                        tg.showAlert("Ошибка создания счета");
-                    }
-                } catch (e) { tg.showAlert("Ошибка сервера оплат"); }
-            } else {
-                tg.showAlert("Оплата через Stars пока в разработке. Используйте TON.");
+                    
+                    if(data.invoice_url) { 
+                        tg.openInvoice(data.invoice_url, function(status) { 
+                            if (status === 'paid') { 
+                                let succ = currentLang === 'uk' ? "Оплата успішна!" : currentLang === 'en' ? "Payment successful!" : currentLang === 'be' ? "Аплата паспяховая!" : "Оплата успешна!";
+                                tg.showAlert(succ); 
+                            } 
+                            else if (status === 'failed') { 
+                                let fail = currentLang === 'uk' ? "Помилка при оплаті Stars." : currentLang === 'en' ? "Stars payment failed." : currentLang === 'be' ? "Памылка пры аплаце Stars." : "Ошибка при оплате Stars.";
+                                tg.showAlert(fail); 
+                            } 
+                        }); 
+                    } else { tg.showAlert("API Error"); }
+                } catch (e) { tg.showAlert("Error"); }
             }
         }
 
-        // ================= ЕЖЕДНЕВКА (СЕРВЕРНОЕ ВРЕМЯ) =================
+        // ================= ЕЖЕДНЕВКА =================
         function updateDailyUI() {
-            const ONE_DAY = 24 * 60 * 60 * 1000;
+            const ONE_DAY = 24 * 60 * 60 * 1000; 
             let timePassed = Date.now() - userData.last_daily;
-
             let nextStreak = userData.daily_streak + 1; 
             let is7thDay = (nextStreak % 7 === 0);
             
-            let baseRew = 10;
-            if(userData.subscription==="ULTRA") baseRew = 500; else if(userData.subscription==="VIP") baseRew = 250; else if(userData.subscription==="Pro") baseRew = 100; else if(userData.subscription==="Premium") baseRew = 50;
+            let baseRew = userData.daily_reward || 10; 
             let actualRew = is7thDay ? baseRew * 2 : baseRew;
+            
+            let streakText = currentLang === 'uk' ? "Стрік" : currentLang === 'en' ? "Streak" : currentLang === 'be' ? "Стрык" : "Стрик";
+            let daysText = currentLang === 'uk' ? "днів" : currentLang === 'en' ? "days" : currentLang === 'be' ? "дзён" : "дней";
+            let bonusText = currentLang === 'en' ? "BONUS" : "БОНУС";
 
-            document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`;
-            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? " (БОНУС x2!)" : "");
-
+            document.getElementById('daily-streak-text').innerText = `${streakText}: ${userData.daily_streak} ${daysText}`;
+            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (${bonusText} x2!)` : "");
+            
             clearInterval(dailyTimerInterval);
-
+            
             if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) {
-                document.getElementById('daily-btn').style.display = 'none';
+                document.getElementById('daily-btn').style.display = 'none'; 
                 document.getElementById('daily-wait').style.display = 'block';
-
+                
                 dailyTimerInterval = setInterval(() => {
                     let timeLeft = ONE_DAY - (Date.now() - userData.last_daily);
-                    if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } 
-                    else {
-                        let h = Math.floor(timeLeft / (1000 * 60 * 60));
-                        let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    if (timeLeft <= 0) { 
+                        clearInterval(dailyTimerInterval); 
+                        location.reload(); 
+                    } else {
+                        let h = Math.floor(timeLeft / (1000 * 60 * 60)); 
+                        let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); 
                         let s = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                        h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s;
-                        document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
+                        
+                        h = h < 10 ? "0" + h : h; 
+                        m = m < 10 ? "0" + m : m; 
+                        s = s < 10 ? "0" + s : s;
+                        
+                        let waitTitle = currentLang === 'uk' ? "Наступна нагорода через:" : currentLang === 'en' ? "Next reward in:" : currentLang === 'be' ? "Наступная ўзнагарода праз:" : "Следующая награда через:";
+                        document.getElementById('daily-wait').innerHTML = `${waitTitle}<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
                     }
                 }, 1000);
-            } else {
-                document.getElementById('daily-btn').style.display = 'block';
-                document.getElementById('daily-wait').style.display = 'none';
+            } else { 
+                document.getElementById('daily-btn').style.display = 'block'; 
+                document.getElementById('daily-wait').style.display = 'none'; 
             }
         }
 
         async function claimDaily() {
             try {
-                const res = await fetch('/api/user/claim-daily', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ tg_id: getUid() })
+                const res = await fetch('/api/user/claim-daily', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders()
                 });
                 const data = await res.json();
-                if (data.error) {
-                    tg.showAlert(data.error);
-                } else {
-                    tg.showAlert(`Получено: ${data.reward} 🌙!`);
-                    userData.shards = data.new_balance;
-                    userData.daily_streak = data.streak;
-                    userData.last_daily = Date.now();
-                    updateBalanceUI(userData.shards);
-                    updateDailyUI();
+                
+                if (data.error) { 
+                    tg.showAlert(data.error); 
+                } else { 
+                    let rText = currentLang === 'uk' ? "Отримано" : currentLang === 'en' ? "Received" : currentLang === 'be' ? "Атрымана" : "Получено";
+                    tg.showAlert(`${rText}: ${data.reward} 🌙!`); 
+                    userData.shards = data.new_balance; 
+                    userData.daily_streak = data.streak; 
+                    userData.last_daily = Date.now(); 
+                    
+                    updateBalanceUI(userData.shards); 
+                    updateDailyUI(); 
                 }
-            } catch (e) { tg.showAlert("Ошибка сервера"); }
+            } catch (e) { tg.showAlert("Error"); }
         }
 
         // ================= ПЕРСОНАЖИ =================
         async function renderUserChars() {
             try {
-                const res = await fetch('/api/get-characters');
+                const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
                 allChars = await res.json();
+                
+                allChars.sort((a, b) => b.id - a.id); 
+                
                 const list = document.getElementById('user-char-list');
-                if(allChars.length === 0) { list.innerHTML = "<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>"; return; }
-                list.innerHTML = allChars.map(c => `
+                
+                if(allChars.length === 0) { 
+                    let emptyText = currentLang === 'uk' ? "Немає персонажів" : currentLang === 'en' ? "No characters" : currentLang === 'be' ? "Няма персанажаў" : "Нет персонажей";
+                    list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>${emptyText}</div>`; 
+                    return; 
+                }
+                
+                let yText = currentLang === 'uk' ? "років" : currentLang === 'en' ? "y.o." : currentLang === 'be' ? "гадоў" : "лет";
+                let mText = currentLang === 'uk' ? "Чол" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Муж" : "Муж";
+                let fText = currentLang === 'uk' ? "Жін" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жан" : "Жен";
+
+                const charCards = await Promise.all(allChars.map(async (c) => {
+                    let tName = await neuroTranslate(c.name, currentLang);
+                    return `
                     <div class="char-card" onclick="openDossier(${c.id})">
                         <img src="${c.photo}">
                         <div class="char-card-info">
-                            <div class="char-card-name">${c.name}</div>
-                            <div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? 'Муж' : 'Жен'}</div>
+                            <div class="char-card-name">${tName}</div>
+                            <div class="char-card-tags">${c.age} ${yText} | ${c.gender === 'm' ? mText : fText}</div>
                         </div>
-                    </div>`).join('');
+                    </div>`;
+                }));
+                
+                list.innerHTML = charCards.join('');
             } catch (e) {}
         }
 
-        function openDossier(id) {
-            const c = allChars.find(x => x.id === id);
-            if(!c) return;
+        async function openDossier(id) {
+            const c = allChars.find(x => x.id === id); 
+            if(!c) return; 
             activeCharId = id;
-            document.getElementById('dos-name').innerText = c.name;
-            document.getElementById('dos-img').src = c.photo;
+            
+            let tName = await neuroTranslate(c.name, currentLang);
+            let tDesc = await neuroTranslate(c.desc, currentLang);
+
+            document.getElementById('dos-name').innerText = tName; 
+            document.getElementById('dos-img').src = c.photo; 
             document.getElementById('dos-age').innerText = c.age;
-            document.getElementById('dos-gender').innerText = c.gender === 'm' ? 'Мужской' : 'Женский';
-            document.getElementById('dos-desc').innerText = c.desc;
-            if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; }
+            
+            let mText = currentLang === 'uk' ? "Чоловіча" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Мужчынскі" : "Мужской";
+            let fText = currentLang === 'uk' ? "Жіноча" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жаночы" : "Женский";
+
+            document.getElementById('dos-gender').innerText = c.gender === 'm' ? mText : fText; 
+            document.getElementById('dos-desc').innerText = tDesc;
+            
+            if(getUid() === OID) { 
+                document.getElementById('dos-del-btn').style.display = 'block'; 
+            } 
             openPanel('p-char-dossier');
         }
 
+        function setCharGender(g) { 
+            currentCharGender = g; 
+            document.getElementById('cg-m').classList.toggle('active', g === 'm'); 
+            document.getElementById('cg-f').classList.toggle('active', g === 'f'); 
+        }
+
         async function saveCharDB() {
-            const n = document.getElementById('ich-name').value;
+            const n = document.getElementById('ich-name').value; 
             const img = document.getElementById('char-preview').src;
-            if(!n || img.includes('#')) return tg.showAlert("Имя и фото обязательны!");
+            if(!n || img.includes('#')) return tg.showAlert("Name and photo are required!");
             
-            const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img };
+            const charData = { 
+                id: Date.now(), 
+                name: n, 
+                age: document.getElementById('ich-age').value, 
+                gender: currentCharGender, 
+                desc: document.getElementById('ich-desc').value, 
+                photo: img 
+            };
             
-            await fetch('/api/admin/create-char', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), charData: charData }) });
-            tg.showAlert("Создан!"); renderUserChars();
+            await fetch('/api/admin/create-char', { 
+                method: 'POST', 
+                headers: getAuthHeaders(), 
+                body: JSON.stringify({ charData: charData }) 
+            });
+            
+            tg.showAlert("Created!"); 
+            renderUserChars();
         }
 
-        async function deleteChar() {
-            await fetch('/api/admin/delete-char', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), char_id: activeCharId }) });
-            tg.showAlert("Удален!"); renderUserChars(); back();
+        async function deleteChar() { 
+            await fetch('/api/admin/delete-char', { 
+                method: 'POST', 
+                headers: getAuthHeaders(), 
+                body: JSON.stringify({ char_id: activeCharId }) 
+            }); 
+            
+            tg.showAlert("Deleted!"); 
+            renderUserChars(); 
+            back(); 
         }
 
-        // ================= АДМИНКА И ПРОЧЕЕ =================
+        // ================= АДМИНКА =================
         async function modFunds(t, a) {
-            let idField = t === 'shards' ? 'ish-id' : 'isu-id'; let valField = t === 'shards' ? 'ish-val' : 'isu-type';
-            const target_id = document.getElementById(idField).value; const v = document.getElementById(valField).value;
-            if(!target_id) return tg.showAlert("Введите ID!");
+            let idField = t === 'shards' ? 'ish-id' : 'isu-id'; 
+            let valField = t === 'shards' ? 'ish-val' : 'isu-type';
+            const target_id = document.getElementById(idField).value; 
+            const v = document.getElementById(valField).value;
+            
+            if(!target_id) return tg.showAlert("Enter ID!");
             
             const endpoint = t === 'shards' ? '/api/admin/manage-shards' : '/api/admin/manage-sub';
-            const body = { sender_id: getUid(), target_id: target_id, action: a };
-            if(t === 'shards') body.amount = v; else body.sub_type = v;
-
-            const res = await fetch(endpoint, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
-            const data = await res.json(); tg.showAlert(data.message || "Ошибка");
+            const body = { target_id: target_id, action: a }; 
+            
+            if(t === 'shards') body.amount = v; 
+            else body.sub_type = v;
+            
+            const res = await fetch(endpoint, { 
+                method: 'POST', 
+                headers: getAuthHeaders(), 
+                body: JSON.stringify(body) 
+            });
+            
+            const data = await res.json(); 
+            tg.showAlert(data.message || "Error");
         }
 
+        // ================= ПРОМОКОДЫ =================
         async function createPromo() {
-            const code = document.getElementById('ip-code').value.toUpperCase().trim(); const rew = parseInt(document.getElementById('ip-rew').value);
+            const code = document.getElementById('ip-code').value.toUpperCase().trim(); 
+            const rew = parseInt(document.getElementById('ip-rew').value);
             if(!code || !rew) return;
-            await fetch('/api/admin/create-promo', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), promoData: {code, reward: rew} }) });
-            document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = ''; renderAdminPromos(); tg.showAlert("Создано!");
+            
+            await fetch('/api/admin/create-promo', { 
+                method: 'POST', 
+                headers: getAuthHeaders(), 
+                body: JSON.stringify({ promoData: {code, reward: rew} }) 
+            });
+            
+            document.getElementById('ip-code').value = ''; 
+            document.getElementById('ip-rew').value = ''; 
+            renderAdminPromos(); 
+            tg.showAlert("Created!");
         }
 
         async function renderAdminPromos() {
             try {
-                const res = await fetch('/api/get-promos'); const promos = await res.json();
-                document.getElementById('promo-list').innerHTML = promos.map(p => `<div class="task-item"><span>${p.code} (+${p.reward})</span></div>`).join('');
+                const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
+                const promos = await res.json();
+                
+                document.getElementById('promo-list').innerHTML = promos.map(p => {
+                    let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : '';
+                    return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`;
+                }).join('');
             } catch(e){}
         }
 
+        async function deletePromo(code) {
+            tg.showConfirm("Delete promo " + code + "?", async (yes) => {
+                if(yes) {
+                    await fetch('/api/admin/delete-promo', { 
+                        method: 'POST', 
+                        headers: getAuthHeaders(), 
+                        body: JSON.stringify({ code: code }) 
+                    });
+                    renderAdminPromos(); 
+                    tg.showAlert("Deleted!");
+                }
+            });
+        }
+
         async function usePromo() {
-            const uid = getUid(); const input = document.getElementById('user-promo-input').value.toUpperCase().trim();
-            const res = await fetch('/api/get-promos'); const promos = await res.json();
-            const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]");
-            const found = promos.find(p => p.code === input);
-            if(!found) return tg.showAlert("Неверный код"); if(used.includes(input)) return tg.showAlert("Уже активирован");
+            if (promoLock) return;
+            promoLock = true;
             
-            // Зачисляем через сервер
-            await fetch('/api/admin/manage-shards', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: found.reward }) });
+            const btn = document.getElementById('promo-btn'); 
+            const oldText = btn.innerText; 
+            btn.innerText = currentLang === 'en' ? "CHECKING..." : "ПРОВЕРКА..."; 
+            btn.style.opacity = "0.5";
             
-            used.push(input); localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
-            if(uid !== OID) updateBalanceUI(userData.shards + found.reward);
-            tg.showAlert(`Получено ${found.reward} 🌙!`);
+            try {
+                const uid = getUid(); 
+                const inputField = document.getElementById('user-promo-input'); 
+                const input = inputField.value.toUpperCase().trim();
+                
+                if(!input) { promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; return; }
+                
+                const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
+                const promos = await res.json();
+                
+                const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]"); 
+                const found = promos.find(p => p.code === input);
+                
+                if(!found) { 
+                    tg.showAlert(currentLang === 'en' ? "Invalid code" : "Неверный код"); 
+                } else if(used.includes(input)) { 
+                    tg.showAlert(currentLang === 'en' ? "Already used" : "Уже активирован"); 
+                } else {
+                    await fetch('/api/admin/manage-shards', { 
+                        method: 'POST', 
+                        headers: getAuthHeaders(), // Сервер знает, что админ тут бот
+                        body: JSON.stringify({ target_id: uid, action: 'add', amount: found.reward, bypass_admin: true }) 
+                    });
+                    
+                    used.push(input); 
+                    localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used));
+                    
+                    if(uid !== OID) updateBalanceUI(userData.shards + found.reward);
+                    
+                    inputField.value = ''; 
+                    let rText = currentLang === 'en' ? "Received" : "Получено";
+                    tg.showAlert(`${rText} ${found.reward} 🌙!`);
+                }
+            } catch(e) { tg.showAlert("Connection Error"); }
+            
+            promoLock = false; 
+            btn.innerText = oldText; 
+            btn.style.opacity = "1";
         }
 
         // ================= ЗАДАНИЯ =================
         async function modTask(act, tid=null) {
             if(act==='add') {
-                const n = document.getElementById('it-name').value; const rType = document.getElementById('it-rtype').value; if(!n) return;
-                const taskData = { id: Date.now(), name: n, link: document.getElementById('it-link').value, rType: rType, rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value };
-                await fetch('/api/admin/create-task', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), taskData: taskData }) });
+                const n = document.getElementById('it-name').value; 
+                const rType = document.getElementById('it-rtype').value; 
+                if(!n) return;
+                
+                const taskData = { 
+                    id: Date.now(), 
+                    name: n, 
+                    link: document.getElementById('it-link').value, 
+                    rType: rType, 
+                    rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value 
+                };
+                
+                await fetch('/api/admin/create-task', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(), 
+                    body: JSON.stringify({ taskData: taskData }) 
+                });
             }
-            renderTasks(); renderUserTasks();
+            renderTasks(); 
+            renderUserTasks();
         }
 
         async function renderTasks() {
-            const res = await fetch('/api/get-tasks'); const tasks = await res.json();
-            document.getElementById('task-list').innerHTML = tasks.map(x => `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span></div>`).join('');
-        }
-
-        async function renderUserTasks() {
-            const res = await fetch('/api/get-tasks'); const tasks = await res.json();
-            const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
-            const list = document.getElementById('user-task-list');
-            if (tasks.length === 0) { list.innerHTML = "<div class='info-card' style='text-align:center; color:#888;'>Пока нет доступных заданий</div>"; return; }
-            list.innerHTML = tasks.map(t => {
-                if(completed.includes(t.id)) return `<div class="task-item" style="opacity:0.5;"><span>${t.name}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
-                return `<div class="task-item" id="utask-${t.id}"><span>${t.name}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`;
+            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
+            const tasks = await res.json();
+            
+            document.getElementById('task-list').innerHTML = tasks.map(x => {
+                let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : '';
+                return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`;
             }).join('');
         }
 
-        function startTask(id, link) { tg.openLink(link); if(!clickedTasks.includes(id)) clickedTasks.push(id); const taskDiv = document.getElementById(`utask-${id}`); if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание проверки...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } }
-        function checkTask(id) { if(!clickedTasks.includes(id)) return; tg.showAlert("Проверка..."); setTimeout(() => { completeTaskAction(id); }, 1500); }
-        async function completeTaskAction(id) {
-            const uid = getUid(); const res = await fetch('/api/get-tasks'); const tasks = await res.json();
-            const t = tasks.find(x => x.id === id); if(!t) return;
-            let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); if(completed.includes(id)) return;
+        async function deleteTask(id) {
+            tg.showConfirm("Delete task?", async (yes) => {
+                if(yes) {
+                    await fetch('/api/admin/delete-task', { 
+                        method: 'POST', 
+                        headers: getAuthHeaders(), 
+                        body: JSON.stringify({ task_id: id }) 
+                    });
+                    renderTasks(); 
+                    renderUserTasks(); 
+                    tg.showAlert("Deleted!");
+                }
+            });
+        }
+
+        async function renderUserTasks() {
+            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
+            const tasks = await res.json();
+            const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
+            const list = document.getElementById('user-task-list');
             
-            if(t.rType === 'shards') {
-                await fetch('/api/admin/manage-shards', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', amount: t.rVal }) });
-                if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal));
-            } else if(t.rType === 'sub7') {
-                await fetch('/api/admin/manage-sub', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: OID, target_id: uid, action: 'add', sub_type: "Premium" }) });
+            if (tasks.length === 0) { 
+                let emptyText = currentLang === 'uk' ? "Поки немає доступних завдань" : currentLang === 'en' ? "No available tasks" : currentLang === 'be' ? "Пакуль няма даступных заданняў" : "Пока нет доступных заданий";
+                list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyText}</div>`; 
+                return; 
             }
-            completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); tg.showAlert(`Задание выполнено! Награда получена.`); renderUserTasks();
+            
+            let doneText = currentLang === 'uk' ? "Виконано" : currentLang === 'en' ? "Completed" : currentLang === 'be' ? "Выканана" : "Выполнено";
+            let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
+            let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
+
+            const taskCards = await Promise.all(tasks.map(async (t) => {
+                let tName = await neuroTranslate(t.name, currentLang);
+                if(completed.includes(t.id)) {
+                    return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
+                }
+                return `
+                <div class="task-item" id="utask-${t.id}">
+                    <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
+                    <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
+                </div>`;
+            }));
+
+            list.innerHTML = taskCards.join('');
+        }
+
+        function startTask(id, link) { 
+            tg.openLink(link); 
+            if(!clickedTasks.includes(id)) clickedTasks.push(id); 
+            
+            let waitText = currentLang === 'uk' ? "Очікування перевірки..." : currentLang === 'en' ? "Waiting for verification..." : currentLang === 'be' ? "Чаканне праверкі..." : "Ожидание проверки...";
+            let btnText = currentLang === 'uk' ? "ПЕРЕВІРИТИ" : currentLang === 'en' ? "CHECK" : currentLang === 'be' ? "ПРАВЕРЫЦЬ" : "ПРОВЕРИТЬ";
+
+            const taskDiv = document.getElementById(`utask-${id}`); 
+            if(taskDiv) { 
+                taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">${waitText}</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>`; 
+            } 
+        }
+
+        async function checkTask(id) { 
+            if(!clickedTasks.includes(id)) return; 
+            
+            let checkText = currentLang === 'uk' ? "Перевірка підписки..." : currentLang === 'en' ? "Checking subscription..." : currentLang === 'be' ? "Праверка падпіскі..." : "Проверка подписки...";
+            tg.showAlert(checkText); 
+            
+            try {
+                const res = await fetch('/api/check-task', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(), 
+                    body: JSON.stringify({ task_id: id }) 
+                });
+                const data = await res.json();
+                
+                if(data.success) { 
+                    completeTaskAction(id); 
+                } else { 
+                    let err = currentLang === 'uk' ? "Умова не виконана! Спершу підпишись." : currentLang === 'en' ? "Condition not met! Subscribe first." : currentLang === 'be' ? "Умова не выканана! Спачатку падпішыся." : "Условие не выполнено! Сначала подпишись.";
+                    tg.showAlert(data.error || err); 
+                }
+            } catch(e) { tg.showAlert("Error"); }
+        }
+
+        async function completeTaskAction(id) {
+            const uid = getUid(); 
+            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
+            const tasks = await res.json();
+            const t = tasks.find(x => x.id === id); 
+            if(!t) return;
+            
+            let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); 
+            if(completed.includes(id)) return;
+            
+            if(t.rType === 'shards') { 
+                await fetch('/api/admin/manage-shards', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(), 
+                    body: JSON.stringify({ target_id: uid, action: 'add', amount: t.rVal, bypass_admin: true }) 
+                }); 
+                if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal)); 
+            } 
+            else if(t.rType === 'sub7') { 
+                await fetch('/api/admin/manage-sub', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(), 
+                    body: JSON.stringify({ target_id: uid, action: 'add', sub_type: "Premium", bypass_admin: true }) 
+                }); 
+            }
+            
+            completed.push(id); 
+            localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); 
+            
+            let msg = currentLang === 'uk' ? "Завдання виконано! Нагороду отримано." : currentLang === 'en' ? "Task completed! Reward received." : currentLang === 'be' ? "Заданне выканана! Узнагарода атрымана." : "Задание выполнено! Награда получена.";
+            tg.showAlert(msg); 
+            
+            renderUserTasks();
+        }
+
+        function shareRef() {
+            const uid = getUid(); 
+            const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`;
+            
+            const text_ru = `Залетай в Anime AI! Общайся с ИИ-персонажами без цензуры. Переходи по моей ссылке и мы оба получим по 100 🌙!`;
+            const text_uk = `Залітай в Anime AI! Спілкуйся з ШІ-персонажами без цензури. Переходь за моїм посиланням і ми обидва отримаємо по 100 🌙!`;
+            const text_en = `Join Anime AI! Chat with AI characters without censorship. Follow my link and we both get 100 🌙!`;
+            const text_be = `Залятай у Anime AI! Размаўляй з ШІ-персанажамі без цэнзуры. Пераходзь па маёй спасылцы і мы абодва атрымаем па 100 🌙!`;
+            
+            let text = currentLang === 'uk' ? text_uk : currentLang === 'en' ? text_en : currentLang === 'be' ? text_be : text_ru;
+            
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`;
+            tg.openTelegramLink(shareUrl);
         }
 
         // ================= НАСТРОЙКИ И УТИЛИТЫ =================
-        function updateLiveNick(v) { let n = v || "User"; document.getElementById('u-name').innerText = n; document.getElementById('prof-nick').innerText = n; localStorage.setItem('m_nick_' + getUid(), n); }
-        function setGender(g, s=false) { currentCharGender = g; document.getElementById('cg-m')?.classList.toggle('active', g === 'm'); document.getElementById('cg-f')?.classList.toggle('active', g === 'f'); document.getElementById('g-m')?.classList.toggle('active', g === 'm'); document.getElementById('g-f')?.classList.toggle('active', g === 'f'); if(!s) localStorage.setItem('m_gender_' + getUid(), g); }
-        function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
-        function updateSex(v, s=false) { const m = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; document.getElementById('sex-val').innerText = v; document.getElementById('sex-info').innerText = document.getElementById('sex-slider').max == 0 ? "Пошлость недоступна для вашей подписки" : "Уровень " + v + ": " + m[v]; document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; if(!s) localStorage.setItem('m_sex_' + getUid(), v); }
-        function troll() { trollCount++; tg.showAlert(trollCount === 1 ? "Попался! 🤡" : "Не трогай меня, мне неприятно! 🤨"); }
-        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
-        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(i.files[0]); } }
-        async function modAdmin(a) { const id = document.getElementById('ia-id').value; if(!id) return; await fetch('/api/owner/set-admin', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ owner_id: getUid(), target_id: id, status: a === 'add' }) }); tg.showAlert("Обновлено"); }
-        async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ sender_id: getUid(), item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Цены сохранены!"); }
-        function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
+        function updateLiveNick(v) { 
+            let n = v || "User"; 
+            document.getElementById('u-name').innerText = n; 
+            document.getElementById('prof-nick').innerText = n; 
+            localStorage.setItem('m_nick_' + getUid(), n); 
+        }
+
+        function setGender(g, s=false) { 
+            document.getElementById('g-m')?.classList.toggle('active', g === 'm'); 
+            document.getElementById('g-f')?.classList.toggle('active', g === 'f'); 
+            if(!s) localStorage.setItem('m_gender_' + getUid(), g); 
+        }
+
+        function updateLen(v, s=false) { 
+            document.getElementById('len-val').innerText = v; 
+            if(!s) localStorage.setItem('m_len_' + getUid(), v); 
+        }
+
+        function updateSex(v, s=false) { 
+            const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; 
+            const m_uk = ["Без вульгарності", "Слабка", "Нормальна", "Сильна", "Висока", "V-Вульгарна", "HOT 🔥"];
+            const m_en = ["No NSFW", "Weak", "Normal", "Strong", "High", "V-NSFW", "HOT 🔥"];
+            const m_be = ["Без пошласці", "Слабая", "Нармальная", "Моцная", "Высокая", "V-Пошлая", "HOT 🔥"];
+            
+            const m = currentLang === 'uk' ? m_uk : currentLang === 'en' ? m_en : currentLang === 'be' ? m_be : m_ru;
+            
+            document.getElementById('sex-val').innerText = v; 
+            
+            let sliderMax = document.getElementById('sex-slider').max;
+            
+            let infoStr = currentLang === 'uk' ? "Вульгарність недоступна для вашої підписки" : currentLang === 'en' ? "NSFW is not available for your subscription" : currentLang === 'be' ? "Пошласць недаступная для вашай падпіскі" : "Пошлость недоступна для вашей подписки";
+            let lvlStr = currentLang === 'uk' ? "Рівень" : currentLang === 'en' ? "Level" : currentLang === 'be' ? "Узровень" : "Уровень";
+
+            document.getElementById('sex-info').innerText = sliderMax == 0 ? infoStr : `${lvlStr} ${v}: ${m[v]}`; 
+            
+            document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; 
+            if(!s) localStorage.setItem('m_sex_' + getUid(), v); 
+        }
+
+        function updateCharCounter() { 
+            document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; 
+        }
+
+        function previewImg(i) { 
+            if (i.files && i.files[0]) { 
+                const r = new FileReader(); 
+                r.onload = (e) => { 
+                    const p = document.getElementById('char-preview'); 
+                    p.src = e.target.result; 
+                    p.style.display = 'block'; 
+                }; 
+                r.readAsDataURL(i.files[0]); 
+            } 
+        }
+
+        async function modAdmin(a) { 
+            const id = document.getElementById('ia-id').value; 
+            if(!id) return; 
+            await fetch('/api/owner/set-admin', { 
+                method: 'POST', 
+                headers: getAuthHeaders(), 
+                body: JSON.stringify({ target_id: id, status: a === 'add' }) 
+            }); 
+            tg.showAlert("Updated!"); 
+        }
+
+        async function savePrices(type) { 
+            const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; 
+            await fetch('/api/owner/set-price', { 
+                method: 'POST', 
+                headers: getAuthHeaders(), 
+                body: JSON.stringify({ 
+                    item_id: type, 
+                    stars: document.getElementById(prefix+'stars').value, 
+                    ton: document.getElementById(prefix+'ton').value 
+                }) 
+            }); 
+            tg.showAlert("Saved!"); 
+        }
+
+        function toggleTaskInput() { 
+            document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; 
+        }
         
-        function openPanel(id) { stack.push(id); document.getElementById(id).style.display = 'flex'; }
-        function back() { if(stack.length > 0) document.getElementById(stack.pop()).style.display = 'none'; }
+        function openPanel(id) { 
+            stack.push(id); 
+            document.getElementById(id).style.display = 'flex'; 
+            BackButton.show(); 
+        }
+
+        function back() { 
+            if(stack.length > 0) { 
+                document.getElementById(stack.pop()).style.display = 'none'; 
+            } 
+            if(stack.length === 0) { 
+                BackButton.hide(); 
+            } 
+        }
+        
+        BackButton.onClick(() => back());
         
         window.onload = init;
     </script>
