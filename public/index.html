@@ -213,7 +213,6 @@
         <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()" data-i18n="b_del_char">УДАЛИТЬ ПЕРСОНАЖА</div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
-
     <div id="p-daily" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 5px;" data-i18n="h_daily">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
         <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;" data-i18n="d_sub">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
@@ -351,45 +350,38 @@
     
     <div id="p-settings" class="overlay">
         <h2 style="color:#bc42f5" data-i18n="h_set">НАСТРОЙКИ</h2>
-        
         <div class="set-list">
             <div class="set-item" onclick="openPanel('p-set-prof')">
                 <div class="set-icon ic-prof">👤</div>
                 <div class="set-text" data-i18n="s_menu_prof">Настроить профиль</div>
                 <div class="set-arrow">›</div>
             </div>
-            
             <div class="set-item" onclick="openPanel('p-set-lang')">
                 <div class="set-icon ic-lang">🌐</div>
                 <div class="set-text" data-i18n="s_menu_lang">Сменить язык</div>
                 <div class="set-arrow">›</div>
             </div>
-            
             <div class="set-item" onclick="openPanel('p-set-ai')">
                 <div class="set-icon ic-ai">🤖</div>
                 <div class="set-text" data-i18n="s_menu_ai">Настройка ИИ</div>
                 <div class="set-arrow">›</div>
             </div>
-            
             <div class="set-item" onclick="tg.openLink('https://telegra.ph/Privacy-Policy-03-03-61')">
                 <div class="set-icon ic-priv">🔒</div>
                 <div class="set-text" data-i18n="s_menu_priv">Политика конфиденциальности</div>
                 <div class="set-arrow">›</div>
             </div>
-            
             <div class="set-item" onclick="tg.openTelegramLink('https://t.me/suppurtmoders_bot')">
                 <div class="set-icon ic-sup">💬</div>
                 <div class="set-text" data-i18n="s_menu_sup">Техническая поддержка</div>
                 <div class="set-arrow">›</div>
             </div>
-            
             <div class="set-item" onclick="devApk()">
                 <div class="set-icon ic-apk">📱</div>
                 <div class="set-text" data-i18n="s_menu_apk">Приложение .apk</div>
                 <div class="set-arrow">›</div>
             </div>
         </div>
-        
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
 
@@ -398,7 +390,6 @@
         <div class="info-card">
             <span class="s-label" data-i18n="set_nick">Ник в приложении</span>
             <input type="text" id="set-nick" class="term-in" placeholder="..." oninput="updateLiveNick(this.value)">
-            
             <span class="s-label" data-i18n="set_gender">Ваш пол</span>
             <div class="gender-box">
                 <div class="gender-btn active" id="g-m" onclick="setGender('m')" data-i18n="g_m">Мужчина</div>
@@ -431,7 +422,6 @@
                 <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div>
             </div>
         </div>
-        
         <div class="info-card">
             <span class="s-label"><span data-i18n="set_sex">Пошлость персонажей</span> <span class="slider-val" id="sex-val">0</span></span>
             <div class="slider-wrap">
@@ -443,33 +433,80 @@
     </div>
     
     <div id="p-con" class="overlay">
-        <h2 style="color:#e91e63">CONSOLE</h2>
-        <div class="con-grid">
-            <div class="con-btn" onclick="openPanel('p-m-shards')">ОСКОЛКИ</div>
-            <div class="con-btn" onclick="openPanel('p-m-subs')">ПОДПИСКИ</div>
-            <div class="con-btn" onclick="openPanel('p-m-char')">ПЕРСОНАЖИ</div>
-            <div class="con-btn" onclick="openPanel('p-m-prices')">ЦЕНЫ</div>
-            <div class="con-btn" onclick="openPanel('p-m-admins')">АДМИНЫ</div>
-            <div class="con-btn" onclick="openPanel('p-m-promos')">ПРОМОКОДЫ</div>
-            <div class="con-btn" onclick="openPanel('p-m-tasks')" style="grid-column: span 2; border-color: #bc42f5;">ЗАДАНИЯ</div>
+        <h2 style="color:#e91e63">КОНСОЛЬ (OWNER)</h2>
+        <div class="set-list">
+            <div class="set-item" onclick="openPanel('p-m-shards')">
+                <div class="set-icon" style="background:#e91e63;">💎</div>
+                <div class="set-text">ОСКОЛКИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-subs')">
+                <div class="set-icon" style="background:#e91e63;">👑</div>
+                <div class="set-text">ПОДПИСКИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-char')">
+                <div class="set-icon" style="background:#e91e63;">🎭</div>
+                <div class="set-text">ПЕРСОНАЖИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-prices')">
+                <div class="set-icon" style="background:#e91e63;">💲</div>
+                <div class="set-text">ЦЕНЫ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-admins')">
+                <div class="set-icon" style="background:#e91e63;">🛡️</div>
+                <div class="set-text">АДМИНЫ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-promos')">
+                <div class="set-icon" style="background:#e91e63;">🎫</div>
+                <div class="set-text">ПРОМОКОДЫ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-tasks')">
+                <div class="set-icon" style="background:#bc42f5;">🎯</div>
+                <div class="set-text">ЗАДАНИЯ</div>
+                <div class="set-arrow">›</div>
+            </div>
         </div>
         <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
     </div>
     
     <div id="p-adm" class="overlay">
         <h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2>
-        <div class="con-grid">
-            <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-shards')">ВЫДАТЬ ОСКОЛКИ</div>
-            <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-subs')">ВЫДАТЬ SUB</div>
-            <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-char')">ДОБАВИТЬ ПЕРСА</div>
-            <div class="con-btn" style="border-color:#00bcd4" onclick="openPanel('p-m-promos')">СОЗДАТЬ ПРОМО</div>
-            <div class="con-btn" style="border-color:#00bcd4; grid-column: span 2;" onclick="openPanel('p-m-tasks')">ДОБАВИТЬ ЗАДАНИЕ</div>
+        <div class="set-list">
+            <div class="set-item" onclick="openPanel('p-m-shards')">
+                <div class="set-icon" style="background:#00bcd4;">💎</div>
+                <div class="set-text">ВЫДАТЬ ОСКОЛКИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-subs')">
+                <div class="set-icon" style="background:#00bcd4;">👑</div>
+                <div class="set-text">ВЫДАТЬ SUB</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-char')">
+                <div class="set-icon" style="background:#00bcd4;">🎭</div>
+                <div class="set-text">ДОБАВИТЬ ПЕРСА</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-promos')">
+                <div class="set-icon" style="background:#00bcd4;">🎫</div>
+                <div class="set-text">СОЗДАТЬ ПРОМО</div>
+                <div class="set-arrow">›</div>
+            </div>
+            <div class="set-item" onclick="openPanel('p-m-tasks')">
+                <div class="set-icon" style="background:#00bcd4;">🎯</div>
+                <div class="set-text">ДОБАВИТЬ ЗАДАНИЕ</div>
+                <div class="set-arrow">›</div>
+            </div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
-    
     <div id="p-m-shards" class="overlay">
-        <h2>ОСКОЛКИ</h2>
+        <h2 style="color:#00bcd4">ОСКОЛКИ</h2>
         <div class="info-card">
             <input type="number" id="ish-id" class="term-in" placeholder="TG ID">
             <input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО">
@@ -480,7 +517,7 @@
     </div>
     
     <div id="p-m-subs" class="overlay">
-        <h2>ПОДПИСКИ (30д)</h2>
+        <h2 style="color:#00bcd4">ПОДПИСКИ (30д)</h2>
         <div class="info-card">
             <input type="number" id="isu-id" class="term-in" placeholder="TG ID">
             <select id="isu-type" class="term-in">
@@ -513,7 +550,7 @@
     </div>
     
     <div id="p-m-char" class="overlay">
-        <h2>ПЕРСОНАЖ</h2>
+        <h2 style="color:#00bcd4">ПЕРСОНАЖ</h2>
         <div class="info-card" style="text-align: center;">
             <img id="char-preview" src="#">
             <input type="text" id="ich-name" class="term-in" placeholder="Имя">
@@ -533,7 +570,7 @@
     </div>
     
     <div id="p-m-tasks" class="overlay">
-        <h2>ЗАДАНИЯ</h2>
+        <h2 style="color:#00bcd4">ЗАДАНИЯ</h2>
         <div class="info-card">
             <input type="text" id="it-name" class="term-in" placeholder="Название">
             <input type="text" id="it-link" class="term-in" placeholder="Ссылка (https://...)">
@@ -549,7 +586,7 @@
     </div>
     
     <div id="p-m-promos" class="overlay">
-        <h2>ПРОМОКОДЫ</h2>
+        <h2 style="color:#00bcd4">ПРОМОКОДЫ</h2>
         <div class="info-card">
             <input type="text" id="ip-code" class="term-in" placeholder="КОД">
             <input type="number" id="ip-rew" class="term-in" placeholder="НАГРАДА">
@@ -560,7 +597,7 @@
     </div>
     
     <div id="p-m-admins" class="overlay">
-        <h2>АДМИНЫ</h2>
+        <h2 style="color:#e91e63">АДМИНЫ</h2>
         <div class="info-card">
             <input type="number" id="ia-id" class="term-in" placeholder="TG ID">
             <div class="term-btn" style="border-color:#00bcd4" onclick="modAdmin('add')">НАЗНАЧИТЬ</div>
@@ -568,6 +605,7 @@
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         const BackButton = tg.BackButton;
@@ -1635,7 +1673,6 @@
 
         async function checkTask(id) { 
             if(!clickedTasks.includes(id)) return; 
-            const uid = getUid(); 
             
             let checkText = currentLang === 'uk' ? "Перевірка підписки..." : currentLang === 'en' ? "Checking subscription..." : currentLang === 'be' ? "Праверка падпіскі..." : "Проверка подписки...";
             tg.showAlert(checkText); 
