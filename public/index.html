@@ -34,20 +34,12 @@
         .badge-admin { background: linear-gradient(90deg, #00bcd4, #0055ff); color: #fff; box-shadow: 0 0 8px rgba(0,188,212,0.6); border: 1px solid #88ddff; }
         
         /* === АНИМАЦИИ ПЕРЕХОДОВ И КНОПОК === */
-        @keyframes smoothOpen {
-            0% { opacity: 0; transform: translateY(15px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        @keyframes smoothOpen { 0% { opacity: 0; transform: translateY(15px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         
-        .menu-item, .term-btn, .con-btn, .btn-stars, .btn-ton, .char-card, .chatlist-item, .gender-btn, .chat-send-btn, .task-item button {
-            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease;
-        }
-        .menu-item:active, .term-btn:active, .con-btn:active, .btn-stars:active, .btn-ton:active, .char-card:active, .chatlist-item:active, .gender-btn:active, .chat-send-btn:active, .task-item button:active {
-            transform: scale(0.94);
-            filter: brightness(0.8);
-        }
+        .menu-item, .term-btn, .con-btn, .btn-stars, .btn-ton, .char-card, .chatlist-item, .gender-btn, .chat-send-btn, .task-item button { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease; }
+        .menu-item:active, .term-btn:active, .con-btn:active, .btn-stars:active, .btn-ton:active, .char-card:active, .chatlist-item:active, .gender-btn:active, .chat-send-btn:active, .task-item button:active { transform: scale(0.94); filter: brightness(0.8); }
 
-        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК (iOS/Telegram стиль) === */
+        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК (iOS стиль) === */
         .set-list { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; margin-bottom: 15px; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
         .set-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #2d164d; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; }
         .set-item:active { transform: scale(0.97); filter: brightness(0.8); }
@@ -56,12 +48,7 @@
         .set-text { flex: 1; font-size: 15px; color: #fff; font-weight: 500; }
         .set-arrow { color: #555; font-size: 18px; font-weight: bold; }
 
-        .ic-prof { background: #0A84FF; } 
-        .ic-lang { background: #30D158; } 
-        .ic-ai { background: #8E8E93; }   
-        .ic-priv { background: #FF9F0A; } 
-        .ic-sup { background: #BF5AF2; }  
-        .ic-apk { background: #FF453A; }  
+        .ic-prof { background: #0A84FF; } .ic-lang { background: #30D158; } .ic-ai { background: #8E8E93; } .ic-priv { background: #FF9F0A; } .ic-sup { background: #BF5AF2; } .ic-apk { background: #FF453A; }  
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
@@ -78,17 +65,15 @@
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
 
         .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a0b2e; font-size: 14px; }
-        .p-label { color: #888; }
-        .p-val { color: #fff; font-weight: bold; }
-
+        .p-label { color: #888; } .p-val { color: #fff; font-weight: bold; }
         .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
         
         input[type="range"] { touch-action: pan-y; }
-        
         .slider-wrap { width: 100%; margin-top: 5px; }
         .slider { width: 100%; -webkit-appearance: none; height: 4px; background: #2d164d; border-radius: 2px; outline: none; }
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #bc42f5; box-shadow: 0 0 10px #bc42f5; }
         .slider-val { float: right; color: #bc42f5; font-weight: bold; }
+        
         .gender-box { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
         .gender-btn { flex: 1; padding: 10px; border: 1px solid #2d164d; border-radius: 8px; text-align: center; font-size: 12px; color: #555; cursor: pointer; }
         .gender-btn.active { border-color: #bc42f5; color: #bc42f5; background: rgba(188, 66, 245, 0.1); }
@@ -629,6 +614,7 @@
         let allChars = []; 
 
         // === ОГРОМНЫЙ СЛОВАРЬ СТАТИКИ (4 ЯЗЫКА + НОВЫЕ НАСТРОЙКИ) ===
+        // Убран neuroTranslate для динамики! Всё остальное - статика.
         const translations = {
             ru: {
                 m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль",
@@ -677,7 +663,6 @@
         };
 
         let currentLang = 'ru';
-        const transCache = {}; 
 
         function getUid() { 
             return String(tg.initDataUnsafe?.user?.id || OID); 
@@ -689,29 +674,6 @@
                 'Content-Type': 'application/json',
                 'x-tg-data': tg.initData || "dev_mode" 
             };
-        }
-
-        // === НЕЙРО-ПЕРЕВОДЧИК (Google API) ===
-        async function neuroTranslate(text, targetLang) {
-            if (!text || targetLang === 'ru') return text; 
-            
-            const cacheKey = text + '_' + targetLang;
-            if (transCache[cacheKey]) return transCache[cacheKey];
-
-            try {
-                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                
-                let translatedText = '';
-                data[0].forEach(item => { translatedText += item[0]; });
-                
-                transCache[cacheKey] = translatedText; 
-                return translatedText;
-            } catch (e) {
-                console.error("NeuroTranslate Error:", e);
-                return text; 
-            }
         }
 
         // === СИСТЕМА ПЕРЕВОДА ИНТЕРФЕЙСА ===
@@ -727,9 +689,9 @@
 
             applyTranslations();
 
-            if(document.getElementById('p-user-chars').style.display === 'flex') await renderUserChars();
-            if(document.getElementById('p-char-dossier').style.display === 'flex') await openDossier(activeCharId);
-            if(document.getElementById('p-user-tasks').style.display === 'flex') await renderUserTasks();
+            if(document.getElementById('p-user-chars').style.display === 'flex') renderUserChars();
+            if(document.getElementById('p-char-dossier').style.display === 'flex') openDossier(activeCharId);
+            if(document.getElementById('p-user-tasks').style.display === 'flex') renderUserTasks();
             if(document.getElementById('p-user-chatlist').style.display === 'flex') openChatList();
         }
 
@@ -818,10 +780,10 @@
             const uid = getUid();
             if(!uid || document.getElementById('loading').style.display !== 'none') return;
             try {
+                // Строгий POST без лишнего body (твой сервер берет ID из headers x-tg-data)
                 const res = await fetch('/api/user/sync', {
                     method: 'POST', 
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({}) // Сервер сам берет req.tg_user_id из headers
+                    headers: getAuthHeaders()
                 });
                 
                 if(res.ok) {
@@ -1139,20 +1101,19 @@
                 let emptyTxt = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : currentLang === 'en' ? "You have no active chats.<br><br>Go to 'Characters', select a dossier and click 'Start Chat'!" : currentLang === 'be' ? "У вас пакуль няма актыўных дыялогаў.<br><br>Перайдзіце ў 'Персанажы', выберыце дасье і націсніце 'Пачаць чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
                 html = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
             } else {
-                const chatCards = await Promise.all(chatObjects.map(async (obj) => {
+                html = chatObjects.map(obj => {
                     let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
                     let p1 = currentLang === 'uk' ? "Відкріпити" : currentLang === 'en' ? "Unpin" : currentLang === 'be' ? "Адмацаваць" : "Открепить";
                     let p2 = currentLang === 'uk' ? "Закріпити" : currentLang === 'en' ? "Pin" : currentLang === 'be' ? "Замацаваць" : "Закрепить";
                     let pinText = obj.isPinned ? p1 : p2;
                     let clearText = currentLang === 'uk' ? "Очистити пам'ять" : currentLang === 'en' ? "Clear memory" : currentLang === 'be' ? "Ачысціць памяць" : "Очистить память";
                     let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Видалиць чат" : "Удалить чат";
-                    let tName = await neuroTranslate(obj.char.name, currentLang); 
-
+                    
                     return `
                     <div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})" style="z-index:1;">
                         <img src="${obj.char.photo}" class="chatlist-img">
                         <div class="chatlist-info">
-                            <div class="chatlist-name">${pinMark}${tName}</div>
+                            <div class="chatlist-name">${pinMark}${obj.char.name}</div>
                             <div class="chatlist-last">${obj.lastMsg}</div>
                         </div>
                         <button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button>
@@ -1162,8 +1123,7 @@
                             <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 ${delText}</div>
                         </div>
                     </div>`;
-                }));
-                html = chatCards.join('');
+                }).join('');
             }
             list.innerHTML = html; 
             openPanel('p-user-chatlist');
@@ -1173,7 +1133,7 @@
             activeCharId = charId;
             const c = allChars.find(x => x.id == charId); 
             if(!c) return;
-            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
+            document.getElementById('chat-char-name').innerText = c.name; // БЕЗ NEUROTRANSLATE
             renderChatMessages(); 
             openPanel('p-chat');
         }
@@ -1181,7 +1141,7 @@
         async function openChatFromDossier() {
             const c = allChars.find(x => x.id === activeCharId); 
             if(!c) return;
-            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
+            document.getElementById('chat-char-name').innerText = c.name; // БЕЗ NEUROTRANSLATE
             const uid = getUid(); 
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             if(!allChats[activeCharId]) { 
@@ -1209,10 +1169,10 @@
             setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
-        // ================= ОРИГИНАЛЬНЫЕ GET-ЗАПРОСЫ (БЕЗ BODY) =================
+        // ================= ОРИГИНАЛЬНЫЕ GET-ЗАПРОСЫ БЕЗ НЕЙРОСЕТИ =================
         async function renderUserChars() {
             try {
-                // ИСПОЛЬЗУЕМ СТРОГИЙ GET КАК В SERVER.JS
+                // СТРОГИЙ GET
                 const res = await fetch('/api/get-characters', { 
                     headers: getAuthHeaders()
                 }); 
@@ -1231,24 +1191,22 @@
                 let mText = currentLang === 'uk' ? "Чол" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Муж" : "Муж";
                 let fText = currentLang === 'uk' ? "Жін" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жан" : "Жен";
 
-                const charCards = await Promise.all(allChars.map(async (c) => {
-                    let tName = await neuroTranslate(c.name, currentLang);
-                    return `
+                // СИНХРОННЫЙ РЕНДЕР БЕЗ ЗАПРОСОВ К GOOGLE
+                list.innerHTML = allChars.map(c => `
                     <div class="char-card" onclick="openDossier(${c.id})">
                         <img src="${c.photo}">
                         <div class="char-card-info">
-                            <div class="char-card-name">${tName}</div>
+                            <div class="char-card-name">${c.name}</div>
                             <div class="char-card-tags">${c.age} ${yText} | ${c.gender === 'm' ? mText : fText}</div>
                         </div>
-                    </div>`;
-                }));
-                list.innerHTML = charCards.join('');
+                    </div>
+                `).join('');
             } catch (e) { console.error("Render Chars Error:", e); }
         }
 
         async function renderTasks() {
             try {
-                // ИСПОЛЬЗУЕМ СТРОГИЙ GET КАК В SERVER.JS
+                // СТРОГИЙ GET
                 const res = await fetch('/api/get-tasks', { 
                     headers: getAuthHeaders()
                 }); 
@@ -1262,7 +1220,7 @@
 
         async function renderUserTasks() {
             try {
-                // ИСПОЛЬЗУЕМ СТРОГИЙ GET КАК В SERVER.JS
+                // СТРОГИЙ GET
                 const res = await fetch('/api/get-tasks', { 
                     headers: getAuthHeaders()
                 }); 
@@ -1280,24 +1238,23 @@
                 let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
                 let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
 
-                const taskCards = await Promise.all(tasks.map(async (t) => {
-                    let tName = await neuroTranslate(t.name, currentLang);
+                // СИНХРОННЫЙ РЕНДЕР
+                list.innerHTML = tasks.map(t => {
                     if(completed.includes(t.id)) {
-                        return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
+                        return `<div class="task-item" style="opacity:0.5;"><span>${t.name}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
                     }
                     return `
                     <div class="task-item" id="utask-${t.id}">
-                        <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
+                        <span>${t.name}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
                         <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
                     </div>`;
-                }));
-                list.innerHTML = taskCards.join('');
+                }).join('');
             } catch(e) {}
         }
 
         async function renderAdminPromos() {
             try {
-                // ИСПОЛЬЗУЕМ СТРОГИЙ GET КАК В SERVER.JS
+                // СТРОГИЙ GET
                 const res = await fetch('/api/get-promos', { 
                     headers: getAuthHeaders()
                 }); 
@@ -1389,6 +1346,43 @@
             }
         }
 
+        function updateDailyUI() {
+            const ONE_DAY = 24 * 60 * 60 * 1000; 
+            let timePassed = Date.now() - userData.last_daily;
+            let nextStreak = userData.daily_streak + 1; 
+            let is7thDay = (nextStreak % 7 === 0);
+            let baseRew = userData.daily_reward || 10; 
+            let actualRew = is7thDay ? baseRew * 2 : baseRew;
+            
+            let streakText = currentLang === 'en' ? "Streak" : "Стрик";
+            let daysText = currentLang === 'en' ? "days" : "дней";
+            let bonusText = currentLang === 'en' ? "BONUS" : "БОНУС";
+
+            document.getElementById('daily-streak-text').innerText = `${streakText}: ${userData.daily_streak} ${daysText}`;
+            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (${bonusText} x2!)` : "");
+            
+            clearInterval(dailyTimerInterval);
+            
+            if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) {
+                document.getElementById('daily-btn').style.display = 'none'; 
+                document.getElementById('daily-wait').style.display = 'block';
+                
+                dailyTimerInterval = setInterval(() => {
+                    let timeLeft = ONE_DAY - (Date.now() - userData.last_daily);
+                    if (timeLeft <= 0) { 
+                        clearInterval(dailyTimerInterval); location.reload(); 
+                    } else {
+                        let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s;
+                        document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
+                    }
+                }, 1000);
+            } else { 
+                document.getElementById('daily-btn').style.display = 'block'; 
+                document.getElementById('daily-wait').style.display = 'none'; 
+            }
+        }
+
         async function claimDaily() {
             try {
                 const res = await fetch('/api/user/claim-daily', { 
@@ -1408,11 +1402,11 @@
             const c = allChars.find(x => x.id === id); 
             if(!c) return; 
             activeCharId = id;
-            document.getElementById('dos-name').innerText = await neuroTranslate(c.name, currentLang); 
+            document.getElementById('dos-name').innerText = c.name; 
             document.getElementById('dos-img').src = c.photo; 
             document.getElementById('dos-age').innerText = c.age;
             document.getElementById('dos-gender').innerText = c.gender === 'm' ? "Мужской" : "Женский"; 
-            document.getElementById('dos-desc').innerText = await neuroTranslate(c.desc, currentLang);
+            document.getElementById('dos-desc').innerText = c.desc;
             if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } 
             openPanel('p-char-dossier');
         }
