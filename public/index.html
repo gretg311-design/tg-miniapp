@@ -576,6 +576,11 @@
         <div class="info-card">
             <input type="text" id="ip-code" class="term-in" placeholder="КОД">
             <input type="number" id="ip-rew" class="term-in" placeholder="НАГРАДА">
+            <select id="ip-hours" class="term-in">
+                <option value="1">Время: 1 Час</option>
+                <option value="2">Время: 2 Часа</option>
+                <option value="3">Время: 3 Часа</option>
+            </select>
             <div class="term-btn" onclick="createPromo()">СОЗДАТЬ ПРОМО</div>
         </div>
         <div id="promo-list" style="width:100%"></div>
@@ -1113,7 +1118,6 @@
                 let emptyTxt = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : currentLang === 'en' ? "You have no active chats.<br><br>Go to 'Characters', select a dossier and click 'Start Chat'!" : currentLang === 'be' ? "У вас пакуль няма актыўных дыялогаў.<br><br>Перайдзіце ў 'Персанажы', выберыце дасье і націсніце 'Пачаць чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
                 list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
             } else {
-                // ИСПРАВЛЕНИЕ: Promise.all для перевода
                 const chatCards = await Promise.all(chatObjects.map(async (obj) => {
                     let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
                     let p1 = currentLang === 'uk' ? "Відкріпити" : currentLang === 'en' ? "Unpin" : currentLang === 'be' ? "Адмацаваць" : "Открепить";
@@ -1445,11 +1449,24 @@
             const data = await res.json(); tg.showAlert(data.message || "Error");
         }
 
+        // === ОБНОВЛЕННОЕ СОЗДАНИЕ ПРОМОКОДА С ВРЕМЕНЕМ ===
         async function createPromo() {
-            const code = document.getElementById('ip-code').value.toUpperCase().trim(); const rew = parseInt(document.getElementById('ip-rew').value);
+            const code = document.getElementById('ip-code').value.toUpperCase().trim(); 
+            const rew = parseInt(document.getElementById('ip-rew').value);
+            const hours = parseInt(document.getElementById('ip-hours').value); // Считываем время из списка
+            
             if(!code || !rew) return;
-            await fetch('/api/admin/create-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ promoData: {code, reward: rew} }) });
-            document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = ''; renderAdminPromos(); tg.showAlert("Created!");
+            
+            await fetch('/api/admin/create-promo', { 
+                method: 'POST', 
+                headers: getAuthHeaders(), 
+                body: JSON.stringify({ promoData: {code, reward: rew, hours: hours} }) 
+            });
+            
+            document.getElementById('ip-code').value = ''; 
+            document.getElementById('ip-rew').value = ''; 
+            renderAdminPromos(); 
+            tg.showAlert(`Создано на ${hours} ч. и отправлено в канал!`);
         }
 
         async function deletePromo(code) {
