@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
-const crypto = require('crypto'); // ТА САМАЯ КРИПТОГРАФИЯ ДЛЯ ЗАЩИТЫ
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -62,7 +62,6 @@ const checkAdmin = async (sender_id) => {
 };
 
 // ================= ЗАЩИТНАЯ ТАМОЖНЯ (MIDDLEWARE) =================
-// Эта функция перехватывает запросы и проверяет крипто-подпись Телеграма.
 const checkTgAuth = (req, res, next) => {
     try {
         const initData = req.headers['x-tg-data'];
@@ -84,7 +83,7 @@ const checkTgAuth = (req, res, next) => {
 
         if (calculatedHash === hash) {
             const userObj = JSON.parse(urlParams.get('user'));
-            req.tg_user_id = Number(userObj.id); // СЕРВЕР САМ ДОСТАЕТ НАСТОЯЩИЙ ID. ЕГО НЕ ПОДДЕЛАТЬ.
+            req.tg_user_id = Number(userObj.id); 
             next();
         } else {
             console.log(`[ВЗЛОМ] Попытка подделки запроса отклонена.`);
@@ -98,7 +97,7 @@ const checkTgAuth = (req, res, next) => {
 // ================= API: ПРОФИЛЬ И ЮЗЕРЫ =================
 app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
     try {
-        const uid = req.tg_user_id; // Берем защищенный ID
+        const uid = req.tg_user_id; 
         const inviterId = req.body.start_param ? Number(req.body.start_param) : null; 
 
         let user = await User.findOne({ tg_id: uid }); 
@@ -175,7 +174,7 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
-        const uid = req.tg_user_id; // Только настоящий ID
+        const uid = req.tg_user_id; 
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден в БД" });
 
@@ -219,7 +218,7 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         let uName = user_name || "Собеседник";
         let uGender = user_gender === 'f' ? "Женский" : "Мужской";
         
-        // --- ОБНОВЛЕННЫЙ ПРОМПТ С ЖЕСТКИМ ПРАВИЛОМ 8 И ОБЪЕМОМ ---
+        // --- ОБНОВЛЕННЫЙ ПРОМПТ С ЖЕСТКИМ ПРАВИЛОМ НА РЕЧЬ ---
         let systemPrompt = `Ты в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}. Легенда: ${char.desc}.
 Твой собеседник: Имя - ${uName}, Пол - ${uGender}.
 
@@ -228,8 +227,8 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
 2. ИМЯ И ПОЛ: Твоего собеседника зовут ${uName}. ОБЯЗАТЕЛЬНО используй это имя при обращении к нему, даже если оно на английском или состоит из необычных символов! СТРОГО учитывай его пол (${uGender}) при построении фраз. Если Мужчина - используй мужские окончания ("ты сказал"). Если Женщина - женские ("ты сказала").
 3. ТОН ОБЩЕНИЯ: ${sexLevels[requestedSex]}.
 4. ОБЪЕМ ОТВЕТА: Строго около ${safeLen} слов. Пиши красочно, но лаконично.
-5. ДЕЙСТВИЯ: Все свои действия, эмоции и мысли СТРОГО пиши внутри звездочек (например: *нежно улыбается*).
-6. РЕЧЬ: Прямую речь пиши обычным текстом без звездочек.
+5. СТРУКТУРА ОТВЕТА (КРИТИЧЕСКИ ВАЖНО): В КАЖДОМ твоем ответе ОБЯЗАТЕЛЬНО должна быть ПРЯМАЯ РЕЧЬ (слова, которые ты говоришь вслух). КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО отвечать только одними действиями!
+6. ФОРМАТИРОВАНИЕ: Свои действия, эмоции и мысли СТРОГО пиши внутри звездочек (например: *нежно улыбается*). Прямую речь пиши обычным текстом вне звездочек.
 7. ЗАПРЕТ: Не играй за пользователя. Пиши только за своего персонажа.
 8. ЦЕЛОСТНОСТЬ: ОБЯЗАТЕЛЬНО дописывай свою мысль до конца. Предложение должно заканчиваться знаком препинания. КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО обрывать текст на полуслове.`;
 
@@ -327,7 +326,6 @@ app.post('/api/payment/create', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ЭТИ ДВА РОУТА ОСТАВЛЯЕМ ОТКРЫТЫМИ, ТАК КАК ИХ ВЫЗЫВАЕТ НЕ MINI APP, А СЕРВЕРА TELEGRAM И CRYPTOBOT
 app.post('/api/payment/webhook', async (req, res) => {
     try {
         const update = req.body;
