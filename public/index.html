@@ -100,11 +100,14 @@
         .msg-box { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
         .msg-user { background: #2d164d; align-self: flex-end; border-bottom-right-radius: 2px; }
         .msg-char { background: #1a0b2e; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #bc42f5; }
-        .chat-input-area { display: flex; gap: 10px; padding: 10px; background: #0d041a; border-top: 1px solid #2d164d; }
-        .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; }
-        .chat-send-btn { background: #bc42f5; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+        
+        /* === ИЗМЕНЕНИЯ ДЛЯ ПОЛЯ ВВОДА === */
+        .chat-input-area { display: flex; gap: 10px; padding: 10px; background: #0d041a; border-top: 1px solid #2d164d; align-items: flex-end; }
+        .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; resize: none; overflow-y: auto; max-height: 120px; font-family: inherit; line-height: 1.4; word-wrap: break-word; }
+        .chat-input:disabled { opacity: 0.5; }
+        .chat-send-btn:disabled { background: #555; cursor: not-allowed; }
+        /* ================================ */
 
-        /* ИСПРАВЛЕНИЕ Z-INDEX ДЛЯ ЧАТОВ */
         .chatlist-item { display: flex; align-items: center; background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 10px; margin-bottom: 10px; position: relative; z-index: 1; transition: z-index 0.1s; }
         .chatlist-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #bc42f5; margin-right: 15px; flex-shrink: 0; cursor: pointer; }
         .chatlist-info { flex: 1; overflow: hidden; cursor: pointer; }
@@ -168,8 +171,8 @@
                 <div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;" id="chat-empty-msg">Начните диалог...<br>1 сообщение = 1 🌙</div>
             </div>
             <div class="chat-input-area">
-                <input type="text" id="chat-input-text" class="chat-input" placeholder="Ваше сообщение...">
-                <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+                <textarea id="chat-input-text" class="chat-input" placeholder="Ваше сообщение..." rows="1" style="height: 40px;" oninput="this.style.height = '40px'; this.style.height = (this.scrollHeight) + 'px';"></textarea>
+                <button id="chat-send-btn" class="chat-send-btn" onclick="sendMessage()">➤</button>
             </div>
         </div>
     </div>
@@ -310,7 +313,6 @@
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
-    
     <div id="p-user-promos" class="overlay">
         <h2 style="color:#bc42f5" data-i18n="h_promos">ПРОМОКОД</h2>
         <div class="info-card">
@@ -717,7 +719,7 @@
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (t[key]) {
-                    if (el.tagName === 'INPUT') el.placeholder = t[key];
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key];
                     else el.innerHTML = t[key];
                 }
             });
@@ -953,8 +955,10 @@
             }
         }
 
-        // ================= НАВИГАЦИЯ СЛОЯМИ =================
+        // ================= НАВИГАЦИЯ И БЛОКИРОВКА =================
         let baseZ = 15000;
+        let isBotTyping = false; // Флаг блокировки чата
+
         function openPanel(id) { 
             if(stack.includes(id)) return; 
             stack.push(id); 
@@ -967,6 +971,13 @@
         }
 
         function back() { 
+            // ЖЕСТКАЯ БЛОКИРОВКА ВЫХОДА ИЗ ЧАТА ВО ВРЕМЯ ГЕНЕРАЦИИ
+            if(isBotTyping) {
+                let msg = currentLang === 'uk' ? "Бот пише відповідь, зачекайте! ⏳" : currentLang === 'en' ? "Bot is typing, please wait! ⏳" : "Бот печатает ответ, подождите! ⏳";
+                tg.showAlert(msg);
+                return;
+            }
+
             if(stack.length > 0) { 
                 let id = stack.pop();
                 let el = document.getElementById(id);
@@ -978,6 +989,7 @@
         }
         
         BackButton.onClick(() => back());
+        function closeChat() { back(); }
 
         // ================= ЧАТЫ И ЛОГИКА =================
         function updateChatOrder(charId) {
@@ -1149,6 +1161,7 @@
         }
 
         async function resumeChat(charId) {
+            if(isBotTyping) return;
             activeCharId = charId;
             const c = allChars.find(x => x.id == charId); 
             if(!c) return;
@@ -1158,6 +1171,7 @@
         }
 
         async function openChatFromDossier() {
+            if(isBotTyping) return;
             const c = allChars.find(x => x.id === activeCharId); 
             if(!c) return;
             document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
@@ -1275,27 +1289,44 @@
             } catch(e) {}
         }
 
-        // ================= ЗАПРОСЫ (POST) =================
+        // ================= ЧАТ: ОТПРАВКА, АНИМАЦИЯ И БЛОКИРОВКИ =================
         async function sendMessage() {
+            if(isBotTyping) return; // Защита от спама кликами
+            
             const input = document.getElementById('chat-input-text'); 
+            const sendBtn = document.getElementById('chat-send-btn');
             const text = input.value.trim(); 
             if(!text) return;
+            
             const uid = getUid(); 
             if(uid !== OID && userData.shards < 1) {
                 let noShards = currentLang === 'uk' ? "Недостатньо осколків!" : currentLang === 'en' ? "Not enough shards!" : "Недостаточно осколков!";
                 return tg.showAlert(noShards);
             }
+
+            // ВКЛЮЧАЕМ БЛОКИРОВКУ
+            isBotTyping = true;
+            input.disabled = true;
+            sendBtn.disabled = true;
+            input.value = ''; 
+            input.style.height = '40px'; // Сбрасываем размер поля ввода
+
+            // ТАЙМЕР 8 СЕКУНД
+            let minTimePassed = false;
+            setTimeout(() => { minTimePassed = true; }, 8000); 
             
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             if(!allChats[activeCharId]) allChats[activeCharId] = [];
             allChats[activeCharId].push({sender: 'user', text: text}); 
             localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
             
-            updateChatOrder(activeCharId); input.value = ''; renderChatMessages();
+            updateChatOrder(activeCharId); 
+            renderChatMessages();
             
             const chatBox = document.getElementById('chat-messages-box');
             let typingText = currentLang === 'uk' ? "Персонаж друкує..." : currentLang === 'en' ? "Character is typing..." : "Персонаж печатает...";
-            chatBox.innerHTML += `<div class="msg-box msg-char" id="typing-indicator" style="opacity:0.5;">${typingText}</div>`;
+            const typeId = "typing-" + Date.now();
+            chatBox.innerHTML += `<div class="msg-box msg-char" id="${typeId}" style="opacity:0.5;">${typingText}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
             
             try {
@@ -1315,16 +1346,61 @@
                     }) 
                 });
                 const data = await res.json(); 
-                document.getElementById('typing-indicator')?.remove();
+                
                 if (data.reply) { 
-                    allChats[activeCharId].push({sender: 'char', text: data.reply}); 
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                    if (uid !== OID) updateBalanceUI(data.new_balance); 
-                    renderChatMessages(); 
-                } else if (data.error) { tg.showAlert(data.error); }
-            } catch (e) { document.getElementById('typing-indicator')?.remove(); tg.showAlert("Ошибка сервера"); }
+                    const replyBox = document.getElementById(typeId);
+                    replyBox.style.opacity = "1";
+                    replyBox.innerText = ""; // Очищаем "печатает..."
+                    
+                    let replyText = data.reply;
+                    let i = 0;
+                    
+                    // ЭФФЕКТ ПЕЧАТНОЙ МАШИНКИ
+                    function typeChar() {
+                        if (i < replyText.length) {
+                            replyBox.appendChild(document.createTextNode(replyText.charAt(i)));
+                            i++;
+                            chatBox.scrollTop = chatBox.scrollHeight;
+                            setTimeout(typeChar, 20); // Скорость печати: 20мс на букву
+                        } else {
+                            finishMessage(replyText);
+                        }
+                    }
+                    typeChar();
+
+                    function finishMessage(finalText) {
+                        // Ждем, пока пройдет 8 секунд, если печать завершилась быстрее
+                        let waitTimer = setInterval(() => {
+                            if (minTimePassed) {
+                                clearInterval(waitTimer);
+                                allChats[activeCharId].push({sender: 'char', text: finalText}); 
+                                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
+                                if (uid !== OID) updateBalanceUI(data.new_balance); 
+                                unlockChat();
+                            }
+                        }, 500);
+                    }
+
+                } else { 
+                    document.getElementById(typeId)?.remove(); 
+                    if (data.error) tg.showAlert(data.error); 
+                    unlockChat(); // Если ошибка - разблокируем сразу
+                }
+            } catch (e) { 
+                document.getElementById(typeId)?.remove(); 
+                tg.showAlert("Ошибка сервера"); 
+                unlockChat();
+            }
+
+            function unlockChat() {
+                isBotTyping = false;
+                input.disabled = false;
+                sendBtn.disabled = false;
+                setTimeout(() => { input.focus(); }, 100);
+            }
         }
 
+        // ================= ОСТАЛЬНЫЕ ФУНКЦИИ =================
         async function buyItem(type, item, currency, price) {
             if (currency === 'ton') {
                 tg.showAlert("Генерация счета CryptoBot...");
@@ -1449,11 +1525,11 @@
             const data = await res.json(); tg.showAlert(data.message || "Error");
         }
 
-        // === ОБНОВЛЕННОЕ СОЗДАНИЕ ПРОМОКОДА С ВРЕМЕНЕМ ===
+        // === СОЗДАНИЕ ПРОМОКОДА (С ЧАСАМИ) ===
         async function createPromo() {
             const code = document.getElementById('ip-code').value.toUpperCase().trim(); 
             const rew = parseInt(document.getElementById('ip-rew').value);
-            const hours = parseInt(document.getElementById('ip-hours').value); // Считываем время из списка
+            const hours = parseInt(document.getElementById('ip-hours').value); 
             
             if(!code || !rew) return;
             
@@ -1589,7 +1665,6 @@
         }
         function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
         
-        function closeChat() { back(); }
         window.onload = init;
     </script>
 </body>
