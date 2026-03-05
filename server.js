@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
-const crypto = require('crypto');
+const crypto = require('crypto'); // ТА САМАЯ КРИПТОГРАФИЯ ДЛЯ ЗАЩИТЫ
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -62,6 +62,7 @@ const checkAdmin = async (sender_id) => {
 };
 
 // ================= ЗАЩИТНАЯ ТАМОЖНЯ (MIDDLEWARE) =================
+// Эта функция перехватывает запросы и проверяет крипто-подпись Телеграма.
 const checkTgAuth = (req, res, next) => {
     try {
         const initData = req.headers['x-tg-data'];
@@ -83,7 +84,7 @@ const checkTgAuth = (req, res, next) => {
 
         if (calculatedHash === hash) {
             const userObj = JSON.parse(urlParams.get('user'));
-            req.tg_user_id = Number(userObj.id); 
+            req.tg_user_id = Number(userObj.id); // СЕРВЕР САМ ДОСТАЕТ НАСТОЯЩИЙ ID. ЕГО НЕ ПОДДЕЛАТЬ.
             next();
         } else {
             console.log(`[ВЗЛОМ] Попытка подделки запроса отклонена.`);
@@ -97,7 +98,7 @@ const checkTgAuth = (req, res, next) => {
 // ================= API: ПРОФИЛЬ И ЮЗЕРЫ =================
 app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
     try {
-        const uid = req.tg_user_id; 
+        const uid = req.tg_user_id; // Берем защищенный ID
         const inviterId = req.body.start_param ? Number(req.body.start_param) : null; 
 
         let user = await User.findOne({ tg_id: uid }); 
@@ -170,11 +171,11 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (С АВТО-БАЛАНСИРОВКОЙ МОДЕЛЕЙ И ЛИМИТАМИ) =================
+// ================= API: ЧАТ =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
-        const uid = req.tg_user_id; 
+        const uid = req.tg_user_id; // Только настоящий ID
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден в БД" });
 
@@ -201,7 +202,7 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
             "Детальный RolePlay." 
         ];
         
-        // --- ЛОГИКА ДЛИНЫ СООБЩЕНИЙ ---
+        // --- ВНЕДРЯЕМ ТВОИ ЛИМИТЫ (25-50 слов) ---
         let requestedLen = Number(len) || 25;
         let safeLen = 25; // По умолчанию для Free
         
@@ -218,6 +219,7 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         let uName = user_name || "Собеседник";
         let uGender = user_gender === 'f' ? "Женский" : "Мужской";
         
+        // --- ОБНОВЛЕННЫЙ ПРОМПТ С ЖЕСТКИМ ПРАВИЛОМ 8 И ОБЪЕМОМ ---
         let systemPrompt = `Ты в RolePlay чате. Твоя роль: Имя - ${char.name}, Возраст - ${char.age}. Легенда: ${char.desc}.
 Твой собеседник: Имя - ${uName}, Пол - ${uGender}.
 
@@ -244,22 +246,12 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         let aiData = null;
         let finalError = "Неизвестная ошибка";
 
-        // === МАССИВ МОДЕЛЕЙ ДЛЯ АВТО-ПЕРЕКЛЮЧЕНИЯ ===
-        // Если первая забита лимитами или не успела ответить, сервер прыгает на следующую
-        const AI_MODELS = [
-            "gemini-2.5-flash",
-            "gemini-3.1-flash", 
-            "gemini-1.5-flash",
-            "gemini-1.5-pro"
-        ];
-
-        for (let modelName of AI_MODELS) {
+        for (let attempt = 0; attempt <= 1; attempt++) {
             const controller = new AbortController();
-            // ТАЙМАУТ 8.5 СЕКУНД (чтобы 100% уложиться в 10-секундный лимит Vercel)
-            const timeoutId = setTimeout(() => controller.abort(), 8500); 
+            const timeoutId = setTimeout(() => controller.abort(), 8500);
 
             try {
-                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`, {
+                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -277,31 +269,17 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
                 clearTimeout(timeoutId);
                 const data = await aiResponse.json();
 
-                // Если поймали лимит (429) — идем к следующей модели
                 if (aiResponse.status === 429) {
-                    console.log(`[АВТО-БАЛАНСИРОВЩИК] Модель ${modelName} перегружена. Переключаюсь на следующую...`);
-                    continue; 
+                    if (attempt === 0) { await sleep(2000); continue; } 
+                    else { finalError = "Лимит Гугла (15 в минуту). Подожди немного!"; break; }
                 }
-                
-                // Если другая критическая ошибка — прерываем цикл
-                if (!aiResponse.ok) { 
-                    finalError = data.error?.message || `Ошибка API ${aiResponse.status}`; 
-                    break; 
-                }
-                
-                // Успешно получили ответ!
-                aiData = data; 
-                break; 
+                if (!aiResponse.ok) { finalError = data.error?.message || `Ошибка API ${aiResponse.status}`; break; }
+                aiData = data; break; 
 
             } catch (err) {
                 clearTimeout(timeoutId);
-                // Если модель не успела ответить за 8.5 секунд — пробуем следующую
-                if (err.name === 'AbortError') {
-                    console.log(`[АВТО-БАЛАНСИРОВЩИК] Модель ${modelName} долго думает (таймаут). Переключаюсь...`);
-                    continue; 
-                }
-                finalError = `Сбой сети: ${err.message}`; 
-                break;
+                if (err.name === 'AbortError') { if (attempt === 0) { await sleep(1000); continue; } finalError = "Сервер перегружен."; break; }
+                finalError = `Сбой сети: ${err.message}`; break;
             }
         }
 
@@ -315,7 +293,7 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
             res.json({ reply: replyText, new_balance: user.shards });
         } else {
             if (uid !== OWNER_ID) { user.shards += 1; await user.save(); }
-            res.status(500).json({ error: finalError === "Неизвестная ошибка" ? "Все AI-модели перегружены. Попробуйте через минуту." : finalError });
+            res.status(500).json({ error: finalError });
         }
     } catch (e) { res.status(500).json({ error: "Критическая ошибка: " + e.message }); }
 });
@@ -349,6 +327,7 @@ app.post('/api/payment/create', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ЭТИ ДВА РОУТА ОСТАВЛЯЕМ ОТКРЫТЫМИ, ТАК КАК ИХ ВЫЗЫВАЕТ НЕ MINI APP, А СЕРВЕРА TELEGRAM И CRYPTOBOT
 app.post('/api/payment/webhook', async (req, res) => {
     try {
         const update = req.body;
