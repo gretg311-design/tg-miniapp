@@ -19,7 +19,7 @@
         #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         
-        /* === ВИЗУАЛКА НИКОВ ДЛЯ ПОДПИСОК === */
+        /* === ВИЗУАЛКА НИКОВ === */
         @keyframes shimmerNick { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .nick-base { font-size: 22px; font-weight: 900; transition: all 0.3s ease; }
         .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5, #00bcd4); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 2.5s infinite linear; filter: drop-shadow(0px 0px 8px rgba(188,66,245,0.7)); }
@@ -28,26 +28,15 @@
         .nick-premium { background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff7eb3); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 4s infinite ease-in-out; filter: drop-shadow(0px 0px 5px rgba(255,117,140,0.5)); }
         .nick-free { color: #ffffff; }
         
-        /* === БЕЙДЖИ СТАТУСА (OWNER / ADMIN) === */
         .badge-base { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; margin-bottom: 2px; letter-spacing: 1px; text-transform: uppercase; }
         .badge-owner { background: linear-gradient(90deg, #ff0044, #ff0000); color: #fff; box-shadow: 0 0 8px rgba(255,0,0,0.6); border: 1px solid #ffaa88; text-shadow: 0 0 3px #fff; }
         .badge-admin { background: linear-gradient(90deg, #00bcd4, #0055ff); color: #fff; box-shadow: 0 0 8px rgba(0,188,212,0.6); border: 1px solid #88ddff; }
         
-        /* === АНИМАЦИИ ПЕРЕХОДОВ И КНОПОК === */
-        @keyframes smoothOpen {
-            0% { opacity: 0; transform: translateY(15px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        @keyframes smoothOpen { 0% { opacity: 0; transform: translateY(15px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         
-        .menu-item, .term-btn, .con-btn, .btn-stars, .btn-ton, .char-card, .chatlist-item, .gender-btn, .chat-send-btn, .task-item button {
-            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease;
-        }
-        .menu-item:active, .term-btn:active, .con-btn:active, .btn-stars:active, .btn-ton:active, .char-card:active, .chatlist-item:active, .gender-btn:active, .chat-send-btn:active, .task-item button:active {
-            transform: scale(0.94);
-            filter: brightness(0.8);
-        }
+        .menu-item, .term-btn, .con-btn, .btn-stars, .btn-ton, .char-card, .chatlist-item, .gender-btn, .chat-send-btn, .task-item button { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease; }
+        .menu-item:active, .term-btn:active, .con-btn:active, .btn-stars:active, .btn-ton:active, .char-card:active, .chatlist-item:active, .gender-btn:active, .chat-send-btn:active, .task-item button:active { transform: scale(0.94); filter: brightness(0.8); }
 
-        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК (iOS/Telegram стиль) === */
         .set-list { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; margin-bottom: 15px; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
         .set-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #2d164d; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; }
         .set-item:active { transform: scale(0.97); filter: brightness(0.8); }
@@ -56,12 +45,7 @@
         .set-text { flex: 1; font-size: 15px; color: #fff; font-weight: 500; }
         .set-arrow { color: #555; font-size: 18px; font-weight: bold; }
 
-        .ic-prof { background: #0A84FF; } 
-        .ic-lang { background: #30D158; } 
-        .ic-ai { background: #8E8E93; }   
-        .ic-priv { background: #FF9F0A; } 
-        .ic-sup { background: #BF5AF2; }  
-        .ic-apk { background: #FF453A; }  
+        .ic-prof { background: #0A84FF; } .ic-lang { background: #30D158; } .ic-ai { background: #8E8E93; } .ic-priv { background: #FF9F0A; } .ic-sup { background: #BF5AF2; } .ic-apk { background: #FF453A; }  
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
@@ -78,17 +62,15 @@
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
 
         .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a0b2e; font-size: 14px; }
-        .p-label { color: #888; }
-        .p-val { color: #fff; font-weight: bold; }
-
+        .p-label { color: #888; } .p-val { color: #fff; font-weight: bold; }
         .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
         
         input[type="range"] { touch-action: pan-y; }
-        
         .slider-wrap { width: 100%; margin-top: 5px; }
         .slider { width: 100%; -webkit-appearance: none; height: 4px; background: #2d164d; border-radius: 2px; outline: none; }
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #bc42f5; box-shadow: 0 0 10px #bc42f5; }
         .slider-val { float: right; color: #bc42f5; font-weight: bold; }
+        
         .gender-box { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
         .gender-btn { flex: 1; padding: 10px; border: 1px solid #2d164d; border-radius: 8px; text-align: center; font-size: 12px; color: #555; cursor: pointer; }
         .gender-btn.active { border-color: #bc42f5; color: #bc42f5; background: rgba(188, 66, 245, 0.1); }
@@ -154,7 +136,7 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="openPanel('p-user-chatlist')" data-i18n="m_chats">Чаты</div>
+            <div class="menu-item" onclick="openChatList()" data-i18n="m_chats">Чаты</div>
             <div class="menu-item" onclick="openPanel('p-user-chars')" data-i18n="m_chars">Персонажи</div>
             <div class="menu-item" onclick="openPanel('p-daily')" data-i18n="m_daily">Ежедневка</div>
             <div class="menu-item" onclick="openPanel('p-user-tasks')" data-i18n="m_tasks">Задания</div>
@@ -790,7 +772,6 @@
             else nameEl.classList.add('nick-free');
         }
 
-        // СБРОС МЕНЮШЕК И Z-INDEX ПРИ КЛИКЕ В ПУСТОТУ
         document.addEventListener('click', () => {
             if(openDropdownId !== null) {
                 let el = document.getElementById('chat-dd-' + openDropdownId);
@@ -1196,10 +1177,9 @@
             setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
-        // ================= ОРИГИНАЛЬНЫЕ GET-ЗАПРОСЫ К БАЗЕ С NEUROTRANSLATE =================
+        // ================= ОРИГИНАЛЬНЫЕ GET-ЗАПРОСЫ К БАЗЕ =================
         async function renderUserChars() {
             try {
-                // СТРОГИЙ GET
                 const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
                 allChars = await res.json();
                 allChars.sort((a, b) => b.id - a.id); 
@@ -1227,12 +1207,11 @@
                     </div>`;
                 }));
                 list.innerHTML = charCards.join('');
-            } catch (e) { console.error("Render Chars Error:", e); }
+            } catch (e) {}
         }
 
         async function renderTasks() {
             try {
-                // СТРОГИЙ GET
                 const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
                 const tasks = await res.json();
                 document.getElementById('task-list').innerHTML = tasks.map(x => {
@@ -1244,7 +1223,6 @@
 
         async function renderUserTasks() {
             try {
-                // СТРОГИЙ GET
                 const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
                 const tasks = await res.json();
                 const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
@@ -1277,7 +1255,6 @@
 
         async function renderAdminPromos() {
             try {
-                // СТРОГИЙ GET
                 const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
                 const promos = await res.json();
                 document.getElementById('promo-list').innerHTML = promos.map(p => {
@@ -1341,14 +1318,21 @@
             if (currency === 'ton') {
                 tg.showAlert("Генерация счета CryptoBot...");
                 try {
-                    const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) });
+                    const res = await fetch('/api/payment/create', { 
+                        method: 'POST', headers: getAuthHeaders(),
+                        body: JSON.stringify({ type: type, item: item, amount_ton: price }) 
+                    });
                     const data = await res.json(); 
-                    if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); }
+                    if(data.pay_url) { tg.openLink(data.pay_url); } 
+                    else { tg.showAlert("Ошибка CryptoBot"); }
                 } catch (e) { tg.showAlert("Error"); }
             } else if (currency === 'stars') {
                 tg.showAlert("Подготовка оплаты Stars...");
                 try {
-                    const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) });
+                    const res = await fetch('/api/payment/stars-invoice', { 
+                        method: 'POST', headers: getAuthHeaders(),
+                        body: JSON.stringify({ type: type, item: item, amount_stars: price }) 
+                    });
                     const data = await res.json();
                     if(data.invoice_url) { 
                         tg.openInvoice(data.invoice_url, function(status) { 
@@ -1383,19 +1367,25 @@
                 
                 dailyTimerInterval = setInterval(() => {
                     let timeLeft = ONE_DAY - (Date.now() - userData.last_daily);
-                    if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } 
-                    else {
+                    if (timeLeft <= 0) { 
+                        clearInterval(dailyTimerInterval); location.reload(); 
+                    } else {
                         let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000);
                         h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s;
                         document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
                     }
                 }, 1000);
-            } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; }
+            } else { 
+                document.getElementById('daily-btn').style.display = 'block'; 
+                document.getElementById('daily-wait').style.display = 'none'; 
+            }
         }
 
         async function claimDaily() {
             try {
-                const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) });
+                const res = await fetch('/api/user/claim-daily', { 
+                    method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({})
+                });
                 const data = await res.json();
                 if (data.error) { tg.showAlert(data.error); } 
                 else { 
