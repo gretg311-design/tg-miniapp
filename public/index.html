@@ -34,12 +34,20 @@
         .badge-admin { background: linear-gradient(90deg, #00bcd4, #0055ff); color: #fff; box-shadow: 0 0 8px rgba(0,188,212,0.6); border: 1px solid #88ddff; }
         
         /* === АНИМАЦИИ ПЕРЕХОДОВ И КНОПОК === */
-        @keyframes smoothOpen { 0% { opacity: 0; transform: translateY(15px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes smoothOpen {
+            0% { opacity: 0; transform: translateY(15px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
         
-        .menu-item, .term-btn, .con-btn, .btn-stars, .btn-ton, .char-card, .chatlist-item, .gender-btn, .chat-send-btn, .task-item button { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease; }
-        .menu-item:active, .term-btn:active, .con-btn:active, .btn-stars:active, .btn-ton:active, .char-card:active, .chatlist-item:active, .gender-btn:active, .chat-send-btn:active, .task-item button:active { transform: scale(0.94); filter: brightness(0.8); }
+        .menu-item, .term-btn, .con-btn, .btn-stars, .btn-ton, .char-card, .chatlist-item, .gender-btn, .chat-send-btn, .task-item button {
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease;
+        }
+        .menu-item:active, .term-btn:active, .con-btn:active, .btn-stars:active, .btn-ton:active, .char-card:active, .chatlist-item:active, .gender-btn:active, .chat-send-btn:active, .task-item button:active {
+            transform: scale(0.94);
+            filter: brightness(0.8);
+        }
 
-        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК (iOS стиль) === */
+        /* === НОВЫЙ ДИЗАЙН НАСТРОЕК (iOS/Telegram стиль) === */
         .set-list { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; margin-bottom: 15px; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
         .set-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #2d164d; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; }
         .set-item:active { transform: scale(0.97); filter: brightness(0.8); }
@@ -48,7 +56,12 @@
         .set-text { flex: 1; font-size: 15px; color: #fff; font-weight: 500; }
         .set-arrow { color: #555; font-size: 18px; font-weight: bold; }
 
-        .ic-prof { background: #0A84FF; } .ic-lang { background: #30D158; } .ic-ai { background: #8E8E93; } .ic-priv { background: #FF9F0A; } .ic-sup { background: #BF5AF2; } .ic-apk { background: #FF453A; }  
+        .ic-prof { background: #0A84FF; } 
+        .ic-lang { background: #30D158; } 
+        .ic-ai { background: #8E8E93; }   
+        .ic-priv { background: #FF9F0A; } 
+        .ic-sup { background: #BF5AF2; }  
+        .ic-apk { background: #FF453A; }  
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
@@ -65,15 +78,17 @@
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
 
         .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a0b2e; font-size: 14px; }
-        .p-label { color: #888; } .p-val { color: #fff; font-weight: bold; }
+        .p-label { color: #888; }
+        .p-val { color: #fff; font-weight: bold; }
+
         .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
         
         input[type="range"] { touch-action: pan-y; }
+        
         .slider-wrap { width: 100%; margin-top: 5px; }
         .slider { width: 100%; -webkit-appearance: none; height: 4px; background: #2d164d; border-radius: 2px; outline: none; }
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #bc42f5; box-shadow: 0 0 10px #bc42f5; }
         .slider-val { float: right; color: #bc42f5; font-weight: bold; }
-        
         .gender-box { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
         .gender-btn { flex: 1; padding: 10px; border: 1px solid #2d164d; border-radius: 8px; text-align: center; font-size: 12px; color: #555; cursor: pointer; }
         .gender-btn.active { border-color: #bc42f5; color: #bc42f5; background: rgba(188, 66, 245, 0.1); }
@@ -613,8 +628,6 @@
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; 
 
-        // === ОГРОМНЫЙ СЛОВАРЬ СТАТИКИ (4 ЯЗЫКА + НОВЫЕ НАСТРОЙКИ) ===
-        // Убран neuroTranslate для динамики! Всё остальное - статика.
         const translations = {
             ru: {
                 m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль",
@@ -633,7 +646,7 @@
                 b_back: "НАЗАД", b_start_chat: "ПОЧАТИ ЧАТ", b_del_char: "ВИДАЛИТИ ПЕРСОНАЖА", b_claim: "ЗАБРАТИ", b_share: "ПОДІЛИТИСЯ ПОСИЛАННЯМ", b_activate: "АКТИВУВАТИ",
                 pr_nick: "Нік:", pr_id: "Айді юз:", pr_sub: "Підписка:", pr_exp: "Термін:", pr_shards: "К-ть осколків:", pr_status: "Статус:",
                 set_nick: "Нік у додатку", set_gender: "Ваша стать", g_m: "Чоловік", g_f: "Жінка", set_lang: "Мова інтерфейсу", set_len: "Довжина повідомлень", set_sex: "Вульгарність персонажів",
-                d_sub: "Нагорода залежить від підписки. Заходь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
+                d_sub: "Нагорода залежить від підписки. Заходзь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
                 s_pay_info: "Оплата через Telegram Stars або CryptoBot (TON)", sh_subs: "ПІДПИСКИ (30 ДНІВ)", sd_prem: "50 осколків щодня<br>x2 бонус за стрік 7 днів", sd_pro: "150 осколків щодня<br>x2 бонус за стрік 7 днів", sd_vip: "250 осколків щодня<br>x2 бонус за стрік 7 днів", sd_ultra: "500 осколків щодня<br>x2 бонус за стрік 7 днів", sh_shards: "ОСКОЛКИ МІСЯЦЯ", s_shards: "Осколків", p_enter: "Введіть секретний код",
                 dos_age: "Вік:", dos_gender: "Стать:",
                 s_menu_prof: "Налаштувати профіль", s_menu_lang: "Змінити мову", s_menu_ai: "Налаштування ШІ", s_menu_priv: "Політика конфіденційності", s_menu_sup: "Технічна підтримка", s_menu_apk: "Додаток .apk"
@@ -663,6 +676,7 @@
         };
 
         let currentLang = 'ru';
+        const transCache = {}; 
 
         function getUid() { 
             return String(tg.initDataUnsafe?.user?.id || OID); 
@@ -676,7 +690,29 @@
             };
         }
 
-        // === СИСТЕМА ПЕРЕВОДА ИНТЕРФЕЙСА ===
+        // === НЕЙРО-ПЕРЕВОДЧИК ВЕРНУЛСЯ ===
+        async function neuroTranslate(text, targetLang) {
+            if (!text || targetLang === 'ru') return text; 
+            
+            const cacheKey = text + '_' + targetLang;
+            if (transCache[cacheKey]) return transCache[cacheKey];
+
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                let translatedText = '';
+                data[0].forEach(item => { translatedText += item[0]; });
+                
+                transCache[cacheKey] = translatedText; 
+                return translatedText;
+            } catch (e) {
+                console.error("NeuroTranslate Error:", e);
+                return text; 
+            }
+        }
+
         async function setLang(lang) {
             currentLang = lang;
             localStorage.setItem('m_lang_' + getUid(), lang);
@@ -689,9 +725,9 @@
 
             applyTranslations();
 
-            if(document.getElementById('p-user-chars').style.display === 'flex') renderUserChars();
-            if(document.getElementById('p-char-dossier').style.display === 'flex') openDossier(activeCharId);
-            if(document.getElementById('p-user-tasks').style.display === 'flex') renderUserTasks();
+            if(document.getElementById('p-user-chars').style.display === 'flex') await renderUserChars();
+            if(document.getElementById('p-char-dossier').style.display === 'flex') await openDossier(activeCharId);
+            if(document.getElementById('p-user-tasks').style.display === 'flex') await renderUserTasks();
             if(document.getElementById('p-user-chatlist').style.display === 'flex') openChatList();
         }
 
@@ -724,17 +760,9 @@
             }
         }
 
-        function devLang(langName) {
-            let errText = currentLang === 'uk' ? `Мова ${langName} у розробці! 🛠` : currentLang === 'en' ? `Language ${langName} is in development! 🛠` : currentLang === 'be' ? `Мова ${langName} у распрацоўцы! 🛠` : `Язык ${langName} в разработке! 🛠`;
-            tg.showAlert(errText);
-        }
+        function devLang(langName) { tg.showAlert(`Язык ${langName} в разработке! 🛠`); }
+        function devApk() { tg.showAlert(`Приложение APK еще в разработке! 🛠`); }
 
-        function devApk() {
-            let errText = currentLang === 'uk' ? `Додаток APK ще в розробці! 🛠` : currentLang === 'en' ? `APK App is still in development! 🛠` : currentLang === 'be' ? `Дадатак APK яшчэ ў распрацоўцы! 🛠` : `Приложение APK еще в разработке! 🛠`;
-            tg.showAlert(errText);
-        }
-
-        // === ОБНОВЛЕНИЕ БАЛАНСА ВЕЗДЕ (ВКЛЮЧАЯ ЧАТ) ===
         function updateBalanceUI(val) {
             if(getUid() === OID) {
                 document.getElementById('shards-balance').innerText = "∞";
@@ -750,7 +778,6 @@
             userData.shards = val;
         }
 
-        // === СМЕНА СТИЛЯ НИКА ===
         function applyNickStyle(sub) {
             const nameEl = document.getElementById('u-name');
             nameEl.className = 'nick-base'; 
@@ -768,10 +795,8 @@
             if(openDropdownId !== null) {
                 let el = document.getElementById('chat-dd-' + openDropdownId);
                 if(el) el.style.display = 'none';
-                
                 let chatItem = document.getElementById('chat-item-' + openDropdownId);
                 if(chatItem) chatItem.style.zIndex = 1;
-                
                 openDropdownId = null;
             }
         });
@@ -780,7 +805,6 @@
             const uid = getUid();
             if(!uid || document.getElementById('loading').style.display !== 'none') return;
             try {
-                // Строгий POST без лишнего body (твой сервер берет ID из headers x-tg-data)
                 const res = await fetch('/api/user/sync', {
                     method: 'POST', 
                     headers: getAuthHeaders()
@@ -1068,6 +1092,7 @@
             });
         }
 
+        // ================= ИСПРАВЛЕННЫЙ РЕНДЕР ЧАТОВ (С PROMISE.ALL) =================
         async function openChatList() {
             const uid = getUid();
             const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
@@ -1096,12 +1121,12 @@
                 return a.orderIndex - b.orderIndex;
             });
 
-            let html = ""; 
             if(chatObjects.length === 0) {
                 let emptyTxt = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : currentLang === 'en' ? "You have no active chats.<br><br>Go to 'Characters', select a dossier and click 'Start Chat'!" : currentLang === 'be' ? "У вас пакуль няма актыўных дыялогаў.<br><br>Перайдзіце ў 'Персанажы', выберыце дасье і націсніце 'Пачаць чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
-                html = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
+                list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
             } else {
-                html = chatObjects.map(obj => {
+                // ВОТ ОНО - ИСПРАВЛЕНИЕ: Promise.all РЕШАЕТ ПРОБЛЕМУ AWAIT ВНУТРИ MAP
+                const chatCards = await Promise.all(chatObjects.map(async (obj) => {
                     let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
                     let p1 = currentLang === 'uk' ? "Відкріпити" : currentLang === 'en' ? "Unpin" : currentLang === 'be' ? "Адмацаваць" : "Открепить";
                     let p2 = currentLang === 'uk' ? "Закріпити" : currentLang === 'en' ? "Pin" : currentLang === 'be' ? "Замацаваць" : "Закрепить";
@@ -1109,11 +1134,13 @@
                     let clearText = currentLang === 'uk' ? "Очистити пам'ять" : currentLang === 'en' ? "Clear memory" : currentLang === 'be' ? "Ачысціць памяць" : "Очистить память";
                     let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Видалиць чат" : "Удалить чат";
                     
+                    let tName = await neuroTranslate(obj.char.name, currentLang); 
+
                     return `
                     <div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})" style="z-index:1;">
                         <img src="${obj.char.photo}" class="chatlist-img">
                         <div class="chatlist-info">
-                            <div class="chatlist-name">${pinMark}${obj.char.name}</div>
+                            <div class="chatlist-name">${pinMark}${tName}</div>
                             <div class="chatlist-last">${obj.lastMsg}</div>
                         </div>
                         <button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button>
@@ -1123,9 +1150,9 @@
                             <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 ${delText}</div>
                         </div>
                     </div>`;
-                }).join('');
+                }));
+                list.innerHTML = chatCards.join('');
             }
-            list.innerHTML = html; 
             openPanel('p-user-chatlist');
         }
 
@@ -1133,7 +1160,7 @@
             activeCharId = charId;
             const c = allChars.find(x => x.id == charId); 
             if(!c) return;
-            document.getElementById('chat-char-name').innerText = c.name; // БЕЗ NEUROTRANSLATE
+            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
             renderChatMessages(); 
             openPanel('p-chat');
         }
@@ -1141,7 +1168,7 @@
         async function openChatFromDossier() {
             const c = allChars.find(x => x.id === activeCharId); 
             if(!c) return;
-            document.getElementById('chat-char-name').innerText = c.name; // БЕЗ NEUROTRANSLATE
+            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
             const uid = getUid(); 
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             if(!allChats[activeCharId]) { 
@@ -1169,18 +1196,15 @@
             setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
-        // ================= ОРИГИНАЛЬНЫЕ GET-ЗАПРОСЫ БЕЗ НЕЙРОСЕТИ =================
+        // ================= ОРИГИНАЛЬНЫЕ GET-ЗАПРОСЫ К БАЗЕ С NEUROTRANSLATE =================
         async function renderUserChars() {
             try {
                 // СТРОГИЙ GET
-                const res = await fetch('/api/get-characters', { 
-                    headers: getAuthHeaders()
-                }); 
+                const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
                 allChars = await res.json();
                 allChars.sort((a, b) => b.id - a.id); 
                 
                 const list = document.getElementById('user-char-list');
-                
                 if(allChars.length === 0) { 
                     let emptyText = currentLang === 'uk' ? "Немає персонажів" : currentLang === 'en' ? "No characters" : currentLang === 'be' ? "Няма персанажаў" : "Нет персонажей";
                     list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>${emptyText}</div>`; 
@@ -1191,25 +1215,25 @@
                 let mText = currentLang === 'uk' ? "Чол" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Муж" : "Муж";
                 let fText = currentLang === 'uk' ? "Жін" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жан" : "Жен";
 
-                // СИНХРОННЫЙ РЕНДЕР БЕЗ ЗАПРОСОВ К GOOGLE
-                list.innerHTML = allChars.map(c => `
+                const charCards = await Promise.all(allChars.map(async (c) => {
+                    let tName = await neuroTranslate(c.name, currentLang);
+                    return `
                     <div class="char-card" onclick="openDossier(${c.id})">
                         <img src="${c.photo}">
                         <div class="char-card-info">
-                            <div class="char-card-name">${c.name}</div>
+                            <div class="char-card-name">${tName}</div>
                             <div class="char-card-tags">${c.age} ${yText} | ${c.gender === 'm' ? mText : fText}</div>
                         </div>
-                    </div>
-                `).join('');
+                    </div>`;
+                }));
+                list.innerHTML = charCards.join('');
             } catch (e) { console.error("Render Chars Error:", e); }
         }
 
         async function renderTasks() {
             try {
                 // СТРОГИЙ GET
-                const res = await fetch('/api/get-tasks', { 
-                    headers: getAuthHeaders()
-                }); 
+                const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
                 const tasks = await res.json();
                 document.getElementById('task-list').innerHTML = tasks.map(x => {
                     let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : '';
@@ -1221,9 +1245,7 @@
         async function renderUserTasks() {
             try {
                 // СТРОГИЙ GET
-                const res = await fetch('/api/get-tasks', { 
-                    headers: getAuthHeaders()
-                }); 
+                const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
                 const tasks = await res.json();
                 const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
                 const list = document.getElementById('user-task-list');
@@ -1238,26 +1260,25 @@
                 let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
                 let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
 
-                // СИНХРОННЫЙ РЕНДЕР
-                list.innerHTML = tasks.map(t => {
+                const taskCards = await Promise.all(tasks.map(async (t) => {
+                    let tName = await neuroTranslate(t.name, currentLang);
                     if(completed.includes(t.id)) {
-                        return `<div class="task-item" style="opacity:0.5;"><span>${t.name}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
+                        return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
                     }
                     return `
                     <div class="task-item" id="utask-${t.id}">
-                        <span>${t.name}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
+                        <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
                         <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
                     </div>`;
-                }).join('');
+                }));
+                list.innerHTML = taskCards.join('');
             } catch(e) {}
         }
 
         async function renderAdminPromos() {
             try {
                 // СТРОГИЙ GET
-                const res = await fetch('/api/get-promos', { 
-                    headers: getAuthHeaders()
-                }); 
+                const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
                 const promos = await res.json();
                 document.getElementById('promo-list').innerHTML = promos.map(p => {
                     let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : '';
@@ -1320,21 +1341,14 @@
             if (currency === 'ton') {
                 tg.showAlert("Генерация счета CryptoBot...");
                 try {
-                    const res = await fetch('/api/payment/create', { 
-                        method: 'POST', headers: getAuthHeaders(),
-                        body: JSON.stringify({ type: type, item: item, amount_ton: price }) 
-                    });
+                    const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) });
                     const data = await res.json(); 
-                    if(data.pay_url) { tg.openLink(data.pay_url); } 
-                    else { tg.showAlert("Ошибка CryptoBot"); }
+                    if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); }
                 } catch (e) { tg.showAlert("Error"); }
             } else if (currency === 'stars') {
                 tg.showAlert("Подготовка оплаты Stars...");
                 try {
-                    const res = await fetch('/api/payment/stars-invoice', { 
-                        method: 'POST', headers: getAuthHeaders(),
-                        body: JSON.stringify({ type: type, item: item, amount_stars: price }) 
-                    });
+                    const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) });
                     const data = await res.json();
                     if(data.invoice_url) { 
                         tg.openInvoice(data.invoice_url, function(status) { 
@@ -1369,25 +1383,19 @@
                 
                 dailyTimerInterval = setInterval(() => {
                     let timeLeft = ONE_DAY - (Date.now() - userData.last_daily);
-                    if (timeLeft <= 0) { 
-                        clearInterval(dailyTimerInterval); location.reload(); 
-                    } else {
+                    if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } 
+                    else {
                         let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000);
                         h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s;
                         document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
                     }
                 }, 1000);
-            } else { 
-                document.getElementById('daily-btn').style.display = 'block'; 
-                document.getElementById('daily-wait').style.display = 'none'; 
-            }
+            } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; }
         }
 
         async function claimDaily() {
             try {
-                const res = await fetch('/api/user/claim-daily', { 
-                    method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({})
-                });
+                const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) });
                 const data = await res.json();
                 if (data.error) { tg.showAlert(data.error); } 
                 else { 
@@ -1402,11 +1410,11 @@
             const c = allChars.find(x => x.id === id); 
             if(!c) return; 
             activeCharId = id;
-            document.getElementById('dos-name').innerText = c.name; 
+            document.getElementById('dos-name').innerText = await neuroTranslate(c.name, currentLang); 
             document.getElementById('dos-img').src = c.photo; 
             document.getElementById('dos-age').innerText = c.age;
             document.getElementById('dos-gender').innerText = c.gender === 'm' ? "Мужской" : "Женский"; 
-            document.getElementById('dos-desc').innerText = c.desc;
+            document.getElementById('dos-desc').innerText = await neuroTranslate(c.desc, currentLang);
             if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } 
             openPanel('p-char-dossier');
         }
@@ -1541,7 +1549,6 @@
             tg.openTelegramLink(shareUrl);
         }
 
-        // ================= НАСТРОЙКИ И УТИЛИТЫ =================
         function updateLiveNick(v) { let n = v || "User"; document.getElementById('u-name').innerText = n; document.getElementById('prof-nick').innerText = n; localStorage.setItem('m_nick_' + getUid(), n); }
         function setGender(g, s=false) { document.getElementById('g-m')?.classList.toggle('active', g === 'm'); document.getElementById('g-f')?.classList.toggle('active', g === 'f'); if(!s) localStorage.setItem('m_gender_' + getUid(), g); }
         function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
