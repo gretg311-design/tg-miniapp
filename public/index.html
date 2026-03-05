@@ -402,10 +402,10 @@
     <div id="p-set-ai" class="overlay">
         <h2 style="color:#8E8E93" data-i18n="s_menu_ai">Настройка ИИ</h2>
         <div class="info-card">
-            <span class="s-label"><span data-i18n="set_len">Длина сообщений</span> <span class="slider-val" id="len-val">45</span></span>
+            <span class="s-label"><span data-i18n="set_len">Длина сообщений</span> <span class="slider-val" id="len-val">25</span></span>
             <div class="slider-wrap">
-                <input type="range" min="45" max="45" value="45" class="slider" id="len-slider" oninput="updateLen(this.value)">
-                <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 45 слов</div>
+                <input type="range" min="25" max="25" value="25" class="slider" id="len-slider" oninput="updateLen(this.value)">
+                <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 25 слов</div>
             </div>
         </div>
         <div class="info-card">
@@ -626,7 +626,7 @@
                 m_chats: "Чати", m_chars: "Персонажі", m_daily: "Щоденна", m_tasks: "Завдання", m_shop: "Магазин", m_promos: "Промокоди", m_prof: "Профіль", m_set: "Налаштування", m_adm: "Адмінка", m_con: "Консоль",
                 h_chats: "МОЇ ЧАТИ", h_chars: "ПЕРСОНАЖІ", h_daily: "ЩОДЕННА НАГОРОДА", h_tasks: "ЗАВДАННЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФІЛЬ", h_set: "НАЛАШТУВАННЯ",
                 b_back: "НАЗАД", b_start_chat: "ПОЧАТИ ЧАТ", b_del_char: "ВИДАЛИТИ ПЕРСОНАЖА", b_claim: "ЗАБРАТИ", b_share: "ПОДІЛИТИСЯ ПОСИЛАННЯМ", b_activate: "АКТИВУВАТИ",
-                pr_nick: "Нік:", pr_id: "Айді юз:", pr_sub: "Підписка:", pr_exp: "Термін:", pr_shards: "К-ть осколків:", pr_status: "Статус:",
+                pr_nick: "Нік:", pr_id: "Айдзі юз:", pr_sub: "Підписка:", pr_exp: "Термін:", pr_shards: "К-ть осколків:", pr_status: "Статус:",
                 set_nick: "Нік у додатку", set_gender: "Ваша стать", g_m: "Чоловік", g_f: "Жінка", set_lang: "Мова інтерфейсу", set_len: "Довжина повідомлень", set_sex: "Вульгарність персонажів",
                 d_sub: "Нагорода залежить від підписки. Заходзь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
                 s_pay_info: "Оплата через Telegram Stars або CryptoBot (TON)", sh_subs: "ПІДПИСКИ (30 ДНІВ)", sd_prem: "50 осколків щодня<br>x2 бонус за стрік 7 днів", sd_pro: "150 осколків щодня<br>x2 бонус за стрік 7 днів", sd_vip: "250 осколків щодня<br>x2 бонус за стрік 7 днів", sd_ultra: "500 осколків щодня<br>x2 бонус за стрік 7 днів", sh_shards: "ОСКОЛКИ МІСЯЦЯ", s_shards: "Осколків", p_enter: "Введіть секретний код",
@@ -664,7 +664,6 @@
             return String(tg.initDataUnsafe?.user?.id || OID); 
         }
 
-        // === ОРИГИНАЛЬНАЯ БРОНЯ: ФУНКЦИЯ ЗАГОЛОВКОВ ===
         function getAuthHeaders() {
             return {
                 'Content-Type': 'application/json',
@@ -672,10 +671,8 @@
             };
         }
 
-        // === НЕЙРО-ПЕРЕВОДЧИК ВЕРНУЛСЯ ===
         async function neuroTranslate(text, targetLang) {
             if (!text || targetLang === 'ru') return text; 
-            
             const cacheKey = text + '_' + targetLang;
             if (transCache[cacheKey]) return transCache[cacheKey];
 
@@ -683,14 +680,11 @@
                 const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
                 const res = await fetch(url);
                 const data = await res.json();
-                
                 let translatedText = '';
                 data[0].forEach(item => { translatedText += item[0]; });
-                
                 transCache[cacheKey] = translatedText; 
                 return translatedText;
             } catch (e) {
-                console.error("NeuroTranslate Error:", e);
                 return text; 
             }
         }
@@ -729,9 +723,14 @@
             let lS = document.getElementById('len-slider');
             if(lS) {
                 let maxLen = parseInt(lS.max);
+                let minLen = parseInt(lS.min);
                 let lText = currentLang === 'uk' ? "Твій ліміт" : currentLang === 'en' ? "Your limit" : currentLang === 'be' ? "Твой ліміт" : "Твой лимит";
                 let wText = currentLang === 'uk' ? "слів" : currentLang === 'en' ? "words" : currentLang === 'be' ? "слоў" : "слов";
-                document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`;
+                if(minLen === maxLen) {
+                    document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`;
+                } else {
+                    document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): от ${minLen} до ${maxLen} ${wText}`;
+                }
             }
 
             const chatBox = document.getElementById('chat-messages-box');
@@ -805,7 +804,7 @@
             } catch(e) {}
         }, 3000);
 
-        // ================= ИНИЦИАЛИЗАЦИЯ =================
+        // ================= ИНИЦИАЛИЗАЦИЯ И ЛИМИТЫ ПОДПИСОК =================
         async function init() {
             setTimeout(() => {
                 const loader = document.getElementById('loading');
@@ -896,30 +895,39 @@
 
             applyNickStyle(userData.subscription);
 
+            // --- ЖЕЛЕЗОБЕТОННАЯ ЛОГИКА ПОЛЗУНКА ---
             let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
-            let maxLen = 45; let maxSex = 0;
+            let minLen = 25; let maxLen = 25; let maxSex = 0;
             
-            if(currentSub === "premium") { maxLen = 55; }
-            else if(currentSub === "pro") { maxLen = 65; maxSex = 3; }
-            else if(currentSub === "vip") { maxLen = 80; maxSex = 5; }
-            else if(currentSub === "ultra") { maxLen = 100; maxSex = 6; } 
+            if(currentSub === "premium") { maxLen = 30; }
+            else if(currentSub === "pro") { maxLen = 35; maxSex = 3; }
+            else if(currentSub === "vip") { maxLen = 40; maxSex = 5; }
+            else if(currentSub === "ultra") { maxLen = 50; maxSex = 6; } 
 
             const lS = document.getElementById('len-slider');
             const sS = document.getElementById('sex-slider');
             
             if(lS && sS) {
-                lS.max = maxLen; sS.max = maxSex;
+                lS.min = minLen; 
+                lS.max = maxLen; 
+                sS.max = maxSex;
                 
                 let lText = currentLang === 'uk' ? "Твій ліміт" : currentLang === 'en' ? "Your limit" : currentLang === 'be' ? "Твой ліміт" : "Твой лимит";
                 let wText = currentLang === 'uk' ? "слів" : currentLang === 'en' ? "words" : currentLang === 'be' ? "слоў" : "слов";
                 let noSex = currentLang === 'uk' ? "Вульгарність недоступна для вашої підписки" : currentLang === 'en' ? "NSFW is not available for your subscription" : currentLang === 'be' ? "Пошласць недаступная для вашай падпіскі" : "Пошлость недоступна для вашей подписки";
                 let lvlTxt = currentLang === 'uk' ? "Доступно рівнів" : currentLang === 'en' ? "Available levels" : currentLang === 'be' ? "Даступна ўзроўняў" : "Доступно уровней";
 
-                document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`;
+                if (minLen === maxLen) {
+                    document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`;
+                } else {
+                    document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): от ${minLen} до ${maxLen} ${wText}`;
+                }
+                
                 document.getElementById('sex-info').innerText = maxSex === 0 ? noSex : `${lvlTxt}: ${maxSex}`;
 
-                let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 45);
+                let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 25);
                 if(savedLen > maxLen) savedLen = maxLen;
+                if(savedLen < minLen) savedLen = minLen;
                 lS.value = savedLen; 
                 updateLen(savedLen, true);
 
@@ -1073,7 +1081,6 @@
             });
         }
 
-        // ================= ИСПРАВЛЕННЫЙ РЕНДЕР ЧАТОВ (С PROMISE.ALL) =================
         async function openChatList() {
             const uid = getUid();
             const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
@@ -1106,7 +1113,7 @@
                 let emptyTxt = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : currentLang === 'en' ? "You have no active chats.<br><br>Go to 'Characters', select a dossier and click 'Start Chat'!" : currentLang === 'be' ? "У вас пакуль няма актыўных дыялогаў.<br><br>Перайдзіце ў 'Персанажы', выберыце дасье і націсніце 'Пачаць чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
                 list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
             } else {
-                // ВОТ ОНО - ИСПРАВЛЕНИЕ: Promise.all РЕШАЕТ ПРОБЛЕМУ AWAIT ВНУТРИ MAP
+                // ИСПРАВЛЕНИЕ: Promise.all для перевода
                 const chatCards = await Promise.all(chatObjects.map(async (obj) => {
                     let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
                     let p1 = currentLang === 'uk' ? "Відкріпити" : currentLang === 'en' ? "Unpin" : currentLang === 'be' ? "Адмацаваць" : "Открепить";
@@ -1177,7 +1184,7 @@
             setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
-        // ================= ОРИГИНАЛЬНЫЕ GET-ЗАПРОСЫ К БАЗЕ =================
+        // ================= ОРИГИНАЛЬНЫЕ GET-ЗАПРОСЫ =================
         async function renderUserChars() {
             try {
                 const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
@@ -1264,7 +1271,7 @@
             } catch(e) {}
         }
 
-        // ================= ОСТАЛЬНЫЕ ЗАПРОСЫ (POST) =================
+        // ================= ЗАПРОСЫ (POST) =================
         async function sendMessage() {
             const input = document.getElementById('chat-input-text'); 
             const text = input.value.trim(); 
@@ -1291,7 +1298,7 @@
                 const uName = document.getElementById('u-name').innerText;
                 const rawGender = localStorage.getItem('m_gender_' + uid) || 'm';
                 let uGender = rawGender === 'f' ? (currentLang === 'en' ? "Female" : "Женский") : (currentLang === 'en' ? "Male" : "Мужской");
-                const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 45); 
+                const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 25); 
                 const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
                 
                 const res = await fetch('/api/chat', { 
