@@ -55,12 +55,14 @@ const promoSchema = new mongoose.Schema({
 });
 const taskSchema = new mongoose.Schema({ id: Number, name: String, link: String, rType: String, rVal: Number });
 const priceSchema = new mongoose.Schema({ item_id: { type: String, unique: true }, stars: { type: Number, default: 0 }, ton: { type: Number, default: 0 } });
+const newsSchema = new mongoose.Schema({ id: Number, text: String, photo: String }); // НОВАЯ БАЗА ДЛЯ НОВОСТЕЙ
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 const Character = mongoose.models.Character || mongoose.model('Character', charSchema);
 const Promo = mongoose.models.Promo || mongoose.model('Promo', promoSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
 const Price = mongoose.models.Price || mongoose.model('Price', priceSchema);
+const News = mongoose.models.News || mongoose.model('News', newsSchema); // МОДЕЛЬ НОВОСТЕЙ
 
 const checkAdmin = async (sender_id) => {
     if (Number(sender_id) === OWNER_ID) return true;
@@ -189,7 +191,7 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (ИДЕАЛЬНЫЙ ПРОМПТ БЕЗ ПОДСЧЕТА СЛОВ) =================
+// ================= API: ЧАТ =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
@@ -227,20 +229,12 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         else if (userSub === "pro") safeLen = Math.min(Math.max(requestedLen, 25), 35);
         else if (userSub === "premium") safeLen = Math.min(Math.max(requestedLen, 25), 30);
 
-        // --- ПОЛНОСТЬЮ СМЫСЛОВОЙ ОГРАНИЧИТЕЛЬ ОБЪЕМА (НИКАКИХ ЦИФР СЛОВ) ---
-        let sizeInstruction = "";
-        if (safeLen <= 30) {
-            sizeInstruction = "Отвечай ОЧЕНЬ КОРОТКО (ровно 1-2 небольших предложения). Не расписывай лишние детали.";
-        } else if (safeLen <= 40) {
-            sizeInstruction = "Отвечай СРЕДНЕ (ровно 2-3 полных предложения). Балансируй между действиями и словами.";
-        } else {
-            sizeInstruction = "Отвечай РАЗВЕРНУТО (ровно 3-5 предложений). Описывай эмоции, окружение и мысли.";
-        }
-        
+        let maxLenBuffer = safeLen + 5; 
+        if (safeLen >= 50) maxLenBuffer = safeLen + 15;
+
         let uName = user_name || "Собеседник";
         let uGender = user_gender === 'f' ? "Женский" : "Мужской";
         
-        // --- ФИНАЛЬНЫЙ ЖЕЛЕЗОБЕТОННЫЙ ПРОМПТ ПРОТИВ ОБРЫВОВ ---
         let systemPrompt = `[Роль]: Имя - ${char.name}, Возраст - ${char.age}. Описание: ${char.desc}.
 [Собеседник]: Имя - ${uName}, Пол - ${uGender}.
 
@@ -249,8 +243,8 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
 2. Обращайся к собеседнику по имени: ${uName}. Учитывай его пол (${uGender}) в окончаниях.
 3. Тон: ${sexLevels[requestedSex]}.
 4. Формат: Твои действия и мысли СТРОГО внутри звездочек (*смотрит*). Прямая речь - без звездочек. В КАЖДОМ твоем ответе ОБЯЗАТЕЛЬНО должны быть слова вслух (прямая речь). Не отвечай только одними действиями!
-5. Объем: ${sizeInstruction} ВНИМАНИЕ: никогда не считай слова! Пиши естественно в рамках указанных предложений.
-6. ЦЕЛОСТНОСТЬ (САМОЕ ВАЖНОЕ ПРАВИЛО!): ТВОЙ ОТВЕТ ДОЛЖЕН БЫТЬ ПОЛНОСТЬЮ ЗАКОНЧЕН! КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО обрывать текст на полуслове или запятой. Последним символом в твоем тексте ВСЕГДА должна быть точка (.), вопросительный знак (?), восклицательный знак (!) или закрывающая звездочка (*). Если ты чувствуешь, что мысль затягивается — просто поставь точку и заверши ответ.`;
+5. ОБЪЕМ: Напиши минимум 3-4 полных предложения. Твой текст должен содержать примерно от ${safeLen} до ${maxLenBuffer} слов. Меньше писать нельзя! Пиши естественно, не обрывайся.
+6. ЦЕЛОСТНОСТЬ (САМОЕ ВАЖНОЕ ПРАВИЛО!): КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО обрывать текст на полуслове! Если ты достиг нужного объема, аккуратно заверши текущую мысль и ОБЯЗАТЕЛЬНО поставь финальную точку, восклицательный знак или вопросительный знак. Заканчивай предложение всегда!`;
 
         let historyText = "--- ИСТОРИЯ ДИАЛОГА ---\n";
         if (chat_history && chat_history.length > 0) {
@@ -275,10 +269,7 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
                     body: JSON.stringify({
                         systemInstruction: { parts: [{ text: systemPrompt }] },
                         contents: [{ role: "user", parts: [{ text: historyText }] }],
-                        generationConfig: { 
-                            maxOutputTokens: 1500, // Увеличил лимит выходных токенов с запасом
-                            temperature: 0.85 
-                        },
+                        generationConfig: { maxOutputTokens: 1000, temperature: 0.85 },
                         safetySettings: [
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
                             { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -400,7 +391,24 @@ app.post('/api/tg-webhook', async (req, res) => {
     } catch (e) { res.sendStatus(500); }
 });
 
-// ================= АДМИНКА И ПРОВЕРКА ЗАДАНИЙ (С БЛОКИРОВКАМИ ДЛЯ АДМИНОВ) =================
+// ================= АДМИНКА И ПРОВЕРКА ЗАДАНИЙ (БЛОКИРОВКИ ПРАВ) =================
+
+// НОВЫЕ РОУТЫ ДЛЯ ЛЕНТЫ НОВОСТЕЙ
+app.get('/api/get-news', checkTgAuth, async (req, res) => res.json(await News.find()));
+
+app.post('/api/admin/create-news', checkTgAuth, async (req, res) => {
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер!" });
+    await new News(req.body.newsData).save();
+    res.json({ message: "Новость опубликована" });
+});
+
+app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => {
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер!" });
+    await News.findOneAndDelete({ id: req.body.news_id });
+    res.json({ message: "Новость удалена" });
+});
+// ===========================================
+
 app.get('/api/get-characters', checkTgAuth, async (req, res) => res.json(await Character.find()));
 app.get('/api/get-tasks', checkTgAuth, async (req, res) => res.json(await Task.find()));
 app.get('/api/get-promos', checkTgAuth, async (req, res) => res.json(await Promo.find()));
