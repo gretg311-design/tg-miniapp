@@ -120,6 +120,13 @@
         .chat-dropdown-item { padding: 12px 15px; font-size: 12px; color: #fff; cursor: pointer; border-bottom: 1px solid #2d164d; white-space: nowrap; }
         .chat-dropdown-item:last-child { border-bottom: none; }
         .pin-icon { color: #bc42f5; margin-right: 5px; font-size: 12px; }
+
+        /* === СТИЛИ ДЛЯ ЛЕНТЫ НОВОСТЕЙ === */
+        .news-container { margin-top: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
+        .news-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; position: relative; }
+        .news-date { font-size: 10px; color: #bc42f5; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; }
+        .news-text { font-size: 12px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+        .news-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #2d164d; display: none; }
     </style>
 </head>
 <body>
@@ -152,6 +159,9 @@
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')" data-i18n="m_con">Консоль</div>
         </div>
         <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
+
+        <div id="main-news-feed" class="news-container">
+            </div>
     </div>
 
     <div id="p-user-chatlist" class="overlay">
@@ -224,7 +234,6 @@
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
-
     <div id="p-user-tasks" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 20px;" data-i18n="h_tasks">ЗАДАНИЯ</h2>
         <div class="info-card" style="text-align: center; border-color: #bc42f5;">
@@ -319,6 +328,7 @@
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
+    
     <div id="p-user-promos" class="overlay">
         <h2 style="color:#bc42f5" data-i18n="h_promos">ПРОМОКОД</h2>
         <div class="info-card">
@@ -429,6 +439,12 @@
     <div id="p-con" class="overlay">
         <h2 style="color:#e91e63">КОНСОЛЬ (OWNER)</h2>
         <div class="set-list">
+            <div class="set-item" onclick="openPanel('p-m-news')">
+                <div class="set-icon" style="background:#ffaa00;">📰</div>
+                <div class="set-text">НОВОСТИ</div>
+                <div class="set-arrow">›</div>
+            </div>
+            
             <div class="set-item" onclick="openPanel('p-m-shards')">
                 <div class="set-icon" style="background:#e91e63;">💎</div>
                 <div class="set-text">ОСКОЛКИ</div>
@@ -499,7 +515,20 @@
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
-    
+    <div id="p-m-news" class="overlay">
+        <h2 style="color:#ffaa00">ОПУБЛИКОВАТЬ НОВОСТЬ</h2>
+        <div class="info-card" style="text-align: center;">
+            <img id="news-preview" src="#" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 10px; display: none; border: 1px solid #ffaa00; margin-bottom: 10px;">
+            <textarea id="inews-text" class="term-in" style="height: 150px; resize: none;" placeholder="Что нового в проекте?..." maxlength="3500" oninput="document.getElementById('news-limit').innerText = this.value.length + '/3500'"></textarea>
+            <div id="news-limit" class="char-counter" style="color:#ffaa00;">0/3500</div>
+            
+            <input type="file" id="news-file" accept="image/*" style="display:none;" onchange="if(this.files && this.files[0]){ const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('news-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }">
+            <div class="term-btn" style="border-color:#ffaa00" onclick="document.getElementById('news-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
+            <div class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00;" onclick="publishNews()">ОПУБЛИКОВАТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">НАЗАД</div>
+    </div>
+
     <div id="p-m-shards" class="overlay">
         <h2 style="color:#00bcd4">ОСКОЛКИ</h2>
         <div class="info-card">
@@ -623,6 +652,7 @@
         
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; 
+        let allNews = []; // Массив для хранения новостей
 
         const translations = {
             ru: {
@@ -639,7 +669,7 @@
             uk: {
                 m_chats: "Чати", m_chars: "Персонажі", m_daily: "Щоденна", m_tasks: "Завдання", m_shop: "Магазин", m_promos: "Промокоди", m_prof: "Профіль", m_set: "Налаштування", m_adm: "Адмінка", m_con: "Консоль",
                 h_chats: "МОЇ ЧАТИ", h_chars: "ПЕРСОНАЖІ", h_daily: "ЩОДЕННА НАГОРОДА", h_tasks: "ЗАВДАННЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФІЛЬ", h_set: "НАЛАШТУВАННЯ",
-                b_back: "НАЗАД", b_start_chat: "ПОЧАТИ ЧАТ", b_del_char: "ВИДАЛИТИ ПЕРСОНАЖА", b_claim: "ЗАБРАТИ", b_share: "ПОДІЛИТИСЯ ПОСИЛАННЯМ", b_activate: "АКТИВУВАТИ",
+                b_back: "НАЗАД", b_start_chat: "ПОЧАТИ ЧАТ", b_del_char: "ВИДАЛИТИ ПЕРСОНАЖА", b_claim: "ЗАБРАТИ", b_share: "ПОДІЛИТИСЯ ПОСИЛАННЯМ", b_activate: "АКТИВУВАТЬ",
                 pr_nick: "Нік:", pr_id: "Айдзі юз:", pr_sub: "Підписка:", pr_exp: "Термін:", pr_shards: "К-ть осколків:", pr_status: "Статус:",
                 set_nick: "Нік у додатку", set_gender: "Ваша стать", g_m: "Чоловік", g_f: "Жінка", set_lang: "Мова інтерфейсу", set_len: "Довжина повідомлень", set_sex: "Вульгарність персонажів",
                 d_sub: "Нагорода залежить від підписки. Заходзь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
@@ -953,6 +983,7 @@
             
             updateDailyUI();
             
+            try { await fetchNews(); } catch(e) {} // Загружаем новости
             try { await renderUserChars(); } catch(e) {}
             try { await renderUserTasks(); } catch(e) {}
             
@@ -964,7 +995,7 @@
 
         // ================= НАВИГАЦИЯ И БЛОКИРОВКА =================
         let baseZ = 15000;
-        let isBotTyping = false; // Флаг жесткой блокировки чата
+        let isBotTyping = false; 
 
         function openPanel(id) { 
             if(stack.includes(id)) return; 
@@ -978,7 +1009,6 @@
         }
 
         function back() { 
-            // ЖЕСТКИЙ ЛОК ВЫХОДА ИЗ ЧАТА ВО ВРЕМЯ ГЕНЕРАЦИИ
             if(isBotTyping) {
                 let msg = currentLang === 'uk' ? "Бот пише відповідь, зачекайте! ⏳" : currentLang === 'en' ? "Bot is typing, please wait! ⏳" : currentLang === 'be' ? "Бот друкуе адказ, пачакайце! ⏳" : "Бот печатает ответ, подождите! ⏳";
                 tg.showAlert(msg);
@@ -997,6 +1027,89 @@
         
         BackButton.onClick(() => back());
         function closeChat() { back(); }
+
+        // ================= ЛЕНТА НОВОСТЕЙ (ЛОГИКА) =================
+        async function fetchNews() {
+            try {
+                const res = await fetch('/api/get-news', { headers: getAuthHeaders() });
+                if(res.ok) {
+                    allNews = await res.json();
+                    renderNews();
+                }
+            } catch(e) {}
+        }
+
+        function renderNews() {
+            const container = document.getElementById('main-news-feed');
+            if(!container) return;
+            if(allNews.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            // Сортируем новости от новых к старым
+            const sortedNews = [...allNews].sort((a, b) => b.id - a.id);
+            
+            container.innerHTML = sortedNews.map(n => {
+                let imgTag = n.photo && n.photo.length > 10 ? `<img src="${n.photo}" class="news-img" style="display:block;">` : '';
+                let delBtn = getUid() === OID ? `<span style="color:#ff4444; cursor:pointer; font-size:14px; padding-left:10px;" onclick="deleteNews(${n.id})">✖ Удалить</span>` : '';
+                let d = new Date(n.id).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+                
+                return `
+                <div class="news-card">
+                    <div class="news-date"><span>${d}</span> ${delBtn}</div>
+                    <div class="news-text">${n.text}</div>
+                    ${imgTag}
+                </div>`;
+            }).join('');
+        }
+
+        async function publishNews() {
+            const text = document.getElementById('inews-text').value.trim();
+            const img = document.getElementById('news-preview').src;
+            
+            if(!text && (!img || img.includes('#'))) {
+                return tg.showAlert("Введите текст новости или добавьте картинку!");
+            }
+            
+            const newsData = { 
+                id: Date.now(), 
+                text: text, 
+                photo: img.includes('#') ? '' : img 
+            };
+            
+            try {
+                await fetch('/api/admin/create-news', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(), 
+                    body: JSON.stringify({ newsData: newsData }) 
+                });
+                
+                document.getElementById('inews-text').value = '';
+                document.getElementById('news-preview').src = '#';
+                document.getElementById('news-preview').style.display = 'none';
+                document.getElementById('news-limit').innerText = '0/3500';
+                
+                tg.showAlert("Новость опубликована!");
+                back(); // Закрываем панель создания
+                fetchNews(); // Обновляем ленту
+            } catch(e) { 
+                tg.showAlert("Ошибка при публикации новости"); 
+            }
+        }
+
+        async function deleteNews(id) {
+            tg.showConfirm("Удалить эту новость из ленты?", async (yes) => {
+                if(yes) {
+                    await fetch('/api/admin/delete-news', { 
+                        method: 'POST', 
+                        headers: getAuthHeaders(), 
+                        body: JSON.stringify({ news_id: id }) 
+                    });
+                    fetchNews(); // Обновляем ленту после удаления
+                }
+            });
+        }
 
         // ================= ЧАТЫ И ЛОГИКА =================
         function updateChatOrder(charId) {
@@ -1298,7 +1411,7 @@
 
         // ================= ЧАТ: ОТПРАВКА, АНИМАЦИЯ И БЛОКИРОВКИ =================
         async function sendMessage() {
-            if(isBotTyping) return; // ЗАЩИТА ОТ СПАМА
+            if(isBotTyping) return; 
             
             const input = document.getElementById('chat-input-text'); 
             const sendBtn = document.getElementById('chat-send-btn');
@@ -1316,9 +1429,8 @@
             input.disabled = true;
             sendBtn.disabled = true;
             input.value = ''; 
-            input.style.height = '40px'; // Сброс высоты текстового поля
+            input.style.height = '40px'; 
 
-            // ЖЕСТКИЙ ТАЙМЕР: 8 СЕКУНД
             let minTimePassed = false;
             setTimeout(() => { minTimePassed = true; }, 8000); 
             
@@ -1362,13 +1474,12 @@
                     let replyText = data.reply;
                     let i = 0;
                     
-                    // ЭФФЕКТ ПЕЧАТНОЙ МАШИНКИ
                     function typeChar() {
                         if (i < replyText.length) {
                             replyBox.appendChild(document.createTextNode(replyText.charAt(i)));
                             i++;
                             chatBox.scrollTop = chatBox.scrollHeight;
-                            setTimeout(typeChar, 20); // Скорость появления букв
+                            setTimeout(typeChar, 20); 
                         } else {
                             finishMessage(replyText);
                         }
@@ -1376,7 +1487,6 @@
                     typeChar();
 
                     function finishMessage(finalText) {
-                        // ОЖИДАЕМ КОНЦА 8-СЕКУНДНОГО ТАЙМЕРА ПЕРЕД РАЗБЛОКИРОВКОЙ
                         let waitTimer = setInterval(() => {
                             if (minTimePassed) {
                                 clearInterval(waitTimer);
