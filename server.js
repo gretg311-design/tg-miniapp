@@ -49,9 +49,9 @@ const charSchema = new mongoose.Schema({ id: Number, name: String, age: Number, 
 const promoSchema = new mongoose.Schema({ 
     code: { type: String, unique: true }, 
     reward: Number,
-    expiresAt: Number, // Время смерти промокода
-    messageId: Number, // ID сообщения в канале для зачеркивания
-    emoji: String      // Рандомный эмодзи
+    expiresAt: Number, 
+    messageId: Number, 
+    emoji: String      
 });
 const taskSchema = new mongoose.Schema({ id: Number, name: String, link: String, rType: String, rVal: Number });
 const priceSchema = new mongoose.Schema({ item_id: { type: String, unique: true }, stars: { type: Number, default: 0 }, ton: { type: Number, default: 0 } });
@@ -92,7 +92,6 @@ const checkTgAuth = (req, res, next) => {
             req.tg_user_id = Number(userObj.id); 
             next();
         } else {
-            console.log(`[ВЗЛОМ] Попытка подделки запроса отклонена.`);
             return res.status(403).json({ error: "Фальшивый запрос! Попытка взлома." });
         }
     } catch (e) {
@@ -116,7 +115,7 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
             user.invited_by = inviterId; user.shards += 100; isModified = true;
             User.findOneAndUpdate({ tg_id: inviterId }, { $inc: { shards: 100 } }).then(inviter => {
                 if (inviter) sendTgMessage(inviterId, `🎉 По вашей ссылке зарегистрировался новый пользователь! Вы получили 100 🌙.`);
-            }).catch(e => console.error("Ref Reward Error:", e));
+            }).catch(e => {});
             sendTgMessage(uid, `🎉 Вы зарегистрировались по пригласительной ссылке и получили бонус 100 🌙!`);
         }
 
@@ -190,7 +189,7 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (С ИСПРАВЛЕННЫМ СЕКРЕТНЫМ ПРОМПТОМ) =================
+// ================= API: ЧАТ (ИДЕАЛЬНЫЙ ПРОМПТ БЕЗ ПОДСЧЕТА СЛОВ) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
@@ -228,14 +227,20 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         else if (userSub === "pro") safeLen = Math.min(Math.max(requestedLen, 25), 35);
         else if (userSub === "premium") safeLen = Math.min(Math.max(requestedLen, 25), 30);
 
-        // --- СЕКРЕТНЫЙ БУФЕР ±5 СЛОВ ---
-        let maxLenBuffer = safeLen + 5; 
-        if (safeLen >= 50) maxLenBuffer = safeLen + 15; // Для ультры буфер побольше
-
+        // --- ПОЛНОСТЬЮ СМЫСЛОВОЙ ОГРАНИЧИТЕЛЬ ОБЪЕМА (НИКАКИХ ЦИФР СЛОВ) ---
+        let sizeInstruction = "";
+        if (safeLen <= 30) {
+            sizeInstruction = "Отвечай ОЧЕНЬ КОРОТКО (ровно 1-2 небольших предложения). Не расписывай лишние детали.";
+        } else if (safeLen <= 40) {
+            sizeInstruction = "Отвечай СРЕДНЕ (ровно 2-3 полных предложения). Балансируй между действиями и словами.";
+        } else {
+            sizeInstruction = "Отвечай РАЗВЕРНУТО (ровно 3-5 предложений). Описывай эмоции, окружение и мысли.";
+        }
+        
         let uName = user_name || "Собеседник";
         let uGender = user_gender === 'f' ? "Женский" : "Мужской";
         
-        // НОВЫЙ ЖЕЛЕЗОБЕТОННЫЙ ПРОМПТ
+        // --- ФИНАЛЬНЫЙ ЖЕЛЕЗОБЕТОННЫЙ ПРОМПТ ПРОТИВ ОБРЫВОВ ---
         let systemPrompt = `[Роль]: Имя - ${char.name}, Возраст - ${char.age}. Описание: ${char.desc}.
 [Собеседник]: Имя - ${uName}, Пол - ${uGender}.
 
@@ -244,8 +249,8 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
 2. Обращайся к собеседнику по имени: ${uName}. Учитывай его пол (${uGender}) в окончаниях.
 3. Тон: ${sexLevels[requestedSex]}.
 4. Формат: Твои действия и мысли СТРОГО внутри звездочек (*смотрит*). Прямая речь - без звездочек. В КАЖДОМ твоем ответе ОБЯЗАТЕЛЬНО должны быть слова вслух (прямая речь). Не отвечай только одними действиями!
-5. ОБЪЕМ: Напиши минимум 3-4 полных предложения. Твой текст должен содержать примерно от ${safeLen} до ${maxLenBuffer} слов. Меньше писать нельзя! Пиши естественно, не обрывайся.
-6. ЦЕЛОСТНОСТЬ (САМОЕ ВАЖНОЕ ПРАВИЛО!): КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО обрывать текст на полуслове! Если ты достиг нужного объема, аккуратно заверши текущую мысль и ОБЯЗАТЕЛЬНО поставь финальную точку, восклицательный знак или вопросительный знак. Заканчивай предложение всегда!`;
+5. Объем: ${sizeInstruction} ВНИМАНИЕ: никогда не считай слова! Пиши естественно в рамках указанных предложений.
+6. ЦЕЛОСТНОСТЬ (САМОЕ ВАЖНОЕ ПРАВИЛО!): ТВОЙ ОТВЕТ ДОЛЖЕН БЫТЬ ПОЛНОСТЬЮ ЗАКОНЧЕН! КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО обрывать текст на полуслове или запятой. Последним символом в твоем тексте ВСЕГДА должна быть точка (.), вопросительный знак (?), восклицательный знак (!) или закрывающая звездочка (*). Если ты чувствуешь, что мысль затягивается — просто поставь точку и заверши ответ.`;
 
         let historyText = "--- ИСТОРИЯ ДИАЛОГА ---\n";
         if (chat_history && chat_history.length > 0) {
@@ -270,7 +275,10 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
                     body: JSON.stringify({
                         systemInstruction: { parts: [{ text: systemPrompt }] },
                         contents: [{ role: "user", parts: [{ text: historyText }] }],
-                        generationConfig: { maxOutputTokens: 1000, temperature: 0.85 },
+                        generationConfig: { 
+                            maxOutputTokens: 1500, // Увеличил лимит выходных токенов с запасом
+                            temperature: 0.85 
+                        },
                         safetySettings: [
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
                             { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -392,7 +400,7 @@ app.post('/api/tg-webhook', async (req, res) => {
     } catch (e) { res.sendStatus(500); }
 });
 
-// ================= АДМИНКА И ПРОВЕРКА ЗАДАНИЙ (БЛОКИРОВКИ ПРАВ) =================
+// ================= АДМИНКА И ПРОВЕРКА ЗАДАНИЙ (С БЛОКИРОВКАМИ ДЛЯ АДМИНОВ) =================
 app.get('/api/get-characters', checkTgAuth, async (req, res) => res.json(await Character.find()));
 app.get('/api/get-tasks', checkTgAuth, async (req, res) => res.json(await Task.find()));
 app.get('/api/get-promos', checkTgAuth, async (req, res) => res.json(await Promo.find()));
@@ -421,7 +429,6 @@ app.post('/api/admin/manage-shards', checkTgAuth, async (req, res) => {
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
     const action = (req.body.action || '').toLowerCase().trim(); let amount = Math.abs(Number(req.body.amount)); 
     
-    // БЛОКИРОВКА АДМИНА
     if (action !== 'add') {
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать осколки!" });
         let user = await User.findOne({ tg_id: target_id }); if (user && user.shards < amount) amount = user.shards; 
@@ -441,7 +448,6 @@ app.post('/api/admin/manage-sub', checkTgAuth, async (req, res) => {
         let cleanSub = (req.body.sub_type || "FREE").trim(); if (/^ultra$/i.test(cleanSub)) cleanSub = "Ultra"; else if (/^vip$/i.test(cleanSub)) cleanSub = "VIP"; else if (/^pro$/i.test(cleanSub)) cleanSub = "Pro"; else if (/^premium$/i.test(cleanSub)) cleanSub = "Premium";
         await User.findOneAndUpdate({ tg_id: target_id }, { subscription: cleanSub, sub_exp: expDate.getTime() }, { upsert: true }); await sendTgMessage(target_id, `Администратор выдал вам подписку ${cleanSub}`); res.json({ message: `Подписка выдана на ${days} дней` });
     } else {
-        // БЛОКИРОВКА АДМИНА
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может снимать подписку!" });
         await User.findOneAndUpdate({ tg_id: target_id }, { subscription: "FREE", sub_exp: 0 }, { upsert: true }); await sendTgMessage(target_id, `Администратор забрал вашу подписку`); res.json({ message: "Подписка аннулирована" });
     }
@@ -449,7 +455,6 @@ app.post('/api/admin/manage-sub', checkTgAuth, async (req, res) => {
 
 app.post('/api/admin/create-char', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Character(req.body.charData).save(); res.json({ message: "Персонаж добавлен!" }); });
 
-// БЛОКИРОВКА АДМИНА
 app.post('/api/admin/delete-char', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Character.findOneAndDelete({ id: req.body.char_id }); res.json({ message: "Удален" }); });
 
 app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => { 
@@ -484,12 +489,10 @@ app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => {
     }
 });
 
-// БЛОКИРОВКА АДМИНА
 app.post('/api/admin/delete-promo', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Promo.findOneAndDelete({ code: req.body.code }); res.json({ message: "Промо удален" }); });
 
 app.post('/api/admin/create-task', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Task(req.body.taskData).save(); res.json({ message: "Задание добавлено" }); });
 
-// БЛОКИРОВКА АДМИНА
 app.post('/api/admin/delete-task', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Task.findOneAndDelete({ id: req.body.task_id }); res.json({ message: "Задание удалено" }); });
 
 app.post('/api/owner/set-admin', checkTgAuth, async (req, res) => {
