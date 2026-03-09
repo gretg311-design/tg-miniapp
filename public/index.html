@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Moon Project - Железобетон 1.2.1.0 FULL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -16,7 +17,7 @@
         .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
         .app-version { font-size: 10px; color: #444; text-align: center; margin-top: 15px; font-family: monospace; }
 
-        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; }
+        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; position: relative; z-index: 2; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         
         @keyframes shimmerNick { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -127,7 +128,7 @@
         .news-text { font-size: 12px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
         .news-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #2d164d; display: none; }
 
-        /* === СТИЛИ АВТОМАТИЧЕСКИХ СЕЗОНОВ === */
+        /* === СТИЛИ АВТОМАТИЧЕСКИХ СЕЗОНОВ И САКУРЫ === */
         body.theme-winter { background: #010a15 !important; }
         body.theme-winter .menu-item { border-color: rgba(0, 188, 212, 0.4); box-shadow: 0 0 5px rgba(0, 188, 212, 0.1); }
         
@@ -139,6 +140,13 @@
         
         body.theme-autumn { background: #150501 !important; }
         body.theme-autumn .menu-item { border-color: rgba(255, 85, 0, 0.3); box-shadow: 0 0 5px rgba(255, 85, 0, 0.1); }
+
+        .sakura-petal { position: absolute; background: #ffb7c5; border-radius: 15px 50px; opacity: 0.8; pointer-events: none; animation: fall linear infinite; z-index: 1; }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg) scale(0.5); opacity: 0; }
+            10% { opacity: 0.8; }
+            100% { transform: translateY(100vh) rotate(360deg) scale(1); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -650,11 +658,17 @@
     <script>
         const tg = window.Telegram.WebApp;
         const BackButton = tg.BackButton;
+        
+        // --- РАЗВОРАЧИВАЕМ НА ВЕСЬ ЭКРАН (ПРЯЧЕМ РАМКУ И ШАПКУ) ---
         tg.expand();
+        try {
+            if(tg.requestFullscreen) tg.requestFullscreen(); // Новая фича API, убирает шапку полностью
+        } catch(e){}
+        
         tg.enableClosingConfirmation();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
 
-        // === МАГИЯ СЕЗОНОВ И РАМКИ ТЕЛЕГРАМА ===
+        // === МАГИЯ СЕЗОНОВ И ПЕРЕКРАСКА РАМКИ ===
         function applySeasonTheme() {
             const month = new Date().getMonth() + 1; // 1-12
             let theme = "theme-winter";
@@ -663,6 +677,7 @@
             if (month >= 3 && month <= 5) {
                 theme = "theme-spring";
                 bgColor = "#051005";
+                createSakura(); // Запускаем сакуру весной
             } else if (month >= 6 && month <= 8) {
                 theme = "theme-summer";
                 bgColor = "#100a00";
@@ -671,17 +686,33 @@
                 bgColor = "#150501";
             }
             
-            // Если месяц 12, 1, 2 - останется winter
             document.body.className = theme;
             
-            // Красим рамку Telegram в цвет сезона (чтобы как на iOS литое было)
+            // Красим остатки рамки Telegram в цвет сезона (чтобы всё было литое)
             try {
                 tg.setHeaderColor(bgColor);
                 tg.setBackgroundColor(bgColor);
                 if (tg.setBottomBarColor) tg.setBottomBarColor(bgColor);
-            } catch(e) { } // Заглушка, если юзер открыл не с телефона
+            } catch(e) { } 
         }
-        applySeasonTheme(); // Запускаем сразу
+
+        // === ГЕНЕРАТОР САКУРЫ ===
+        function createSakura() {
+            const numPetals = 15; // Легкий эффект, чтобы не тормозило
+            const app = document.getElementById('app');
+            for(let i=0; i<numPetals; i++) {
+                let petal = document.createElement('div');
+                petal.className = 'sakura-petal';
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.width = (Math.random() * 10 + 5) + 'px';
+                petal.style.height = (Math.random() * 15 + 10) + 'px';
+                petal.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                petal.style.animationDelay = Math.random() * 5 + 's';
+                app.appendChild(petal);
+            }
+        }
+        
+        applySeasonTheme(); // Запускаем проверку сезона сразу
 
         const OID = "8287041036";
         let stack = [], trollCount = 0, clickedTasks = [];
@@ -703,7 +734,7 @@
                 pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:",
                 set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей",
                 d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по",
-                s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколвно ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код",
+                s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код",
                 dos_age: "Возраст:", dos_gender: "Пол:",
                 s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk"
             },
@@ -990,7 +1021,6 @@
 
             applyNickStyle(userData.subscription);
 
-            // --- ЖЕЛЕЗОБЕТОННАЯ ЛОГИКА ПОЛЗУНКА ---
             let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
             let minLen = 25; let maxLen = 25; let maxSex = 0;
             
