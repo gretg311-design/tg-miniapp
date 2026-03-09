@@ -150,7 +150,6 @@ app.post('/api/user/sync', checkTgAuth, async (req, res) => {
             for (let promo of expiredPromos) {
                 await Promo.deleteOne({ _id: promo._id });
                 if (promo.messageId) {
-                    // Кавычки снаружи тега <s>
                     const text = `${promo.emoji}\nПромокод «<s>${promo.code}</s>» даёт ${promo.reward} осколков\nUPD: промокод закончился`;
                     fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -192,10 +191,11 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ =================
+// ================= API: ЧАТ (С НОВОЙ ЯЗЫКОВОЙ ЛОГИКОЙ) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
-        const { char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
+        // Добавили lang в деструктуризацию запроса
+        const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
         const uid = req.tg_user_id; 
         let user = await User.findOne({ tg_id: uid });
         if (!user) return res.status(404).json({ error: "Юзер не найден в БД" });
@@ -241,6 +241,10 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         
         let uName = user_name || "Собеседник";
         let uGender = user_gender === 'f' ? "Женский" : "Мужской";
+
+        // === ОПРЕДЕЛЯЕМ ЯЗЫК ДЛЯ ИИ ===
+        let langMap = { "ru": "Русском", "uk": "Украинском", "en": "Английском", "be": "Белорусском" };
+        let aiLang = langMap[lang] || "Русском"; 
         
         let systemPrompt = `[Роль]: Имя - ${char.name}, Возраст - ${char.age}. Описание: ${char.desc}.
 [Собеседник]: Имя - ${uName}, Пол - ${uGender}.
@@ -251,7 +255,8 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
 3. Тон: ${sexLevels[requestedSex]}.
 4. Формат: Твои действия и мысли СТРОГО внутри звездочек (*смотрит*). Прямая речь - без звездочек. В КАЖДОМ твоем ответе ОБЯЗАТЕЛЬНО должны быть слова вслух (прямая речь). Не отвечай только одними действиями!
 5. Объем: ${sizeInstruction} ВНИМАНИЕ: никогда не считай слова! Пиши естественно в рамках указанных предложений.
-6. ЦЕЛОСТНОСТЬ (САМОЕ ВАЖНОЕ ПРАВИЛО!): ТВОЙ ОТВЕТ ДОЛЖЕН БЫТЬ ПОЛНОСТЬЮ ЗАКОНЧЕН! КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО обрывать текст на полуслове или запятой. Последним символом в твоем тексте ВСЕГДА должна быть точка (.), вопросительный знак (?), восклицательный знак (!) или закрывающая звездочка (*). Если ты чувствуешь, что мысль затягивается — просто поставь точку и заверши ответ.`;
+6. ЦЕЛОСТНОСТЬ: ТВОЙ ОТВЕТ ДОЛЖЕН БЫТЬ ПОЛНОСТЬЮ ЗАКОНЧЕН! КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО обрывать текст на полуслове или запятой. Последним символом в твоем тексте ВСЕГДА должна быть точка (.), вопросительный знак (?), восклицательный знак (!) или закрывающая звездочка (*).
+7. ЯЗЫК (КРИТИЧНО!): Твой ответ ОБЯЗАТЕЛЬНО должен быть написан на ${aiLang} языке! Никаких исключений, отвечай строго на этом языке.`;
 
         let historyText = "--- ИСТОРИЯ ДИАЛОГА ---\n";
         if (chat_history && chat_history.length > 0) {
@@ -482,8 +487,6 @@ app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => {
     const expiresAt = Date.now() + (hours * 60 * 60 * 1000); 
     
     let hourText = hours === 1 ? "1 Час" : (hours === 3 ? "3 Часа" : "2 Часа");
-    
-    // Кавычки вынесены ЗА тег <code>, чтобы юзеры копировали только сам текст кода
     const text = `${randomEmoji}\nПромокод «<code>${code}</code>» даёт ${reward} осколков\nUPD: ${hourText}`;
 
     try {
