@@ -16,7 +16,8 @@
         .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
         .app-version { font-size: 10px; color: #444; text-align: center; margin-top: 15px; font-family: monospace; }
 
-        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; }
+        /* ДОБАВИЛИ ОТСТУП СВЕРХУ 65px */
+        #app { padding: 65px 20px 40px 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         
         @keyframes shimmerNick { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -51,7 +52,8 @@
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        /* ДОБАВИЛИ ОТСТУП СВЕРХУ 65px ВО ВСЕХ МЕНЮ */
+        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 65px 20px 20px 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
@@ -170,7 +172,7 @@
     </div>
 
     <div id="p-chat" class="overlay" style="padding: 0;">
-        <div style="width: 100%; background: #0d041a; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d164d;">
+        <div style="width: 100%; background: #0d041a; padding: 55px 15px 15px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d164d;">
             <div style="font-weight: bold; color: #bc42f5; font-size: 18px;" id="chat-char-name">Имя Персонажа</div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div style="font-weight: bold; color: #fff; font-size: 16px;">🌙 <span id="chat-shards-balance">0</span></div>
@@ -1213,7 +1215,7 @@
 
         function deleteChatAction(charId, e) {
             if(e) e.stopPropagation();
-            let text = currentLang === 'uk' ? "Видалити чат повністю? Це дію не можна скасувати." : currentLang === 'en' ? "Delete chat completely? This cannot be undone." : currentLang === 'be' ? "Выдаліць чат цалкам? Гэта дзеянне нельга адмяніць." : "Удалить чат полностью? Это действие нельзя отменить.";
+            let text = currentLang === 'uk' ? "Видалити чат повністю? Це дію не можна скасувати." : currentLang === 'en' ? "Delete chat completely? This cannot be undone." : currentLang === 'be' ? "Выдаліць чат цалкам? Гэта дзеянне нельга адмяніць." : "Удалить чат повністю? Это действие нельзя отменить.";
             
             tg.showConfirm(text, (yes) => {
                 if(yes) {
