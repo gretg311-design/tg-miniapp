@@ -121,7 +121,6 @@
         .chat-dropdown-item:last-child { border-bottom: none; }
         .pin-icon { color: #bc42f5; margin-right: 5px; font-size: 12px; }
 
-        /* === СТИЛИ ДЛЯ ЛЕНТЫ НОВОСТЕЙ === */
         .news-container { margin-top: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
         .news-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; position: relative; }
         .news-date { font-size: 10px; color: #bc42f5; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; }
@@ -652,7 +651,7 @@
         
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; 
-        let allNews = []; // Массив для хранения новостей
+        let allNews = []; 
 
         const translations = {
             ru: {
@@ -864,7 +863,17 @@
             const uid = getUid();
             const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
 
-            currentLang = localStorage.getItem('m_lang_' + uid) || 'ru';
+            // === УМНОЕ ОПРЕДЕЛЕНИЕ ЯЗЫКА ===
+            let savedLang = localStorage.getItem('m_lang_' + uid);
+            if (!savedLang) {
+                let tgLang = (u.language_code || 'ru').toLowerCase().slice(0, 2);
+                if (['ru', 'uk', 'en', 'be'].includes(tgLang)) {
+                    savedLang = tgLang;
+                } else {
+                    savedLang = 'en'; 
+                }
+            }
+            currentLang = savedLang;
             setLang(currentLang);
 
             document.getElementById('u-id-head').innerText = uid;
@@ -983,7 +992,7 @@
             
             updateDailyUI();
             
-            try { await fetchNews(); } catch(e) {} // Загружаем новости
+            try { await fetchNews(); } catch(e) {} 
             try { await renderUserChars(); } catch(e) {}
             try { await renderUserTasks(); } catch(e) {}
             
@@ -1047,7 +1056,6 @@
                 return;
             }
             
-            // Сортируем новости от новых к старым
             const sortedNews = [...allNews].sort((a, b) => b.id - a.id);
             
             container.innerHTML = sortedNews.map(n => {
@@ -1091,8 +1099,8 @@
                 document.getElementById('news-limit').innerText = '0/3500';
                 
                 tg.showAlert("Новость опубликована!");
-                back(); // Закрываем панель создания
-                fetchNews(); // Обновляем ленту
+                back(); 
+                fetchNews(); 
             } catch(e) { 
                 tg.showAlert("Ошибка при публикации новости"); 
             }
@@ -1106,7 +1114,7 @@
                         headers: getAuthHeaders(), 
                         body: JSON.stringify({ news_id: id }) 
                     });
-                    fetchNews(); // Обновляем ленту после удаления
+                    fetchNews(); 
                 }
             });
         }
@@ -1409,7 +1417,7 @@
             } catch(e) {}
         }
 
-        // ================= ЧАТ: ОТПРАВКА, АНИМАЦИЯ И БЛОКИРОВКИ =================
+        // ================= ЧАТ: ОТПРАВКА С ЯЗЫКОМ И БЛОКИРОВКИ =================
         async function sendMessage() {
             if(isBotTyping) return; 
             
@@ -1424,7 +1432,6 @@
                 return tg.showAlert(noShards);
             }
 
-            // ВКЛЮЧАЕМ БЛОКИРОВКУ
             isBotTyping = true;
             input.disabled = true;
             sendBtn.disabled = true;
@@ -1458,10 +1465,11 @@
                 const res = await fetch('/api/chat', { 
                     method: 'POST', 
                     headers: getAuthHeaders(),
+                    // ПЕРЕДАЕМ CURRENT LANG НА СЕРВЕР!
                     body: JSON.stringify({ 
                         char_id: activeCharId, message: text, 
                         chat_history: allChats[activeCharId], len: lenSet, sex: sexSet,
-                        user_name: uName, user_gender: uGender  
+                        user_name: uName, user_gender: uGender, lang: currentLang  
                     }) 
                 });
                 const data = await res.json(); 
