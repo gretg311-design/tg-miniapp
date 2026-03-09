@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Moon Project - Железобетон 1.2.1.0 FULL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
-        html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; transition: background 0.5s ease; }
+        html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
@@ -17,7 +16,7 @@
         .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
         .app-version { font-size: 10px; color: #444; text-align: center; margin-top: 15px; font-family: monospace; }
 
-        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; position: relative; z-index: 2; }
+        #app { padding: 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; padding-bottom: 40px; }
         .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         
         @keyframes shimmerNick { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -127,26 +126,6 @@
         .news-date { font-size: 10px; color: #bc42f5; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; }
         .news-text { font-size: 12px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
         .news-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #2d164d; display: none; }
-
-        /* === СТИЛИ АВТОМАТИЧЕСКИХ СЕЗОНОВ И САКУРЫ === */
-        body.theme-winter { background: #010a15 !important; }
-        body.theme-winter .menu-item { border-color: rgba(0, 188, 212, 0.4); box-shadow: 0 0 5px rgba(0, 188, 212, 0.1); }
-        
-        body.theme-spring { background: #051005 !important; }
-        body.theme-spring .menu-item { border-color: rgba(0, 255, 100, 0.3); box-shadow: 0 0 5px rgba(0, 255, 100, 0.1); }
-        
-        body.theme-summer { background: #100a00 !important; }
-        body.theme-summer .menu-item { border-color: rgba(255, 204, 0, 0.3); box-shadow: 0 0 5px rgba(255, 204, 0, 0.1); }
-        
-        body.theme-autumn { background: #150501 !important; }
-        body.theme-autumn .menu-item { border-color: rgba(255, 85, 0, 0.3); box-shadow: 0 0 5px rgba(255, 85, 0, 0.1); }
-
-        .sakura-petal { position: absolute; background: #ffb7c5; border-radius: 15px 50px; opacity: 0.8; pointer-events: none; animation: fall linear infinite; z-index: 1; }
-        @keyframes fall {
-            0% { transform: translateY(-10vh) rotate(0deg) scale(0.5); opacity: 0; }
-            10% { opacity: 0.8; }
-            100% { transform: translateY(100vh) rotate(360deg) scale(1); opacity: 0; }
-        }
     </style>
 </head>
 <body>
@@ -659,60 +638,21 @@
         const tg = window.Telegram.WebApp;
         const BackButton = tg.BackButton;
         
-        // --- РАЗВОРАЧИВАЕМ НА ВЕСЬ ЭКРАН (ПРЯЧЕМ РАМКУ И ШАПКУ) ---
+        // --- РАЗВОРАЧИВАЕМ НА ВЕСЬ ЭКРАН И ПРЯЧЕМ РАМКУ ---
         tg.expand();
         try {
-            if(tg.requestFullscreen) tg.requestFullscreen(); // Новая фича API, убирает шапку полностью
+            if(tg.requestFullscreen) tg.requestFullscreen(); // Скрывает верхнюю шапку в новых версиях TG
         } catch(e){}
+        
+        try {
+            // Красим остатки рамок в наш фирменный темный фон
+            tg.setHeaderColor('#05010a');
+            tg.setBackgroundColor('#05010a');
+            if (tg.setBottomBarColor) tg.setBottomBarColor('#05010a');
+        } catch(e) {}
         
         tg.enableClosingConfirmation();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
-
-        // === МАГИЯ СЕЗОНОВ И ПЕРЕКРАСКА РАМКИ ===
-        function applySeasonTheme() {
-            const month = new Date().getMonth() + 1; // 1-12
-            let theme = "theme-winter";
-            let bgColor = "#010a15";
-
-            if (month >= 3 && month <= 5) {
-                theme = "theme-spring";
-                bgColor = "#051005";
-                createSakura(); // Запускаем сакуру весной
-            } else if (month >= 6 && month <= 8) {
-                theme = "theme-summer";
-                bgColor = "#100a00";
-            } else if (month >= 9 && month <= 11) {
-                theme = "theme-autumn";
-                bgColor = "#150501";
-            }
-            
-            document.body.className = theme;
-            
-            // Красим остатки рамки Telegram в цвет сезона (чтобы всё было литое)
-            try {
-                tg.setHeaderColor(bgColor);
-                tg.setBackgroundColor(bgColor);
-                if (tg.setBottomBarColor) tg.setBottomBarColor(bgColor);
-            } catch(e) { } 
-        }
-
-        // === ГЕНЕРАТОР САКУРЫ ===
-        function createSakura() {
-            const numPetals = 15; // Легкий эффект, чтобы не тормозило
-            const app = document.getElementById('app');
-            for(let i=0; i<numPetals; i++) {
-                let petal = document.createElement('div');
-                petal.className = 'sakura-petal';
-                petal.style.left = Math.random() * 100 + 'vw';
-                petal.style.width = (Math.random() * 10 + 5) + 'px';
-                petal.style.height = (Math.random() * 15 + 10) + 'px';
-                petal.style.animationDuration = (Math.random() * 5 + 5) + 's';
-                petal.style.animationDelay = Math.random() * 5 + 's';
-                app.appendChild(petal);
-            }
-        }
-        
-        applySeasonTheme(); // Запускаем проверку сезона сразу
 
         const OID = "8287041036";
         let stack = [], trollCount = 0, clickedTasks = [];
@@ -1021,6 +961,7 @@
 
             applyNickStyle(userData.subscription);
 
+            // --- ЖЕЛЕЗОБЕТОННАЯ ЛОГИКА ПОЛЗУНКА ---
             let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
             let minLen = 25; let maxLen = 25; let maxSex = 0;
             
@@ -1064,8 +1005,9 @@
             
             updateDailyUI();
             
+            // --- ЖЕЛЕЗОБЕТОННАЯ ПОДГРУЗКА ---
             try { await fetchNews(); } catch(e) {} 
-            try { await renderUserChars(); } catch(e) {}
+            try { await renderUserChars(); } catch(e) {} // 100% подгрузка персов при старте
             try { await renderUserTasks(); } catch(e) {}
             
             if (uid === OID || userData.is_admin) {
@@ -1299,6 +1241,11 @@
         }
 
         async function openChatList() {
+            // === ЖЕЛЕЗОБЕТОННАЯ СТРАХОВКА: ЕСЛИ ПЕРСЫ НЕ ПРОГРУЗИЛИСЬ, КАЧАЕМ ИХ СЕЙЧАС ===
+            if (allChars.length === 0) {
+                await renderUserChars(); 
+            }
+
             const uid = getUid();
             const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
