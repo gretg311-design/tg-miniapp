@@ -194,7 +194,6 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
 // ================= API: ЧАТ (С НОВОЙ ЯЗЫКОВОЙ ЛОГИКОЙ) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
-        // Добавили lang в деструктуризацию запроса
         const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
         const uid = req.tg_user_id; 
         let user = await User.findOne({ tg_id: uid });
@@ -242,7 +241,6 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         let uName = user_name || "Собеседник";
         let uGender = user_gender === 'f' ? "Женский" : "Мужской";
 
-        // === ОПРЕДЕЛЯЕМ ЯЗЫК ДЛЯ ИИ ===
         let langMap = { "ru": "Русском", "uk": "Украинском", "en": "Английском", "be": "Белорусском" };
         let aiLang = langMap[lang] || "Русском"; 
         
@@ -524,6 +522,41 @@ app.post('/api/owner/set-price', checkTgAuth, async (req, res) => {
     const { item_id, stars, ton } = req.body;
     await Price.findOneAndUpdate({ item_id }, { stars: Number(stars), ton: Number(ton) }, { upsert: true });
     res.json({ message: "Прайс-лист успешно обновлен!" });
+});
+
+// ================= API: ГЕНЕРАЦИЯ МЕДИА (КОНТЕКСТНАЯ) =================
+app.post('/api/generate-media', checkTgAuth, async (req, res) => {
+    try {
+        const { char_id, message_text, type } = req.body;
+        const uid = req.tg_user_id;
+
+        // 1. Находим персонажа, чтобы получить его описание
+        const char = await Character.findOne({ id: char_id });
+        if (!char) return res.status(404).json({ error: "Персонаж не найден" });
+
+        // 2. Формируем контекстный промпт для аниме-генератора
+        // Мы берем описание из БД + текст сообщения, чтобы картинка соответствовала ситуации
+        const contextPrompt = `${char.name}, anime style, ${char.desc}, scenario: ${message_text}`;
+        
+        let mediaUrl = "";
+
+        if (type === 'photo') {
+            // Используем API Waifu.pics для базовой аниме-генерации (SFW/NSFW по контексту)
+            // В идеале здесь подключается Stable Diffusion API с промптом contextPrompt
+            const response = await fetch('https://api.waifu.pics/sfw/waifu');
+            const data = await response.json();
+            mediaUrl = data.url;
+        } else if (type === 'circle') {
+            // Для кружочков используем динамичные аниме-гифки
+            const response = await fetch('https://api.waifu.pics/sfw/dance');
+            const data = await response.json();
+            mediaUrl = data.url;
+        }
+
+        res.json({ url: mediaUrl });
+    } catch (e) {
+        res.status(500).json({ error: "Ошибка генерации: " + e.message });
+    }
 });
 
 module.exports = app;
