@@ -16,6 +16,7 @@
         .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
         .app-version { font-size: 10px; color: #444; text-align: center; margin-top: 15px; font-family: monospace; }
 
+        /* ОПУСТИЛИ ВСЁ ВНИЗ НА 85px ЧТОБЫ НЕ ПЕРЕКРЫВАЛОСЬ ШАПКОЙ ТГ */
         #app { padding: 85px 20px 40px 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; }
         .u-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         
@@ -51,6 +52,7 @@
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
+        /* ОПУСТИЛИ ВСЕ ВСПЛЫВАЮЩИЕ ОКНА НА 85px */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 85px 20px 20px 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
@@ -94,6 +96,7 @@
         .char-card-tags { font-size: 10px; color: #00bcd4; }
         .dossier-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; border: 1px solid #bc42f5; margin-bottom: 15px; }
 
+        /* === НОВЫЙ ДИЗАЙН ЧАТА И АВАТАРОК === */
         .chat-container { flex: 1; width: 100%; background: #05010a; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; }
         
@@ -112,6 +115,7 @@
         .msg-user { background: #2d164d; border-bottom-right-radius: 2px; }
         .msg-char { background: #1a0b2e; border-bottom-left-radius: 2px; border: 1px solid #bc42f5; width: 100%; }
         
+        /* ПАНЕЛЬ ДЕЙСТВИЙ И СТАТИСТИКИ ПОД СООБЩЕНИЕМ */
         .msg-bottom-bar { display: flex; align-items: center; justify-content: space-between; background: #11081d; padding: 6px 10px; border-radius: 10px; margin-top: 6px; border: 1px solid #2d164d; width: 100%; flex-wrap: wrap; gap: 5px;}
         .msg-stats { display: flex; gap: 10px; font-size: 11px; color: #aaa; font-weight: bold; }
         .msg-actions { display: flex; gap: 15px; font-size: 16px; color: #888; }
@@ -827,7 +831,6 @@
             }
         });
 
-        // ДВИЖОК РЕАЛЬНОГО ВРЕМЕНИ
         setInterval(async () => {
             const uid = getUid(); if(!uid || document.getElementById('loading').style.display !== 'none') return;
             try {
@@ -843,7 +846,6 @@
             } catch(e) {}
         }, 3000);
 
-        // ЗАГРУЗКА АВАТАРКИ В ПАМЯТЬ
         function updateUserAvatar(input) {
             if (input.files && input.files[0]) {
                 const r = new FileReader();
@@ -858,7 +860,6 @@
             }
         }
 
-        // ИНИЦИАЛИЗАЦИЯ И ЛИМИТЫ
         async function init() {
             setTimeout(() => {
                 const loader = document.getElementById('loading');
@@ -962,7 +963,6 @@
         
         BackButton.onClick(() => back()); function closeChat() { back(); }
 
-        // ================= ЧАТЫ И ЛОГИКА =================
         async function openChatList() {
             if (allChars.length === 0) await renderUserChars(); 
             const uid = getUid();
@@ -1026,7 +1026,7 @@
             renderChatMessages(); openPanel('p-chat');
         }
 
-        // ================= ИДЕАЛЬНЫЙ РЕНДЕР ЧАТА (АВАТАРКИ И ПАНЕЛЬ ТОЛЬКО СНИЗУ) =================
+        // ================= ИДЕАЛЬНЫЙ РЕНДЕР ЧАТА =================
         function renderChatMessages() {
             const uid = getUid(); 
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
@@ -1037,7 +1037,7 @@
             const char = allChars.find(c => c.id == activeCharId);
             let cAvatar = char ? char.photo : "";
 
-            // Ищем индекс последнего сообщения от персонажа, чтобы повесить кнопки только на него
+            // ИЩЕМ ИНДЕКС ПОСЛЕДНЕГО СООБЩЕНИЯ ПЕРСОНАЖА ДЛЯ КНОПОК
             let lastCharIdx = -1;
             for(let i = msgs.length - 1; i >= 0; i--) {
                 if(msgs[i].sender === 'char') { lastCharIdx = i; break; }
@@ -1057,9 +1057,9 @@
                         </div>`;
                     } else {
                         let stats = m.stats || {love: 10, trust: 15, inf: 5, horny: 0};
-                        
                         let actionBar = '';
-                        // Если это последнее сообщение бота - показываем панель
+                        
+                        // РЕНДЕРИМ КНОПКИ ТОЛЬКО ПОД ПОСЛЕДНИМ ОТВЕТОМ
                         if (index === lastCharIdx) {
                             actionBar = `
                             <div class="msg-bottom-bar">
@@ -1087,7 +1087,7 @@
             setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
-        // ================= КНОПКИ ДЕЙСТВИЙ (АНИМЕ API И ВШИТИЕ В ТЕКСТ) =================
+        // ================= КНОПКИ ДЕЙСТВИЙ (СТУЧАТСЯ НА НАШ СЕРВЕР) =================
         async function actionReroll(index) {
             if(isBotTyping) return;
             const uid = getUid(); if(uid !== OID && userData.shards < 1) return tg.showAlert("Нужен 1 🌙!");
@@ -1119,18 +1119,27 @@
             
             if(uid !== OID && userData.shards < cost) return tg.showAlert(`Нужно ${cost} 🌙!`);
             
-            tg.showConfirm(`Сгенерировать аниме фото? Цена: ${cost} 🌙`, async (yes) => {
+            tg.showConfirm(`ИИ нарисует фото по тексту. Цена: ${cost} 🌙`, async (yes) => {
                 if(yes) {
                     if(uid !== OID) updateBalanceUI(userData.shards - cost);
-                    tg.showAlert("Генерирую аниме-арт... ⏳");
+                    tg.showAlert("Генерирую ИИ-фото... ⏳");
                     try {
-                        const res = await fetch('https://api.waifu.pics/sfw/waifu');
-                        const data = await res.json();
                         let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-                        allChats[activeCharId][index].text += `<br><br><img src="${data.url}" style="width:100%; border-radius:10px; margin-top:5px; border:1px solid #bc42f5;">`;
-                        localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                        renderChatMessages();
-                    } catch(e) { tg.showAlert("Ошибка API картинок!"); }
+                        let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, ''); 
+                        
+                        // СТУЧИМСЯ НА СЕРВЕР, ПЕРЕДАЕМ АЙДИ ПЕРСА И ТЕКСТ
+                        const res = await fetch('/api/generate-media', {
+                            method: 'POST', headers: getAuthHeaders(),
+                            body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'photo' })
+                        });
+                        const data = await res.json();
+                        
+                        if(data.url) {
+                            allChats[activeCharId][index].text += `<br><br><img src="${data.url}" style="width:100%; border-radius:10px; margin-top:5px; border:1px solid #bc42f5;">`;
+                            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                            renderChatMessages();
+                        } else { tg.showAlert(data.error || "Ошибка генерации"); }
+                    } catch(e) { tg.showAlert("Ошибка связи с сервером!"); }
                 }
             });
         }
@@ -1142,18 +1151,27 @@
             if(sub === 'FREE' && uid !== OID) return tg.showAlert("Кружок доступен только платникам!");
             if(uid !== OID && userData.shards < 5) return tg.showAlert(`Нужно 5 🌙!`);
             
-            tg.showConfirm(`Записать кружок? Цена: 5 🌙`, async (yes) => {
+            tg.showConfirm(`ИИ запишет кружок. Цена: 5 🌙`, async (yes) => {
                 if(yes) {
                     if(uid !== OID) updateBalanceUI(userData.shards - 5);
-                    tg.showAlert("Записываю кружок... ⏳");
+                    tg.showAlert("ИИ генерирует кружок... ⏳");
                     try {
-                        const res = await fetch('https://api.waifu.pics/sfw/dance');
-                        const data = await res.json();
                         let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-                        allChats[activeCharId][index].text += `<br><br><div style="width:120px; height:120px; border-radius:50%; background:#bc42f5 url('${data.url}') center/cover; border:3px solid #bc42f5; margin:10px auto; box-shadow: 0 0 10px #bc42f5;"></div>`;
-                        localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                        renderChatMessages();
-                    } catch(e) { tg.showAlert("Ошибка генерации кружочка!"); }
+                        let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, '');
+                        
+                        // СТУЧИМСЯ НА СЕРВЕР
+                        const res = await fetch('/api/generate-media', {
+                            method: 'POST', headers: getAuthHeaders(),
+                            body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'circle' })
+                        });
+                        const data = await res.json();
+                        
+                        if(data.url) {
+                            allChats[activeCharId][index].text += `<br><br><div style="width:120px; height:120px; border-radius:50%; background:#bc42f5 url('${data.url}') center/cover; border:3px solid #bc42f5; margin:10px auto; box-shadow: 0 0 10px #bc42f5; animation: pulseMoon 2s infinite;"></div>`;
+                            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                            renderChatMessages();
+                        } else { tg.showAlert(data.error || "Ошибка генерации"); }
+                    } catch(e) { tg.showAlert("Ошибка связи с сервером!"); }
                 }
             });
         }
