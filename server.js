@@ -469,89 +469,81 @@ app.post('/api/admin/manage-sub', checkTgAuth, async (req, res) => {
 });
 
 app.post('/api/admin/create-char', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Character(req.body.charData).save(); res.json({ message: "Персонаж добавлен!" }); });
-
 app.post('/api/admin/delete-char', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Character.findOneAndDelete({ id: req.body.char_id }); res.json({ message: "Удален" }); });
 
+// ================= ИСПРАВЛЕННОЕ СОЗДАНИЕ ПРОМОКОДОВ (ЗАЩИТА ОТ ДУБЛЕЙ) =================
 app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => { 
     if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); 
     
     let { code, reward, hours } = req.body.promoData;
-    hours = Number(hours) || 1;
-    if (hours < 1) hours = 1;
+    hours = Number(hours) || 1; 
+    if (hours < 1) hours = 1; 
     if (hours > 3) hours = 3;
 
-    const emojis = ["🎁", "🔥", "💎", "🚀", "⚡️", "🌙", "✨", "🎉"];
-    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-    const expiresAt = Date.now() + (hours * 60 * 60 * 1000); 
-    
-    let hourText = hours === 1 ? "1 Час" : (hours === 3 ? "3 Часа" : "2 Часа");
-    const text = `${randomEmoji}\nПромокод «<code>${code}</code>» даёт ${reward} осколков\nUPD: ${hourText}`;
-
     try {
+        // Сначала проверяем, есть ли уже такой код в базе. Если есть - сразу отбиваем запрос.
+        const exists = await Promo.findOne({ code });
+        if (exists) return res.status(400).json({ error: "Такой промокод уже существует!" });
+
+        const emojis = ["🎁", "🔥", "💎", "🚀", "⚡️", "🌙", "✨", "🎉"];
+        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+        const expiresAt = Date.now() + (hours * 60 * 60 * 1000); 
+
+        // Записываем код в базу СРАЗУ, чтобы второй случайный клик не прошел
+        const newPromo = new Promo({ code, reward, expiresAt, emoji: randomEmoji });
+        await newPromo.save();
+        
+        // Только если код записался в базу, отправляем сообщение в группу
+        let hourText = hours === 1 ? "1 Час" : (hours === 3 ? "3 Часа" : "2 Часа");
+        const text = `${randomEmoji}\nПромокод «<code>${code}</code>» даёт ${reward} осколков\nUPD: ${hourText}`;
+
         const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: "@Anime_ai_18", text: text, parse_mode: 'HTML' })
         });
+        
         const tgData = await tgRes.json();
         
-        let messageId = 0;
-        if (tgData.ok) { messageId = tgData.result.message_id; }
+        // Если сообщение отправлено успешно - сохраняем его айди для удаления потом
+        if (tgData.ok) { 
+            newPromo.messageId = tgData.result.message_id; 
+            await newPromo.save();
+        }
 
-        await new Promo({ code, reward, expiresAt, messageId, emoji: randomEmoji }).save(); 
         res.json({ message: "Промо создан и отправлен в канал!" });
     } catch(e) {
+        if (e.code === 11000) return res.status(400).json({ error: "Промокод уже существует!" });
         res.status(500).json({ error: "Ошибка при отправке в канал" });
     }
 });
 
 app.post('/api/admin/delete-promo', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Promo.findOneAndDelete({ code: req.body.code }); res.json({ message: "Промо удален" }); });
-
 app.post('/api/admin/create-task', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Task(req.body.taskData).save(); res.json({ message: "Задание добавлено" }); });
-
 app.post('/api/admin/delete-task', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Task.findOneAndDelete({ id: req.body.task_id }); res.json({ message: "Задание удалено" }); });
+app.post('/api/owner/set-admin', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" }); await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true }); if (req.body.status) await sendTgMessage(req.body.target_id, `Администратор сделал вас админом`); else await sendTgMessage(req.body.target_id, `Администратор забрал у вас права админа`); res.json({ message: "Статус обновлен" }); });
+app.post('/api/owner/set-price', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" }); await Price.findOneAndUpdate({ item_id: req.body.item_id }, { stars: Number(req.body.stars), ton: Number(req.body.ton) }, { upsert: true }); res.json({ message: "Прайс-лист успешно обновлен!" }); });
 
-app.post('/api/owner/set-admin', checkTgAuth, async (req, res) => {
-    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
-    await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true });
-    if (req.body.status) await sendTgMessage(req.body.target_id, `Администратор сделал вас админом`); else await sendTgMessage(req.body.target_id, `Администратор забрал у вас права админа`);
-    res.json({ message: "Статус обновлен" });
-});
-
-app.post('/api/owner/set-price', checkTgAuth, async (req, res) => {
-    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
-    const { item_id, stars, ton } = req.body;
-    await Price.findOneAndUpdate({ item_id }, { stars: Number(stars), ton: Number(ton) }, { upsert: true });
-    res.json({ message: "Прайс-лист успешно обновлен!" });
-});
-
-
-// ================= API: УМНАЯ ГЕНЕРАЦИЯ (GEMINI + POLLINATIONS) =================
+// ================= API: УМНАЯ ГЕНЕРАЦИЯ МЕДИА БЕЗ КЛЮЧЕЙ =================
 app.post('/api/generate-media', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message_text, type } = req.body;
         
-        // 1. Достаем перса из базы
+        // 1. Берем перса из БД
         const char = await Character.findOne({ id: char_id });
         if (!char) return res.status(404).json({ error: "Персонаж не найден" });
 
-        // 2. Чистим текст сообщения
+        // 2. Чистим текст
         const safeText = (message_text || "").replace(/<[^>]*>?/gm, '').substring(0, 150);
 
-        // 3. ПРОСИМ GEMINI СОЗДАТЬ ИДЕАЛЬНЫЙ АНГЛИЙСКИЙ ПРОМПТ ПО ОПИСАНИЮ
-        let promptInstruction = `Create a short, highly detailed stable diffusion prompt in English for an anime character based on this data:
-        Character Name: ${char.name}
-        Appearance: ${char.desc}
-        Current Action/Scenario: ${safeText}
-        Only output the english tags separated by commas. No intro, no outro. Include tags: masterpiece, best quality, highly detailed anime style.`;
-
-        if (type === 'circle') {
-            promptInstruction += " Also add these exact tags: closeup face portrait, looking directly at viewer, speaking, dynamic angle.";
-        }
-
-        // Дефолтный промпт на случай, если Gemini тупанет
-        let finalEngPrompt = `masterpiece, best quality, anime style, 1girl/1boy, ${char.name}, ${char.desc}, ${safeText}`;
+        // 3. Формируем железобетонный промпт
+        let finalEngPrompt = `masterpiece, best quality, anime style, 1girl/1boy, solo, ${char.name}, ${char.desc}, doing this: ${safeText}`;
+        if (type === 'circle') finalEngPrompt += ", closeup face portrait, looking directly at viewer, speaking";
 
         try {
+            // Просим Gemini перевести на инглиш и сделать промпт идеальным
+            let promptInstruction = `Translate and enhance this to a short Stable Diffusion prompt (english tags only, separated by commas, no intro/outro). Character: ${char.name}. Description: ${char.desc}. Action: ${safeText}. Add tags: masterpiece, best quality, highly detailed anime style.`;
+            if(type === 'circle') promptInstruction += " Add tags: closeup face portrait, looking at viewer.";
+
             const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: promptInstruction }] }] })
@@ -560,28 +552,19 @@ app.post('/api/generate-media', checkTgAuth, async (req, res) => {
             if (aiData.candidates && aiData.candidates[0]) {
                 finalEngPrompt = aiData.candidates[0].content.parts[0].text.trim();
             }
-        } catch(e) { 
-            console.log("Gemini prompt fail, using default."); 
-        }
+        } catch(e) { console.log("Gemini prompt fail, using default."); }
 
-        // 4. ОТПРАВЛЯЕМ ПРОМПТ В БЕСПЛАТНУЮ НЕЙРОСЕТЬ (РАБОТАЕТ ВСЕГДА)
+        // 4. Генерируем ссылку в бесплатной нейросети (РАБОТАЕТ МГНОВЕННО, БЕЗ СКАЧИВАНИЯ)
         const seed = Math.floor(Math.random() * 10000000);
         const encodedPrompt = encodeURIComponent(finalEngPrompt);
         const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&nologo=true&seed=${seed}&model=anime`;
 
-        const imgRes = await fetch(imageUrl);
-        if (!imgRes.ok) throw new Error("Сервер картинок перегружен");
-
-        const arrayBuffer = await imgRes.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const base64 = buffer.toString('base64');
-
-        // 5. Возвращаем картинку прямо в чат
-        res.json({ url: `data:image/jpeg;base64,${base64}` });
+        // Сразу отдаем ссылку фронтенду! 
+        res.json({ url: imageUrl });
 
     } catch (e) {
         console.error("Ошибка генерации:", e.message);
-        res.status(500).json({ error: "Ошибка генерации фото: " + e.message });
+        res.status(500).json({ error: "Сервер генерации недоступен" });
     }
 });
 
