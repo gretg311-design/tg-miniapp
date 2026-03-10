@@ -191,7 +191,7 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (С НОВОЙ ЯЗЫКОВОЙ ЛОГИКОЙ) =================
+// ================= API: ЧАТ =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
@@ -524,38 +524,49 @@ app.post('/api/owner/set-price', checkTgAuth, async (req, res) => {
     res.json({ message: "Прайс-лист успешно обновлен!" });
 });
 
-// ================= API: ГЕНЕРАЦИЯ МЕДИА (КОНТЕКСТНАЯ) =================
+
+// ================= API: ГЕНЕРАЦИЯ МЕДИА (БЕЗ КЛЮЧЕЙ И РЕГИСТРАЦИЙ) =================
 app.post('/api/generate-media', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message_text, type } = req.body;
-        const uid = req.tg_user_id;
-
-        // 1. Находим персонажа, чтобы получить его описание
+        
         const char = await Character.findOne({ id: char_id });
         if (!char) return res.status(404).json({ error: "Персонаж не найден" });
 
-        // 2. Формируем контекстный промпт для аниме-генератора
-        // Мы берем описание из БД + текст сообщения, чтобы картинка соответствовала ситуации
-        const contextPrompt = `${char.name}, anime style, ${char.desc}, scenario: ${message_text}`;
-        
-        let mediaUrl = "";
-
         if (type === 'photo') {
-            // Используем API Waifu.pics для базовой аниме-генерации (SFW/NSFW по контексту)
-            // В идеале здесь подключается Stable Diffusion API с промптом contextPrompt
-            const response = await fetch('https://api.waifu.pics/sfw/waifu');
-            const data = await response.json();
-            mediaUrl = data.url;
+            // Формируем промпт строго под перса
+            // Убираем спецсимволы из текста юзера чтобы не сломать URL
+            const safeText = (message_text || "").replace(/[^a-zA-Zа-яА-Я0-9\s,\.]/g, '').substring(0, 100);
+            
+            // Железобетонный промпт с именем персонажа и описанием сцены
+            const prompt = `Masterpiece, best quality, anime style, highly detailed, ${char.name}, ${char.desc}, scenario: ${safeText}`;
+            const encodedPrompt = encodeURIComponent(prompt);
+            
+            // Добавляем случайный seed чтобы фото всегда были разными
+            const seed = Math.floor(Math.random() * 10000000);
+            
+            // Используем полностью бесплатный, открытый ИИ без API ключей
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&nologo=true&seed=${seed}&model=anime`;
+
+            // Скачиваем на сервер и конвертируем в Base64, чтобы намертво вшить в чат
+            const imgRes = await fetch(imageUrl);
+            if (!imgRes.ok) throw new Error("API генерации не ответило");
+            
+            const arrayBuffer = await imgRes.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const base64 = buffer.toString('base64');
+            
+            res.json({ url: `data:image/jpeg;base64,${base64}` });
+
         } else if (type === 'circle') {
-            // Для кружочков используем динамичные аниме-гифки
+            // Для кружочков (гифки/видео) пока оставляем waifu, так как открытых ИИ генераторов видео без ключей не существует
             const response = await fetch('https://api.waifu.pics/sfw/dance');
             const data = await response.json();
-            mediaUrl = data.url;
+            res.json({ url: data.url });
         }
-
-        res.json({ url: mediaUrl });
     } catch (e) {
-        res.status(500).json({ error: "Ошибка генерации: " + e.message });
+        console.error("Ошибка генерации:", e.message);
+        res.status(500).json({ error: "Ошибка генерации фото: " + e.message });
     }
 });
 
