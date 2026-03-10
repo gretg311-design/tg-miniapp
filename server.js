@@ -18,7 +18,7 @@ const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
 
 // !!! СЮДА ВСТАВЬ СВОЙ КЛЮЧ ОТ HUGGING FACE !!!
-const HF_TOKEN = "ВСТАВЬ_СЮДА_ТОКЕН_hf_..."; 
+const HF_TOKEN = "hf=RxsMhXAUKtkAdRuQdkBnluRRIlyUqxtrIk"; 
 
 const sendTgMessage = async (tg_id, text) => {
     try {
