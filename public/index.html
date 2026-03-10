@@ -16,12 +16,12 @@
         .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
         .app-version { font-size: 10px; color: #444; text-align: center; margin-top: 15px; font-family: monospace; }
 
-        /* ДОБАВИЛИ ОТСТУП СВЕРХУ 65px */
-        #app { padding: 65px 20px 40px 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; }
-        .u-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+        /* ОПУСТИЛИ ВСЁ ВНИЗ НА 85px ЧТОБЫ НЕ ПЕРЕКРЫВАЛОСЬ ШАПКОЙ ТГ */
+        #app { padding: 85px 20px 40px 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; }
+        .u-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         
         @keyframes shimmerNick { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .nick-base { font-size: 22px; font-weight: 900; transition: all 0.3s ease; }
+        .nick-base { font-size: 22px; font-weight: 900; transition: all 0.3s ease; line-height: 1; }
         .nick-ultra { background: linear-gradient(90deg, #bc42f5, #00bcd4, #bc42f5, #00bcd4); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 2.5s infinite linear; filter: drop-shadow(0px 0px 8px rgba(188,66,245,0.7)); }
         .nick-vip { background: linear-gradient(90deg, #FFD700, #F5F5DC, #FFAA00, #F5F5DC); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerNick 3s infinite linear; filter: drop-shadow(0px 0px 6px rgba(255,215,0,0.6)); }
         .nick-pro { color: #00bcd4; text-shadow: 0 0 5px rgba(0,188,212,0.5), 0 0 10px rgba(0,188,212,0.8); letter-spacing: 1px; }
@@ -52,8 +52,8 @@
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* ДОБАВИЛИ ОТСТУП СВЕРХУ 65px ВО ВСЕХ МЕНЮ */
-        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 65px 20px 20px 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        /* ОПУСТИЛИ ВСЕ ВСПЛЫВАЮЩИЕ ОКНА НА 85px */
+        .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 85px 20px 20px 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
@@ -62,7 +62,7 @@
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 20px; }
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
 
-        .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a0b2e; font-size: 14px; }
+        .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a0b2e; font-size: 14px; align-items: center; }
         .p-label { color: #888; } .p-val { color: #fff; font-weight: bold; }
         .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
         
@@ -96,11 +96,31 @@
         .char-card-tags { font-size: 10px; color: #00bcd4; }
         .dossier-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; border: 1px solid #bc42f5; margin-bottom: 15px; }
 
+        /* === НОВЫЙ ДИЗАЙН ЧАТА И АВАТАРОК === */
         .chat-container { flex: 1; width: 100%; background: #05010a; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        .msg-box { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
-        .msg-user { background: #2d164d; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .msg-char { background: #1a0b2e; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #bc42f5; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .chat-msg-row { display: flex; align-items: flex-end; width: 100%; }
+        .chat-msg-row.user-row { justify-content: flex-end; }
+        .chat-msg-row.char-row { justify-content: flex-start; }
+        
+        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .user-row .msg-avatar { margin-left: 10px; border: 1px solid #2d164d; }
+        .char-row .msg-avatar { margin-right: 10px; border: 1px solid #bc42f5; }
+        
+        .msg-bot-wrapper { display: flex; flex-direction: column; max-width: 80%; align-items: flex-start; }
+        .msg-user-wrapper { display: flex; flex-direction: column; max-width: 80%; align-items: flex-end; }
+
+        .msg-box { padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .msg-user { background: #2d164d; border-bottom-right-radius: 2px; }
+        .msg-char { background: #1a0b2e; border-bottom-left-radius: 2px; border: 1px solid #bc42f5; width: 100%; }
+        
+        /* ПАНЕЛЬ ДЕЙСТВИЙ И СТАТИСТИКИ ПОД СООБЩЕНИЕМ */
+        .msg-bottom-bar { display: flex; align-items: center; justify-content: space-between; background: #11081d; padding: 6px 10px; border-radius: 10px; margin-top: 6px; border: 1px solid #2d164d; width: 100%; flex-wrap: wrap; gap: 5px;}
+        .msg-stats { display: flex; gap: 10px; font-size: 11px; color: #aaa; font-weight: bold; }
+        .msg-actions { display: flex; gap: 15px; font-size: 16px; color: #888; }
+        .msg-actions span { cursor: pointer; transition: transform 0.1s, color 0.1s; }
+        .msg-actions span:active { transform: scale(0.8); color: #fff; }
         
         .chat-input-area { display: flex; gap: 10px; padding: 10px; background: #0d041a; border-top: 1px solid #2d164d; align-items: flex-end; }
         .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; resize: none; overflow-y: auto; max-height: 120px; font-family: inherit; line-height: 1.4; word-wrap: break-word; }
@@ -139,10 +159,13 @@
 
     <div id="app">
         <div class="u-header">
-            <div style="display:flex; flex-direction:column; align-items:flex-start;">
-                <div id="u-name" class="nick-base nick-free">...</div>
-                <div id="u-badge" style="display:none;"></div>
-                <div style="font-size:12px; color:#555; margin-top: 3px;">ID: <span id="u-id-head">0</span></div>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <img id="main-u-avatar" src="https://i.ibb.co/4pDNDk1/avatar.png" style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid #bc42f5; object-fit: cover;">
+                <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                    <div id="u-name" class="nick-base nick-free">...</div>
+                    <div id="u-badge" style="display:none;"></div>
+                    <div style="font-size:12px; color:#555; margin-top: 3px;">ID: <span id="u-id-head">0</span></div>
+                </div>
             </div>
             <div style="font-size: 22px; font-weight: bold;">🌙 <span id="shards-balance">0</span></div>
         </div>
@@ -171,9 +194,12 @@
         <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
 
-    <div id="p-chat" class="overlay" style="padding: 0;">
-        <div style="width: 100%; background: #0d041a; padding: 55px 15px 15px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d164d;">
-            <div style="font-weight: bold; color: #bc42f5; font-size: 18px;" id="chat-char-name">Имя Персонажа</div>
+    <div id="p-chat" class="overlay" style="padding: 85px 0 0 0;">
+        <div style="width: 100%; background: #0d041a; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d164d;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img id="chat-header-avatar" src="" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid #bc42f5; object-fit: cover;">
+                <div style="font-weight: bold; color: #bc42f5; font-size: 18px;" id="chat-char-name">Имя Персонажа</div>
+            </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div style="font-weight: bold; color: #fff; font-size: 16px;">🌙 <span id="chat-shards-balance">0</span></div>
                 <div style="color: #888; font-size: 28px; cursor: pointer; padding: 0 5px; line-height: 1;" onclick="closeChat()">×</div>
@@ -342,7 +368,8 @@
     
     <div id="p-profile" class="overlay">
         <h2 style="color:#bc42f5" data-i18n="h_prof">ПРОФИЛЬ</h2>
-        <div class="info-card">
+        <div class="info-card" style="text-align: center;">
+            <img id="prof-u-avatar" src="https://i.ibb.co/4pDNDk1/avatar.png" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #bc42f5; object-fit: cover; margin-bottom: 15px;">
             <div class="p-row"><span class="p-label" data-i18n="pr_nick">Ник:</span> <span class="p-val" id="prof-nick">...</span></div>
             <div class="p-row"><span class="p-label" data-i18n="pr_id">Айди юз:</span> <span class="p-val" id="prof-id">0</span></div>
             <div class="p-row"><span class="p-label" data-i18n="pr_sub">Подписка:</span> <span class="p-val" id="prof-sub">FREE</span></div>
@@ -392,10 +419,14 @@
 
     <div id="p-set-prof" class="overlay">
         <h2 style="color:#0A84FF" data-i18n="s_menu_prof">Настроить профиль</h2>
-        <div class="info-card">
-            <span class="s-label" data-i18n="set_nick">Ник в приложении</span>
+        <div class="info-card" style="text-align: center;">
+            <img id="set-u-avatar-preview" src="https://i.ibb.co/4pDNDk1/avatar.png" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #0A84FF; object-fit: cover; margin-bottom: 10px;">
+            <input type="file" id="set-u-avatar-file" accept="image/*" style="display:none;" onchange="updateUserAvatar(this)">
+            <div class="term-btn" style="border-color:#0A84FF; font-size:12px; padding:10px; margin-bottom:20px;" onclick="document.getElementById('set-u-avatar-file').click()">ЗАГРУЗИТЬ ФОТО</div>
+
+            <span class="s-label" data-i18n="set_nick" style="text-align: left;">Ник в приложении</span>
             <input type="text" id="set-nick" class="term-in" placeholder="..." oninput="updateLiveNick(this.value)">
-            <span class="s-label" data-i18n="set_gender">Ваш пол</span>
+            <span class="s-label" data-i18n="set_gender" style="text-align: left;">Ваш пол</span>
             <div class="gender-box">
                 <div class="gender-btn active" id="g-m" onclick="setGender('m')" data-i18n="g_m">Мужчина</div>
                 <div class="gender-btn" id="g-f" onclick="setGender('f')" data-i18n="g_f">Женщина</div>
@@ -678,7 +709,8 @@
                 d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по",
                 s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код",
                 dos_age: "Возраст:", dos_gender: "Пол:",
-                s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk"
+                s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk",
+                c_love: "Влюбленность", c_trust: "Доверие", c_inf: "Влияние", c_horny: "Возбуждение"
             },
             uk: {
                 m_chats: "Чати", m_chars: "Персонажі", m_daily: "Щоденна", m_tasks: "Завдання", m_shop: "Магазин", m_promos: "Промокоди", m_prof: "Профіль", m_set: "Налаштування", m_adm: "Адмінка", m_con: "Консоль",
@@ -689,7 +721,8 @@
                 d_sub: "Нагорода залежить від підписки. Заходзь 7 днів поспіль для бонусу x2!", d_today: "Ваша нагорода сьогодні:", t_invite: "ЗАПРОСИ ДРУГА", t_invite_desc: "Ти і твій друг отримаєте по",
                 s_pay_info: "Оплата через Telegram Stars або CryptoBot (TON)", sh_subs: "ПІДПИСКИ (30 ДНІВ)", sd_prem: "50 осколків щодня<br>x2 бонус за стрік 7 днів", sd_pro: "150 осколків щодня<br>x2 бонус за стрік 7 днів", sd_vip: "250 осколків щодня<br>x2 бонус за стрік 7 днів", sd_ultra: "500 осколків щодня<br>x2 бонус за стрік 7 днів", sh_shards: "ОСКОЛКИ МІСЯЦЯ", s_shards: "Осколків", p_enter: "Введіть секретний код",
                 dos_age: "Вік:", dos_gender: "Стать:",
-                s_menu_prof: "Налаштувати профіль", s_menu_lang: "Змінити мову", s_menu_ai: "Налаштування ШІ", s_menu_priv: "Політика конфіденційності", s_menu_sup: "Технічна підтримка", s_menu_apk: "Додаток .apk"
+                s_menu_prof: "Налаштувати профіль", s_menu_lang: "Змінити мову", s_menu_ai: "Налаштування ШІ", s_menu_priv: "Політика конфіденційності", s_menu_sup: "Технічна підтримка", s_menu_apk: "Додаток .apk",
+                c_love: "Закоханість", c_trust: "Довіра", c_inf: "Вплив", c_horny: "Збудження"
             },
             en: {
                 m_chats: "Chats", m_chars: "Characters", m_daily: "Daily", m_tasks: "Tasks", m_shop: "Shop", m_promos: "Promocodes", m_prof: "Profile", m_set: "Settings", m_adm: "Admin", m_con: "Console",
@@ -700,7 +733,8 @@
                 d_sub: "Reward depends on subscription. Log in 7 days for x2 bonus!", d_today: "Your reward today:", t_invite: "INVITE A FRIEND", t_invite_desc: "You and your friend get",
                 s_pay_info: "Pay via Telegram Stars or CryptoBot (TON)", sh_subs: "SUBSCRIPTIONS (30 DAYS)", sd_prem: "50 shards daily<br>x2 bonus for 7-day streak", sd_pro: "150 shards daily<br>x2 bonus for 7-day streak", sd_vip: "250 shards daily<br>x2 bonus for 7-day streak", sd_ultra: "500 shards daily<br>x2 bonus for 7-day streak", sh_shards: "MOON SHARDS", s_shards: "Shards", p_enter: "Enter secret code",
                 dos_age: "Age:", dos_gender: "Gender:",
-                s_menu_prof: "Edit Profile", s_menu_lang: "Change Language", s_menu_ai: "AI Settings", s_menu_priv: "Privacy Policy", s_menu_sup: "Technical Support", s_menu_apk: "App .apk"
+                s_menu_prof: "Edit Profile", s_menu_lang: "Change Language", s_menu_ai: "AI Settings", s_menu_priv: "Privacy Policy", s_menu_sup: "Technical Support", s_menu_apk: "App .apk",
+                c_love: "Love", c_trust: "Trust", c_inf: "Influence", c_horny: "Arousal"
             },
             be: {
                 m_chats: "Чаты", m_chars: "Персанажы", m_daily: "Штодзёнка", m_tasks: "Заданні", m_shop: "Крама", m_promos: "Прамакоды", m_prof: "Профіль", m_set: "Налады", m_adm: "Адмінка", m_con: "Кансоль",
@@ -711,7 +745,8 @@
                 d_sub: "Узнагарода залежыць ад падпіскі. Заходзь 7 дзён запар для бонусу x2!", d_today: "Ваша ўзнагарода сёння:", t_invite: "ЗАПРАСІ СЯБРА", t_invite_desc: "Ты і твой сябар атрымаеце па",
                 s_pay_info: "Аплата праз Telegram Stars або CryptoBot (TON)", sh_subs: "ПАДПІСКІ (30 ДЗЁН)", sd_prem: "50 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_pro: "150 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_vip: "250 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sd_ultra: "500 аскепкаў штодня<br>x2 бонус за стрык 7 дзён", sh_shards: "АСКЕПКІ МЕСЯЦА", s_shards: "Аскепкаў", p_enter: "Увядзіце сакрэтны код",
                 dos_age: "Узрост:", dos_gender: "Пол:",
-                s_menu_prof: "Наладзіць профіль", s_menu_lang: "Змяніць мову", s_menu_ai: "Налады ШІ", s_menu_priv: "Палітыка прыватнасці", s_menu_sup: "Тэхнічная падтрымка", s_menu_apk: "Дадатак .apk"
+                s_menu_prof: "Наладзіць профіль", s_menu_lang: "Змяніць мову", s_menu_ai: "Налады ШІ", s_menu_priv: "Палітыка прыватнасці", s_menu_sup: "Тэхнічная падтрымка", s_menu_apk: "Дадатак .apk",
+                c_love: "Закаханасць", c_trust: "Давер", c_inf: "Уплыў", c_horny: "Узбуджэнне"
             }
         };
 
@@ -732,32 +767,22 @@
             if (!text || targetLang === 'ru') return text; 
             const cacheKey = text + '_' + targetLang;
             if (transCache[cacheKey]) return transCache[cacheKey];
-
             try {
                 const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                let translatedText = '';
-                data[0].forEach(item => { translatedText += item[0]; });
-                transCache[cacheKey] = translatedText; 
-                return translatedText;
-            } catch (e) {
-                return text; 
-            }
+                const res = await fetch(url); const data = await res.json();
+                let translatedText = ''; data[0].forEach(item => { translatedText += item[0]; });
+                transCache[cacheKey] = translatedText; return translatedText;
+            } catch (e) { return text; }
         }
 
         async function setLang(lang) {
             currentLang = lang;
             localStorage.setItem('m_lang_' + getUid(), lang);
-            
             document.querySelectorAll('.lang-btn').forEach(btn => { btn.style.borderColor = '#2d164d'; btn.style.opacity = '1'; });
             const activeBtn = document.getElementById('lang-' + lang);
             if (activeBtn) activeBtn.style.borderColor = '#bc42f5';
-            
             document.querySelector('[onclick="devLang(\'Deutsch\')"]').style.opacity = '0.4'; 
-
             applyTranslations();
-
             if(document.getElementById('p-user-chars').style.display === 'flex') await renderUserChars();
             if(document.getElementById('p-char-dossier').style.display === 'flex') await openDossier(activeCharId);
             if(document.getElementById('p-user-tasks').style.display === 'flex') await renderUserTasks();
@@ -768,28 +793,17 @@
             const t = translations[currentLang];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (t[key]) {
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key];
-                    else el.innerHTML = t[key];
-                }
+                if (t[key]) { if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key]; else el.innerHTML = t[key]; }
             });
-
-            updateLen(document.getElementById('len-slider').value, true);
-            updateSex(document.getElementById('sex-slider').value, true);
-            
+            updateLen(document.getElementById('len-slider').value, true); updateSex(document.getElementById('sex-slider').value, true);
             let lS = document.getElementById('len-slider');
             if(lS) {
-                let maxLen = parseInt(lS.max);
-                let minLen = parseInt(lS.min);
+                let maxLen = parseInt(lS.max); let minLen = parseInt(lS.min);
                 let lText = currentLang === 'uk' ? "Твій ліміт" : currentLang === 'en' ? "Your limit" : currentLang === 'be' ? "Твой ліміт" : "Твой лимит";
                 let wText = currentLang === 'uk' ? "слів" : currentLang === 'en' ? "words" : currentLang === 'be' ? "слоў" : "слов";
-                if(minLen === maxLen) {
-                    document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`;
-                } else {
-                    document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): от ${minLen} до ${maxLen} ${wText}`;
-                }
+                if(minLen === maxLen) { document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`; } 
+                else { document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): от ${minLen} до ${maxLen} ${wText}`; }
             }
-
             const chatBox = document.getElementById('chat-messages-box');
             if(chatBox && (chatBox.innerHTML.includes('1 ') || chatBox.innerHTML.includes('...'))) {
                 let emptyT = currentLang === 'uk' ? "Почніть діалог" : currentLang === 'en' ? "Start conversation" : currentLang === 'be' ? "Пачніце дыялог" : "Начните диалог";
@@ -803,451 +817,171 @@
 
         function updateBalanceUI(val) {
             if(getUid() === OID) {
-                document.getElementById('shards-balance').innerText = "∞";
-                document.getElementById('prof-shards').innerText = "∞";
-                let cb = document.getElementById('chat-shards-balance');
-                if(cb) cb.innerText = "∞";
-                return;
+                document.getElementById('shards-balance').innerText = "∞"; document.getElementById('prof-shards').innerText = "∞";
+                let cb = document.getElementById('chat-shards-balance'); if(cb) cb.innerText = "∞"; return;
             }
-            document.getElementById('shards-balance').innerText = val;
-            document.getElementById('prof-shards').innerText = val;
-            let cb = document.getElementById('chat-shards-balance');
-            if(cb) cb.innerText = val;
-            userData.shards = val;
+            document.getElementById('shards-balance').innerText = val; document.getElementById('prof-shards').innerText = val;
+            let cb = document.getElementById('chat-shards-balance'); if(cb) cb.innerText = val; userData.shards = val;
         }
 
         function applyNickStyle(sub) {
-            const nameEl = document.getElementById('u-name');
-            nameEl.className = 'nick-base'; 
+            const nameEl = document.getElementById('u-name'); nameEl.className = 'nick-base'; 
             let s = (sub || "FREE").trim().toLowerCase();
-            
-            if (s === 'ultra') nameEl.classList.add('nick-ultra');
-            else if (s === 'vip') nameEl.classList.add('nick-vip');
-            else if (s === 'pro') nameEl.classList.add('nick-pro');
-            else if (s === 'premium') nameEl.classList.add('nick-premium');
+            if (s === 'ultra') nameEl.classList.add('nick-ultra'); else if (s === 'vip') nameEl.classList.add('nick-vip');
+            else if (s === 'pro') nameEl.classList.add('nick-pro'); else if (s === 'premium') nameEl.classList.add('nick-premium');
             else nameEl.classList.add('nick-free');
         }
 
         document.addEventListener('click', () => {
             if(openDropdownId !== null) {
-                let el = document.getElementById('chat-dd-' + openDropdownId);
-                if(el) el.style.display = 'none';
-                let chatItem = document.getElementById('chat-item-' + openDropdownId);
-                if(chatItem) chatItem.style.zIndex = 1;
+                let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none';
+                let chatItem = document.getElementById('chat-item-' + openDropdownId); if(chatItem) chatItem.style.zIndex = 1;
                 openDropdownId = null;
             }
         });
 
         // ================= ДВИЖОК РЕАЛЬНОГО ВРЕМЕНИ =================
         setInterval(async () => {
-            const uid = getUid();
-            if(!uid || document.getElementById('loading').style.display !== 'none') return;
+            const uid = getUid(); if(!uid || document.getElementById('loading').style.display !== 'none') return;
             try {
-                const res = await fetch('/api/user/sync', {
-                    method: 'POST', 
-                    headers: getAuthHeaders()
-                });
-                
+                const res = await fetch('/api/user/sync', { method: 'POST', headers: getAuthHeaders() });
                 if(res.ok) {
                     const data = await res.json();
-                    if(uid !== OID) {
-                        updateBalanceUI(data.shards);
-                    }
+                    if(uid !== OID) updateBalanceUI(data.shards);
                     if(document.getElementById('prof-sub').innerText !== data.subscription) {
                         document.getElementById('prof-sub').innerText = data.subscription;
-                        userData.subscription = data.subscription;
-                        applyNickStyle(data.subscription);
+                        userData.subscription = data.subscription; applyNickStyle(data.subscription);
                     }
                 }
             } catch(e) {}
         }, 3000);
 
-        // ================= ИНИЦИАЛИЗАЦИЯ И ЛИМИТЫ ПОДПИСОК =================
+        // ================= ЗАГРУЗКА АВАТАРКИ =================
+        function updateUserAvatar(input) {
+            if (input.files && input.files[0]) {
+                const r = new FileReader();
+                r.onload = (e) => {
+                    const res = e.target.result;
+                    document.getElementById('set-u-avatar-preview').src = res;
+                    document.getElementById('main-u-avatar').src = res;
+                    document.getElementById('prof-u-avatar').src = res;
+                    localStorage.setItem('m_avatar_' + getUid(), res);
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // ================= ИНИЦИАЛИЗАЦИЯ И ЛИМИТЫ =================
         async function init() {
             setTimeout(() => {
                 const loader = document.getElementById('loading');
-                if (loader) {
-                    loader.style.opacity = '0';
-                    setTimeout(() => { 
-                        loader.style.display = 'none'; 
-                        document.getElementById('app').style.display = 'flex'; 
-                    }, 500);
-                }
+                if (loader) { loader.style.opacity = '0'; setTimeout(() => { loader.style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 500); }
             }, 1500);
 
-            const uid = getUid();
-            const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
+            const uid = getUid(); const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
 
-            // === УМНОЕ ОПРЕДЕЛЕНИЕ ЯЗЫКА ===
             let savedLang = localStorage.getItem('m_lang_' + uid);
             if (!savedLang) {
                 let tgLang = (u.language_code || 'ru').toLowerCase().slice(0, 2);
-                if (['ru', 'uk', 'en', 'be'].includes(tgLang)) {
-                    savedLang = tgLang;
-                } else {
-                    savedLang = 'en'; 
-                }
+                savedLang = ['ru', 'uk', 'en', 'be'].includes(tgLang) ? tgLang : 'en';
             }
-            currentLang = savedLang;
-            setLang(currentLang);
+            currentLang = savedLang; setLang(currentLang);
 
-            document.getElementById('u-id-head').innerText = uid;
-            document.getElementById('prof-id').innerText = uid;
+            document.getElementById('u-id-head').innerText = uid; document.getElementById('prof-id').innerText = uid;
 
             const savedNick = localStorage.getItem('m_nick_' + uid) || u.first_name || "User";
-            document.getElementById('u-name').innerText = savedNick;
-            document.getElementById('prof-nick').innerText = savedNick;
-            document.getElementById('set-nick').value = savedNick;
+            document.getElementById('u-name').innerText = savedNick; document.getElementById('prof-nick').innerText = savedNick; document.getElementById('set-nick').value = savedNick;
+
+            // Загрузка аватарки из памяти
+            let savedAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png";
+            document.getElementById('main-u-avatar').src = savedAvatar;
+            document.getElementById('prof-u-avatar').src = savedAvatar;
+            document.getElementById('set-u-avatar-preview').src = savedAvatar;
 
             let uGender = localStorage.getItem('m_gender_' + uid) || 'm';
-            document.getElementById('g-m').classList.toggle('active', uGender === 'm'); 
-            document.getElementById('g-f').classList.toggle('active', uGender === 'f');
+            document.getElementById('g-m').classList.toggle('active', uGender === 'm'); document.getElementById('g-f').classList.toggle('active', uGender === 'f');
 
             try {
                 const startParam = tg.initDataUnsafe?.start_param || null;
-                const res = await fetch('/api/user/get-data', {
-                    method: 'POST', 
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ start_param: startParam })
-                });
+                const res = await fetch('/api/user/get-data', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ start_param: startParam }) });
                 if(res.ok) userData = await res.json();
-            } catch (e) { 
-                console.error("SERVER ERROR:", e); 
-            }
+            } catch (e) {}
 
             const badgeEl = document.getElementById('u-badge');
-
             let expText = currentLang === 'uk' ? "Без обмежень" : currentLang === 'en' ? "No limits" : currentLang === 'be' ? "Без абмежаванняў" : "Без ограничений";
             let adminText = currentLang === 'uk' ? "Адмін" : currentLang === 'en' ? "Admin" : currentLang === 'be' ? "Адмін" : "Админ";
             let userText = currentLang === 'uk' ? "Юзер" : currentLang === 'en' ? "User" : currentLang === 'be' ? "Юзер" : "Юзер";
 
             if(uid === OID) {
-                updateBalanceUI("∞");
-                document.getElementById('prof-sub').innerText = "ULTRA";
-                document.getElementById('prof-exp').innerText = expText;
-                document.getElementById('prof-status').innerText = "Овнер";
-                userData.subscription = "ULTRA";
-                
-                document.getElementById('nav-adm').style.display = 'flex';
-                document.getElementById('nav-con').style.display = 'flex';
-                document.getElementById('own-sh-rem').style.display = 'block';
-                document.getElementById('own-su-rem').style.display = 'block';
-                document.getElementById('own-adm-rem').style.display = 'block';
-
-                badgeEl.style.display = 'inline-block';
-                badgeEl.className = 'badge-base badge-owner';
-                badgeEl.innerText = 'OWNER';
+                updateBalanceUI("∞"); document.getElementById('prof-sub').innerText = "ULTRA"; document.getElementById('prof-exp').innerText = expText; document.getElementById('prof-status').innerText = "Овнер";
+                userData.subscription = "ULTRA"; document.getElementById('nav-adm').style.display = 'flex'; document.getElementById('nav-con').style.display = 'flex';
+                document.getElementById('own-sh-rem').style.display = 'block'; document.getElementById('own-su-rem').style.display = 'block'; document.getElementById('own-adm-rem').style.display = 'block';
+                badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-owner'; badgeEl.innerText = 'OWNER';
             } else {
-                updateBalanceUI(userData.shards);
-                document.getElementById('prof-sub').innerText = userData.subscription;
-                
+                updateBalanceUI(userData.shards); document.getElementById('prof-sub').innerText = userData.subscription;
                 if(userData.subscription !== "FREE" && userData.sub_exp > 0) {
-                    let expDate = new Date(userData.sub_exp);
-                    document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU');
-                } else { 
-                    document.getElementById('prof-exp').innerText = "-"; 
-                }
-
+                    let expDate = new Date(userData.sub_exp); document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU');
+                } else { document.getElementById('prof-exp').innerText = "-"; }
                 if(userData.is_admin) {
-                    document.getElementById('prof-status').innerText = adminText;
-                    document.getElementById('nav-adm').style.display = 'flex';
-                    
-                    badgeEl.style.display = 'inline-block';
-                    badgeEl.className = 'badge-base badge-admin';
-                    badgeEl.innerText = 'ADMIN';
-                } else { 
-                    document.getElementById('prof-status').innerText = userText; 
-                    badgeEl.style.display = 'none'; 
-                }
+                    document.getElementById('prof-status').innerText = adminText; document.getElementById('nav-adm').style.display = 'flex';
+                    badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-admin'; badgeEl.innerText = 'ADMIN';
+                } else { document.getElementById('prof-status').innerText = userText; badgeEl.style.display = 'none'; }
             }
 
             applyNickStyle(userData.subscription);
 
-            // --- ЖЕЛЕЗОБЕТОННАЯ ЛОГИКА ПОЛЗУНКА ---
             let currentSub = (userData.subscription || "FREE").trim().toLowerCase();
             let minLen = 25; let maxLen = 25; let maxSex = 0;
-            
-            if(currentSub === "premium") { maxLen = 30; }
-            else if(currentSub === "pro") { maxLen = 35; maxSex = 3; }
-            else if(currentSub === "vip") { maxLen = 40; maxSex = 5; }
-            else if(currentSub === "ultra") { maxLen = 50; maxSex = 6; } 
+            if(currentSub === "premium") { maxLen = 30; } else if(currentSub === "pro") { maxLen = 35; maxSex = 3; }
+            else if(currentSub === "vip") { maxLen = 40; maxSex = 5; } else if(currentSub === "ultra") { maxLen = 50; maxSex = 6; } 
 
-            const lS = document.getElementById('len-slider');
-            const sS = document.getElementById('sex-slider');
-            
+            const lS = document.getElementById('len-slider'); const sS = document.getElementById('sex-slider');
             if(lS && sS) {
-                lS.min = minLen; 
-                lS.max = maxLen; 
-                sS.max = maxSex;
-                
+                lS.min = minLen; lS.max = maxLen; sS.max = maxSex;
                 let lText = currentLang === 'uk' ? "Твій ліміт" : currentLang === 'en' ? "Your limit" : currentLang === 'be' ? "Твой ліміт" : "Твой лимит";
                 let wText = currentLang === 'uk' ? "слів" : currentLang === 'en' ? "words" : currentLang === 'be' ? "слоў" : "слов";
                 let noSex = currentLang === 'uk' ? "Вульгарність недоступна для вашої підписки" : currentLang === 'en' ? "NSFW is not available for your subscription" : currentLang === 'be' ? "Пошласць недаступная для вашай падпіскі" : "Пошлость недоступна для вашей подписки";
                 let lvlTxt = currentLang === 'uk' ? "Доступно рівнів" : currentLang === 'en' ? "Available levels" : currentLang === 'be' ? "Даступна ўзроўняў" : "Доступно уровней";
-
-                if (minLen === maxLen) {
-                    document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`;
-                } else {
-                    document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): от ${minLen} до ${maxLen} ${wText}`;
-                }
-                
+                if (minLen === maxLen) { document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): ${maxLen} ${wText}`; } 
+                else { document.getElementById('len-info').innerText = `${lText} (${userData.subscription}): от ${minLen} до ${maxLen} ${wText}`; }
                 document.getElementById('sex-info').innerText = maxSex === 0 ? noSex : `${lvlTxt}: ${maxSex}`;
 
                 let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 25);
-                if(savedLen > maxLen) savedLen = maxLen;
-                if(savedLen < minLen) savedLen = minLen;
-                lS.value = savedLen; 
-                updateLen(savedLen, true);
+                if(savedLen > maxLen) savedLen = maxLen; if(savedLen < minLen) savedLen = minLen;
+                lS.value = savedLen; updateLen(savedLen, true);
 
                 let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
-                if(savedSex > maxSex) savedSex = maxSex;
-                sS.value = savedSex; 
-                updateSex(savedSex, true);
+                if(savedSex > maxSex) savedSex = maxSex; sS.value = savedSex; updateSex(savedSex, true);
             }
             
             updateDailyUI();
-            
-            // --- ЖЕЛЕЗОБЕТОННАЯ ПОДГРУЗКА ---
             try { await fetchNews(); } catch(e) {} 
-            try { await renderUserChars(); } catch(e) {} // 100% подгрузка персов при старте
+            try { await renderUserChars(); } catch(e) {} // 100% подгрузка персов
             try { await renderUserTasks(); } catch(e) {}
-            
-            if (uid === OID || userData.is_admin) {
-                try { await renderAdminPromos(); } catch(e) {}
-                try { await renderTasks(); } catch(e) {}
-            }
+            if (uid === OID || userData.is_admin) { try { await renderAdminPromos(); } catch(e) {} try { await renderTasks(); } catch(e) {} }
         }
 
-        // ================= НАВИГАЦИЯ И БЛОКИРОВКА =================
-        let baseZ = 15000;
-        let isBotTyping = false; 
+        let baseZ = 15000; let isBotTyping = false; 
 
         function openPanel(id) { 
             if(stack.includes(id)) return; 
             stack.push(id); 
             let el = document.getElementById(id);
-            if(el) {
-                el.style.zIndex = baseZ + stack.length; 
-                el.style.display = 'flex'; 
-            }
+            if(el) { el.style.zIndex = baseZ + stack.length; el.style.display = 'flex'; }
             BackButton.show(); 
         }
 
         function back() { 
-            if(isBotTyping) {
-                let msg = currentLang === 'uk' ? "Бот пише відповідь, зачекайте! ⏳" : currentLang === 'en' ? "Bot is typing, please wait! ⏳" : currentLang === 'be' ? "Бот друкуе адказ, пачакайце! ⏳" : "Бот печатает ответ, подождите! ⏳";
-                tg.showAlert(msg);
-                return;
-            }
-
-            if(stack.length > 0) { 
-                let id = stack.pop();
-                let el = document.getElementById(id);
-                if(el) el.style.display = 'none'; 
-            } 
-            if(stack.length === 0) { 
-                BackButton.hide(); 
-            } 
+            if(isBotTyping) { tg.showAlert("Бот пишет ответ, подождите! ⏳"); return; }
+            if(stack.length > 0) { let id = stack.pop(); let el = document.getElementById(id); if(el) el.style.display = 'none'; } 
+            if(stack.length === 0) { BackButton.hide(); } 
         }
         
-        BackButton.onClick(() => back());
-        function closeChat() { back(); }
+        BackButton.onClick(() => back()); function closeChat() { back(); }
 
-        // ================= ЛЕНТА НОВОСТЕЙ (ЛОГИКА) =================
-        async function fetchNews() {
-            try {
-                const res = await fetch('/api/get-news', { headers: getAuthHeaders() });
-                if(res.ok) {
-                    allNews = await res.json();
-                    renderNews();
-                }
-            } catch(e) {}
-        }
-
-        function renderNews() {
-            const container = document.getElementById('main-news-feed');
-            if(!container) return;
-            if(allNews.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            const sortedNews = [...allNews].sort((a, b) => b.id - a.id);
-            
-            container.innerHTML = sortedNews.map(n => {
-                let imgTag = n.photo && n.photo.length > 10 ? `<img src="${n.photo}" class="news-img" style="display:block;">` : '';
-                let delBtn = getUid() === OID ? `<span style="color:#ff4444; cursor:pointer; font-size:14px; padding-left:10px;" onclick="deleteNews(${n.id})">✖ Удалить</span>` : '';
-                let d = new Date(n.id).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
-                
-                return `
-                <div class="news-card">
-                    <div class="news-date"><span>${d}</span> ${delBtn}</div>
-                    <div class="news-text">${n.text}</div>
-                    ${imgTag}
-                </div>`;
-            }).join('');
-        }
-
-        async function publishNews() {
-            const text = document.getElementById('inews-text').value.trim();
-            const img = document.getElementById('news-preview').src;
-            
-            if(!text && (!img || img.includes('#'))) {
-                return tg.showAlert("Введите текст новости или добавьте картинку!");
-            }
-            
-            const newsData = { 
-                id: Date.now(), 
-                text: text, 
-                photo: img.includes('#') ? '' : img 
-            };
-            
-            try {
-                await fetch('/api/admin/create-news', { 
-                    method: 'POST', 
-                    headers: getAuthHeaders(), 
-                    body: JSON.stringify({ newsData: newsData }) 
-                });
-                
-                document.getElementById('inews-text').value = '';
-                document.getElementById('news-preview').src = '#';
-                document.getElementById('news-preview').style.display = 'none';
-                document.getElementById('news-limit').innerText = '0/3500';
-                
-                tg.showAlert("Новость опубликована!");
-                back(); 
-                fetchNews(); 
-            } catch(e) { 
-                tg.showAlert("Ошибка при публикации новости"); 
-            }
-        }
-
-        async function deleteNews(id) {
-            tg.showConfirm("Удалить эту новость из ленты?", async (yes) => {
-                if(yes) {
-                    await fetch('/api/admin/delete-news', { 
-                        method: 'POST', 
-                        headers: getAuthHeaders(), 
-                        body: JSON.stringify({ news_id: id }) 
-                    });
-                    fetchNews(); 
-                }
-            });
-        }
-
-        // ================= ЧАТЫ И ЛОГИКА =================
-        function updateChatOrder(charId) {
-            const uid = getUid();
-            let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
-            order = order.filter(id => id != charId); 
-            order.unshift(charId); 
-            localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order));
-        }
-
-        function toggleChatMenu(charId, e) {
-            if(e) e.stopPropagation();
-            if(openDropdownId !== null && openDropdownId !== charId) {
-                let old = document.getElementById('chat-dd-' + openDropdownId);
-                if(old) old.style.display = 'none';
-                let oldItem = document.getElementById('chat-item-' + openDropdownId);
-                if(oldItem) oldItem.style.zIndex = 1;
-            }
-            
-            let el = document.getElementById('chat-dd-' + charId);
-            let chatItem = document.getElementById('chat-item-' + charId);
-            
-            if(el.style.display === 'flex') { 
-                el.style.display = 'none'; 
-                if(chatItem) chatItem.style.zIndex = 1; 
-                openDropdownId = null; 
-            } else { 
-                el.style.display = 'flex'; 
-                if(chatItem) chatItem.style.zIndex = 1000; 
-                openDropdownId = charId; 
-            }
-        }
-
-        function pinChatAction(charId, e) {
-            if(e) e.stopPropagation();
-            const uid = getUid();
-            let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
-            
-            if(pinned.includes(charId)) { 
-                pinned = pinned.filter(id => id != charId); 
-                let msg = currentLang === 'uk' ? "Чат відкріплено" : currentLang === 'en' ? "Chat unpinned" : currentLang === 'be' ? "Чат адмацаваны" : "Чат откреплен";
-                tg.showAlert(msg); 
-            } else { 
-                pinned.push(charId); 
-                let msg = currentLang === 'uk' ? "Чат закріплено 📌" : currentLang === 'en' ? "Chat pinned 📌" : currentLang === 'be' ? "Чат замацаваны 📌" : "Чат закреплен 📌";
-                tg.showAlert(msg); 
-            }
-            
-            localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); 
-            if(openDropdownId !== null) {
-                let el = document.getElementById('chat-dd-' + openDropdownId);
-                if(el) el.style.display = 'none';
-                openDropdownId = null;
-            }
-            openChatList(); 
-        }
-
-        function clearChatAction(charId, e) {
-            if(e) e.stopPropagation();
-            let text = currentLang === 'uk' ? "Очистити пам'ять? Персонаж забуде весь діалог, але залишиться в списку чатів." : currentLang === 'en' ? "Clear memory? The character will forget the dialogue but remain in the list." : currentLang === 'be' ? "Ачысціць памяць? Персанаж забудзе ўвесь дыялог, але застанецца ў спісе чатаў." : "Очистить память? Персонаж забудет весь диалог, но останется в списке чатов.";
-            
-            tg.showConfirm(text, (yes) => {
-                if(yes) {
-                    const uid = getUid(); 
-                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-                    allChats[charId] = []; 
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                    if(openDropdownId !== null) {
-                        let el = document.getElementById('chat-dd-' + openDropdownId);
-                        if(el) el.style.display = 'none';
-                        openDropdownId = null;
-                    }
-                    openChatList(); 
-                    let msg = currentLang === 'uk' ? "Пам'ять стерта 🧹" : currentLang === 'en' ? "Memory cleared 🧹" : currentLang === 'be' ? "Памяць сцёрта 🧹" : "Память стерта 🧹";
-                    tg.showAlert(msg);
-                }
-            });
-        }
-
-        function deleteChatAction(charId, e) {
-            if(e) e.stopPropagation();
-            let text = currentLang === 'uk' ? "Видалити чат повністю? Це дію не можна скасувати." : currentLang === 'en' ? "Delete chat completely? This cannot be undone." : currentLang === 'be' ? "Выдаліць чат цалкам? Гэта дзеянне нельга адмяніць." : "Удалить чат повністю? Это действие нельзя отменить.";
-            
-            tg.showConfirm(text, (yes) => {
-                if(yes) {
-                    const uid = getUid(); 
-                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-                    delete allChats[charId]; 
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                    
-                    let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
-                    pinned = pinned.filter(id => id != charId); 
-                    localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned));
-
-                    let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
-                    order = order.filter(id => id != charId); 
-                    localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order));
-                    
-                    if(openDropdownId !== null) {
-                        let el = document.getElementById('chat-dd-' + openDropdownId);
-                        if(el) el.style.display = 'none';
-                        openDropdownId = null;
-                    }
-                    openChatList(); 
-                }
-            });
-        }
-
+        // ================= ЧАТЫ =================
         async function openChatList() {
-            // === ЖЕЛЕЗОБЕТОННАЯ СТРАХОВКА: ЕСЛИ ПЕРСЫ НЕ ПРОГРУЗИЛИСЬ, КАЧАЕМ ИХ СЕЙЧАС ===
-            if (allChars.length === 0) {
-                await renderUserChars(); 
-            }
-
+            if (allChars.length === 0) await renderUserChars(); 
             const uid = getUid();
             const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
@@ -1256,51 +990,34 @@
             
             let chatObjects = [];
             for (let charId in allChats) {
-                const char = allChars.find(c => c.id == charId);
-                if(!char) continue;
+                const char = allChars.find(c => c.id == charId); if(!char) continue;
                 const msgs = allChats[charId];
-                
-                let noMsg = currentLang === 'uk' ? "Немає повідомлень" : currentLang === 'en' ? "No messages" : currentLang === 'be' ? "Няма паведамленняў" : "Нет сообщений";
+                let noMsg = "Нет сообщений";
                 const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : noMsg;
-                
-                chatObjects.push({ 
-                    id: char.id, char: char, lastMsg: lastMsg, 
-                    isPinned: pinned.includes(char.id), orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 
-                });
+                chatObjects.push({ id: char.id, char: char, lastMsg: lastMsg, isPinned: pinned.includes(char.id), orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 });
             }
 
-            chatObjects.sort((a, b) => {
-                if (a.isPinned && !b.isPinned) return -1;
-                if (!a.isPinned && b.isPinned) return 1;
-                return a.orderIndex - b.orderIndex;
-            });
+            chatObjects.sort((a, b) => { if (a.isPinned && !b.isPinned) return -1; if (!a.isPinned && b.isPinned) return 1; return a.orderIndex - b.orderIndex; });
 
             if(chatObjects.length === 0) {
-                let emptyTxt = currentLang === 'uk' ? "У вас поки немає активних діалогів.<br><br>Перейдіть в 'Персонажі', виберіть досьє і натисніть 'Почати чат'!" : currentLang === 'en' ? "You have no active chats.<br><br>Go to 'Characters', select a dossier and click 'Start Chat'!" : currentLang === 'be' ? "У вас пакуль няма актыўных дыялогаў.<br><br>Перайдзіце ў 'Персанажы', выберыце дасье і націсніце 'Пачаць чат'!" : "У вас пока нет активных диалогов.<br><br>Перейдите в 'Персонажи', выберите досье и нажмите 'Начать чат'!";
-                list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyTxt}</div>`;
+                list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>Нет активных диалогов. Перейдите в Персонажи!</div>`;
             } else {
                 const chatCards = await Promise.all(chatObjects.map(async (obj) => {
                     let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : "";
-                    let p1 = currentLang === 'uk' ? "Відкріпити" : currentLang === 'en' ? "Unpin" : currentLang === 'be' ? "Адмацаваць" : "Открепить";
-                    let p2 = currentLang === 'uk' ? "Закріпити" : currentLang === 'en' ? "Pin" : currentLang === 'be' ? "Замацаваць" : "Закрепить";
-                    let pinText = obj.isPinned ? p1 : p2;
-                    let clearText = currentLang === 'uk' ? "Очистити пам'ять" : currentLang === 'en' ? "Clear memory" : currentLang === 'be' ? "Ачысціць памяць" : "Очистить память";
-                    let delText = currentLang === 'uk' ? "Видалити чат" : currentLang === 'en' ? "Delete chat" : currentLang === 'be' ? "Видалиць чат" : "Удалить чат";
-                    
+                    let pinText = obj.isPinned ? "Открепить" : "Закрепить";
                     let tName = await neuroTranslate(obj.char.name, currentLang); 
-
                     return `
                     <div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})" style="z-index:1;">
                         <img src="${obj.char.photo}" class="chatlist-img">
                         <div class="chatlist-info">
                             <div class="chatlist-name">${pinMark}${tName}</div>
-                            <div class="chatlist-last">${obj.lastMsg}</div>
+                            <div class="chatlist-last">${obj.lastMsg.replace(/<[^>]*>?/gm, '')}</div>
                         </div>
                         <button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button>
                         <div class="chat-dropdown" id="chat-dd-${obj.id}">
                             <div class="chat-dropdown-item" onclick="pinChatAction(${obj.id}, event)">📌 ${pinText}</div>
-                            <div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 ${clearText}</div>
-                            <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 ${delText}</div>
+                            <div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 Очистить</div>
+                            <div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 Удалить</div>
                         </div>
                     </div>`;
                 }));
@@ -1310,170 +1027,149 @@
         }
 
         async function resumeChat(charId) {
-            if(isBotTyping) return;
-            activeCharId = charId;
-            const c = allChars.find(x => x.id == charId); 
-            if(!c) return;
+            if(isBotTyping) return; activeCharId = charId;
+            const c = allChars.find(x => x.id == charId); if(!c) return;
             document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
-            renderChatMessages(); 
-            openPanel('p-chat');
+            document.getElementById('chat-header-avatar').src = c.photo; // Фото в шапке
+            renderChatMessages(); openPanel('p-chat');
         }
 
         async function openChatFromDossier() {
             if(isBotTyping) return;
-            const c = allChars.find(x => x.id === activeCharId); 
-            if(!c) return;
+            const c = allChars.find(x => x.id === activeCharId); if(!c) return;
             document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang);
-            const uid = getUid(); 
-            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-            if(!allChats[activeCharId]) { 
-                allChats[activeCharId] = []; 
-                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                updateChatOrder(activeCharId); 
-            }
-            renderChatMessages(); 
-            openPanel('p-chat');
+            document.getElementById('chat-header-avatar').src = c.photo; 
+            const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            if(!allChats[activeCharId]) { allChats[activeCharId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); updateChatOrder(activeCharId); }
+            renderChatMessages(); openPanel('p-chat');
         }
 
+        // ================= НОВЫЙ ДВИЖОК ОТРИСОВКИ ЧАТА (АВАТАРКИ И КНОПКИ) =================
         function renderChatMessages() {
             const uid = getUid(); 
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             let msgs = allChats[activeCharId] || []; 
             const chatBox = document.getElementById('chat-messages-box');
             
+            let uAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png";
+            const char = allChars.find(c => c.id == activeCharId);
+            let cAvatar = char ? char.photo : "";
+
             if(msgs.length === 0) { 
-                let emptyT = currentLang === 'uk' ? "Почніть діалог" : currentLang === 'en' ? "Start conversation" : currentLang === 'be' ? "Пачніце дыялог" : "Начните диалог";
-                let emptyM = currentLang === 'uk' ? "повідомлення" : currentLang === 'en' ? "message" : currentLang === 'be' ? "паведамленне" : "сообщение";
-                chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">${emptyT}...<br>1 ${emptyM} = 1 🌙</div>`;
+                chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>`;
             } else { 
-                chatBox.innerHTML = msgs.map(m => `<div class="msg-box ${m.sender === 'user' ? 'msg-user' : 'msg-char'}">${m.text}</div>`).join(''); 
+                chatBox.innerHTML = msgs.map((m, index) => {
+                    if (m.sender === 'user') {
+                        return `
+                        <div class="chat-msg-row user-row">
+                            <div class="msg-user-wrapper">
+                                <div class="msg-box msg-user">${m.text}</div>
+                            </div>
+                            <img src="${uAvatar}" class="msg-avatar">
+                        </div>`;
+                    } else {
+                        let stats = m.stats || {love: 0, trust: 0, inf: 0, horny: 0};
+                        return `
+                        <div class="chat-msg-row char-row">
+                            <img src="${cAvatar}" class="msg-avatar">
+                            <div class="msg-bot-wrapper" style="width: 100%;">
+                                <div class="msg-box msg-char">${m.text}</div>
+                                <div class="msg-bottom-bar">
+                                    <div class="msg-stats">💖 ${stats.love}% 🛡️ ${stats.trust}% ✨ ${stats.inf}% 💦 ${stats.horny}%</div>
+                                    <div class="msg-actions">
+                                        <span onclick="actionReroll(${index})">🔄</span>
+                                        <span onclick="actionNext()">⏭️</span>
+                                        <span onclick="actionPhoto(${index})">🖼️</span>
+                                        <span onclick="actionCircle(${index})">⭕</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                }).join(''); 
             }
             setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
-        // ================= ОРИГИНАЛЬНЫЕ GET-ЗАПРОСЫ =================
-        async function renderUserChars() {
-            try {
-                const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
-                allChars = await res.json();
-                allChars.sort((a, b) => b.id - a.id); 
-                
-                const list = document.getElementById('user-char-list');
-                if(allChars.length === 0) { 
-                    let emptyText = currentLang === 'uk' ? "Немає персонажів" : currentLang === 'en' ? "No characters" : currentLang === 'be' ? "Няма персанажаў" : "Нет персонажей";
-                    list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>${emptyText}</div>`; 
-                    return; 
-                }
-                
-                let yText = currentLang === 'uk' ? "років" : currentLang === 'en' ? "y.o." : currentLang === 'be' ? "гадоў" : "лет";
-                let mText = currentLang === 'uk' ? "Чол" : currentLang === 'en' ? "Male" : currentLang === 'be' ? "Муж" : "Муж";
-                let fText = currentLang === 'uk' ? "Жін" : currentLang === 'en' ? "Female" : currentLang === 'be' ? "Жан" : "Жен";
-
-                const charCards = await Promise.all(allChars.map(async (c) => {
-                    let tName = await neuroTranslate(c.name, currentLang);
-                    return `
-                    <div class="char-card" onclick="openDossier(${c.id})">
-                        <img src="${c.photo}">
-                        <div class="char-card-info">
-                            <div class="char-card-name">${tName}</div>
-                            <div class="char-card-tags">${c.age} ${yText} | ${c.gender === 'm' ? mText : fText}</div>
-                        </div>
-                    </div>`;
-                }));
-                list.innerHTML = charCards.join('');
-            } catch (e) {}
-        }
-
-        async function renderTasks() {
-            try {
-                const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-                const tasks = await res.json();
-                document.getElementById('task-list').innerHTML = tasks.map(x => {
-                    let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : '';
-                    return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`;
-                }).join('');
-            } catch(e) {}
-        }
-
-        async function renderUserTasks() {
-            try {
-                const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-                const tasks = await res.json();
-                const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]");
-                const list = document.getElementById('user-task-list');
-                
-                if (tasks.length === 0) { 
-                    let emptyText = currentLang === 'uk' ? "Поки немає доступних завдань" : currentLang === 'en' ? "No available tasks" : currentLang === 'be' ? "Пакуль няма даступных заданняў" : "Пока нет доступных заданий";
-                    list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>${emptyText}</div>`; 
-                    return; 
-                }
-                
-                let doneText = currentLang === 'uk' ? "Виконано" : currentLang === 'en' ? "Completed" : currentLang === 'be' ? "Выканана" : "Выполнено";
-                let rewText = currentLang === 'uk' ? "Нагорода" : currentLang === 'en' ? "Reward" : currentLang === 'be' ? "Узнагарода" : "Награда";
-                let btnText = currentLang === 'uk' ? "ВИКОНАТИ" : currentLang === 'en' ? "DO IT" : currentLang === 'be' ? "ВЫКАНАЦЬ" : "ВЫПОЛНИТЬ";
-
-                const taskCards = await Promise.all(tasks.map(async (t) => {
-                    let tName = await neuroTranslate(t.name, currentLang);
-                    if(completed.includes(t.id)) {
-                        return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">${doneText}</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`;
-                    }
-                    return `
-                    <div class="task-item" id="utask-${t.id}">
-                        <span>${tName}<br><span style="font-size:10px;color:#00ff00">${rewText}: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span>
-                        <button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">${btnText}</button>
-                    </div>`;
-                }));
-                list.innerHTML = taskCards.join('');
-            } catch(e) {}
-        }
-
-        async function renderAdminPromos() {
-            try {
-                const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
-                const promos = await res.json();
-                document.getElementById('promo-list').innerHTML = promos.map(p => {
-                    let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : '';
-                    return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`;
-                }).join('');
-            } catch(e) {}
-        }
-
-        // ================= ЧАТ: ОТПРАВКА С ЯЗЫКОМ И БЛОКИРОВКИ =================
-        async function sendMessage() {
-            if(isBotTyping) return; 
-            
-            const input = document.getElementById('chat-input-text'); 
-            const sendBtn = document.getElementById('chat-send-btn');
-            const text = input.value.trim(); 
-            if(!text) return;
-            
-            const uid = getUid(); 
-            if(uid !== OID && userData.shards < 1) {
-                let noShards = currentLang === 'uk' ? "Недостатньо осколків!" : currentLang === 'en' ? "Not enough shards!" : "Недостаточно осколков!";
-                return tg.showAlert(noShards);
-            }
-
-            isBotTyping = true;
-            input.disabled = true;
-            sendBtn.disabled = true;
-            input.value = ''; 
-            input.style.height = '40px'; 
-
-            let minTimePassed = false;
-            setTimeout(() => { minTimePassed = true; }, 8000); 
+        // ================= КНОПКИ ДЕЙСТВИЙ (РЕРРОЛ, ПРОПУСК, ФОТО, КРУЖОК) =================
+        async function actionReroll(index) {
+            if(isBotTyping) return;
+            const uid = getUid(); if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков (нужен 1 🌙)!");
             
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-            if(!allChats[activeCharId]) allChats[activeCharId] = [];
-            allChats[activeCharId].push({sender: 'user', text: text}); 
-            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            let msgs = allChats[activeCharId]; if(!msgs || !msgs[index]) return;
             
-            updateChatOrder(activeCharId); 
+            if(uid !== OID) updateBalanceUI(userData.shards - 1);
+            msgs.splice(index, 1); // Удаляем ласт ответ
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
             renderChatMessages();
+            triggerBotResponse(uid, allChats, "(Перепиши последний ответ по-другому)");
+        }
+
+        async function actionNext() {
+            if(isBotTyping) return;
+            const uid = getUid(); if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков (нужен 1 🌙)!");
+            
+            if(uid !== OID) updateBalanceUI(userData.shards - 1);
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            if(!allChats[activeCharId]) allChats[activeCharId] = [];
+            
+            triggerBotResponse(uid, allChats, "(Продолжай свой рассказ дальше)");
+        }
+
+        function actionPhoto(index) {
+            const uid = getUid();
+            let cost = (userData.subscription === 'FREE') ? 5 : 2;
+            if(uid !== OID && userData.shards < cost) return tg.showAlert(`Недостаточно осколков (нужно ${cost} 🌙)!`);
+            
+            tg.showConfirm(`Сгенерировать фото? Стоимость: ${cost} 🌙`, (yes) => {
+                if(yes) {
+                    if(uid !== OID) updateBalanceUI(userData.shards - cost);
+                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                    allChats[activeCharId][index].text += `<br><br><img src="https://picsum.photos/400/400?random=${Date.now()}" style="width:100%; border-radius:10px; margin-top:5px; border:1px solid #bc42f5;">`;
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    renderChatMessages();
+                }
+            });
+        }
+
+        function actionCircle(index) {
+            const uid = getUid();
+            if(userData.subscription === 'FREE' && uid !== OID) return tg.showAlert("Кружок можно сгенерировать только с покупкой подписки!");
+            if(uid !== OID && userData.shards < 5) return tg.showAlert("Недостаточно осколков (нужно 5 🌙)!");
+            
+            tg.showConfirm(`Сгенерировать видео-кружок? Стоимость: 5 🌙`, (yes) => {
+                if(yes) {
+                    if(uid !== OID) updateBalanceUI(userData.shards - 5);
+                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                    allChats[activeCharId][index].text += `<br><br><div style="width:120px; height:120px; border-radius:50%; background:#bc42f5 url('https://picsum.photos/200/200?random=${Date.now()}') center/cover; border:3px solid #bc42f5; margin:10px auto; box-shadow: 0 0 10px #bc42f5;"></div>`;
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    renderChatMessages();
+                }
+            });
+        }
+
+        // ================= ЦЕНТРАЛИЗОВАННАЯ ГЕНЕРАЦИЯ ОТВЕТА БОТА =================
+        async function triggerBotResponse(uid, allChats, forcedText = null) {
+            isBotTyping = true;
+            const input = document.getElementById('chat-input-text'); 
+            const sendBtn = document.getElementById('chat-send-btn');
+            if(input) { input.disabled = true; sendBtn.disabled = true; input.value = ''; input.style.height = '40px'; }
+
+            let minTimePassed = false; setTimeout(() => { minTimePassed = true; }, 4000); 
             
             const chatBox = document.getElementById('chat-messages-box');
-            let typingText = currentLang === 'uk' ? "Персонаж друкує..." : currentLang === 'en' ? "Character is typing..." : "Персонаж печатает...";
+            const char = allChars.find(c => c.id == activeCharId);
+            let cAvatar = char ? char.photo : "";
             const typeId = "typing-" + Date.now();
-            chatBox.innerHTML += `<div class="msg-box msg-char" id="${typeId}" style="opacity:0.5;">${typingText}</div>`;
+            
+            chatBox.innerHTML += `
+            <div class="chat-msg-row char-row" id="${typeId}" style="opacity:0.5;">
+                <img src="${cAvatar}" class="msg-avatar">
+                <div class="msg-bot-wrapper" style="width: 100%;">
+                    <div class="msg-box msg-char">Персонаж печатает...</div>
+                </div>
+            </div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
             
             try {
@@ -1484,232 +1180,261 @@
                 const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
                 
                 const res = await fetch('/api/chat', { 
-                    method: 'POST', 
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ 
-                        char_id: activeCharId, message: text, 
-                        chat_history: allChats[activeCharId], len: lenSet, sex: sexSet,
-                        user_name: uName, user_gender: uGender, lang: currentLang  
-                    }) 
+                    method: 'POST', headers: getAuthHeaders(),
+                    body: JSON.stringify({ char_id: activeCharId, message: forcedText || "", chat_history: allChats[activeCharId], len: lenSet, sex: sexSet, user_name: uName, user_gender: uGender, lang: currentLang }) 
                 });
                 const data = await res.json(); 
                 
                 if (data.reply) { 
-                    const replyBox = document.getElementById(typeId);
-                    replyBox.style.opacity = "1";
-                    replyBox.innerText = ""; 
+                    const replyRow = document.getElementById(typeId); replyRow.style.opacity = "1";
+                    const replyBox = replyRow.querySelector('.msg-box'); replyBox.innerText = ""; 
                     
-                    let replyText = data.reply;
-                    let i = 0;
-                    
+                    let replyText = data.reply; let i = 0;
                     function typeChar() {
                         if (i < replyText.length) {
-                            replyBox.appendChild(document.createTextNode(replyText.charAt(i)));
-                            i++;
-                            chatBox.scrollTop = chatBox.scrollHeight;
-                            setTimeout(typeChar, 20); 
-                        } else {
-                            finishMessage(replyText);
-                        }
+                            replyBox.appendChild(document.createTextNode(replyText.charAt(i))); i++;
+                            chatBox.scrollTop = chatBox.scrollHeight; setTimeout(typeChar, 20); 
+                        } else { finishMessage(replyText, data.new_balance); }
                     }
                     typeChar();
 
-                    function finishMessage(finalText) {
+                    function finishMessage(finalText, newBal) {
                         let waitTimer = setInterval(() => {
                             if (minTimePassed) {
                                 clearInterval(waitTimer);
-                                allChats[activeCharId].push({sender: 'char', text: finalText}); 
+                                // Генерируем стату при ответе
+                                let stats = {
+                                    love: Math.floor(Math.random() * 30) + 10, trust: Math.floor(Math.random() * 30) + 10,
+                                    inf: Math.floor(Math.random() * 20) + 5, horny: sexSet > 0 ? Math.floor(Math.random() * 40) + 10 : 0
+                                };
+                                allChats[activeCharId].push({sender: 'char', text: finalText, stats: stats}); 
                                 localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                                if (uid !== OID) updateBalanceUI(data.new_balance); 
-                                unlockChat();
+                                if (uid !== OID && newBal !== undefined) updateBalanceUI(newBal); 
+                                renderChatMessages(); unlockChat();
                             }
                         }, 500);
                     }
-
                 } else { 
-                    document.getElementById(typeId)?.remove(); 
-                    if (data.error) tg.showAlert(data.error); 
-                    unlockChat(); 
+                    document.getElementById(typeId)?.remove(); if (data.error) tg.showAlert(data.error); unlockChat(); 
                 }
-            } catch (e) { 
-                document.getElementById(typeId)?.remove(); 
-                tg.showAlert("Ошибка сервера"); 
-                unlockChat();
-            }
+            } catch (e) { document.getElementById(typeId)?.remove(); tg.showAlert("Ошибка сервера"); unlockChat(); }
 
-            function unlockChat() {
-                isBotTyping = false;
-                input.disabled = false;
-                sendBtn.disabled = false;
-                setTimeout(() => { input.focus(); }, 100);
+            function unlockChat() { isBotTyping = false; if(input) { input.disabled = false; sendBtn.disabled = false; setTimeout(() => { input.focus(); }, 100); } }
+        }
+
+        async function sendMessage() {
+            if(isBotTyping) return; 
+            const input = document.getElementById('chat-input-text'); const text = input.value.trim(); if(!text) return;
+            
+            const uid = getUid(); 
+            if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков!");
+
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            if(!allChats[activeCharId]) allChats[activeCharId] = [];
+            allChats[activeCharId].push({sender: 'user', text: text}); 
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            
+            updateChatOrder(activeCharId); renderChatMessages();
+            triggerBotResponse(uid, allChats, text);
+        }
+
+        function updateChatOrder(charId) {
+            const uid = getUid(); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
+            order = order.filter(id => id != charId); order.unshift(charId); 
+            localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order));
+        }
+
+        function toggleChatMenu(charId, e) {
+            if(e) e.stopPropagation();
+            if(openDropdownId !== null && openDropdownId !== charId) {
+                let old = document.getElementById('chat-dd-' + openDropdownId); if(old) old.style.display = 'none';
+                let oldItem = document.getElementById('chat-item-' + openDropdownId); if(oldItem) oldItem.style.zIndex = 1;
             }
+            let el = document.getElementById('chat-dd-' + charId); let chatItem = document.getElementById('chat-item-' + charId);
+            if(el.style.display === 'flex') { el.style.display = 'none'; if(chatItem) chatItem.style.zIndex = 1; openDropdownId = null; } 
+            else { el.style.display = 'flex'; if(chatItem) chatItem.style.zIndex = 1000; openDropdownId = charId; }
+        }
+
+        function pinChatAction(charId, e) {
+            if(e) e.stopPropagation(); const uid = getUid();
+            let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
+            if(pinned.includes(charId)) { pinned = pinned.filter(id => id != charId); tg.showAlert("Чат откреплен"); } 
+            else { pinned.push(charId); tg.showAlert("Чат закреплен 📌"); }
+            localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); 
+            if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; }
+            openChatList(); 
+        }
+
+        function clearChatAction(charId, e) {
+            if(e) e.stopPropagation();
+            tg.showConfirm("Очистить память? Персонаж забудет диалог.", (yes) => {
+                if(yes) {
+                    const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                    allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; }
+                    openChatList(); tg.showAlert("Память стерта 🧹");
+                }
+            });
+        }
+
+        function deleteChatAction(charId, e) {
+            if(e) e.stopPropagation();
+            tg.showConfirm("Удалить чат полностью?", (yes) => {
+                if(yes) {
+                    const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                    delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]");
+                    pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned));
+                    let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]");
+                    order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order));
+                    if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; }
+                    openChatList(); 
+                }
+            });
         }
 
         // ================= ОСТАЛЬНЫЕ ФУНКЦИИ =================
+        async function renderUserChars() {
+            try {
+                const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); allChars = await res.json(); allChars.sort((a, b) => b.id - a.id); 
+                const list = document.getElementById('user-char-list');
+                if(allChars.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; }
+                const charCards = await Promise.all(allChars.map(async (c) => {
+                    let tName = await neuroTranslate(c.name, currentLang);
+                    return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`;
+                }));
+                list.innerHTML = charCards.join('');
+            } catch (e) {}
+        }
+
+        async function fetchNews() { try { const res = await fetch('/api/get-news', { headers: getAuthHeaders() }); if(res.ok) { allNews = await res.json(); renderNews(); } } catch(e) {} }
+        function renderNews() {
+            const container = document.getElementById('main-news-feed'); if(!container) return;
+            if(allNews.length === 0) { container.innerHTML = ''; return; }
+            const sortedNews = [...allNews].sort((a, b) => b.id - a.id);
+            container.innerHTML = sortedNews.map(n => {
+                let imgTag = n.photo && n.photo.length > 10 ? `<img src="${n.photo}" class="news-img" style="display:block;">` : '';
+                let delBtn = getUid() === OID ? `<span style="color:#ff4444; cursor:pointer; font-size:14px; padding-left:10px;" onclick="deleteNews(${n.id})">✖ Удалить</span>` : '';
+                let d = new Date(n.id).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+                return `<div class="news-card"><div class="news-date"><span>${d}</span> ${delBtn}</div><div class="news-text">${n.text}</div>${imgTag}</div>`;
+            }).join('');
+        }
+        async function publishNews() {
+            const text = document.getElementById('inews-text').value.trim(); const img = document.getElementById('news-preview').src;
+            if(!text && (!img || img.includes('#'))) return tg.showAlert("Введите текст или фото!");
+            await fetch('/api/admin/create-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ newsData: { id: Date.now(), text: text, photo: img.includes('#') ? '' : img } }) });
+            document.getElementById('inews-text').value = ''; document.getElementById('news-preview').src = '#'; document.getElementById('news-preview').style.display = 'none'; document.getElementById('news-limit').innerText = '0/3500';
+            tg.showAlert("Опубликовано!"); back(); fetchNews(); 
+        }
+        async function deleteNews(id) { tg.showConfirm("Удалить новость?", async (yes) => { if(yes) { await fetch('/api/admin/delete-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ news_id: id }) }); fetchNews(); } }); }
+
+        async function renderTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); document.getElementById('task-list').innerHTML = tasks.map(x => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : ''; return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
+        async function renderUserTasks() {
+            try {
+                const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json();
+                const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]"); const list = document.getElementById('user-task-list');
+                if (tasks.length === 0) { list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>Нет заданий</div>`; return; }
+                const taskCards = await Promise.all(tasks.map(async (t) => {
+                    let tName = await neuroTranslate(t.name, currentLang);
+                    if(completed.includes(t.id)) { return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`; }
+                    return `<div class="task-item" id="utask-${t.id}"><span>${tName}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`;
+                }));
+                list.innerHTML = taskCards.join('');
+            } catch(e) {}
+        }
+        async function renderAdminPromos() { try { const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json(); document.getElementById('promo-list').innerHTML = promos.map(p => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : ''; return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
+
         async function buyItem(type, item, currency, price) {
             if (currency === 'ton') {
                 tg.showAlert("Генерация счета CryptoBot...");
                 try {
-                    const res = await fetch('/api/payment/create', { 
-                        method: 'POST', headers: getAuthHeaders(),
-                        body: JSON.stringify({ type: type, item: item, amount_ton: price }) 
-                    });
-                    const data = await res.json(); 
-                    if(data.pay_url) { tg.openLink(data.pay_url); } 
-                    else { tg.showAlert("Ошибка CryptoBot"); }
+                    const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) });
+                    const data = await res.json(); if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); }
                 } catch (e) { tg.showAlert("Error"); }
             } else if (currency === 'stars') {
                 tg.showAlert("Подготовка оплаты Stars...");
                 try {
-                    const res = await fetch('/api/payment/stars-invoice', { 
-                        method: 'POST', headers: getAuthHeaders(),
-                        body: JSON.stringify({ type: type, item: item, amount_stars: price }) 
-                    });
+                    const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) });
                     const data = await res.json();
-                    if(data.invoice_url) { 
-                        tg.openInvoice(data.invoice_url, function(status) { 
-                            if (status === 'paid') { tg.showAlert("Оплата успешна!"); } 
-                            else if (status === 'failed') { tg.showAlert("Ошибка при оплате Stars."); } 
-                        }); 
-                    } else { tg.showAlert("API Error"); }
+                    if(data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата успешна!"); } else if (status === 'failed') { tg.showAlert("Ошибка при оплате."); } }); } else { tg.showAlert("API Error"); }
                 } catch (e) { tg.showAlert("Error"); }
             }
         }
 
         function updateDailyUI() {
-            const ONE_DAY = 24 * 60 * 60 * 1000; 
-            let timePassed = Date.now() - userData.last_daily;
-            let nextStreak = userData.daily_streak + 1; 
-            let is7thDay = (nextStreak % 7 === 0);
-            let baseRew = userData.daily_reward || 10; 
-            let actualRew = is7thDay ? baseRew * 2 : baseRew;
-            
-            let streakText = currentLang === 'en' ? "Streak" : "Стрик";
-            let daysText = currentLang === 'en' ? "days" : "дней";
-            let bonusText = currentLang === 'en' ? "BONUS" : "БОНУС";
-
-            document.getElementById('daily-streak-text').innerText = `${streakText}: ${userData.daily_streak} ${daysText}`;
-            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (${bonusText} x2!)` : "");
-            
+            const ONE_DAY = 24 * 60 * 60 * 1000; let timePassed = Date.now() - userData.last_daily;
+            let nextStreak = userData.daily_streak + 1; let is7thDay = (nextStreak % 7 === 0);
+            let baseRew = userData.daily_reward || 10; let actualRew = is7thDay ? baseRew * 2 : baseRew;
+            document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`;
+            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (БОНУС x2!)` : "");
             clearInterval(dailyTimerInterval);
-            
             if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) {
-                document.getElementById('daily-btn').style.display = 'none'; 
-                document.getElementById('daily-wait').style.display = 'block';
-                
+                document.getElementById('daily-btn').style.display = 'none'; document.getElementById('daily-wait').style.display = 'block';
                 dailyTimerInterval = setInterval(() => {
                     let timeLeft = ONE_DAY - (Date.now() - userData.last_daily);
-                    if (timeLeft <= 0) { 
-                        clearInterval(dailyTimerInterval); location.reload(); 
-                    } else {
+                    if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } else {
                         let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000);
                         h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s;
                         document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`;
                     }
                 }, 1000);
-            } else { 
-                document.getElementById('daily-btn').style.display = 'block'; 
-                document.getElementById('daily-wait').style.display = 'none'; 
-            }
+            } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; }
         }
 
         async function claimDaily() {
             try {
-                const res = await fetch('/api/user/claim-daily', { 
-                    method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({})
-                });
+                const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) });
                 const data = await res.json();
-                if (data.error) { tg.showAlert(data.error); } 
-                else { 
-                    tg.showAlert(`Получено: ${data.reward} 🌙!`); 
-                    userData.shards = data.new_balance; userData.daily_streak = data.streak; userData.last_daily = Date.now(); 
-                    updateBalanceUI(userData.shards); updateDailyUI(); 
-                }
+                if (data.error) { tg.showAlert(data.error); } else { tg.showAlert(`Получено: ${data.reward} 🌙!`); userData.shards = data.new_balance; userData.daily_streak = data.streak; userData.last_daily = Date.now(); updateBalanceUI(userData.shards); updateDailyUI(); }
             } catch (e) { tg.showAlert("Error"); }
         }
 
         async function openDossier(id) {
-            const c = allChars.find(x => x.id === id); 
-            if(!c) return; 
-            activeCharId = id;
-            document.getElementById('dos-name').innerText = await neuroTranslate(c.name, currentLang); 
-            document.getElementById('dos-img').src = c.photo; 
-            document.getElementById('dos-age').innerText = c.age;
-            document.getElementById('dos-gender').innerText = c.gender === 'm' ? "Мужской" : "Женский"; 
+            const c = allChars.find(x => x.id === id); if(!c) return; activeCharId = id;
+            document.getElementById('dos-name').innerText = await neuroTranslate(c.name, currentLang); document.getElementById('dos-img').src = c.photo; 
+            document.getElementById('dos-age').innerText = c.age; document.getElementById('dos-gender').innerText = c.gender === 'm' ? "Мужской" : "Женский"; 
             document.getElementById('dos-desc').innerText = await neuroTranslate(c.desc, currentLang);
-            if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } 
-            openPanel('p-char-dossier');
+            if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } openPanel('p-char-dossier');
         }
 
-        function setCharGender(g) { 
-            currentCharGender = g; 
-            document.getElementById('cg-m').classList.toggle('active', g === 'm'); 
-            document.getElementById('cg-f').classList.toggle('active', g === 'f'); 
-        }
+        function setCharGender(g) { currentCharGender = g; document.getElementById('cg-m').classList.toggle('active', g === 'm'); document.getElementById('cg-f').classList.toggle('active', g === 'f'); }
 
         async function saveCharDB() {
             const n = document.getElementById('ich-name').value; const img = document.getElementById('char-preview').src;
-            if(!n || img.includes('#')) return tg.showAlert("Name and photo are required!");
+            if(!n || img.includes('#')) return tg.showAlert("Name and photo required!");
             const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img };
             await fetch('/api/admin/create-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData: charData }) });
             tg.showAlert("Created!"); renderUserChars();
         }
 
-        async function deleteChar() { 
-            await fetch('/api/admin/delete-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) }); 
-            tg.showAlert("Deleted!"); renderUserChars(); back(); 
-        }
+        async function deleteChar() { await fetch('/api/admin/delete-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) }); tg.showAlert("Deleted!"); renderUserChars(); back(); }
 
         async function modFunds(t, a) {
             let idField = t === 'shards' ? 'ish-id' : 'isu-id'; let valField = t === 'shards' ? 'ish-val' : 'isu-type';
             const target_id = document.getElementById(idField).value; const v = document.getElementById(valField).value;
             if(!target_id) return tg.showAlert("Enter ID!");
-            const body = { target_id: target_id, action: a }; 
-            if(t === 'shards') body.amount = v; else body.sub_type = v;
+            const body = { target_id: target_id, action: a }; if(t === 'shards') body.amount = v; else body.sub_type = v;
             const res = await fetch(t === 'shards' ? '/api/admin/manage-shards' : '/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(body) });
             const data = await res.json(); tg.showAlert(data.message || "Error");
         }
 
         async function createPromo() {
-            const code = document.getElementById('ip-code').value.toUpperCase().trim(); 
-            const rew = parseInt(document.getElementById('ip-rew').value);
-            const hours = parseInt(document.getElementById('ip-hours').value); 
-            
+            const code = document.getElementById('ip-code').value.toUpperCase().trim(); const rew = parseInt(document.getElementById('ip-rew').value); const hours = parseInt(document.getElementById('ip-hours').value); 
             if(!code || !rew) return;
-            
-            await fetch('/api/admin/create-promo', { 
-                method: 'POST', 
-                headers: getAuthHeaders(), 
-                body: JSON.stringify({ promoData: {code, reward: rew, hours: hours} }) 
-            });
-            
-            document.getElementById('ip-code').value = ''; 
-            document.getElementById('ip-rew').value = ''; 
-            renderAdminPromos(); 
-            tg.showAlert(`Создано на ${hours} ч. и отправлено в канал!`);
+            await fetch('/api/admin/create-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ promoData: {code, reward: rew, hours: hours} }) });
+            document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = ''; renderAdminPromos(); tg.showAlert(`Создано на ${hours} ч.!`);
         }
 
-        async function deletePromo(code) {
-            tg.showConfirm("Delete promo " + code + "?", async (yes) => {
-                if(yes) {
-                    await fetch('/api/admin/delete-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ code: code }) });
-                    renderAdminPromos(); tg.showAlert("Deleted!");
-                }
-            });
-        }
+        async function deletePromo(code) { tg.showConfirm("Delete " + code + "?", async (yes) => { if(yes) { await fetch('/api/admin/delete-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ code: code }) }); renderAdminPromos(); tg.showAlert("Deleted!"); } }); }
 
         async function usePromo() {
-            if (promoLock) return;
-            promoLock = true;
+            if (promoLock) return; promoLock = true;
             const btn = document.getElementById('promo-btn'); const oldText = btn.innerText; btn.innerText = "ПРОВЕРКА..."; btn.style.opacity = "0.5";
             try {
                 const uid = getUid(); const inputField = document.getElementById('user-promo-input'); const input = inputField.value.toUpperCase().trim();
                 if(!input) { promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; return; }
-                const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
-                const promos = await res.json();
-                const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]"); 
-                const found = promos.find(p => p.code === input);
-                
+                const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json();
+                const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]"); const found = promos.find(p => p.code === input);
                 if(!found) { tg.showAlert("Неверный код"); } else if(used.includes(input)) { tg.showAlert("Уже активирован"); } 
                 else {
                     await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: found.reward }) });
@@ -1723,90 +1448,45 @@
 
         async function modTask(act, tid=null) {
             if(act==='add') {
-                const n = document.getElementById('it-name').value; const rType = document.getElementById('it-rtype').value; 
-                if(!n) return;
+                const n = document.getElementById('it-name').value; const rType = document.getElementById('it-rtype').value; if(!n) return;
                 const taskData = { id: Date.now(), name: n, link: document.getElementById('it-link').value, rType: rType, rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value };
                 await fetch('/api/admin/create-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ taskData: taskData }) });
             }
             renderTasks(); renderUserTasks();
         }
 
-        async function deleteTask(id) {
-            tg.showConfirm("Delete task?", async (yes) => {
-                if(yes) {
-                    await fetch('/api/admin/delete-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) });
-                    renderTasks(); renderUserTasks(); tg.showAlert("Deleted!");
-                }
-            });
-        }
+        async function deleteTask(id) { tg.showConfirm("Delete task?", async (yes) => { if(yes) { await fetch('/api/admin/delete-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) }); renderTasks(); renderUserTasks(); tg.showAlert("Deleted!"); } }); }
 
-        function startTask(id, link) { 
-            tg.openLink(link); 
-            if(!clickedTasks.includes(id)) clickedTasks.push(id); 
-            const taskDiv = document.getElementById(`utask-${id}`); 
-            if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } 
-        }
+        function startTask(id, link) { tg.openLink(link); if(!clickedTasks.includes(id)) clickedTasks.push(id); const taskDiv = document.getElementById(`utask-${id}`); if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } }
 
         async function checkTask(id) { 
-            if(!clickedTasks.includes(id)) return; 
-            tg.showAlert("Проверка подписки..."); 
-            try {
-                const res = await fetch('/api/check-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) });
-                const data = await res.json();
-                if(data.success) { completeTaskAction(id); } else { tg.showAlert(data.error || "Условие не выполнено!"); }
-            } catch(e) { tg.showAlert("Error"); }
+            if(!clickedTasks.includes(id)) return; tg.showAlert("Проверка..."); 
+            try { const res = await fetch('/api/check-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) }); const data = await res.json(); if(data.success) { completeTaskAction(id); } else { tg.showAlert(data.error || "Не выполнено!"); } } catch(e) { tg.showAlert("Error"); }
         }
 
         async function completeTaskAction(id) {
-            const uid = getUid(); 
-            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-            const tasks = await res.json();
-            const t = tasks.find(x => x.id === id); 
-            if(!t) return;
-            let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); 
-            if(completed.includes(id)) return;
-            
-            if(t.rType === 'shards') { 
-                await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: t.rVal }) }); 
-                if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal)); 
-            } else if(t.rType === 'sub7') { 
-                await fetch('/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', sub_type: "Premium" }) }); 
-            }
-            completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); 
-            tg.showAlert("Награда получена!"); renderUserTasks();
+            const uid = getUid(); const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json();
+            const t = tasks.find(x => x.id === id); if(!t) return;
+            let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); if(completed.includes(id)) return;
+            if(t.rType === 'shards') { await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: t.rVal }) }); if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal)); } 
+            else if(t.rType === 'sub7') { await fetch('/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', sub_type: "Premium" }) }); }
+            completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); tg.showAlert("Получено!"); renderUserTasks();
         }
 
         function shareRef() {
             const uid = getUid(); const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`;
-            const text = `Залетай в Anime AI! Общайся с ИИ-персонажами без цензуры. Переходи по моей ссылке и мы оба получим по 100 🌙!`;
-            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`;
-            tg.openTelegramLink(shareUrl);
+            const text = `Залетай в Anime AI! Переходи по моей ссылке и мы оба получим по 100 🌙!`;
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`; tg.openTelegramLink(shareUrl);
         }
 
         function updateLiveNick(v) { let n = v || "User"; document.getElementById('u-name').innerText = n; document.getElementById('prof-nick').innerText = n; localStorage.setItem('m_nick_' + getUid(), n); }
         function setGender(g, s=false) { document.getElementById('g-m')?.classList.toggle('active', g === 'm'); document.getElementById('g-f')?.classList.toggle('active', g === 'f'); if(!s) localStorage.setItem('m_gender_' + getUid(), g); }
         function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
-        function updateSex(v, s=false) { 
-            const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; 
-            document.getElementById('sex-val').innerText = v; 
-            let sliderMax = document.getElementById('sex-slider').max;
-            document.getElementById('sex-info').innerText = sliderMax == 0 ? "Недоступно для вашей подписки" : `Уровень ${v}: ${m_ru[v]}`; 
-            document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; 
-            if(!s) localStorage.setItem('m_sex_' + getUid(), v); 
-        }
+        function updateSex(v, s=false) { const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; document.getElementById('sex-val').innerText = v; let sliderMax = document.getElementById('sex-slider').max; document.getElementById('sex-info').innerText = sliderMax == 0 ? "Недоступно для вашей подписки" : `Уровень ${v}: ${m_ru[v]}`; document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; if(!s) localStorage.setItem('m_sex_' + getUid(), v); }
         function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
         function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(i.files[0]); } }
-        
-        async function modAdmin(a) { 
-            const id = document.getElementById('ia-id').value; if(!id) return; 
-            await fetch('/api/owner/set-admin', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: id, status: a === 'add' }) }); 
-            tg.showAlert("Updated!"); 
-        }
-        async function savePrices(type) { 
-            const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; 
-            await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); 
-            tg.showAlert("Saved!"); 
-        }
+        async function modAdmin(a) { const id = document.getElementById('ia-id').value; if(!id) return; await fetch('/api/owner/set-admin', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: id, status: a === 'add' }) }); tg.showAlert("Updated!"); }
+        async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Saved!"); }
         function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
         
         window.onload = init;
