@@ -17,9 +17,6 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "no-key";
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
 const TG_BOT_TOKEN = "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
 
-// !!! СЮДА ВСТАВЬ СВОЙ КЛЮЧ ОТ HUGGING FACE !!!
-const HF_TOKEN = "hf=RxsMhXAUKtkAdRuQdkBnluRRIlyUqxtrIk"; 
-
 const sendTgMessage = async (tg_id, text) => {
     try {
         await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
@@ -49,13 +46,7 @@ const userSchema = new mongoose.Schema({
     invited_by: { type: Number, default: null } 
 });
 const charSchema = new mongoose.Schema({ id: Number, name: String, age: Number, gender: String, desc: String, photo: String });
-const promoSchema = new mongoose.Schema({ 
-    code: { type: String, unique: true }, 
-    reward: Number,
-    expiresAt: Number, 
-    messageId: Number, 
-    emoji: String      
-});
+const promoSchema = new mongoose.Schema({ code: { type: String, unique: true }, reward: Number, expiresAt: Number, messageId: Number, emoji: String });
 const taskSchema = new mongoose.Schema({ id: Number, name: String, link: String, rType: String, rVal: Number });
 const priceSchema = new mongoose.Schema({ item_id: { type: String, unique: true }, stars: { type: Number, default: 0 }, ton: { type: Number, default: 0 } });
 const newsSchema = new mongoose.Schema({ id: Number, text: String, photo: String });
@@ -194,7 +185,7 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (С НОВОЙ ЯЗЫКОВОЙ ЛОГИКОЙ) =================
+// ================= API: ЧАТ =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
@@ -205,7 +196,7 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         let requestedSex = Number(sex) || 0;
         let userSub = (uid === OWNER_ID) ? "ultra" : (user.subscription || "FREE").trim().toLowerCase();
         
-        if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "6 уровень откровенности доступен только с подпиской Ultra!" });
+        if (requestedSex >= 6 && userSub !== "ultra") return res.status(403).json({ error: "Только с подпиской Ultra!" });
 
         if (uid !== OWNER_ID) {
             if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" });
@@ -255,9 +246,9 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
 2. Обращайся к собеседнику по имени: ${uName}. Учитывай его пол (${uGender}) в окончаниях.
 3. Тон: ${sexLevels[requestedSex]}.
 4. Формат: Твои действия и мысли СТРОГО внутри звездочек (*смотрит*). Прямая речь - без звездочек. В КАЖДОМ твоем ответе ОБЯЗАТЕЛЬНО должны быть слова вслух (прямая речь). Не отвечай только одними действиями!
-5. Объем: ${sizeInstruction} ВНИМАНИЕ: никогда не считай слова! Пиши естественно в рамках указанных предложений.
-6. ЦЕЛОСТНОСТЬ: ТВОЙ ОТВЕТ ДОЛЖЕН БЫТЬ ПОЛНОСТЬЮ ЗАКОНЧЕН! КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО обрывать текст на полуслове или запятой. Последним символом в твоем тексте ВСЕГДА должна быть точка (.), вопросительный знак (?), восклицательный знак (!) или закрывающая звездочка (*).
-7. ЯЗЫК (КРИТИЧНО!): Твой ответ ОБЯЗАТЕЛЬНО должен быть написан на ${aiLang} языке! Никаких исключений, отвечай строго на этом языке.`;
+5. Объем: ${sizeInstruction}
+6. ЦЕЛОСТНОСТЬ: ТВОЙ ОТВЕТ ДОЛЖЕН БЫТЬ ПОЛНОСТЬЮ ЗАКОНЧЕН! Последним символом ВСЕГДА должна быть точка (.), знак вопроса (?) или закрывающая звездочка (*).
+7. ЯЗЫК: Твой ответ ОБЯЗАТЕЛЬНО должен быть написан на ${aiLang} языке!`;
 
         let historyText = "--- ИСТОРИЯ ДИАЛОГА ---\n";
         if (chat_history && chat_history.length > 0) {
@@ -406,17 +397,13 @@ app.post('/api/tg-webhook', async (req, res) => {
 
 // ================= АДМИНКА И ПРОВЕРКА ЗАДАНИЙ =================
 app.get('/api/get-news', checkTgAuth, async (req, res) => res.json(await News.find()));
-
 app.post('/api/admin/create-news', checkTgAuth, async (req, res) => {
     if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер!" });
-    await new News(req.body.newsData).save();
-    res.json({ message: "Новость опубликована" });
+    await new News(req.body.newsData).save(); res.json({ message: "Новость опубликована" });
 });
-
 app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => {
     if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер!" });
-    await News.findOneAndDelete({ id: req.body.news_id });
-    res.json({ message: "Новость удалена" });
+    await News.findOneAndDelete({ id: req.body.news_id }); res.json({ message: "Новость удалена" });
 });
 
 app.get('/api/get-characters', checkTgAuth, async (req, res) => res.json(await Character.find()));
@@ -425,17 +412,13 @@ app.get('/api/get-promos', checkTgAuth, async (req, res) => res.json(await Promo
 
 app.post('/api/check-task', checkTgAuth, async (req, res) => {
     try {
-        const { task_id } = req.body;
-        const uid = req.tg_user_id;
-        const task = await Task.findOne({ id: task_id });
+        const { task_id } = req.body; const uid = req.tg_user_id; const task = await Task.findOne({ id: task_id });
         if (!task) return res.json({ success: false, error: "Задание не найдено" });
-
         const match = task.link.match(/t\.me\/(?!\+)([a-zA-Z0-9_]+)/);
         if (match && match[1]) {
             const channel = "@" + match[1];
             const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/getChatMember?chat_id=${channel}&user_id=${uid}`);
             const tgData = await tgRes.json();
-            
             if (tgData.ok && ['member', 'administrator', 'creator'].includes(tgData.result.status)) { return res.json({ success: true }); } 
             else { return res.json({ success: false, error: "Сначала подпишись на канал! ❌" }); }
         } else { return res.json({ success: true }); }
@@ -446,7 +429,6 @@ app.post('/api/admin/manage-shards', checkTgAuth, async (req, res) => {
     const sender_id = req.tg_user_id; const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
     const action = (req.body.action || '').toLowerCase().trim(); let amount = Math.abs(Number(req.body.amount)); 
-    
     if (action !== 'add') {
         if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать осколки!" });
         let user = await User.findOne({ tg_id: target_id }); if (user && user.shards < amount) amount = user.shards; 
@@ -459,7 +441,6 @@ app.post('/api/admin/manage-shards', checkTgAuth, async (req, res) => {
 app.post('/api/admin/manage-sub', checkTgAuth, async (req, res) => {
     const sender_id = req.tg_user_id; const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
-    
     if (req.body.action === 'add') {
         let days = 30; if (isOwner && req.body.days) days = Number(req.body.days); 
         let user = await User.findOne({ tg_id: target_id }); let expDate = user && user.sub_exp > Date.now() ? new Date(user.sub_exp) : new Date(); expDate.setDate(expDate.getDate() + days);
@@ -472,118 +453,61 @@ app.post('/api/admin/manage-sub', checkTgAuth, async (req, res) => {
 });
 
 app.post('/api/admin/create-char', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Character(req.body.charData).save(); res.json({ message: "Персонаж добавлен!" }); });
-
 app.post('/api/admin/delete-char', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Character.findOneAndDelete({ id: req.body.char_id }); res.json({ message: "Удален" }); });
-
 app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => { 
     if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); 
-    
-    let { code, reward, hours } = req.body.promoData;
-    hours = Number(hours) || 1;
-    if (hours < 1) hours = 1;
-    if (hours > 3) hours = 3;
-
-    const emojis = ["🎁", "🔥", "💎", "🚀", "⚡️", "🌙", "✨", "🎉"];
-    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-    const expiresAt = Date.now() + (hours * 60 * 60 * 1000); 
-    
-    let hourText = hours === 1 ? "1 Час" : (hours === 3 ? "3 Часа" : "2 Часа");
-    const text = `${randomEmoji}\nПромокод «<code>${code}</code>» даёт ${reward} осколков\nUPD: ${hourText}`;
-
+    let { code, reward, hours } = req.body.promoData; hours = Number(hours) || 1; if (hours < 1) hours = 1; if (hours > 3) hours = 3;
+    const emojis = ["🎁", "🔥", "💎", "🚀", "⚡️", "🌙", "✨", "🎉"]; const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)]; const expiresAt = Date.now() + (hours * 60 * 60 * 1000); 
+    let hourText = hours === 1 ? "1 Час" : (hours === 3 ? "3 Часа" : "2 Часа"); const text = `${randomEmoji}\nПромокод «<code>${code}</code>» даёт ${reward} осколков\nUPD: ${hourText}`;
     try {
-        const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: "@Anime_ai_18", text: text, parse_mode: 'HTML' })
-        });
-        const tgData = await tgRes.json();
-        
-        let messageId = 0;
-        if (tgData.ok) { messageId = tgData.result.message_id; }
-
-        await new Promo({ code, reward, expiresAt, messageId, emoji: randomEmoji }).save(); 
-        res.json({ message: "Промо создан и отправлен в канал!" });
-    } catch(e) {
-        res.status(500).json({ error: "Ошибка при отправке в канал" });
-    }
+        const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: "@Anime_ai_18", text: text, parse_mode: 'HTML' }) });
+        const tgData = await tgRes.json(); let messageId = 0; if (tgData.ok) { messageId = tgData.result.message_id; }
+        await new Promo({ code, reward, expiresAt, messageId, emoji: randomEmoji }).save(); res.json({ message: "Промо создан и отправлен в канал!" });
+    } catch(e) { res.status(500).json({ error: "Ошибка при отправке в канал" }); }
 });
-
 app.post('/api/admin/delete-promo', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Promo.findOneAndDelete({ code: req.body.code }); res.json({ message: "Промо удален" }); });
-
 app.post('/api/admin/create-task', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Task(req.body.taskData).save(); res.json({ message: "Задание добавлено" }); });
-
 app.post('/api/admin/delete-task', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Task.findOneAndDelete({ id: req.body.task_id }); res.json({ message: "Задание удалено" }); });
+app.post('/api/owner/set-admin', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" }); await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true }); if (req.body.status) await sendTgMessage(req.body.target_id, `Администратор сделал вас админом`); else await sendTgMessage(req.body.target_id, `Администратор забрал у вас права админа`); res.json({ message: "Статус обновлен" }); });
+app.post('/api/owner/set-price', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" }); await Price.findOneAndUpdate({ item_id: req.body.item_id }, { stars: Number(req.body.stars), ton: Number(req.body.ton) }, { upsert: true }); res.json({ message: "Прайс-лист успешно обновлен!" }); });
 
-app.post('/api/owner/set-admin', checkTgAuth, async (req, res) => {
-    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
-    await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true });
-    if (req.body.status) await sendTgMessage(req.body.target_id, `Администратор сделал вас админом`); else await sendTgMessage(req.body.target_id, `Администратор забрал у вас права админа`);
-    res.json({ message: "Статус обновлен" });
-});
-
-app.post('/api/owner/set-price', checkTgAuth, async (req, res) => {
-    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
-    const { item_id, stars, ton } = req.body;
-    await Price.findOneAndUpdate({ item_id }, { stars: Number(stars), ton: Number(ton) }, { upsert: true });
-    res.json({ message: "Прайс-лист успешно обновлен!" });
-});
-
-// Функция автоперевода (ИИ понимает только Английский)
-async function translateToEng(text) {
-    if(!text) return "";
-    try {
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`);
-        const data = await res.json();
-        return data[0].map(item => item[0]).join('');
-    } catch(e) { return text; }
-}
-
-// ================= API: СТРОГАЯ ГЕНЕРАЦИЯ ПО ФОТО ПЕРСОНАЖА (IMAGE-TO-IMAGE) =================
+// ================= API: СТРОГАЯ ГЕНЕРАЦИЯ МЕДИА БЕЗ КЛЮЧЕЙ =================
 app.post('/api/generate-media', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message_text, type } = req.body;
         
-        if (typeof HF_TOKEN === 'undefined' || HF_TOKEN.includes("ВСТАВЬ_СЮДА")) {
-            return res.status(500).json({ error: "Овнер не добавил токен HuggingFace в server.js!" });
-        }
-
+        // 1. Берем персонажа из БД
         const char = await Character.findOne({ id: char_id });
-        if (!char || !char.photo) return res.status(404).json({ error: "Персонаж или его фото не найдены в БД" });
+        if (!char) return res.status(404).json({ error: "Персонаж не найден" });
 
-        const safeText = (message_text || "").replace(/<[^>]*>?/gm, '').substring(0, 100);
-        const engAction = await translateToEng(safeText);
-        const engDesc = await translateToEng(char.desc);
+        // 2. Чистим текст и формируем промпт
+        const safeText = (message_text || "").replace(/[^a-zA-Zа-яА-Я0-9\s,\.]/g, '').substring(0, 100);
+        const seed = Math.floor(Math.random() * 10000000);
 
-        let prompt = `masterpiece, best quality, anime style, 1girl/1boy, solo, ${engDesc}, doing: ${engAction}`;
-        if (type === 'circle') prompt += ", closeup face portrait, looking directly at viewer, speaking";
+        let prompt = `masterpiece, best quality, anime style, highly detailed, 1girl/1boy, solo, character name: ${char.name}, character description: ${char.desc}, current action: ${safeText}`;
+        if (type === 'circle') prompt += ", closeup face portrait, looking directly at viewer, speaking, vlogger style";
 
-        const base64Data = char.photo.replace(/^data:image\/\w+;base64,/, "");
+        // 3. Переводим промпт на английский через Google Translate (бесплатно, без API ключей)
+        const translateRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(prompt)}`);
+        const translateData = await translateRes.json();
+        const engPrompt = translateData[0].map(item => item[0]).join('');
 
-        const response = await fetch("https://api-inference.huggingface.co/models/cagliostrolab/animagine-xl-3.1", {
-            headers: {
-                "Authorization": `Bearer ${HF_TOKEN}`,
-                "Content-Type": "application/json",
-                "x-wait-for-model": "true"
-            },
-            method: "POST",
-            body: JSON.stringify({
-                inputs: prompt,
-                image: base64Data
-            }),
-        });
+        // 4. Отправляем промпт в открытую, БЕСПЛАТНУЮ нейросеть Pollinations (никакие ключи не нужны!)
+        const encodedPrompt = encodeURIComponent(engPrompt);
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&nologo=true&seed=${seed}&model=anime`;
 
-        if (!response.ok) {
-            throw new Error("Нейросеть перегружена. Попробуй еще раз.");
-        }
+        // 5. Загружаем картинку на сервер и превращаем в Base64, чтобы вшить в чат намертво
+        const imgRes = await fetch(imageUrl);
+        if (!imgRes.ok) throw new Error("API генерации не ответило");
 
-        const arrayBuffer = await response.arrayBuffer();
+        const arrayBuffer = await imgRes.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        const outBase64 = buffer.toString('base64');
-        
-        res.json({ url: `data:image/jpeg;base64,${outBase64}` });
+        const base64 = buffer.toString('base64');
 
+        res.json({ url: `data:image/jpeg;base64,${base64}` });
     } catch (e) {
-        console.error("Ошибка Image-to-Image:", e.message);
-        res.status(500).json({ error: "Сбой генерации. ИИ не смог обработать фото." });
+        console.error("Ошибка генерации:", e.message);
+        res.status(500).json({ error: "Сбой генерации. ИИ перегружен, попробуй позже." });
     }
 });
 
