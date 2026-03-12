@@ -147,6 +147,29 @@
         .news-date { font-size: 10px; color: #bc42f5; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; }
         .news-text { font-size: 12px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
         .news-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #2d164d; display: none; }
+
+        /* ================= РЕСПОНСИВНОСТЬ (ПК, ПЛАНШЕТЫ И ЛАНДШАФТ) ================= */
+        @media (min-width: 768px) {
+            .menu-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .char-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .con-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .msg-bot-wrapper, .msg-user-wrapper { max-width: 600px; }
+            .shop-item { flex-direction: row; justify-content: space-between; text-align: left; align-items: center; }
+            .shop-desc { text-align: left; margin-bottom: 0; margin-right: 20px; flex: 1; }
+            .buy-btns { width: auto; flex-shrink: 0; }
+            #app, .overlay { padding-left: 10vw; padding-right: 10vw; }
+        }
+        @media (min-width: 1200px) {
+            .menu-grid { grid-template-columns: repeat(5, 1fr); }
+            .char-grid { grid-template-columns: repeat(6, 1fr); }
+            #app, .overlay { padding-left: 20vw; padding-right: 20vw; }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            #app, .overlay { padding-top: 20px !important; }
+            .u-header { margin-bottom: 10px; }
+            .moon-logo { width: 60px; height: 60px; }
+            #p-chat > div:first-child { padding-top: 20px !important; }
+        }
     </style>
 </head>
 <body>
@@ -668,7 +691,6 @@
             } setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
-        // ================= ИСПРАВЛЕННЫЕ КНОПКИ ГЕНЕРАЦИИ БЕЗ БЛОКИРОВОК =================
         async function actionPhoto(index) {
             const uid = getUid(); 
             let sub = (userData.subscription || "FREE").trim().toUpperCase();
@@ -677,27 +699,37 @@
             if(uid !== OID && userData.shards < cost) return tg.showAlert(`❌ Нужно ${cost} 🌙!`);
             if(uid !== OID) updateBalanceUI(userData.shards - cost);
             
-            tg.showAlert("⏳ ИИ рисует фото... Ожидайте около 10-15 секунд.");
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, ''); 
+
+            const loadId = "load-ph-" + Date.now();
+            allChats[activeCharId][index].text += `<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ рисует фото...</div>`;
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            renderChatMessages();
             
             try {
-                let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-                let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, ''); 
-                
                 const res = await fetch('/api/generate-media', {
                     method: 'POST', headers: getAuthHeaders(),
                     body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'photo' })
                 });
-                
                 const data = await res.json();
+                
+                allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ рисует фото...</div>`, '');
+
                 if(data.url) {
                     allChats[activeCharId][index].text += `<br><br><img src="${data.url}" style="width:100%; border-radius:10px; margin-top:5px; border:1px solid #bc42f5;">`;
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
                     renderChatMessages();
                 } else { 
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
                     if(uid !== OID) updateBalanceUI(userData.shards + cost);
                     tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
                 }
             } catch(e) { 
+                allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ рисует фото...</div>`, '');
+                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
                 if(uid !== OID) updateBalanceUI(userData.shards + cost);
                 tg.showAlert("❌ Ошибка связи с сервером!"); 
             }
@@ -711,27 +743,38 @@
             if(uid !== OID && userData.shards < 5) return tg.showAlert(`❌ Нужно 5 🌙!`);
             
             if(uid !== OID) updateBalanceUI(userData.shards - 5);
-            tg.showAlert("⏳ ИИ создает кружок... Ожидайте 10-15 секунд.");
+            
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, '');
+
+            const loadId = "load-cr-" + Date.now();
+            allChats[activeCharId][index].text += `<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ создает кружок...</div>`;
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            renderChatMessages();
             
             try {
-                let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
-                let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, '');
-                
                 const res = await fetch('/api/generate-media', {
                     method: 'POST', headers: getAuthHeaders(),
                     body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'circle' })
                 });
-                
                 const data = await res.json();
+                
+                allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ создает кружок...</div>`, '');
+
                 if(data.url) {
                     allChats[activeCharId][index].text += `<br><br><div style="width:120px; height:120px; border-radius:50%; background:#bc42f5 url('${data.url}') center/cover; border:3px solid #bc42f5; margin:10px auto; box-shadow: 0 0 10px #bc42f5; animation: pulseMoon 2s infinite;"></div>`;
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
                     renderChatMessages();
                 } else { 
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
                     if(uid !== OID) updateBalanceUI(userData.shards + 5);
                     tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
                 }
             } catch(e) { 
+                allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ создает кружок...</div>`, '');
+                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
                 if(uid !== OID) updateBalanceUI(userData.shards + 5);
                 tg.showAlert("❌ Ошибка связи с сервером!"); 
             }
