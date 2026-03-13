@@ -365,6 +365,7 @@ app.post('/api/payment/webhook', async (req, res) => {
 app.post('/api/tg-webhook', async (req, res) => {
     try {
         const update = req.body;
+        
         if (update.message && update.message.text && update.message.text.startsWith('/start')) {
             const chatId = update.message.chat.id;
             const textParts = update.message.text.split(' ');
@@ -376,12 +377,14 @@ app.post('/api/tg-webhook', async (req, res) => {
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    chat_id: chatId, text: welcomeText, parse_mode: 'Markdown',
+                    chat_id: chatId, 
+                    text: welcomeText, 
+                    parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
-                            [ { text: "Открыть приложение", url: appUrl } ],
-                            [ { text: "Персонажи", url: "https://t.me/anime_ai_charactersbot" } ],
-                            [ { text: "Наш канал", url: "https://t.me/Anime_ai_18" }, { text: "Служба поддержки", url: "https://t.me/suppurtmoders_bot" } ]
+                            [ { text: "🎮 Открыть приложение", url: appUrl } ],
+                            [ { text: "🎭 Персонажи", url: "https://t.me/anime_ai_charactersbot" } ],
+                            [ { text: "📢 Наш канал", url: "https://t.me/Anime_ai_18" }, { text: "🛠 Служба поддержки", url: "https://t.me/suppurtmoders_bot" } ]
                         ]
                     }
                 })
