@@ -232,7 +232,7 @@ app.post('/api/user/suggest-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (OPENROUTER UNCENSORED) =================
+// ================= API: ЧАТ (OPENROUTER STHENO UNCENSORED) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
@@ -328,7 +328,7 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
                         "X-Title": "Anime AI 18+"
                     },
                     body: JSON.stringify({
-                        model: "cognitivecomputations/dolphin-mixtral-8x7b",
+                        model: "sao10k/l3-8b-stheno-v3.2",
                         messages: messages,
                         max_tokens: 300,
                         temperature: 0.85
