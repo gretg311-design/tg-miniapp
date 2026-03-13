@@ -468,7 +468,6 @@ app.post('/api/tg-webhook', async (req, res) => {
                     reply_markup: {
                         inline_keyboard: [
                             [ { text: "🎮 Открыть приложение", url: appUrl } ],
-                            [ { text: "🎭 Персонажи", url: "https://t.me/anime_ai_charactersbot" } ],
                             [ { text: "📢 Наш канал", url: "https://t.me/Anime_ai_18" }, { text: "🛠 Служба поддержки", url: "https://t.me/suppurtmoders_bot" } ]
                         ]
                     }
