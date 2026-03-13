@@ -379,8 +379,9 @@ app.post('/api/tg-webhook', async (req, res) => {
                     chat_id: chatId, text: welcomeText, parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
-                            [ { text: "📱 Открыть", url: appUrl }, { text: "📝 Создать перса", url: "https://t.me/anime_ai_charactersbot" } ],
-                            [ { text: "📰 Наш канал", url: "https://t.me/Anime_ai_18" }, { text: "❓ Поддержка", url: "https://t.me/suppurtmoders_bot" } ]
+                            [ { text: "Открыть приложение", url: appUrl } ],
+                            [ { text: "Персонажи", url: "https://t.me/anime_ai_charactersbot" } ],
+                            [ { text: "Наш канал", url: "https://t.me/Anime_ai_18" }, { text: "Служба поддержки", url: "https://t.me/suppurtmoders_bot" } ]
                         ]
                     }
                 })
@@ -471,7 +472,6 @@ app.post('/api/admin/manage-sub', checkTgAuth, async (req, res) => {
 app.post('/api/admin/create-char', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Character(req.body.charData).save(); res.json({ message: "Персонаж добавлен!" }); });
 app.post('/api/admin/delete-char', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Character.findOneAndDelete({ id: req.body.char_id }); res.json({ message: "Удален" }); });
 
-// ================= ИСПРАВЛЕННОЕ СОЗДАНИЕ ПРОМОКОДОВ (ЗАЩИТА ОТ ДУБЛЕЙ) =================
 app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => { 
     if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); 
     
@@ -481,7 +481,6 @@ app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => {
     if (hours > 3) hours = 3;
 
     try {
-        // Сначала проверяем, есть ли уже такой код в базе. Если есть - сразу отбиваем запрос.
         const exists = await Promo.findOne({ code });
         if (exists) return res.status(400).json({ error: "Такой промокод уже существует!" });
 
@@ -489,11 +488,9 @@ app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => {
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
         const expiresAt = Date.now() + (hours * 60 * 60 * 1000); 
 
-        // Записываем код в базу СРАЗУ, чтобы второй случайный клик не прошел
         const newPromo = new Promo({ code, reward, expiresAt, emoji: randomEmoji });
         await newPromo.save();
         
-        // Только если код записался в базу, отправляем сообщение в группу
         let hourText = hours === 1 ? "1 Час" : (hours === 3 ? "3 Часа" : "2 Часа");
         const text = `${randomEmoji}\nПромокод «<code>${code}</code>» даёт ${reward} осколков\nUPD: ${hourText}`;
 
@@ -504,7 +501,6 @@ app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => {
         
         const tgData = await tgRes.json();
         
-        // Если сообщение отправлено успешно - сохраняем его айди для удаления потом
         if (tgData.ok) { 
             newPromo.messageId = tgData.result.message_id; 
             await newPromo.save();
@@ -528,19 +524,15 @@ app.post('/api/generate-media', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message_text, type } = req.body;
         
-        // 1. Берем перса из БД
         const char = await Character.findOne({ id: char_id });
         if (!char) return res.status(404).json({ error: "Персонаж не найден" });
 
-        // 2. Чистим текст
         const safeText = (message_text || "").replace(/<[^>]*>?/gm, '').substring(0, 150);
 
-        // 3. Формируем железобетонный промпт
         let finalEngPrompt = `masterpiece, best quality, anime style, 1girl/1boy, solo, ${char.name}, ${char.desc}, doing this: ${safeText}`;
         if (type === 'circle') finalEngPrompt += ", closeup face portrait, looking directly at viewer, speaking";
 
         try {
-            // Просим Gemini перевести на инглиш и сделать промпт идеальным
             let promptInstruction = `Translate and enhance this to a short Stable Diffusion prompt (english tags only, separated by commas, no intro/outro). Character: ${char.name}. Description: ${char.desc}. Action: ${safeText}. Add tags: masterpiece, best quality, highly detailed anime style.`;
             if(type === 'circle') promptInstruction += " Add tags: closeup face portrait, looking at viewer.";
 
@@ -554,12 +546,10 @@ app.post('/api/generate-media', checkTgAuth, async (req, res) => {
             }
         } catch(e) { console.log("Gemini prompt fail, using default."); }
 
-        // 4. Генерируем ссылку в бесплатной нейросети (РАБОТАЕТ МГНОВЕННО, БЕЗ СКАЧИВАНИЯ)
         const seed = Math.floor(Math.random() * 10000000);
         const encodedPrompt = encodeURIComponent(finalEngPrompt);
         const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&nologo=true&seed=${seed}&model=anime`;
 
-        // Сразу отдаем ссылку фронтенду! 
         res.json({ url: imageUrl });
 
     } catch (e) {
