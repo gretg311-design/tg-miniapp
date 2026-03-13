@@ -57,12 +57,18 @@ const taskSchema = new mongoose.Schema({ id: Number, name: String, link: String,
 const priceSchema = new mongoose.Schema({ item_id: { type: String, unique: true }, stars: { type: Number, default: 0 }, ton: { type: Number, default: 0 } });
 const newsSchema = new mongoose.Schema({ id: Number, text: String, photo: String });
 
+// БАЗА ДЛЯ ПЕРСОНАЖЕЙ НА МОДЕРАЦИИ
+const pendingCharSchema = new mongoose.Schema({ 
+    id: Number, name: String, age: Number, gender: String, desc: String, photo: String, creator_id: Number 
+});
+
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 const Character = mongoose.models.Character || mongoose.model('Character', charSchema);
 const Promo = mongoose.models.Promo || mongoose.model('Promo', promoSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
 const Price = mongoose.models.Price || mongoose.model('Price', priceSchema);
 const News = mongoose.models.News || mongoose.model('News', newsSchema);
+const PendingCharacter = mongoose.models.PendingCharacter || mongoose.model('PendingCharacter', pendingCharSchema);
 
 const checkAdmin = async (sender_id) => {
     if (Number(sender_id) === OWNER_ID) return true;
@@ -188,6 +194,43 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
         user.shards += actualRew; user.last_daily = now; let currentStreak = user.daily_streak;
         if (is7thDay) user.daily_streak = 0; await user.save();
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: currentStreak });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ================= API: ПРЕДЛОЖИТЬ ПЕРСОНАЖА (МОДЕРАЦИЯ) =================
+app.post('/api/user/suggest-char', checkTgAuth, async (req, res) => {
+    try {
+        const charData = req.body.charData;
+        charData.creator_id = req.tg_user_id;
+        
+        // 1. Сохраняем во временную базу
+        await new PendingCharacter(charData).save();
+
+        // 2. Ищем всех админов
+        const admins = await User.find({ is_admin: true });
+        const adminIds = [OWNER_ID, ...admins.map(a => a.tg_id)];
+        const uniqueAdmins = [...new Set(adminIds)]; // Убираем дубли, если овнер есть в списке админов
+
+        // 3. Отправляем уведомления с кнопками
+        const safeDesc = charData.desc.substring(0, 300); // Обрезаем для красивого вида в ТГ
+        
+        for (let adminId of uniqueAdmins) {
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: adminId,
+                    text: `🆕 <b>ПРЕДЛОЖЕН НОВЫЙ ПЕРСОНАЖ</b>\n\n🎭 <b>Имя:</b> ${charData.name}\n🔞 <b>Возраст:</b> ${charData.age}\n🚻 <b>Пол:</b> ${charData.gender === 'm' ? 'Мужской' : 'Женский'}\n📝 <b>Описание:</b> ${safeDesc}...\n\n<i>ID создателя: ${req.tg_user_id}</i>`,
+                    parse_mode: 'HTML',
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "✅ Одобрить", callback_data: `approve_char_${charData.id}` }],
+                            [{ text: "❌ Отклонить", callback_data: `reject_char_${charData.id}` }]
+                        ]
+                    }
+                })
+            });
+        }
+        res.json({ message: "Успешно отправлено на модерацию!" });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -366,20 +409,62 @@ app.post('/api/tg-webhook', async (req, res) => {
     try {
         const update = req.body;
         
+        // ОБРАБОТКА НАЖАТИЯ ИНЛАЙН КНОПОК АДМИНАМИ (ОДОБРИТЬ/ОТКЛОНИТЬ)
+        if (update.callback_query) {
+            const cb = update.callback_query;
+            const cbData = cb.data;
+            const chatId = cb.message.chat.id;
+            const messageId = cb.message.message_id;
+
+            if (cbData.startsWith('approve_char_')) {
+                const charId = Number(cbData.split('_')[2]);
+                const pending = await PendingCharacter.findOne({ id: charId });
+                if (pending) {
+                    const newChar = new Character({ id: pending.id, name: pending.name, age: pending.age, gender: pending.gender, desc: pending.desc, photo: pending.photo });
+                    await newChar.save();
+                    await PendingCharacter.findOneAndDelete({ id: charId });
+                    
+                    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: chatId, message_id: messageId, text: `✅ Персонаж <b>${pending.name}</b> успешно ОДОБРЕН и добавлен в базу!`, parse_mode: 'HTML' })
+                    });
+                    await sendTgMessage(pending.creator_id, `🎉 Ура! Ваш предложенный персонаж «${pending.name}» прошел модерацию и добавлен в приложение!`);
+                } else {
+                    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chatId, message_id: messageId, text: `⚠️ Этот персонаж уже был обработан другим админом.` }) });
+                }
+            }
+            else if (cbData.startsWith('reject_char_')) {
+                const charId = Number(cbData.split('_')[2]);
+                const pending = await PendingCharacter.findOne({ id: charId });
+                if (pending) {
+                    await PendingCharacter.findOneAndDelete({ id: charId });
+                    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: chatId, message_id: messageId, text: `❌ Персонаж <b>${pending.name}</b> ОТКЛОНЕН.`, parse_mode: 'HTML' })
+                    });
+                    await sendTgMessage(pending.creator_id, `😔 К сожалению, ваш предложенный персонаж «${pending.name}» не прошел модерацию.`);
+                } else {
+                    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chatId, message_id: messageId, text: `⚠️ Этот персонаж уже был обработан другим админом.` }) });
+                }
+            }
+            
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/answerCallbackQuery`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ callback_query_id: cb.id }) });
+            return res.sendStatus(200);
+        }
+
+        // ОБРАБОТКА КОМАНДЫ /start
         if (update.message && update.message.text && update.message.text.startsWith('/start')) {
             const chatId = update.message.chat.id;
             const textParts = update.message.text.split(' ');
             const startParam = textParts.length > 1 ? textParts[1] : '';
             const appUrl = startParam ? `https://t.me/anime_ai_18_bot/PlayApp?startapp=${startParam}` : `https://t.me/anime_ai_18_bot/PlayApp`;
 
-            const welcomeText = `🎮 *Добро пожаловать!*\n\nВ мир *AI-персонажей* — общайся с любыми персонажами или теми, которые тебе нравятся.`;
+            const welcomeText = `🎮 *Добро пожаловать!*\n\nВ мир *AI-персонажей* — общайся с любыми персонажами или создавай своих!`;
             
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    chat_id: chatId, 
-                    text: welcomeText, 
-                    parse_mode: 'Markdown',
+                    chat_id: chatId, text: welcomeText, parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
                             [ { text: "🎮 Открыть приложение", url: appUrl } ],
