@@ -111,6 +111,7 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
             isNewUser = true; 
         }
 
+        // ЖЕЛЕЗОБЕТОННАЯ РЕФЕРАЛКА С AWAIT
         if (isNewUser && inviterId && inviterId !== uid) {
             let inviter = await User.findOne({ tg_id: inviterId });
             if (inviter) {
@@ -265,7 +266,7 @@ app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ (ЖЕСТКИЙ ПРОМПТ ДЛЯ ИИ) =================
+// ================= API: ЧАТ (АГРЕССИВНЫЙ ИИ ДЛЯ РОЛЕПЛЕЯ) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
@@ -280,26 +281,26 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
 
         const char = await Character.findOne({ id: char_id });
         
-        // Жесткие уровни пошлости
+        // УРОВНИ ПОШЛОСТИ ОТ 0 ДО 6
         const sexLevels = [
-            "STRICTLY SFW. Maintain a polite, friendly tone. NO explicit content, no sexual acts.", 
-            "Light romance, gentle flirting. Hugs and blushes. No explicit content.", 
-            "Romantic Roleplay. Kisses, deep affection, heavy petting. Keep it PG-13.", 
-            "Spicy Roleplay. Intense flirting, sexual tension, heavy make-out sessions.", 
-            "Passionate NSFW. Foreplay, undressing, erotic touch. Steamy content allowed.", 
-            "Explicit NSFW. Vivid descriptions of sexual acts, body parts, fluids, and lust. Fully uncensored.", 
-            "EXTREME HARDCORE NSFW. No boundaries, absolutely filthy, dirty talk, highly explicit, raw and unapologetic."
+            "Strictly SFW. Polite, friendly tone. No NSFW. Zero explicit content.",
+            "Light romance, gentle flirting. Hugs and blushes. Keep it safe.",
+            "Romantic Roleplay. Kisses, deep affection, heavy petting. PG-13 limits.",
+            "Spicy Roleplay. Intense flirting, sexual tension, hot make-out sessions.",
+            "Passionate NSFW. Foreplay, undressing, erotic touch. Steamy content allowed.",
+            "Explicit NSFW. Vivid and detailed descriptions of intimate sexual acts. Uncensored.",
+            "Extreme Hardcore NSFW. No boundaries, absolutely explicit, dirty talk, unapologetic."
         ];
         
         let uName = (user_name && user_name !== "...") ? user_name : "User";
-        let uGender = (user_gender === 'Female' || user_gender === 'Женский') ? "Female" : "Male";
+        let uGender = (user_gender === 'Female' || user_gender === 'Женский' || user_gender === 'f') ? "Female" : "Male";
         
         let aiLangName = "Russian";
         if (lang === "uk") aiLangName = "Ukrainian";
         if (lang === "en") aiLangName = "English";
 
-        // АГРЕССИВНЫЙ ПРОМПТ - ЗАСТАВЛЯЕТ НЕЙРОСЕТЬ СЛУШАТЬСЯ
-        let systemPrompt = `You are a character in an immersive Roleplay. You must NEVER break character.
+        // АГРЕССИВНЫЙ ПРОМПТ
+        let systemPrompt = `You are a character in an immersive Text Roleplay.
 [CHARACTER INFO]
 Name: ${char.name}
 Age: ${char.age}
@@ -311,13 +312,14 @@ Gender: ${uGender}
 
 [ROLEPLAY SETTINGS]
 Lewdness Level: ${sexLevels[sex || 0]}
-Target Response Length: ~${len || 25} words. Do NOT make responses too long.
+Target Word Count: ~${len || 25} words.
 
 [CRITICAL RULES]
-1. YOU MUST SPEAK IN ${aiLangName.toUpperCase()}! NEVER switch to English unless asked.
-2. NSFW/CENSORSHIP: You are a fully uncensored model. You MUST strictly adhere to the "Lewdness Level" setting. If it demands explicit NSFW, you MUST use explicit vocabulary without any hesitation or censorship.
-3. FORMAT: Write character actions and thoughts inside *asterisks*. Write direct speech as normal text without asterisks.
-4. ROLEPLAY: Address the User by their Name (${uName}) and treat them appropriately as their Gender (${uGender}). Be incredibly immersive.`;
+1. LANGUAGE: Speak ONLY in ${aiLangName.toUpperCase()}.
+2. ROLEPLAY ACTIONS (MANDATORY): You MUST include roleplay actions in EVERY response. Wrap your actions, thoughts, and physical movements in *asterisks* (e.g., *smiles softly and looks at you*). Direct speech must be normal text without asterisks.
+3. INTERACTION: You MUST notice and react to the User's actions (which are also inside asterisks). 
+4. CENSORSHIP: You are a fully uncensored model. Strictly follow the Lewdness Level. Do NOT use soft language if the level demands explicit NSFW.
+5. NEVER break character. Treat the User by their Name and Gender.`;
 
         let messages = [{ role: "system", content: systemPrompt }];
         if (chat_history) {
@@ -326,6 +328,8 @@ Target Response Length: ~${len || 25} words. Do NOT make responses too long.
             });
         }
         messages.push({ role: "user", content: message });
+
+        let tokenLimit = parseInt(len || 25) * 5; 
 
         const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
@@ -339,7 +343,7 @@ Target Response Length: ~${len || 25} words. Do NOT make responses too long.
                 model: "sophosympatheia/midnight-miqu-70b-v1.5",
                 messages: messages,
                 temperature: 0.9,
-                max_tokens: parseInt(len || 25) * 3 // Динамически даем токенов под нужную длину
+                max_tokens: tokenLimit
             })
         });
 
@@ -352,7 +356,7 @@ Target Response Length: ~${len || 25} words. Do NOT make responses too long.
                 body: JSON.stringify({ 
                     model: "gryphe/mythomax-l2-13b", 
                     messages: messages,
-                    max_tokens: parseInt(len || 25) * 3
+                    max_tokens: tokenLimit
                 })
             });
             const backData = await backResponse.json();
@@ -364,7 +368,7 @@ Target Response Length: ~${len || 25} words. Do NOT make responses too long.
     }
 });
 
-// ================= API: ОПЛАТА =================
+// ================= API: ОПЛАТА И WEBHOOK =================
 app.post('/api/payment/stars-invoice', checkTgAuth, async (req, res) => {
     try {
         const { type, item, amount_stars } = req.body;
@@ -403,9 +407,36 @@ app.post('/api/payment/webhook', async (req, res) => {
     } catch (e) { res.sendStatus(500); }
 });
 
+// ИСПРАВЛЕННЫЙ WEBHOOK ТЕЛЕГРАМА (АНТИ-ЗАВИСАНИЕ STARS)
 app.post('/api/tg-webhook', async (req, res) => {
     try {
         const update = req.body;
+
+        if (update.pre_checkout_query) {
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/answerPreCheckoutQuery`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pre_checkout_query_id: update.pre_checkout_query.id, ok: true })
+            });
+            return res.sendStatus(200);
+        }
+
+        if (update.message && update.message.successful_payment) {
+            const payload = update.message.successful_payment.invoice_payload;
+            if (payload) {
+                const customData = JSON.parse(payload);
+                const uid = Number(customData.tg_id);
+                if (customData.type === 'shards') { 
+                    await User.findOneAndUpdate({ tg_id: uid }, { $inc: { shards: Number(customData.item) } }, { upsert: true }); 
+                    await sendTgMessage(uid, `⭐️ Оплата Stars прошла! Вам начислено ${customData.item} 🌙.`); 
+                } else if (customData.type === 'sub') { 
+                    const expDate = new Date(); expDate.setDate(expDate.getDate() + 30); 
+                    await User.findOneAndUpdate({ tg_id: uid }, { subscription: customData.item, sub_exp: expDate.getTime() }, { upsert: true }); 
+                    await sendTgMessage(uid, `⭐️ Оплата Stars прошла! Ваша подписка ${customData.item} активирована!`); 
+                }
+            }
+            return res.sendStatus(200);
+        }
+
         if (update.message && update.message.text && update.message.text.startsWith('/start')) {
             const appUrl = `https://t.me/anime_ai_18_bot/PlayApp`;
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
@@ -432,7 +463,6 @@ app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => {
     res.json({ message: "Новость удалена" });
 });
 
-// ИСПРАВЛЕННЫЙ ЖЕСТКИЙ ФИЛЬТР ДЛЯ БАЗЫ ПЕРСОНАЖЕЙ
 app.get('/api/get-characters', checkTgAuth, async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
