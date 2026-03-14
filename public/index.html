@@ -16,6 +16,7 @@
         .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
         .app-version { font-size: 10px; color: #444; text-align: center; margin-top: 15px; font-family: monospace; }
 
+        /* ОПУСТИЛИ ВСЁ ВНИЗ НА 85px ЧТОБЫ НЕ ПЕРЕКРЫВАЛОСЬ ШАПКОЙ ТГ */
         #app { padding: 85px 20px 40px 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; }
         .u-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         
@@ -46,6 +47,7 @@
 
         .ic-prof { background: #0A84FF; } .ic-lang { background: #30D158; } .ic-ai { background: #8E8E93; } .ic-priv { background: #FF9F0A; } .ic-sup { background: #BF5AF2; } .ic-apk { background: #FF453A; }  
 
+        /* СЕТКА СТРОГО 2 КОЛОНКИ КАК В ЖЕЛЕЗОБЕТОНЕ */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
@@ -53,7 +55,7 @@
 
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 85px 20px 20px 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
-        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; position: relative; }
+        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
         
@@ -74,13 +76,102 @@
         .gender-btn { flex: 1; padding: 10px; border: 1px solid #2d164d; border-radius: 8px; text-align: center; font-size: 12px; color: #555; cursor: pointer; }
         .gender-btn.active { border-color: #bc42f5; color: #bc42f5; background: rgba(188, 66, 245, 0.1); }
 
+        #char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
+        .char-counter { font-size: 10px; color: #bc42f5; text-align: right; margin-top: -8px; margin-bottom: 10px; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
+
+        .shop-item { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; }
+        .shop-title { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 5px; }
+        .shop-desc { font-size: 12px; color: #888; margin-bottom: 15px; text-align: center; }
+        .buy-btns { display: flex; gap: 10px; width: 100%; }
+        .btn-stars { flex: 1; background: rgba(255, 215, 0, 0.1); border: 1px solid gold; color: gold; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-ton { flex: 1; background: rgba(0, 136, 204, 0.1); border: 1px solid #0088cc; color: #0088cc; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .shop-header { color: #e91e63; font-size: 14px; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; width: 100%; text-align: left; border-bottom: 1px solid #2d164d; padding-bottom: 5px;}
+
         .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .char-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; position: relative; }
+        .char-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; position: relative;}
         .char-card img { width: 100%; height: 120px; object-fit: cover; }
         .char-card-info { padding: 10px; text-align: center; }
         .char-card-name { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 5px; }
         .char-card-tags { font-size: 10px; color: #00bcd4; }
+        .dossier-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; border: 1px solid #bc42f5; margin-bottom: 15px; }
+
+        /* === ДИЗАЙН ЧАТА === */
+        .chat-container { flex: 1; width: 100%; background: #05010a; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; }
         
+        .chat-msg-row { display: flex; align-items: flex-end; width: 100%; }
+        .chat-msg-row.user-row { justify-content: flex-end; }
+        .chat-msg-row.char-row { justify-content: flex-start; }
+        
+        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .user-row .msg-avatar { margin-left: 10px; border: 1px solid #2d164d; }
+        .char-row .msg-avatar { margin-right: 10px; border: 1px solid #bc42f5; }
+        
+        .msg-bot-wrapper { display: flex; flex-direction: column; max-width: 80%; align-items: flex-start; }
+        .msg-user-wrapper { display: flex; flex-direction: column; max-width: 80%; align-items: flex-end; }
+
+        .msg-box { padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .msg-user { background: #2d164d; border-bottom-right-radius: 2px; }
+        .msg-char { background: #1a0b2e; border-bottom-left-radius: 2px; border: 1px solid #bc42f5; width: 100%; }
+        
+        .msg-bottom-bar { display: flex; align-items: center; justify-content: space-between; background: #11081d; padding: 6px 10px; border-radius: 10px; margin-top: 6px; border: 1px solid #2d164d; width: 100%; flex-wrap: wrap; gap: 5px;}
+        .msg-stats { display: flex; gap: 10px; font-size: 11px; color: #aaa; font-weight: bold; }
+        .msg-actions { display: flex; gap: 15px; font-size: 16px; color: #888; }
+        .msg-actions span { cursor: pointer; transition: transform 0.1s, color 0.1s; }
+        .msg-actions span:active { transform: scale(0.8); color: #fff; }
+        
+        .chat-input-area { display: flex; gap: 10px; padding: 10px; background: #0d041a; border-top: 1px solid #2d164d; align-items: flex-end; }
+        .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; resize: none; overflow-y: auto; max-height: 120px; font-family: inherit; line-height: 1.4; word-wrap: break-word; }
+        .chat-input:disabled { opacity: 0.5; }
+        
+        .chat-send-btn { background: linear-gradient(135deg, #bc42f5, #e91e63); color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 12px rgba(188, 66, 245, 0.6); transition: transform 0.1s, box-shadow 0.1s; flex-shrink: 0; }
+        .chat-send-btn:active { transform: scale(0.9); box-shadow: 0 0 5px rgba(188, 66, 245, 0.8); }
+        .chat-send-btn:disabled { background: #2d164d; box-shadow: none; color: #555; cursor: not-allowed; transform: none; }
+        .chat-send-btn svg { width: 20px; height: 20px; margin-right: -2px; margin-top: 2px; }
+
+        .chatlist-item { display: flex; align-items: center; background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 10px; margin-bottom: 10px; position: relative; z-index: 1; transition: z-index 0.1s; }
+        .chatlist-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #bc42f5; margin-right: 15px; flex-shrink: 0; cursor: pointer; }
+        .chatlist-info { flex: 1; overflow: hidden; cursor: pointer; }
+        .chatlist-name { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 5px; }
+        .chatlist-last { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .chat-menu-btn { background: none; border: none; color: #888; font-size: 20px; font-weight: bold; cursor: pointer; padding: 0 10px; }
+        .chat-dropdown { display: none; position: absolute; right: 35px; top: 35px; background: #11081d; border: 1px solid #bc42f5; border-radius: 8px; z-index: 1000; flex-direction: column; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        .chat-dropdown-item { padding: 12px 15px; font-size: 12px; color: #fff; cursor: pointer; border-bottom: 1px solid #2d164d; white-space: nowrap; }
+        .chat-dropdown-item:last-child { border-bottom: none; }
+        .pin-icon { color: #bc42f5; margin-right: 5px; font-size: 12px; }
+
+        .news-container { margin-top: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
+        .news-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; position: relative; }
+        .news-date { font-size: 10px; color: #bc42f5; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; }
+        .news-text { font-size: 12px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+        .news-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #2d164d; display: none; }
+
+        /* ================= РЕСПОНСИВНОСТЬ ================= */
+        @media (min-width: 768px) {
+            .menu-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .char-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .con-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .msg-bot-wrapper, .msg-user-wrapper { max-width: 600px; }
+            .shop-item { flex-direction: row; justify-content: space-between; text-align: left; align-items: center; }
+            .shop-desc { text-align: left; margin-bottom: 0; margin-right: 20px; flex: 1; }
+            .buy-btns { width: auto; flex-shrink: 0; }
+            #app, .overlay { padding-left: 10vw; padding-right: 10vw; }
+        }
+        @media (min-width: 1200px) {
+            .menu-grid { grid-template-columns: repeat(5, 1fr); }
+            .char-grid { grid-template-columns: repeat(6, 1fr); }
+            #app, .overlay { padding-left: 20vw; padding-right: 20vw; }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            #app, .overlay { padding-top: 20px !important; }
+            .u-header { margin-bottom: 10px; }
+            .moon-logo { width: 60px; height: 60px; }
+            #p-chat > div:first-child { padding-top: 20px !important; }
+        }
+
+        /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ВКЛАДОК */
         .tabs-wrap { display: flex; background: #0d041a; border: 1px solid #2d164d; border-radius: 8px; margin-bottom: 15px; padding: 3px; width: 100%; }
         .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 11px; font-weight: bold; color: #888; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
         .tab-btn.active { background: #bc42f5; color: #fff; }
@@ -88,16 +179,6 @@
         .bg-pending { background: #f39c12; color: #fff; }
         .bg-private { background: #555; color: #fff; }
         .bg-public { background: #00ff00; color: #000; }
-
-        /* ЧАТ ДИЗАЙН */
-        .chat-container { flex: 1; width: 100%; background: #05010a; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; }
-        .msg-box { padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
-        .msg-user { background: #2d164d; border-bottom-right-radius: 2px; }
-        .msg-char { background: #1a0b2e; border-bottom-left-radius: 2px; border: 1px solid #bc42f5; width: 100%; }
-        .chat-input-area { display: flex; gap: 10px; padding: 10px; background: #0d041a; border-top: 1px solid #2d164d; align-items: flex-end; }
-        .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; resize: none; overflow-y: auto; max-height: 120px; font-family: inherit; }
-        .chat-send-btn { background: linear-gradient(135deg, #bc42f5, #e91e63); color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -106,6 +187,7 @@
         <div class="legal-text">All characters are 18+.<br>Content is AI-generated and does not reflect real people.</div>
         <div class="app-version">v. 1.2.1.0</div>
     </div>
+
     <div id="app">
         <div class="u-header">
             <div style="display:flex; align-items:center; gap:15px;">
@@ -156,18 +238,24 @@
         <div class="chat-container">
             <div class="chat-messages" id="chat-messages-box"></div>
             <div class="chat-input-area">
-                <textarea id="chat-input-text" class="chat-input" placeholder="Ваше сообщение..." rows="1" style="height: 40px;"></textarea>
-                <button id="chat-send-btn" class="chat-send-btn" onclick="sendMessage()">➤</button>
+                <textarea id="chat-input-text" class="chat-input" placeholder="Ваше сообщение..." rows="1" style="height: 40px;" oninput="this.style.height = '40px'; this.style.height = (this.scrollHeight) + 'px';"></textarea>
+                <button id="chat-send-btn" class="chat-send-btn" onclick="sendMessage()">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z" fill="currentColor"/>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
 
     <div id="p-user-chars" class="overlay">
         <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chars">ПЕРСОНАЖИ</h2>
+        
         <div class="tabs-wrap">
             <div class="tab-btn active" id="tab-char-off" onclick="switchCharTab('official')">Официальные</div>
             <div class="tab-btn" id="tab-char-cus" onclick="switchCharTab('custom')">Пользовательские</div>
         </div>
+
         <div id="user-char-list" class="char-grid"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
@@ -176,13 +264,15 @@
         <h2 style="color:#bc42f5; margin-bottom: 10px;" id="dos-name">Имя</h2>
         <div class="info-card">
             <div id="dos-badge" class="status-badge" style="display:none;"></div>
-            <img id="dos-img" src="" class="dossier-img" style="width:100%; border-radius:10px;">
+            <img id="dos-img" src="" class="dossier-img">
             <div class="p-row"><span class="p-label" data-i18n="dos_age">Возраст:</span> <span class="p-val" id="dos-age">18</span></div>
             <div class="p-row"><span class="p-label" data-i18n="dos_gender">Пол:</span> <span class="p-val" id="dos-gender">М</span></div>
             <div style="margin-top:15px; font-size:12px; color:#ccc; line-height:1.4;" id="dos-desc">Описание...</div>
         </div>
         <div class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()" data-i18n="b_start_chat">НАЧАТЬ ЧАТ</div>
+        
         <div id="dos-pub-btn" class="term-btn" style="border-color:#f39c12; display:none;" onclick="publishMyChar()">ДОБАВИТЬ К ГЛАВНЫМ</div>
+        
         <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()" data-i18n="b_del_char">УДАЛИТЬ ПЕРСОНАЖА</div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
@@ -201,7 +291,6 @@
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
-
     <div id="p-user-tasks" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 20px;" data-i18n="h_tasks">ЗАДАНИЯ</h2>
         <div class="info-card" style="text-align: center; border-color: #bc42f5;">
@@ -288,6 +377,7 @@
         <h2 style="color:#bc42f5" data-i18n="h_set">НАСТРОЙКИ</h2>
         <div class="set-list">
             <div class="set-item" onclick="openMyCharsPanel()"><div class="set-icon" style="background:#f39c12;">🎭</div><div class="set-text">Мои персонажи</div><div class="set-arrow">›</div></div>
+
             <div class="set-item" onclick="openPanel('p-set-prof')"><div class="set-icon ic-prof">👤</div><div class="set-text" data-i18n="s_menu_prof">Настроить профиль</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-set-lang')"><div class="set-icon ic-lang">🌐</div><div class="set-text" data-i18n="s_menu_lang">Сменить язык</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-set-ai')"><div class="set-icon ic-ai">🤖</div><div class="set-text" data-i18n="s_menu_ai">Настройка ИИ</div><div class="set-arrow">›</div></div>
@@ -358,6 +448,8 @@
             <div class="set-item" onclick="openPanel('p-m-admins')"><div class="set-icon" style="background:#e91e63;">🛡️</div><div class="set-text">АДМИНЫ</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-promos')"><div class="set-icon" style="background:#e91e63;">🎫</div><div class="set-text">ПРОМОКОДЫ</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-tasks')"><div class="set-icon" style="background:#bc42f5;">🎯</div><div class="set-text">ЗАДАНИЯ</div><div class="set-arrow">›</div></div>
+            
+            <div class="set-item" onclick="openModPanel()"><div class="set-icon" style="background:#f39c12;">🔴</div><div class="set-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="set-arrow">›</div></div>
         </div>
         <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
     </div>
@@ -535,6 +627,7 @@
         try { if(tg.requestFullscreen) tg.requestFullscreen(); } catch(e){}
         try { tg.setHeaderColor('#05010a'); tg.setBackgroundColor('#05010a'); if (tg.setBottomBarColor) tg.setBottomBarColor('#05010a'); } catch(e) {}
         tg.enableClosingConfirmation();
+        // АЙФОНОВСКАЯ НАСТРОЙКА ПРОТИВ СВАЙПОВ (Железобетон)
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
 
         const OID = "8287041036";
@@ -548,7 +641,7 @@
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; let allNews = []; 
         
-        // === ДОБАВЛЕНО ДЛЯ НОВЫХ ФИЧ ===
+        // Переменные для новых фич
         let currentCharsTab = 'official'; 
         let myCharGender = 'm';
         let myCharsList = [];
@@ -807,7 +900,7 @@
         function clearChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Очистить память?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); tg.showAlert("Очищено 🧹"); } }); }
         function deleteChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Удалить чат?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); } }); }
         
-        // === ИЗМЕНЕНО: Вкладки и фильтрация в Персонажах ===
+        // ВКЛАДКИ ПЕРСОНАЖЕЙ (Официальные/Пользовательские)
         function switchCharTab(tab) {
             currentCharsTab = tab;
             document.getElementById('tab-char-off').classList.toggle('active', tab === 'official');
@@ -822,6 +915,7 @@
                 allChars.sort((a, b) => b.id - a.id); 
                 const list = document.getElementById('user-char-list'); 
                 
+                // Фильтр включает старых персов из базы без тегов (c.char_type === 'official' || !c.char_type)
                 let filtered = allChars.filter(c => currentCharsTab === 'official' ? (c.char_type === 'official' || !c.char_type) : (c.char_type === 'custom' && c.status === 'public'));
                 
                 if(filtered.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; } 
@@ -843,7 +937,6 @@
             document.getElementById('dos-desc').innerText = await neuroTranslate(c.desc, currentLang); 
             if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } 
 
-            // Показываем кнопки для своих личных персов
             let isMine = c.creator_id == getUid() && c.char_type === 'custom';
             document.getElementById('dos-pub-btn').style.display = (isMine && c.status === 'private') ? 'block' : 'none';
             let badge = document.getElementById('dos-badge');
@@ -889,7 +982,7 @@
         async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Saved!"); }
         function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
         
-        // === ДОБАВЛЕННЫЕ ФУНКЦИИ ===
+        // МОИ ПЕРСОНАЖИ И МОДЕРАЦИЯ
         async function openMyCharsPanel() { openPanel('p-my-chars'); loadMyChars(); }
         async function loadMyChars() {
             const list = document.getElementById('my-chars-list');
