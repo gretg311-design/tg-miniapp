@@ -984,4 +984,24 @@
                         <img src="${c.photo}" style="width:100%; max-height:150px; object-fit:contain; margin-bottom:10px;">
                         <div style="display:flex; gap:10px;">
                             <div class="term-btn" style="flex:1; border-color:#00ff00; padding:10px;" onclick="modApprove(${c.id})">ОДОБРИТЬ</div>
-                            <div class="term-btn" style="flex:1; border-color:#ff4444; padding:10px;" onclick="modReject(${c.id})">О
+                            <div class="term-btn" style="flex:1; border-color:#ff4444; padding:10px;" onclick="modReject(${c.id})">ОТКЛОНИТЬ</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { list.innerHTML = "Ошибка"; }
+        }
+        async function modApprove(id) {
+            await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'approve', reason: 'Одобрено' }) });
+            tg.showAlert("Одобрено!"); loadPendingChars();
+        }
+        async function modReject(id) {
+            const reason = prompt("Причина отказа (пойдет в ЛС юзеру):", "Не соответствует правилам.");
+            if(reason === null) return;
+            await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'reject', reason: reason }) });
+            tg.showAlert("Отклонено!"); loadPendingChars();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
