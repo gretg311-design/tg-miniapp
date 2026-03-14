@@ -47,12 +47,23 @@ const userSchema = new mongoose.Schema({
     is_admin: { type: Boolean, default: false }, last_daily: { type: Number, default: 0 }, daily_streak: { type: Number, default: 0 },
     invited_by: { type: Number, default: null } 
 });
-const charSchema = new mongoose.Schema({ id: Number, name: String, age: Number, gender: String, desc: String, photo: String });
+
+const charSchema = new mongoose.Schema({ 
+    id: Number, 
+    name: String, 
+    age: Number, 
+    gender: String, 
+    desc: String, 
+    photo: String,
+    creator_id: { type: Number, default: 0 },
+    status: { type: String, default: "public" }, // private (только для себя), pending (на модерации), public (в общем доступе)
+    char_type: { type: String, default: "official" } // official (создал админ), custom (создал юзер)
+});
+
 const promoSchema = new mongoose.Schema({ code: { type: String, unique: true }, reward: Number, expiresAt: Number, messageId: Number, emoji: String });
 const taskSchema = new mongoose.Schema({ id: Number, name: String, link: String, rType: String, rVal: Number });
 const priceSchema = new mongoose.Schema({ item_id: { type: String, unique: true }, stars: { type: Number, default: 0 }, ton: { type: Number, default: 0 } });
 const newsSchema = new mongoose.Schema({ id: Number, text: String, photo: String });
-const pendingCharSchema = new mongoose.Schema({ id: Number, name: String, age: Number, gender: String, desc: String, photo: String, creator_id: Number });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 const Character = mongoose.models.Character || mongoose.model('Character', charSchema);
@@ -60,7 +71,6 @@ const Promo = mongoose.models.Promo || mongoose.model('Promo', promoSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
 const Price = mongoose.models.Price || mongoose.model('Price', priceSchema);
 const News = mongoose.models.News || mongoose.model('News', newsSchema);
-const PendingCharacter = mongoose.models.PendingCharacter || mongoose.model('PendingCharacter', pendingCharSchema);
 
 const checkAdmin = async (sender_id) => {
     if (Number(sender_id) === OWNER_ID) return true;
@@ -120,7 +130,6 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
 
 app.post('/api/user/sync', checkTgAuth, async (req, res) => {
     try {
-        // === ЛОГИКА УДАЛЕНИЯ ПРОМОКОДОВ (ВОССТАНОВЛЕНА) ===
         const expiredPromos = await Promo.find({ expiresAt: { $lte: Date.now() } });
         if (expiredPromos.length > 0) {
             for (let promo of expiredPromos) {
@@ -159,6 +168,90 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
         user.shards += actualRew; user.last_daily = now;
         if (is7thDay) user.daily_streak = 0; await user.save();
         res.json({ success: true, reward: actualRew, new_balance: user.shards, streak: user.daily_streak });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ================= API: СИСТЕМА ПОЛЬЗОВАТЕЛЬСКИХ ПЕРСОНАЖЕЙ =================
+// Получить своих личных персонажей
+app.get('/api/user/my-chars', checkTgAuth, async (req, res) => {
+    try {
+        const chars = await Character.find({ creator_id: req.tg_user_id, char_type: 'custom' });
+        res.json(chars);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Создать личного персонажа (с экономикой и скидками)
+app.post('/api/user/create-custom-char', checkTgAuth, async (req, res) => {
+    try {
+        const uid = req.tg_user_id;
+        let user = await User.findOne({ tg_id: uid });
+        if (!user) return res.status(404).json({ error: "Юзер не найден" });
+        
+        let cost = 100;
+        let discount = 0;
+        let isFree = !user.subscription || user.subscription === "FREE";
+        if (uid === OWNER_ID) isFree = false; 
+        
+        if (!isFree) {
+            discount = Math.floor(Math.random() * (65 - 25 + 1)) + 25; 
+            cost = Math.floor(cost * (1 - discount / 100));
+        }
+        
+        if (user.shards < cost && uid !== OWNER_ID) {
+            return res.status(400).json({ error: `Недостаточно осколков. Цена: ${cost} 🌙` });
+        }
+        
+        if (uid !== OWNER_ID) { user.shards -= cost; await user.save(); }
+        
+        const charData = req.body.charData;
+        charData.id = Date.now(); 
+        charData.creator_id = uid;
+        charData.status = "private"; 
+        charData.char_type = "custom";
+        
+        await new Character(charData).save();
+        res.json({ message: `Персонаж успешно создан!\nПотрачено: ${cost} 🌙 ${discount > 0 ? `(Ваша скидка: ${discount}%)` : ''}`, new_balance: user.shards });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Редактировать своего персонажа
+app.post('/api/user/edit-custom-char', checkTgAuth, async (req, res) => {
+    try {
+        const uid = req.tg_user_id;
+        const { char_id, charData } = req.body;
+        let char = await Character.findOne({ id: char_id, creator_id: uid, char_type: 'custom' });
+        if (!char) return res.status(403).json({ error: "Персонаж не найден или нет доступа" });
+        
+        char.name = charData.name;
+        char.age = charData.age;
+        char.gender = charData.gender;
+        char.desc = charData.desc;
+        if (charData.photo) char.photo = charData.photo;
+        
+        await char.save();
+        res.json({ message: "Персонаж успешно обновлен!" });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Отправить персонажа на модерацию (в общую базу)
+app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
+    try {
+        const uid = req.tg_user_id;
+        const { char_id } = req.body;
+        let char = await Character.findOne({ id: char_id, creator_id: uid, char_type: 'custom' });
+        if (!char) return res.status(403).json({ error: "Персонаж не найден" });
+        if (char.status === "public") return res.status(400).json({ error: "Персонаж уже в общем доступе!" });
+        if (char.status === "pending") return res.status(400).json({ error: "Персонаж уже на модерации!" });
+        
+        char.status = "pending";
+        await char.save();
+        
+        const admins = await User.find({ is_admin: true });
+        const adminIds = [...new Set([OWNER_ID, ...admins.map(a => a.tg_id)])];
+        for (let adminId of adminIds) {
+            await sendTgMessage(adminId, `🆕 Пользователь (${uid}) предложил персонажа "${char.name}" в общую базу!\n\n👉 Зайдите в Админ-панель -> вкладка Модерация.`);
+        }
+        res.json({ message: "Успешно отправлено на проверку администраторам!" });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -244,29 +337,6 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
     }
 });
 
-// ================= API: ПРЕДЛОЖИТЬ ПЕРСОНАЖА =================
-app.post('/api/user/suggest-char', checkTgAuth, async (req, res) => {
-    try {
-        const charData = req.body.charData;
-        charData.creator_id = req.tg_user_id;
-        await new PendingCharacter(charData).save();
-        const admins = await User.find({ is_admin: true });
-        const adminIds = [OWNER_ID, ...admins.map(a => a.tg_id)];
-        for (let adminId of adminIds) {
-            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: adminId,
-                    text: `🆕 <b>ПРЕДЛОЖЕН ПЕРСОНАЖ</b>\n\n🎭 <b>${charData.name}</b> (${charData.age})\n📝 ${charData.desc.substring(0, 200)}...`,
-                    parse_mode: 'HTML',
-                    reply_markup: { inline_keyboard: [[{ text: "✅ Одобрить", callback_data: `approve_char_${charData.id}` }, { text: "❌ Отклонить", callback_data: `reject_char_${charData.id}` }]] }
-                })
-            });
-        }
-        res.json({ message: "Отправлено на модерацию!" });
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
 // ================= API: ОПЛАТА =================
 app.post('/api/payment/stars-invoice', checkTgAuth, async (req, res) => {
     try {
@@ -309,26 +379,6 @@ app.post('/api/payment/webhook', async (req, res) => {
 app.post('/api/tg-webhook', async (req, res) => {
     try {
         const update = req.body;
-        if (update.callback_query) {
-            const cb = update.callback_query;
-            const charId = Number(cb.data.split('_')[2]);
-            if (cb.data.startsWith('approve_char_')) {
-                const p = await PendingCharacter.findOne({ id: charId });
-                if (p) {
-                    await new Character({ id: p.id, name: p.name, age: p.age, gender: p.gender, desc: p.desc, photo: p.photo }).save();
-                    await PendingCharacter.findOneAndDelete({ id: charId });
-                    await sendTgMessage(cb.message.chat.id, `✅ Персонаж ${p.name} одобрен!`);
-                    await sendTgMessage(p.creator_id, `🎉 Вашего персонажа ${p.name} одобрили!`);
-                }
-            } else if (cb.data.startsWith('reject_char_')) {
-                const p = await PendingCharacter.findOneAndDelete({ id: charId });
-                if (p) {
-                    await sendTgMessage(cb.message.chat.id, `❌ Персонаж ${p.name} отклонен.`);
-                    await sendTgMessage(p.creator_id, `😔 Вашего персонажа ${p.name} отклонили.`);
-                }
-            }
-            return res.sendStatus(200);
-        }
         if (update.message && update.message.text && update.message.text.startsWith('/start')) {
             const appUrl = `https://t.me/anime_ai_18_bot/PlayApp`;
             await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
@@ -355,7 +405,38 @@ app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => {
     res.json({ message: "Новость удалена" });
 });
 
-app.get('/api/get-characters', checkTgAuth, async (req, res) => res.json(await Character.find()));
+// Вывод всех персонажей (Только ОФИЦИАЛЬНЫЕ и ПРИНЯТЫЕ ПОЛЬЗОВАТЕЛЬСКИЕ)
+app.get('/api/get-characters', checkTgAuth, async (req, res) => {
+    const chars = await Character.find({ $or: [{ char_type: 'official' }, { status: 'public' }] });
+    res.json(chars);
+});
+
+// МОДЕРАЦИЯ ПЕРСОНАЖЕЙ АДМИНОМ В WEB APP
+app.get('/api/admin/get-pending-chars', checkTgAuth, async (req, res) => {
+    if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" });
+    const pendingChars = await Character.find({ status: 'pending' });
+    res.json(pendingChars);
+});
+
+app.post('/api/admin/moderate-char', checkTgAuth, async (req, res) => {
+    if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" });
+    const { char_id, action, reason } = req.body;
+    let char = await Character.findOne({ id: char_id });
+    if (!char) return res.status(404).json({ error: "Персонаж не найден" });
+
+    if (action === 'approve') {
+        char.status = 'public';
+        await char.save();
+        await sendTgMessage(char.creator_id, `🎉 Ура! Ваш персонаж "${char.name}" прошел модерацию и добавлен в раздел "Пользовательские" всем юзерам!`);
+        res.json({ message: "Одобрено" });
+    } else if (action === 'reject') {
+        char.status = 'private'; // Возвращаем ему в приватные
+        await char.save();
+        await sendTgMessage(char.creator_id, `😔 Ваш персонаж "${char.name}" не прошел модерацию в общую базу.\n\n💬 Причина администратора: ${reason}`);
+        res.json({ message: "Отклонено" });
+    }
+});
+
 app.get('/api/get-tasks', checkTgAuth, async (req, res) => res.json(await Task.find()));
 app.get('/api/get-promos', checkTgAuth, async (req, res) => res.json(await Promo.find()));
 
@@ -404,8 +485,21 @@ app.post('/api/admin/manage-sub', checkTgAuth, async (req, res) => {
     }
 });
 
-app.post('/api/admin/create-char', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Character(req.body.charData).save(); res.json({ message: "Персонаж добавлен!" }); });
-app.post('/api/admin/delete-char', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); await Character.findOneAndDelete({ id: req.body.char_id }); res.json({ message: "Удален" }); });
+app.post('/api/admin/create-char', checkTgAuth, async (req, res) => { 
+    if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); 
+    const charData = req.body.charData;
+    charData.creator_id = req.tg_user_id;
+    charData.char_type = "official";
+    charData.status = "public";
+    await new Character(charData).save(); 
+    res.json({ message: "Официальный персонаж добавлен!" }); 
+});
+
+app.post('/api/admin/delete-char', checkTgAuth, async (req, res) => { 
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); 
+    await Character.findOneAndDelete({ id: req.body.char_id }); 
+    res.json({ message: "Удален" }); 
+});
 
 app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => { 
     if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); 
