@@ -120,9 +120,30 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
 
 app.post('/api/user/sync', checkTgAuth, async (req, res) => {
     try {
+        // === ЛОГИКА УДАЛЕНИЯ ПРОМОКОДОВ (ВОССТАНОВЛЕНА) ===
+        const expiredPromos = await Promo.find({ expiresAt: { $lte: Date.now() } });
+        if (expiredPromos.length > 0) {
+            for (let promo of expiredPromos) {
+                await Promo.deleteOne({ _id: promo._id });
+                if (promo.messageId) {
+                    const text = `${promo.emoji}\nПромокод «<s>${promo.code}</s>» даёт ${promo.reward} осколков\nUPD: промокод закончился`;
+                    fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: "@Anime_ai_18", message_id: promo.messageId, text: text, parse_mode: 'HTML' })
+                    }).catch(()=>{}); 
+                }
+            }
+        }
+
         const uid = req.tg_user_id; let user = await User.findOne({ tg_id: uid });
         if (!user) return res.json({ shards: 0, subscription: "FREE" });
-        res.json({ shards: user.shards, subscription: uid === OWNER_ID ? "Ultra" : user.subscription });
+        
+        let cleanSub = user.subscription ? user.subscription.trim() : "FREE";
+        if (/^ultra$/i.test(cleanSub)) cleanSub = "Ultra"; else if (/^vip$/i.test(cleanSub)) cleanSub = "VIP";
+        else if (/^pro$/i.test(cleanSub)) cleanSub = "Pro"; else if (/^premium$/i.test(cleanSub)) cleanSub = "Premium"; else cleanSub = "FREE";
+        if (uid === OWNER_ID) cleanSub = "Ultra";
+
+        res.json({ shards: user.shards, subscription: cleanSub });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -319,7 +340,7 @@ app.post('/api/tg-webhook', async (req, res) => {
     } catch (e) { res.sendStatus(500); }
 });
 
-// ================= АДМИНКА И КОНСОЛЬ (ВОССТАНОВЛЕНО НА 100%) =================
+// ================= АДМИНКА И КОНСОЛЬ =================
 app.get('/api/get-news', checkTgAuth, async (req, res) => res.json(await News.find()));
 
 app.post('/api/admin/create-news', checkTgAuth, async (req, res) => {
