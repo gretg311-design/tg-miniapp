@@ -401,21 +401,25 @@ app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => {
     res.json({ message: "Новость удалена" });
 });
 
-// === ИСПРАВЛЕННЫЙ ВЫВОД ПЕРСОНАЖЕЙ (С УЧЕТОМ СТАРЫХ ИЗ БАЗЫ) ===
+// === ИСПРАВЛЕННЫЙ ВЫВОД ПЕРСОНАЖЕЙ ===
 app.get('/api/get-characters', checkTgAuth, async (req, res) => {
     const chars = await Character.find({ 
         $or: [
             { char_type: 'official' }, 
             { status: 'public' },
-            { char_type: { $exists: false } }, // Если нет тега - это старый официальный перс
+            { char_type: { $exists: false } }, 
             { status: { $exists: false } }
         ] 
     });
     res.json(chars);
 });
 
-// МОДЕРАЦИЯ ПЕРСОНАЖЕЙ АДМИНОМ В WEB APP
-app.get('/api/admin/get-pending-chars', checkTgAuth, async (req, res) => {
+// === ТУТ И БЫЛА ОШИБКА: ПЕРЕВЕЛИ НА POST И ДОБАВИЛИ АНТИКЭШ ===
+app.post('/api/admin/get-pending-chars', checkTgAuth, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" });
     const pendingChars = await Character.find({ status: 'pending' });
     res.json(pendingChars);
