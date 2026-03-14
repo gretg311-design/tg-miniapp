@@ -106,13 +106,26 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
         const inviterId = req.body.start_param ? Number(req.body.start_param) : null; 
         let user = await User.findOne({ tg_id: uid }); 
         let isModified = false, isNewUser = false;
-        if (!user) { user = new User({ tg_id: uid }); isNewUser = true; }
-        if (isNewUser && inviterId && inviterId !== uid) {
-            user.invited_by = inviterId; user.shards += 100; isModified = true;
-            User.findOneAndUpdate({ tg_id: inviterId }, { $inc: { shards: 100 } }).then(inviter => {
-                if (inviter) sendTgMessage(inviterId, `🎉 По вашей ссылке зарегистрировался новый пользователь! Вы получили 100 🌙.`);
-            }).catch(e => {});
+        
+        if (!user) { 
+            user = new User({ tg_id: uid }); 
+            isNewUser = true; 
         }
+        
+        // === ЖЕЛЕЗОБЕТОННАЯ РЕФЕРАЛКА ===
+        if (isNewUser && inviterId && inviterId !== uid) {
+            let inviter = await User.findOne({ tg_id: inviterId });
+            if (inviter) {
+                user.invited_by = inviterId; 
+                user.shards += 100; 
+                isModified = true;
+                
+                inviter.shards += 100;
+                await inviter.save();
+                await sendTgMessage(inviterId, `🎉 По вашей ссылке зарегистрировался новый пользователь! Вы получили 100 🌙.`);
+            }
+        }
+
         if (uid === OWNER_ID) {
             user.subscription = "Ultra"; user.is_admin = true;
             if (user.shards < 10000) user.shards = 999999;
@@ -120,10 +133,13 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
         } else if (user.subscription !== "FREE" && user.sub_exp > 0 && user.sub_exp < Date.now()) {
             user.subscription = "FREE"; user.sub_exp = 0; isModified = true;
         }
+        
         if (isModified || user.isNew) await user.save();
+        
         let responseObj = user.toObject();
         let s = responseObj.subscription;
         responseObj.daily_reward = (s === 'Ultra') ? 500 : (s === 'VIP') ? 250 : (s === 'Pro') ? 100 : (s === 'Premium') ? 50 : 10;
+        
         res.json(responseObj);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -136,7 +152,8 @@ app.post('/api/user/sync', checkTgAuth, async (req, res) => {
                 await Promo.deleteOne({ _id: promo._id });
                 if (promo.messageId) {
                     const text = `${promo.emoji}\nПромокод «<s>${promo.code}</s>» даёт ${promo.reward} осколков\nUPD: промокод закончился`;
-                    fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
+                    // ДОБАВЛЕН AWAIT ДЛЯ ЗАЩИТЫ ОТ СБРОСА VERCEL
+                    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ chat_id: "@Anime_ai_18", message_id: promo.messageId, text: text, parse_mode: 'HTML' })
                     }).catch(()=>{}); 
@@ -172,7 +189,7 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
 });
 
 // ================= API: СИСТЕМА ПОЛЬЗОВАТЕЛЬСКИХ ПЕРСОНАЖЕЙ =================
-app.post('/api/user/my-chars', checkTgAuth, async (req, res) => {
+app.get('/api/user/my-chars', checkTgAuth, async (req, res) => {
     try {
         const chars = await Character.find({ creator_id: req.tg_user_id, char_type: 'custom' });
         res.json(chars);
@@ -401,8 +418,11 @@ app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => {
     res.json({ message: "Новость удалена" });
 });
 
-// === ИСПРАВЛЕННЫЙ ВЫВОД ПЕРСОНАЖЕЙ ===
 app.get('/api/get-characters', checkTgAuth, async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     const chars = await Character.find({ 
         $or: [
             { char_type: 'official' }, 
@@ -414,12 +434,11 @@ app.get('/api/get-characters', checkTgAuth, async (req, res) => {
     res.json(chars);
 });
 
-// === ТУТ И БЫЛА ОШИБКА: ПЕРЕВЕЛИ НА POST И ДОБАВИЛИ АНТИКЭШ ===
-app.post('/api/admin/get-pending-chars', checkTgAuth, async (req, res) => {
+app.get('/api/admin/get-pending-chars', checkTgAuth, async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-    
+
     if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" });
     const pendingChars = await Character.find({ status: 'pending' });
     res.json(pendingChars);
@@ -437,7 +456,7 @@ app.post('/api/admin/moderate-char', checkTgAuth, async (req, res) => {
         await sendTgMessage(char.creator_id, `🎉 Ура! Ваш персонаж "${char.name}" прошел модерацию и добавлен в раздел "Пользовательские" всем юзерам!`);
         res.json({ message: "Одобрено" });
     } else if (action === 'reject') {
-        char.status = 'private'; // Возвращаем ему в приватные
+        char.status = 'private'; 
         await char.save();
         await sendTgMessage(char.creator_id, `😔 Ваш персонаж "${char.name}" не прошел модерацию в общую базу.\n\n💬 Причина администратора: ${reason}`);
         res.json({ message: "Отклонено" });
