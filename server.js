@@ -56,8 +56,8 @@ const charSchema = new mongoose.Schema({
     desc: String, 
     photo: String,
     creator_id: { type: Number, default: 0 },
-    status: { type: String, default: "public" }, // private (только для себя), pending (на модерации), public (в общем доступе)
-    char_type: { type: String, default: "official" } // official (создал админ), custom (создал юзер)
+    status: { type: String, default: "public" }, 
+    char_type: { type: String, default: "official" } 
 });
 
 const promoSchema = new mongoose.Schema({ code: { type: String, unique: true }, reward: Number, expiresAt: Number, messageId: Number, emoji: String });
@@ -172,7 +172,6 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
 });
 
 // ================= API: СИСТЕМА ПОЛЬЗОВАТЕЛЬСКИХ ПЕРСОНАЖЕЙ =================
-// Получить своих личных персонажей
 app.get('/api/user/my-chars', checkTgAuth, async (req, res) => {
     try {
         const chars = await Character.find({ creator_id: req.tg_user_id, char_type: 'custom' });
@@ -180,7 +179,6 @@ app.get('/api/user/my-chars', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Создать личного персонажа (с экономикой и скидками)
 app.post('/api/user/create-custom-char', checkTgAuth, async (req, res) => {
     try {
         const uid = req.tg_user_id;
@@ -214,7 +212,6 @@ app.post('/api/user/create-custom-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Редактировать своего персонажа
 app.post('/api/user/edit-custom-char', checkTgAuth, async (req, res) => {
     try {
         const uid = req.tg_user_id;
@@ -233,7 +230,6 @@ app.post('/api/user/edit-custom-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Отправить персонажа на модерацию (в общую базу)
 app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     try {
         const uid = req.tg_user_id;
@@ -405,9 +401,16 @@ app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => {
     res.json({ message: "Новость удалена" });
 });
 
-// Вывод всех персонажей (Только ОФИЦИАЛЬНЫЕ и ПРИНЯТЫЕ ПОЛЬЗОВАТЕЛЬСКИЕ)
+// === ИСПРАВЛЕННЫЙ ВЫВОД ПЕРСОНАЖЕЙ (С УЧЕТОМ СТАРЫХ ИЗ БАЗЫ) ===
 app.get('/api/get-characters', checkTgAuth, async (req, res) => {
-    const chars = await Character.find({ $or: [{ char_type: 'official' }, { status: 'public' }] });
+    const chars = await Character.find({ 
+        $or: [
+            { char_type: 'official' }, 
+            { status: 'public' },
+            { char_type: { $exists: false } }, // Если нет тега - это старый официальный перс
+            { status: { $exists: false } }
+        ] 
+    });
     res.json(chars);
 });
 
