@@ -47,15 +47,15 @@
 
         .ic-prof { background: #0A84FF; } .ic-lang { background: #30D158; } .ic-ai { background: #8E8E93; } .ic-priv { background: #FF9F0A; } .ic-sup { background: #BF5AF2; } .ic-apk { background: #FF453A; }  
 
-        /* СЕТКА СТРОГО 2 КОЛОНКИ КАК В ТВОЕМ ЖЕЛЕЗОБЕТОНЕ */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
+        /* ОПУСТИЛИ ВСЕ ВСПЛЫВАЮЩИЕ ОКНА НА 85px */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 85px 20px 20px 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
-        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; position: relative; }
+        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
         
@@ -171,7 +171,7 @@
             #p-chat > div:first-child { padding-top: 20px !important; }
         }
 
-        /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ВКЛАДОК И СТАТУСОВ */
+        /* --- ДОБАВЛЕНО ТОЛЬКО ДЛЯ НОВЫХ ФИЧ (ВКЛАДКИ И СТАТУСЫ) --- */
         .tabs-wrap { display: flex; background: #0d041a; border: 1px solid #2d164d; border-radius: 8px; margin-bottom: 15px; padding: 3px; width: 100%; }
         .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 11px; font-weight: bold; color: #888; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
         .tab-btn.active { background: #bc42f5; color: #fff; }
@@ -185,7 +185,7 @@
     <div id="loading">
         <div class="moon-logo"></div>
         <div class="legal-text">All characters are 18+.<br>Content is AI-generated and does not reflect real people.</div>
-        <div class="app-version">v. 1.2.1.0</div>
+        <div class="app-version">v. 1.2.1.0(beta)</div>
     </div>
 
     <div id="app">
@@ -213,7 +213,7 @@
             <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')" data-i18n="m_adm">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')" data-i18n="m_con">Консоль</div>
         </div>
-        <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0</div>
+        <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
 
         <div id="main-news-feed" class="news-container"></div>
     </div>
@@ -264,6 +264,7 @@
         <h2 style="color:#bc42f5; margin-bottom: 10px;" id="dos-name">Имя</h2>
         <div class="info-card">
             <div id="dos-badge" class="status-badge" style="display:none;"></div>
+
             <img id="dos-img" src="" class="dossier-img">
             <div class="p-row"><span class="p-label" data-i18n="dos_age">Возраст:</span> <span class="p-val" id="dos-age">18</span></div>
             <div class="p-row"><span class="p-label" data-i18n="dos_gender">Пол:</span> <span class="p-val" id="dos-gender">М</span></div>
@@ -272,7 +273,7 @@
         <div class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()" data-i18n="b_start_chat">НАЧАТЬ ЧАТ</div>
         
         <div id="dos-pub-btn" class="term-btn" style="border-color:#f39c12; display:none;" onclick="publishMyChar()">ДОБАВИТЬ К ГЛАВНЫМ</div>
-        
+
         <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()" data-i18n="b_del_char">УДАЛИТЬ ПЕРСОНАЖА</div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
@@ -630,7 +631,7 @@
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
 
         const OID = "8287041036";
-        let stack = [], clickedTasks = [];
+        let stack = [], trollCount = 0, clickedTasks = [];
         let currentCharGender = 'm'; 
         let activeCharId = null;
         let dailyTimerInterval = null;
@@ -639,12 +640,14 @@
         
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; let allNews = []; 
+        
+        // --- ПЕРЕМЕННЫЕ ДЛЯ НОВЫХ ФИЧ ---
         let currentCharsTab = 'official'; 
         let myCharGender = 'm';
         let myCharsList = [];
 
         const translations = {
-            ru: { m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль", h_chats: "МОИ ЧАТЫ", h_chars: "ПЕРСОНАЖИ", h_daily: "ЕЖЕДНЕВНАЯ НАГРАДА", h_tasks: "ЗАДАНИЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФИЛЬ", h_set: "НАСТРОЙКИ", b_back: "НАЗАД", b_start_chat: "НАЧАТЬ ЧАТ", b_del_char: "УДАЛИТЬ ПЕРСОНАЖА", b_claim: "ЗАБРАТЬ", b_share: "ПОДЕЛИТЬСЯ ССЫЛКОЙ", b_activate: "АКТИВИРОВАТЬ", pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:", set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей", d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по", s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код", dos_age: "Возраст:", dos_gender: "Пол:", s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk" }
+            ru: { m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль", h_chats: "МОИ ЧАТЫ", h_chars: "ПЕРСОНАЖИ", h_daily: "ЕЖЕДНЕВНАЯ НАГРАДА", h_tasks: "ЗАДАНИЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФИЛЬ", h_set: "НАСТРОЙКИ", b_back: "НАЗАД", b_start_chat: "НАЧАТЬ ЧАТ", b_del_char: "УДАЛИТЬ ПЕРСОНАЖА", b_claim: "ЗАБРАТЬ", b_share: "ПОДЕЛИТЬСЯ ССЫЛКОЙ", b_activate: "АКТИВИРОВАТЬ", pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:", set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей", d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по", s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код", dos_age: "Возраст:", dos_gender: "Пол:", s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk", c_love: "Влюбленность", c_trust: "Доверие", c_inf: "Влияние", c_horny: "Возбуждение" }
         };
         let currentLang = 'ru'; const transCache = {}; 
         function getUid() { return String(tg.initDataUnsafe?.user?.id || OID); }
@@ -658,7 +661,7 @@
 
         async function setLang(lang) {
             currentLang = lang; localStorage.setItem('m_lang_' + getUid(), lang); document.querySelectorAll('.lang-btn').forEach(btn => { btn.style.borderColor = '#2d164d'; btn.style.opacity = '1'; }); const activeBtn = document.getElementById('lang-' + lang); if (activeBtn) activeBtn.style.borderColor = '#bc42f5';
-            applyTranslations();
+            document.querySelector('[onclick="devLang(\'Deutsch\')"]').style.opacity = '0.4'; applyTranslations();
             if(document.getElementById('p-user-chars').style.display === 'flex') await renderUserChars(); if(document.getElementById('p-char-dossier').style.display === 'flex') await openDossier(activeCharId); if(document.getElementById('p-user-tasks').style.display === 'flex') await renderUserTasks(); if(document.getElementById('p-user-chatlist').style.display === 'flex') openChatList();
         }
 
@@ -666,7 +669,11 @@
             const t = translations[currentLang] || translations['ru'];
             document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) { if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key]; else el.innerHTML = t[key]; } });
             updateLen(document.getElementById('len-slider').value, true); updateSex(document.getElementById('sex-slider').value, true);
+            let lS = document.getElementById('len-slider'); if(lS) { let maxLen = parseInt(lS.max); let minLen = parseInt(lS.min); if(minLen === maxLen) { document.getElementById('len-info').innerText = `Лимит (${userData.subscription}): ${maxLen} слов`; } else { document.getElementById('len-info').innerText = `Лимит (${userData.subscription}): от ${minLen} до ${maxLen} слов`; } }
         }
+
+        function devLang(langName) { tg.showAlert(`Язык ${langName} в разработке! 🛠`); }
+        function devApk() { tg.showAlert(`Приложение APK еще в разработке! 🛠`); }
 
         function updateBalanceUI(val) {
             if(getUid() === OID) { document.getElementById('shards-balance').innerText = "∞"; document.getElementById('prof-shards').innerText = "∞"; let cb = document.getElementById('chat-shards-balance'); if(cb) cb.innerText = "∞"; return; }
@@ -678,6 +685,20 @@
             if (s === 'ultra') nameEl.classList.add('nick-ultra'); else if (s === 'vip') nameEl.classList.add('nick-vip'); else if (s === 'pro') nameEl.classList.add('nick-pro'); else if (s === 'premium') nameEl.classList.add('nick-premium'); else nameEl.classList.add('nick-free');
         }
 
+        document.addEventListener('click', () => { if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; let chatItem = document.getElementById('chat-item-' + openDropdownId); if(chatItem) chatItem.style.zIndex = 1; openDropdownId = null; } });
+
+        setInterval(async () => {
+            const uid = getUid(); if(!uid || document.getElementById('loading').style.display !== 'none') return;
+            try {
+                const res = await fetch('/api/user/sync', { method: 'POST', headers: getAuthHeaders() });
+                if(res.ok) { const data = await res.json(); if(uid !== OID) updateBalanceUI(data.shards); if(document.getElementById('prof-sub').innerText !== data.subscription) { document.getElementById('prof-sub').innerText = data.subscription; userData.subscription = data.subscription; applyNickStyle(data.subscription); } }
+            } catch(e) {}
+        }, 3000);
+
+        function updateUserAvatar(input) {
+            if (input.files && input.files[0]) { const r = new FileReader(); r.onload = (e) => { const res = e.target.result; document.getElementById('set-u-avatar-preview').src = res; document.getElementById('main-u-avatar').src = res; document.getElementById('prof-u-avatar').src = res; localStorage.setItem('m_avatar_' + getUid(), res); }; r.readAsDataURL(input.files[0]); }
+        }
+
         async function init() {
             setTimeout(() => { const loader = document.getElementById('loading'); if (loader) { loader.style.opacity = '0'; setTimeout(() => { loader.style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 500); } }, 1500);
             const uid = getUid(); const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
@@ -685,22 +706,201 @@
             document.getElementById('u-id-head').innerText = uid; document.getElementById('prof-id').innerText = uid;
             const savedNick = localStorage.getItem('m_nick_' + uid) || u.first_name || "User"; document.getElementById('u-name').innerText = savedNick; document.getElementById('prof-nick').innerText = savedNick; document.getElementById('set-nick').value = savedNick;
             let savedAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png"; document.getElementById('main-u-avatar').src = savedAvatar; document.getElementById('prof-u-avatar').src = savedAvatar; document.getElementById('set-u-avatar-preview').src = savedAvatar;
-            
-            try { const res = await fetch('/api/user/get-data', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) }); if(res.ok) userData = await res.json(); } catch (e) {}
+            let uGender = localStorage.getItem('m_gender_' + uid) || 'm'; document.getElementById('g-m').classList.toggle('active', uGender === 'm'); document.getElementById('g-f').classList.toggle('active', uGender === 'f');
 
-            if(uid === OID) { updateBalanceUI("∞"); document.getElementById('prof-sub').innerText = "ULTRA"; document.getElementById('prof-status').innerText = "Овнер"; document.getElementById('nav-adm').style.display = 'flex'; document.getElementById('nav-con').style.display = 'flex'; document.getElementById('u-badge').style.display = 'inline-block'; document.getElementById('u-badge').className = 'badge-base badge-owner'; document.getElementById('u-badge').innerText = 'OWNER'; } 
-            else { updateBalanceUI(userData.shards); document.getElementById('prof-sub').innerText = userData.subscription; if(userData.is_admin) { document.getElementById('prof-status').innerText = "Админ"; document.getElementById('nav-adm').style.display = 'flex'; document.getElementById('u-badge').style.display = 'inline-block'; document.getElementById('u-badge').className = 'badge-base badge-admin'; document.getElementById('u-badge').innerText = 'ADMIN'; } }
+            try { const startParam = tg.initDataUnsafe?.start_param || null; const res = await fetch('/api/user/get-data', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ start_param: startParam }) }); if(res.ok) userData = await res.json(); } catch (e) {}
+
+            const badgeEl = document.getElementById('u-badge');
+            if(uid === OID) { updateBalanceUI("∞"); document.getElementById('prof-sub').innerText = "ULTRA"; document.getElementById('prof-exp').innerText = "Без ограничений"; document.getElementById('prof-status').innerText = "Овнер"; userData.subscription = "ULTRA"; document.getElementById('nav-adm').style.display = 'flex'; document.getElementById('nav-con').style.display = 'flex'; document.getElementById('own-sh-rem').style.display = 'block'; document.getElementById('own-su-rem').style.display = 'block'; document.getElementById('own-adm-rem').style.display = 'block'; badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-owner'; badgeEl.innerText = 'OWNER'; } 
+            else { updateBalanceUI(userData.shards); document.getElementById('prof-sub').innerText = userData.subscription; if(userData.subscription !== "FREE" && userData.sub_exp > 0) { let expDate = new Date(userData.sub_exp); document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU'); } else { document.getElementById('prof-exp').innerText = "-"; } if(userData.is_admin) { document.getElementById('prof-status').innerText = "Админ"; document.getElementById('nav-adm').style.display = 'flex'; badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-admin'; badgeEl.innerText = 'ADMIN'; } else { document.getElementById('prof-status').innerText = "Юзер"; badgeEl.style.display = 'none'; } }
 
             applyNickStyle(userData.subscription);
-            updateDailyUI(); fetchNews(); renderUserChars(); renderUserTasks();
+            let currentSub = (userData.subscription || "FREE").trim().toLowerCase(); let minLen = 25; let maxLen = 25; let maxSex = 0;
+            if(currentSub === "premium") { maxLen = 30; } else if(currentSub === "pro") { maxLen = 35; maxSex = 3; } else if(currentSub === "vip") { maxLen = 40; maxSex = 5; } else if(currentSub === "ultra") { maxLen = 50; maxSex = 6; } 
+
+            const lS = document.getElementById('len-slider'); const sS = document.getElementById('sex-slider');
+            if(lS && sS) {
+                lS.min = minLen; lS.max = maxLen; sS.max = maxSex; document.getElementById('sex-info').innerText = maxSex === 0 ? "Недоступно" : `Уровней: ${maxSex}`;
+                let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 25); if(savedLen > maxLen) savedLen = maxLen; if(savedLen < minLen) savedLen = minLen; lS.value = savedLen; updateLen(savedLen, true);
+                let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0); if(savedSex > maxSex) savedSex = maxSex; sS.value = savedSex; updateSex(savedSex, true);
+            }
+            updateDailyUI(); try { await fetchNews(); } catch(e) {} try { await renderUserChars(); } catch(e) {} try { await renderUserTasks(); } catch(e) {} if (uid === OID || userData.is_admin) { try { await renderAdminPromos(); } catch(e) {} try { await renderTasks(); } catch(e) {} }
         }
 
         let baseZ = 15000; let isBotTyping = false; 
         function openPanel(id) { if(stack.includes(id)) return; stack.push(id); let el = document.getElementById(id); if(el) { el.style.zIndex = baseZ + stack.length; el.style.display = 'flex'; } BackButton.show(); }
-        function back() { if(isBotTyping) { tg.showAlert("Бот пишет ответ... ⏳"); return; } if(stack.length > 0) { let id = stack.pop(); let el = document.getElementById(id); if(el) el.style.display = 'none'; } if(stack.length === 0) { BackButton.hide(); } }
+        function back() { if(isBotTyping) { tg.showAlert("Бот пишет ответ, подождите! ⏳"); return; } if(stack.length > 0) { let id = stack.pop(); let el = document.getElementById(id); if(el) el.style.display = 'none'; } if(stack.length === 0) { BackButton.hide(); } }
         BackButton.onClick(() => back()); function closeChat() { back(); }
 
-        // ВКЛАДКИ ПЕРСОНАЖЕЙ (ЖЕСТКИЙ ФИЛЬТР)
+        async function openChatList() {
+            if (allChars.length === 0) await renderUserChars(); const uid = getUid(); const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); const list = document.getElementById('chatlist-container');
+            let chatObjects = []; for (let charId in allChats) { const char = allChars.find(c => c.id == charId); if(!char) continue; const msgs = allChats[charId]; const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : "Нет сообщений"; chatObjects.push({ id: char.id, char: char, lastMsg: lastMsg, isPinned: pinned.includes(char.id), orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 }); }
+            chatObjects.sort((a, b) => { if (a.isPinned && !b.isPinned) return -1; if (!a.isPinned && b.isPinned) return 1; return a.orderIndex - b.orderIndex; });
+            if(chatObjects.length === 0) { list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>У вас пока нет активных диалогов. Перейдите в Персонажи!</div>`; } 
+            else { const chatCards = await Promise.all(chatObjects.map(async (obj) => { let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : ""; let pinText = obj.isPinned ? "Открепить" : "Закрепить"; let tName = await neuroTranslate(obj.char.name, currentLang); return `<div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})" style="z-index:1;"><img src="${obj.char.photo}" class="chatlist-img"><div class="chatlist-info"><div class="chatlist-name">${pinMark}${tName}</div><div class="chatlist-last">${obj.lastMsg.replace(/<[^>]*>?/gm, '')}</div></div><button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button><div class="chat-dropdown" id="chat-dd-${obj.id}"><div class="chat-dropdown-item" onclick="pinChatAction(${obj.id}, event)">📌 ${pinText}</div><div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 Очистить</div><div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 Удалить</div></div></div>`; })); list.innerHTML = chatCards.join(''); } openPanel('p-user-chatlist');
+        }
+
+        async function resumeChat(charId) { if(isBotTyping) return; activeCharId = charId; const c = allChars.find(x => x.id == charId); if(!c) return; document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang); document.getElementById('chat-header-avatar').src = c.photo; renderChatMessages(); openPanel('p-chat'); }
+        async function openChatFromDossier() { if(isBotTyping) return; const c = allChars.find(x => x.id === activeCharId); if(!c) return; document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang); document.getElementById('chat-header-avatar').src = c.photo; const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); if(!allChats[activeCharId]) { allChats[activeCharId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); updateChatOrder(activeCharId); } renderChatMessages(); openPanel('p-chat'); }
+
+        function renderChatMessages() {
+            const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); let msgs = allChats[activeCharId] || []; const chatBox = document.getElementById('chat-messages-box');
+            let uAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png"; const char = allChars.find(c => c.id == activeCharId); let cAvatar = char ? char.photo : "";
+            let lastCharIdx = -1; for(let i = msgs.length - 1; i >= 0; i--) { if(msgs[i].sender === 'char') { lastCharIdx = i; break; } }
+            if(msgs.length === 0) { chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>`; } 
+            else { chatBox.innerHTML = msgs.map((m, index) => {
+                    if (m.sender === 'user') { return `<div class="chat-msg-row user-row"><div class="msg-user-wrapper"><div class="msg-box msg-user">${m.text}</div></div><img src="${uAvatar}" class="msg-avatar"></div>`; } 
+                    else {
+                        let stats = m.stats || {love: 10, trust: 15, inf: 5, horny: 0}; let actionBar = '';
+                        if (index === lastCharIdx) { actionBar = `<div class="msg-bottom-bar"><div class="msg-stats">💖 ${stats.love}% 🛡️ ${stats.trust}% ✨ ${stats.inf}% 💦 ${stats.horny}%</div><div class="msg-actions"><span onclick="actionReroll(${index})">🔄</span><span onclick="actionNext()">⏭️</span><span onclick="actionPhoto(${index})">🖼️</span><span onclick="actionCircle(${index})">⭕</span></div></div>`; }
+                        return `<div class="chat-msg-row char-row"><img src="${cAvatar}" class="msg-avatar"><div class="msg-bot-wrapper" style="width: 100%;"><div class="msg-box msg-char">${m.text}</div>${actionBar}</div></div>`;
+                    }
+                }).join(''); 
+            } setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
+        }
+
+        async function actionPhoto(index) {
+            const uid = getUid(); 
+            let sub = (userData.subscription || "FREE").trim().toUpperCase();
+            let cost = (sub === 'FREE') ? 5 : 2;
+            
+            if(uid !== OID && userData.shards < cost) return tg.showAlert(`❌ Нужно ${cost} 🌙!`);
+            if(uid !== OID) updateBalanceUI(userData.shards - cost);
+            
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, ''); 
+
+            const loadId = "load-ph-" + Date.now();
+            allChats[activeCharId][index].text += `<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ рисует фото...</div>`;
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            renderChatMessages();
+            
+            try {
+                const res = await fetch('/api/generate-media', {
+                    method: 'POST', headers: getAuthHeaders(),
+                    body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'photo' })
+                });
+                const data = await res.json();
+                
+                allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ рисует фото...</div>`, '');
+
+                if(data.url) {
+                    allChats[activeCharId][index].text += `<br><br><img src="${data.url}" style="width:100%; border-radius:10px; margin-top:5px; border:1px solid #bc42f5;">`;
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    renderChatMessages();
+                } else { 
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
+                    if(uid !== OID) updateBalanceUI(userData.shards + cost);
+                    tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
+                }
+            } catch(e) { 
+                allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ рисует фото...</div>`, '');
+                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
+                if(uid !== OID) updateBalanceUI(userData.shards + cost);
+                tg.showAlert("❌ Ошибка связи с сервером!"); 
+            }
+        }
+
+        async function actionCircle(index) {
+            const uid = getUid(); 
+            let sub = (userData.subscription || "FREE").trim().toUpperCase();
+            
+            if(sub === 'FREE' && uid !== OID) return tg.showAlert("❌ Кружок доступен только платникам!");
+            if(uid !== OID && userData.shards < 5) return tg.showAlert(`❌ Нужно 5 🌙!`);
+            
+            if(uid !== OID) updateBalanceUI(userData.shards - 5);
+            
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+            let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, '');
+
+            const loadId = "load-cr-" + Date.now();
+            allChats[activeCharId][index].text += `<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ создает кружок...</div>`;
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            renderChatMessages();
+            
+            try {
+                const res = await fetch('/api/generate-media', {
+                    method: 'POST', headers: getAuthHeaders(),
+                    body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'circle' })
+                });
+                const data = await res.json();
+                
+                allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ создает кружок...</div>`, '');
+
+                if(data.url) {
+                    allChats[activeCharId][index].text += `<br><br><div style="width:120px; height:120px; border-radius:50%; background:#bc42f5 url('${data.url}') center/cover; border:3px solid #bc42f5; margin:10px auto; box-shadow: 0 0 10px #bc42f5; animation: pulseMoon 2s infinite;"></div>`;
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+                    renderChatMessages();
+                } else { 
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
+                    if(uid !== OID) updateBalanceUI(userData.shards + 5);
+                    tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
+                }
+            } catch(e) { 
+                allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
+                allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ создает кружок...</div>`, '');
+                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
+                if(uid !== OID) updateBalanceUI(userData.shards + 5);
+                tg.showAlert("❌ Ошибка связи с сервером!"); 
+            }
+        }
+
+        async function actionReroll(index) {
+            if(isBotTyping) return;
+            const uid = getUid(); if(uid !== OID && userData.shards < 1) return tg.showAlert("Нужен 1 🌙!");
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); let msgs = allChats[activeCharId]; if(!msgs || !msgs[index]) return;
+            if(uid !== OID) updateBalanceUI(userData.shards - 1);
+            msgs.splice(index); localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages(); triggerBotResponse(uid, allChats, "(Перепиши свой последний ответ по-другому)");
+        }
+
+        async function actionNext() {
+            if(isBotTyping) return;
+            const uid = getUid(); if(uid !== OID && userData.shards < 1) return tg.showAlert("Нужен 1 🌙!");
+            if(uid !== OID) updateBalanceUI(userData.shards - 1);
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); if(!allChats[activeCharId]) allChats[activeCharId] = []; triggerBotResponse(uid, allChats, "(Продолжай свой рассказ дальше)");
+        }
+
+        async function triggerBotResponse(uid, allChats, forcedText = null) {
+            isBotTyping = true; const input = document.getElementById('chat-input-text'); const sendBtn = document.getElementById('chat-send-btn');
+            if(input) { input.disabled = true; sendBtn.disabled = true; input.value = ''; input.style.height = '40px'; }
+            let minTimePassed = false; setTimeout(() => { minTimePassed = true; }, 4000); 
+            const chatBox = document.getElementById('chat-messages-box'); const char = allChars.find(c => c.id == activeCharId); let cAvatar = char ? char.photo : ""; const typeId = "typing-" + Date.now();
+            chatBox.innerHTML += `<div class="chat-msg-row char-row" id="${typeId}" style="opacity:0.5;"><img src="${cAvatar}" class="msg-avatar"><div class="msg-bot-wrapper" style="width: 100%;"><div class="msg-box msg-char">Персонаж печатает...</div></div></div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            try {
+                const uName = document.getElementById('u-name').innerText; const rawGender = localStorage.getItem('m_gender_' + uid) || 'm'; let uGender = rawGender === 'f' ? (currentLang === 'en' ? "Female" : "Женский") : (currentLang === 'en' ? "Male" : "Мужской"); const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 25); const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
+                const res = await fetch('/api/chat', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message: forcedText || "", chat_history: allChats[activeCharId], len: lenSet, sex: sexSet, user_name: uName, user_gender: uGender, lang: currentLang }) });
+                const data = await res.json(); 
+                if (data.reply) { 
+                    const replyRow = document.getElementById(typeId); replyRow.style.opacity = "1"; const replyBox = replyRow.querySelector('.msg-box'); replyBox.innerText = ""; 
+                    let replyText = data.reply; let i = 0;
+                    function typeChar() { if (i < replyText.length) { replyBox.appendChild(document.createTextNode(replyText.charAt(i))); i++; chatBox.scrollTop = chatBox.scrollHeight; setTimeout(typeChar, 20); } else { finishMessage(replyText, data.new_balance); } }
+                    typeChar();
+                    function finishMessage(finalText, newBal) { let waitTimer = setInterval(() => { if (minTimePassed) { clearInterval(waitTimer); let stats = { love: Math.floor(Math.random() * 40) + 10, trust: Math.floor(Math.random() * 40) + 10, inf: Math.floor(Math.random() * 30) + 5, horny: sexSet > 0 ? Math.floor(Math.random() * 50) + (sexSet * 5) : 0 }; allChats[activeCharId].push({sender: 'char', text: finalText, stats: stats}); localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if (uid !== OID && newBal !== undefined) updateBalanceUI(newBal); renderChatMessages(); unlockChat(); } }, 500); }
+                } else { document.getElementById(typeId)?.remove(); if (data.error) tg.showAlert(data.error); unlockChat(); }
+            } catch (e) { document.getElementById(typeId)?.remove(); tg.showAlert("Ошибка сервера"); unlockChat(); }
+            function unlockChat() { isBotTyping = false; if(input) { input.disabled = false; sendBtn.disabled = false; setTimeout(() => { input.focus(); }, 100); } }
+        }
+
+        async function sendMessage() {
+            if(isBotTyping) return; const input = document.getElementById('chat-input-text'); const text = input.value.trim(); if(!text) return;
+            const uid = getUid(); if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков!");
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); if(!allChats[activeCharId]) allChats[activeCharId] = [];
+            allChats[activeCharId].push({sender: 'user', text: text}); localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            updateChatOrder(activeCharId); renderChatMessages(); triggerBotResponse(uid, allChats, text);
+        }
+
+        function updateChatOrder(charId) { const uid = getUid(); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); order.unshift(charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); }
+
+        function toggleChatMenu(charId, e) { if(e) e.stopPropagation(); if(openDropdownId !== null && openDropdownId !== charId) { let old = document.getElementById('chat-dd-' + openDropdownId); if(old) old.style.display = 'none'; let oldItem = document.getElementById('chat-item-' + openDropdownId); if(oldItem) oldItem.style.zIndex = 1; } let el = document.getElementById('chat-dd-' + charId); let chatItem = document.getElementById('chat-item-' + charId); if(el.style.display === 'flex') { el.style.display = 'none'; if(chatItem) chatItem.style.zIndex = 1; openDropdownId = null; } else { el.style.display = 'flex'; if(chatItem) chatItem.style.zIndex = 1000; openDropdownId = charId; } }
+        function pinChatAction(charId, e) { if(e) e.stopPropagation(); const uid = getUid(); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); if(pinned.includes(charId)) { pinned = pinned.filter(id => id != charId); tg.showAlert("Откреплено"); } else { pinned.push(charId); tg.showAlert("Закреплено 📌"); } localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); }
+        function clearChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Очистить память?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); tg.showAlert("Очищено 🧹"); } }); }
+        function deleteChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Удалить чат?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); } }); }
+        
+        // --- ХИРУРГИЧЕСКИ ДОБАВЛЕН ФИЛЬТР ВКЛАДОК ---
         function switchCharTab(tab) {
             currentCharsTab = tab;
             document.getElementById('tab-char-off').classList.toggle('active', tab === 'official');
@@ -710,19 +910,20 @@
 
         async function renderUserChars() { 
             try { 
-                const res = await fetch('/api/get-characters?_t=' + Date.now(), { headers: getAuthHeaders() }); 
+                const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
                 allChars = await res.json(); 
+                allChars.sort((a, b) => b.id - a.id); 
                 const list = document.getElementById('user-char-list'); 
                 
-                let filtered = allChars.filter(c => {
-                    let isOwnerChar = c.creator_id == OID;
-                    let isOfficial = c.char_type === 'official' || !c.char_type || isOwnerChar;
-                    let isCustom = c.char_type === 'custom' && c.status === 'public' && !isOwnerChar;
-                    return currentCharsTab === 'official' ? isOfficial : isCustom;
-                });
+                let filteredChars = allChars.filter(c => { 
+                    let isOwnerChar = c.creator_id == OID; 
+                    let isOfficial = c.char_type === 'official' || !c.char_type || isOwnerChar; 
+                    let isCustom = c.char_type === 'custom' && c.status === 'public' && !isOwnerChar; 
+                    return currentCharsTab === 'official' ? isOfficial : isCustom; 
+                }); 
                 
-                if(filtered.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888; padding:20px;'>Нет персонажей</div>`; return; } 
-                const charCards = await Promise.all(filtered.map(async (c) => { 
+                if(filteredChars.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; } 
+                const charCards = await Promise.all(filteredChars.map(async (c) => { 
                     let tName = await neuroTranslate(c.name, currentLang); 
                     return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
                 })); 
@@ -730,6 +931,18 @@
             } catch (e) {} 
         }
 
+        async function fetchNews() { try { const res = await fetch('/api/get-news', { headers: getAuthHeaders() }); if(res.ok) { allNews = await res.json(); renderNews(); } } catch(e) {} }
+        function renderNews() { const container = document.getElementById('main-news-feed'); if(!container) return; if(allNews.length === 0) { container.innerHTML = ''; return; } const sortedNews = [...allNews].sort((a, b) => b.id - a.id); container.innerHTML = sortedNews.map(n => { let imgTag = n.photo && n.photo.length > 10 ? `<img src="${n.photo}" class="news-img" style="display:block;">` : ''; let delBtn = getUid() === OID ? `<span style="color:#ff4444; cursor:pointer; font-size:14px; padding-left:10px;" onclick="deleteNews(${n.id})">✖ Удалить</span>` : ''; let d = new Date(n.id).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}); return `<div class="news-card"><div class="news-date"><span>${d}</span> ${delBtn}</div><div class="news-text">${n.text}</div>${imgTag}</div>`; }).join(''); }
+        async function publishNews() { const text = document.getElementById('inews-text').value.trim(); const img = document.getElementById('news-preview').src; if(!text && (!img || img.includes('#'))) return tg.showAlert("Введите текст или фото!"); await fetch('/api/admin/create-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ newsData: { id: Date.now(), text: text, photo: img.includes('#') ? '' : img } }) }); document.getElementById('inews-text').value = ''; document.getElementById('news-preview').src = '#'; document.getElementById('news-preview').style.display = 'none'; document.getElementById('news-limit').innerText = '0/3500'; tg.showAlert("Опубликовано!"); back(); fetchNews(); }
+        async function deleteNews(id) { tg.showConfirm("Удалить новость?", async (yes) => { if(yes) { await fetch('/api/admin/delete-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ news_id: id }) }); fetchNews(); } }); }
+        async function renderTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); document.getElementById('task-list').innerHTML = tasks.map(x => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : ''; return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
+        async function renderUserTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]"); const list = document.getElementById('user-task-list'); if (tasks.length === 0) { list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>Нет заданий</div>`; return; } const taskCards = await Promise.all(tasks.map(async (t) => { let tName = await neuroTranslate(t.name, currentLang); if(completed.includes(t.id)) { return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`; } return `<div class="task-item" id="utask-${t.id}"><span>${tName}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`; })); list.innerHTML = taskCards.join(''); } catch(e) {} }
+        async function renderAdminPromos() { try { const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json(); document.getElementById('promo-list').innerHTML = promos.map(p => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : ''; return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
+        async function buyItem(type, item, currency, price) { if (currency === 'ton') { tg.showAlert("Генерация счета CryptoBot..."); try { const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) }); const data = await res.json(); if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); } } catch (e) { tg.showAlert("Error"); } } else if (currency === 'stars') { tg.showAlert("Подготовка оплаты Stars..."); try { const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) }); const data = await res.json(); if(data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата успешна!"); } }); } else { tg.showAlert("API Error"); } } catch (e) { tg.showAlert("Error"); } } }
+        function updateDailyUI() { const ONE_DAY = 24 * 60 * 60 * 1000; let timePassed = Date.now() - userData.last_daily; let nextStreak = userData.daily_streak + 1; let is7thDay = (nextStreak % 7 === 0); let baseRew = userData.daily_reward || 10; let actualRew = is7thDay ? baseRew * 2 : baseRew; document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`; document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (БОНУС x2!)` : ""); clearInterval(dailyTimerInterval); if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) { document.getElementById('daily-btn').style.display = 'none'; document.getElementById('daily-wait').style.display = 'block'; dailyTimerInterval = setInterval(() => { let timeLeft = ONE_DAY - (Date.now() - userData.last_daily); if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } else { let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000); h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s; document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`; } }, 1000); } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; } }
+        async function claimDaily() { try { const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) }); const data = await res.json(); if (data.error) { tg.showAlert(data.error); } else { tg.showAlert(`Получено: ${data.reward} 🌙!`); userData.shards = data.new_balance; userData.daily_streak = data.streak; userData.last_daily = Date.now(); updateBalanceUI(userData.shards); updateDailyUI(); } } catch (e) { tg.showAlert("Error"); } }
+        
+        // --- ХИРУРГИЧЕСКИ ДОБАВЛЕНА КНОПКА ПУБЛИКАЦИИ В ДОСЬЕ ---
         async function openDossier(id) { 
             const c = allChars.find(x => x.id === id); if(!c) return; 
             activeCharId = id; 
@@ -738,84 +951,166 @@
             document.getElementById('dos-age').innerText = c.age; 
             document.getElementById('dos-gender').innerText = c.gender === 'm' ? "Мужской" : "Женский"; 
             document.getElementById('dos-desc').innerText = await neuroTranslate(c.desc, currentLang); 
+            if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } 
             
-            let isMine = c.creator_id == getUid() && c.char_type === 'custom';
-            document.getElementById('dos-pub-btn').style.display = (isMine && c.status === 'private') ? 'block' : 'none';
-            document.getElementById('dos-del-btn').style.display = (getUid() === OID) ? 'block' : 'none';
-            
-            let badge = document.getElementById('dos-badge');
-            if (isMine) { 
-                badge.style.display = 'block'; 
-                badge.className = 'status-badge ' + (c.status==='private'?'bg-private':c.status==='pending'?'bg-pending':'bg-public'); 
-                badge.innerText = c.status==='private'?'ПРИВАТНЫЙ':c.status==='pending'?'НА МОДЕРАЦИИ':'ОПУБЛИКОВАН'; 
-            } else { badge.style.display = 'none'; }
+            let isMine = c.creator_id == getUid() && c.char_type === 'custom'; 
+            let pubBtn = document.getElementById('dos-pub-btn'); 
+            if (pubBtn) pubBtn.style.display = (isMine && c.status === 'private') ? 'block' : 'none'; 
+            let badge = document.getElementById('dos-badge'); 
+            if (badge) { 
+                if (isMine) { 
+                    badge.style.display = 'block'; 
+                    badge.className = 'status-badge ' + (c.status === 'private' ? 'bg-private' : c.status === 'pending' ? 'bg-pending' : 'bg-public'); 
+                    badge.innerText = c.status === 'private' ? 'ПРИВАТНЫЙ' : c.status === 'pending' ? 'НА МОДЕРАЦИИ' : 'ОПУБЛИКОВАН'; 
+                } else { badge.style.display = 'none'; } 
+            } 
             openPanel('p-char-dossier'); 
         }
 
-        // МОДЕРАЦИЯ (С ЖЕСТКИМ АНТИ-КЭШЕМ)
+        function setCharGender(g) { currentCharGender = g; document.getElementById('cg-m').classList.toggle('active', g === 'm'); document.getElementById('cg-f').classList.toggle('active', g === 'f'); }
+        async function saveCharDB() { const n = document.getElementById('ich-name').value; const img = document.getElementById('char-preview').src; if(!n || img.includes('#')) return tg.showAlert("Name and photo required!"); const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img }; await fetch('/api/admin/create-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData: charData }) }); tg.showAlert("Created!"); renderUserChars(); }
+        async function deleteChar() { await fetch('/api/admin/delete-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) }); tg.showAlert("Deleted!"); renderUserChars(); back(); }
+        async function modFunds(t, a) { let idField = t === 'shards' ? 'ish-id' : 'isu-id'; let valField = t === 'shards' ? 'ish-val' : 'isu-type'; const target_id = document.getElementById(idField).value; const v = document.getElementById(valField).value; if(!target_id) return tg.showAlert("Enter ID!"); const body = { target_id: target_id, action: a }; if(t === 'shards') body.amount = v; else body.sub_type = v; const res = await fetch(t === 'shards' ? '/api/admin/manage-shards' : '/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(body) }); const data = await res.json(); tg.showAlert(data.message || "Error"); }
+        async function createPromo() { const code = document.getElementById('ip-code').value.toUpperCase().trim(); const rew = parseInt(document.getElementById('ip-rew').value); const hours = parseInt(document.getElementById('ip-hours').value); if(!code || !rew) return; await fetch('/api/admin/create-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ promoData: {code, reward: rew, hours: hours} }) }); document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = ''; renderAdminPromos(); tg.showAlert(`Создано на ${hours} ч.!`); }
+        async function deletePromo(code) { tg.showConfirm("Delete " + code + "?", async (yes) => { if(yes) { await fetch('/api/admin/delete-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ code: code }) }); renderAdminPromos(); tg.showAlert("Deleted!"); } }); }
+        async function usePromo() { if (promoLock) return; promoLock = true; const btn = document.getElementById('promo-btn'); const oldText = btn.innerText; btn.innerText = "ПРОВЕРКА..."; btn.style.opacity = "0.5"; try { const uid = getUid(); const inputField = document.getElementById('user-promo-input'); const input = inputField.value.toUpperCase().trim(); if(!input) { promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; return; } const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json(); const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]"); const found = promos.find(p => p.code === input); if(!found) { tg.showAlert("Неверный код"); } else if(used.includes(input)) { tg.showAlert("Уже активирован"); } else { await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: found.reward }) }); used.push(input); localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used)); if(uid !== OID) updateBalanceUI(userData.shards + found.reward); inputField.value = ''; tg.showAlert(`Получено ${found.reward} 🌙!`); } } catch(e) {} promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; }
+        async function modTask(act, tid=null) { if(act==='add') { const n = document.getElementById('it-name').value; const rType = document.getElementById('it-rtype').value; if(!n) return; const taskData = { id: Date.now(), name: n, link: document.getElementById('it-link').value, rType: rType, rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value }; await fetch('/api/admin/create-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ taskData: taskData }) }); } renderTasks(); renderUserTasks(); }
+        async function deleteTask(id) { tg.showConfirm("Delete task?", async (yes) => { if(yes) { await fetch('/api/admin/delete-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) }); renderTasks(); renderUserTasks(); tg.showAlert("Deleted!"); } }); }
+        function startTask(id, link) { tg.openLink(link); if(!clickedTasks.includes(id)) clickedTasks.push(id); const taskDiv = document.getElementById(`utask-${id}`); if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } }
+        async function checkTask(id) { if(!clickedTasks.includes(id)) return; tg.showAlert("Проверка..."); try { const res = await fetch('/api/check-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) }); const data = await res.json(); if(data.success) { completeTaskAction(id); } else { tg.showAlert(data.error || "Не выполнено!"); } } catch(e) { tg.showAlert("Error"); } }
+        async function completeTaskAction(id) { const uid = getUid(); const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); const t = tasks.find(x => x.id === id); if(!t) return; let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); if(completed.includes(id)) return; if(t.rType === 'shards') { await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: t.rVal }) }); if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal)); } else if(t.rType === 'sub7') { await fetch('/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', sub_type: "Premium" }) }); } completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); tg.showAlert("Получено!"); renderUserTasks(); }
+        function shareRef() { const uid = getUid(); const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`; const text = `Залетай в Anime AI! Переходи по моей ссылке и мы оба получим по 100 🌙!`; const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`; tg.openTelegramLink(shareUrl); }
+        function updateLiveNick(v) { let n = v || "User"; document.getElementById('u-name').innerText = n; document.getElementById('prof-nick').innerText = n; localStorage.setItem('m_nick_' + getUid(), n); }
+        function setGender(g, s=false) { document.getElementById('g-m')?.classList.toggle('active', g === 'm'); document.getElementById('g-f')?.classList.toggle('active', g === 'f'); if(!s) localStorage.setItem('m_gender_' + getUid(), g); }
+        function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
+        function updateSex(v, s=false) { const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; document.getElementById('sex-val').innerText = v; let sliderMax = document.getElementById('sex-slider').max; document.getElementById('sex-info').innerText = sliderMax == 0 ? "Недоступно для вашей подписки" : `Уровень ${v}: ${m_ru[v]}`; document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; if(!s) localStorage.setItem('m_sex_' + getUid(), v); }
+        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
+        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(i.files[0]); } }
+        async function modAdmin(a) { const id = document.getElementById('ia-id').value; if(!id) return; await fetch('/api/owner/set-admin', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: id, status: a === 'add' }) }); tg.showAlert("Updated!"); }
+        async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Saved!"); }
+        function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
+        
+        // ================= НОВЫЕ ФУНКЦИИ (ПОЛЬЗОВАТЕЛЬСКИЕ ПЕРСЫ И МОДЕРАЦИЯ) =================
+        async function openMyCharsPanel() { openPanel('p-my-chars'); loadMyChars(); }
+        async function loadMyChars() {
+            const list = document.getElementById('my-chars-list');
+            list.innerHTML = '<div class="loader"></div>';
+            try {
+                const res = await fetch('/api/user/my-chars', { headers: getAuthHeaders() });
+                myCharsList = await res.json();
+                if(myCharsList.length === 0) { list.innerHTML = "<div style='grid-column:span 2;text-align:center;color:#888;'>У вас еще нет своих персонажей.</div>"; return; }
+                const cards = await Promise.all(myCharsList.map(async c => {
+                    let tName = await neuroTranslate(c.name, currentLang);
+                    let bClass = c.status === 'private' ? 'bg-private' : c.status === 'pending' ? 'bg-pending' : 'bg-public';
+                    let bText = c.status === 'private' ? 'ПРИВАТНЫЙ' : c.status === 'pending' ? 'МОДЕРАЦИЯ' : 'ОПУБЛИКОВАН';
+                    return `<div class="char-card" onclick="openMyCharOpts(${c.id})"><div class="status-badge ${bClass}">${bText}</div><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`;
+                }));
+                list.innerHTML = cards.join('');
+            } catch(e) { list.innerHTML = "Ошибка"; }
+        }
+        
+        function openMyCharOpts(id) {
+            const c = myCharsList.find(x => x.id === id);
+            if(!c) return;
+            if(!allChars.find(x => x.id === id)) allChars.push(c);
+            openDossier(id);
+        }
+        
+        function openCreateMyChar(id = null) {
+            if(id) {
+                const c = myCharsList.find(x => x.id === id);
+                document.getElementById('imy-id').value = c.id;
+                document.getElementById('imy-name').value = c.name;
+                document.getElementById('imy-age').value = c.age;
+                document.getElementById('imy-desc').value = c.desc;
+                document.getElementById('my-char-preview').src = c.photo;
+                document.getElementById('my-char-preview').style.display = 'block';
+                setMyCharGender(c.gender);
+                document.getElementById('my-char-title').innerText = "РЕДАКТИРОВАТЬ";
+                document.getElementById('my-char-cost-info').style.display = 'none';
+            } else {
+                document.getElementById('imy-id').value = "";
+                document.getElementById('imy-name').value = "";
+                document.getElementById('imy-age').value = "";
+                document.getElementById('imy-desc').value = "";
+                document.getElementById('my-char-preview').src = "#";
+                document.getElementById('my-char-preview').style.display = 'none';
+                setMyCharGender('m');
+                document.getElementById('my-char-title').innerText = "СОЗДАТЬ ПЕРСОНАЖА";
+                document.getElementById('my-char-cost-info').innerText = getUid()===OID ? "Стоимость: 0 🌙 (Вы Овнер)" : "Стоимость: 100 🌙 (Для платников скидки!)";
+                document.getElementById('my-char-cost-info').style.display = 'block';
+            }
+            openPanel('p-create-my-char');
+        }
+        
+        function setMyCharGender(g) { myCharGender = g; document.getElementById('my-cg-m').classList.toggle('active', g === 'm'); document.getElementById('my-cg-f').classList.toggle('active', g === 'f'); }
+        
+        async function saveMyChar() {
+            const id = document.getElementById('imy-id').value;
+            const n = document.getElementById('imy-name').value; 
+            const a = document.getElementById('imy-age').value;
+            const d = document.getElementById('imy-desc').value;
+            const img = document.getElementById('my-char-preview').src;
+            if(!n || img.includes('#')) return tg.showAlert("Заполните Имя и добавьте фото!");
+            const charData = { name: n, age: a, gender: myCharGender, desc: d, photo: img };
+            if(id) {
+                await fetch('/api/user/edit-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: parseInt(id), charData }) });
+                tg.showAlert("Обновлено!");
+            } else {
+                const res = await fetch('/api/user/create-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData }) });
+                const data = await res.json();
+                if(res.ok) { tg.showAlert(data.message); if(getUid()!==OID) updateBalanceUI(data.new_balance); }
+                else return tg.showAlert(data.error);
+            }
+            back(); loadMyChars();
+        }
+        
+        async function publishMyChar() {
+            tg.showConfirm("Отправить на модерацию? (Админы проверят)", async (yes) => {
+                if(yes) {
+                    const res = await fetch('/api/user/submit-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) });
+                    const data = await res.json();
+                    if(res.ok) { tg.showAlert(data.message); back(); loadMyChars(); } else tg.showAlert(data.error);
+                }
+            });
+        }
+
         function openModPanel() { openPanel('p-m-mod'); loadPendingChars(); }
+        
         async function loadPendingChars() {
             const list = document.getElementById('mod-list-container');
             list.innerHTML = '<div class="loader"></div>';
             try {
-                // ПРИНУДИТЕЛЬНЫЙ ТАЙМШТАМП ДЛЯ ПРОБИТИЯ КЭША VERCEL
+                // АНТИ-КЭШ VERCEL: GET запрос с параметром времени
                 const res = await fetch('/api/admin/get-pending-chars?_t=' + Date.now(), { headers: getAuthHeaders() });
                 const chars = await res.json();
                 if (chars.error) { list.innerHTML = `<div style='color:red;'>${chars.error}</div>`; return; }
-                if(!chars || chars.length === 0) { list.innerHTML = "<div style='text-align:center;color:#888;padding:20px;'>Нет новых заявок</div>"; return; }
+                if(!chars || chars.length === 0) { list.innerHTML = "<div style='text-align:center;color:#888;'>Нет заявок на модерацию.</div>"; return; }
                 list.innerHTML = chars.map(c => `
                     <div class="info-card">
-                        <div style="font-weight:bold; color:#f39c12; margin-bottom:5px;">${c.name} (${c.age})</div>
-                        <div style="font-size:11px; color:#aaa; margin-bottom:10px;">${c.desc}</div>
-                        <img src="${c.photo}" style="width:100%; border-radius:10px; margin-bottom:10px;">
+                        <div style="font-weight:bold; color:#f39c12; margin-bottom:5px;">${c.name} (${c.age}, ${c.gender})</div>
+                        <div style="font-size:12px; color:#aaa; margin-bottom:10px;">${c.desc}</div>
+                        <img src="${c.photo}" style="width:100%; max-height:150px; object-fit:contain; margin-bottom:10px;">
                         <div style="display:flex; gap:10px;">
                             <div class="term-btn" style="flex:1; border-color:#00ff00; padding:10px;" onclick="modApprove(${c.id})">ОДОБРИТЬ</div>
                             <div class="term-btn" style="flex:1; border-color:#ff4444; padding:10px;" onclick="modReject(${c.id})">ОТКЛОНИТЬ</div>
                         </div>
                     </div>
                 `).join('');
-            } catch(e) { list.innerHTML = "<div style='color:red;'>Ошибка связи с сервером</div>"; }
+            } catch(e) { list.innerHTML = "Ошибка связи с сервером"; }
         }
-
+        
         async function modApprove(id) {
-            await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'approve' }) });
-            tg.showAlert("Персонаж опубликован!"); loadPendingChars();
+            await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'approve', reason: 'Одобрено' }) });
+            tg.showAlert("Одобрено!"); loadPendingChars();
         }
+        
         async function modReject(id) {
-            const reason = prompt("Причина отказа:");
+            const reason = prompt("Причина отказа (пойдет в ЛС юзеру):", "Не соответствует правилам.");
             if(reason === null) return;
             await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'reject', reason: reason }) });
-            tg.showAlert("Отклонено"); loadPendingChars();
+            tg.showAlert("Отклонено!"); loadPendingChars();
         }
-
-        // ОСТАЛЬНЫЕ ФУНКЦИИ (ЧАТ, ЗАДАНИЯ, МАГАЗИН...)
-        async function openMyCharsPanel() { openPanel('p-my-chars'); loadMyChars(); }
-        async function loadMyChars() {
-            const res = await fetch('/api/user/my-chars', { headers: getAuthHeaders() });
-            myCharsList = await res.json();
-            const list = document.getElementById('my-chars-list');
-            if(myCharsList.length === 0) { list.innerHTML = "<div style='grid-column:span 2;text-align:center;color:#888;'>Пусто</div>"; return; }
-            list.innerHTML = myCharsList.map(c => `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div>${c.name}</div></div></div>`).join('');
-        }
-        function openCreateMyChar() { openPanel('p-create-my-char'); }
-        function setMyCharGender(g) { myCharGender = g; document.getElementById('my-cg-m').className = g==='m'?'gender-btn active':'gender-btn'; document.getElementById('my-cg-f').className = g==='f'?'gender-btn active':'gender-btn'; }
-        async function saveMyChar() {
-            const charData = { name: document.getElementById('imy-name').value, age: document.getElementById('imy-age').value, gender: myCharGender, desc: document.getElementById('imy-desc').value, photo: document.getElementById('my-char-preview').src };
-            const res = await fetch('/api/user/create-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData }) });
-            const data = await res.json();
-            if(res.ok) { tg.showAlert(data.message); back(); loadMyChars(); updateBalanceUI(data.new_balance); } else tg.showAlert(data.error);
-        }
-        async function publishMyChar() {
-            await fetch('/api/user/submit-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) });
-            tg.showAlert("Отправлено на модерацию!"); back(); loadMyChars();
-        }
-
-        // СТАНДАРТНЫЕ СИСТЕМНЫЕ ФУНКЦИИ
-        function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
-        function updateSex(v, s=false) { document.getElementById('sex-val').innerText = v; if(!s) localStorage.setItem('m_sex_' + getUid(), v); }
-        function updateDailyUI() { /* Логика ежедневки */ }
-        function fetchNews() { /* Логика новостей */ }
-        function renderUserTasks() { /* Логика заданий */ }
 
         window.onload = init;
     </script>
