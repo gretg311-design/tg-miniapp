@@ -47,7 +47,7 @@
 
         .ic-prof { background: #0A84FF; } .ic-lang { background: #30D158; } .ic-ai { background: #8E8E93; } .ic-priv { background: #FF9F0A; } .ic-sup { background: #BF5AF2; } .ic-apk { background: #FF453A; }  
 
-        /* СЕТКА СТРОГО 2 КОЛОНКИ КАК В ЖЕЛЕЗОБЕТОНЕ */
+        /* СЕТКА СТРОГО 2 КОЛОНКИ КАК В ТВОЕМ ЖЕЛЕЗОБЕТОНЕ */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
@@ -55,7 +55,7 @@
 
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 85px 20px 20px 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
-        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
+        .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; position: relative; }
         .term-in { background: #000; border: 1px solid #2d164d; border-radius: 8px; padding: 12px; color: #fff; width: 100%; margin-bottom: 10px; font-size: 14px; }
         .term-btn { background: #1a0b2e; border: 1px solid #e91e63; padding: 15px; border-radius: 10px; text-align: center; width: 100%; color: #fff; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
         
@@ -171,7 +171,7 @@
             #p-chat > div:first-child { padding-top: 20px !important; }
         }
 
-        /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ВКЛАДОК */
+        /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ВКЛАДОК И СТАТУСОВ */
         .tabs-wrap { display: flex; background: #0d041a; border: 1px solid #2d164d; border-radius: 8px; margin-bottom: 15px; padding: 3px; width: 100%; }
         .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 11px; font-weight: bold; color: #888; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
         .tab-btn.active { background: #bc42f5; color: #fff; }
@@ -627,7 +627,6 @@
         try { if(tg.requestFullscreen) tg.requestFullscreen(); } catch(e){}
         try { tg.setHeaderColor('#05010a'); tg.setBackgroundColor('#05010a'); if (tg.setBottomBarColor) tg.setBottomBarColor('#05010a'); } catch(e) {}
         tg.enableClosingConfirmation();
-        // АЙФОНОВСКАЯ НАСТРОЙКА ПРОТИВ СВАЙПОВ (Железобетон)
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
 
         const OID = "8287041036";
@@ -900,7 +899,7 @@
         function clearChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Очистить память?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); tg.showAlert("Очищено 🧹"); } }); }
         function deleteChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Удалить чат?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); } }); }
         
-        // ВКЛАДКИ ПЕРСОНАЖЕЙ (Официальные/Пользовательские)
+        // ВКЛАДКИ ПЕРСОНАЖЕЙ (ЖЕСТКИЙ ФИЛЬТР)
         function switchCharTab(tab) {
             currentCharsTab = tab;
             document.getElementById('tab-char-off').classList.toggle('active', tab === 'official');
@@ -915,8 +914,15 @@
                 allChars.sort((a, b) => b.id - a.id); 
                 const list = document.getElementById('user-char-list'); 
                 
-                // Фильтр включает старых персов из базы без тегов (c.char_type === 'official' || !c.char_type)
-                let filtered = allChars.filter(c => currentCharsTab === 'official' ? (c.char_type === 'official' || !c.char_type) : (c.char_type === 'custom' && c.status === 'public'));
+                let filtered = allChars.filter(c => {
+                    let isOwnerChar = c.creator_id == OID;
+                    let isOfficial = c.char_type === 'official' || !c.char_type || isOwnerChar;
+                    let isCustom = c.char_type === 'custom' && c.status === 'public' && !isOwnerChar;
+
+                    if (currentCharsTab === 'official') return isOfficial;
+                    if (currentCharsTab === 'custom') return isCustom;
+                    return false;
+                });
                 
                 if(filtered.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; } 
                 const charCards = await Promise.all(filtered.map(async (c) => { 
@@ -924,7 +930,7 @@
                     return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
                 })); 
                 list.innerHTML = charCards.join(''); 
-            } catch (e) {} 
+            } catch (e) { console.error(e); } 
         }
 
         async function openDossier(id) { 
@@ -982,7 +988,7 @@
         async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Saved!"); }
         function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
         
-        // МОИ ПЕРСОНАЖИ И МОДЕРАЦИЯ
+        // МОИ ПЕРСОНАЖИ И МОДЕРАЦИЯ (С ЗАЩИТОЙ ОТ КЭША VERCEL)
         async function openMyCharsPanel() { openPanel('p-my-chars'); loadMyChars(); }
         async function loadMyChars() {
             const list = document.getElementById('my-chars-list');
@@ -1067,7 +1073,8 @@
             const list = document.getElementById('mod-list-container');
             list.innerHTML = '<div class="loader"></div>';
             try {
-                const res = await fetch('/api/admin/get-pending-chars', { headers: getAuthHeaders() });
+                // ПЕРЕВЕЛИ НА POST, ЧТОБЫ УБИТЬ КЭШ VERCEL
+                const res = await fetch('/api/admin/get-pending-chars', { method: 'POST', headers: getAuthHeaders() });
                 const chars = await res.json();
                 if(chars.length === 0) { list.innerHTML = "<div style='text-align:center;color:#888;'>Нет заявок на модерацию.</div>"; return; }
                 list.innerHTML = chars.map(c => `
@@ -1081,7 +1088,7 @@
                         </div>
                     </div>
                 `).join('');
-            } catch(e) { list.innerHTML = "Ошибка"; }
+            } catch(e) { list.innerHTML = "<div style='color:#ff4444;text-align:center;'>Ошибка загрузки заявок. Проверьте сервер.</div>"; }
         }
         async function modApprove(id) {
             await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'approve', reason: 'Одобрено' }) });
