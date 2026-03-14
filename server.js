@@ -13,7 +13,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 const OWNER_ID = 8287041036;
 const MONGO_URI = "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 
-// Ключ берется из настроек Vercel (Environment Variables)
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; 
 
 const CRYPTOBOT_TOKEN = "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
@@ -111,15 +110,15 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
             user = new User({ tg_id: uid }); 
             isNewUser = true; 
         }
-        
-        // === ЖЕЛЕЗОБЕТОННАЯ РЕФЕРАЛКА ===
+
+        // ЖЕЛЕЗОБЕТОННАЯ РЕФЕРАЛКА С AWAIT
         if (isNewUser && inviterId && inviterId !== uid) {
             let inviter = await User.findOne({ tg_id: inviterId });
             if (inviter) {
                 user.invited_by = inviterId; 
                 user.shards += 100; 
                 isModified = true;
-                
+
                 inviter.shards += 100;
                 await inviter.save();
                 await sendTgMessage(inviterId, `🎉 По вашей ссылке зарегистрировался новый пользователь! Вы получили 100 🌙.`);
@@ -152,7 +151,6 @@ app.post('/api/user/sync', checkTgAuth, async (req, res) => {
                 await Promo.deleteOne({ _id: promo._id });
                 if (promo.messageId) {
                     const text = `${promo.emoji}\nПромокод «<s>${promo.code}</s>» даёт ${promo.reward} осколков\nUPD: промокод закончился`;
-                    // ДОБАВЛЕН AWAIT ДЛЯ ЗАЩИТЫ ОТ СБРОСА VERCEL
                     await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ chat_id: "@Anime_ai_18", message_id: promo.messageId, text: text, parse_mode: 'HTML' })
@@ -418,6 +416,7 @@ app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => {
     res.json({ message: "Новость удалена" });
 });
 
+// ИСПРАВЛЕННЫЙ ЖЕСТКИЙ ФИЛЬТР ДЛЯ БАЗЫ ПЕРСОНАЖЕЙ
 app.get('/api/get-characters', checkTgAuth, async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -426,9 +425,8 @@ app.get('/api/get-characters', checkTgAuth, async (req, res) => {
     const chars = await Character.find({ 
         $or: [
             { char_type: 'official' }, 
-            { status: 'public' },
-            { char_type: { $exists: false } }, 
-            { status: { $exists: false } }
+            { char_type: 'custom', status: 'public' },
+            { char_type: { $exists: false } }
         ] 
     });
     res.json(chars);
