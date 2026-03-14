@@ -172,7 +172,7 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
 });
 
 // ================= API: СИСТЕМА ПОЛЬЗОВАТЕЛЬСКИХ ПЕРСОНАЖЕЙ =================
-app.get('/api/user/my-chars', checkTgAuth, async (req, res) => {
+app.post('/api/user/my-chars', checkTgAuth, async (req, res) => {
     try {
         const chars = await Character.find({ creator_id: req.tg_user_id, char_type: 'custom' });
         res.json(chars);
