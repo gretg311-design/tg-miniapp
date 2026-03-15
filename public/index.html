@@ -7,7 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
-        html, body { background: #05010a; color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
+        html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
         
         #loading { position: fixed; inset: 0; background: #05010a; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
         .moon-logo { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff, #888); box-shadow: 0 0 35px #fff; animation: pulseMoon 2s infinite ease-in-out; }
@@ -16,6 +16,7 @@
         .legal-text { margin-top: 30px; font-size: 10px; color: #555; text-align: center; max-width: 80%; opacity: 0.8; font-family: monospace; }
         .app-version { font-size: 10px; color: #444; text-align: center; margin-top: 15px; font-family: monospace; }
 
+        /* ОПУСТИЛИ ВСЁ ВНИЗ НА 85px ЧТОБЫ НЕ ПЕРЕКРЫВАЛОСЬ ШАПКОЙ ТГ */
         #app { padding: 85px 20px 40px 20px; display: none; flex-direction: column; height: 100vh; overflow-y: auto; }
         .u-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         
@@ -36,11 +37,22 @@
         .menu-item, .term-btn, .con-btn, .btn-stars, .btn-ton, .char-card, .chatlist-item, .gender-btn, .task-item button { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.1s ease; }
         .menu-item:active, .term-btn:active, .con-btn:active, .btn-stars:active, .btn-ton:active, .char-card:active, .chatlist-item:active, .gender-btn:active, .task-item button:active { transform: scale(0.94); filter: brightness(0.8); }
 
+        .set-list { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; margin-bottom: 15px; width: 100%; display: flex; flex-direction: column; overflow: hidden; }
+        .set-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #2d164d; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; }
+        .set-item:active { transform: scale(0.97); filter: brightness(0.8); }
+        .set-item:last-child { border-bottom: none; }
+        .set-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 15px; flex-shrink: 0; }
+        .set-text { flex: 1; font-size: 15px; color: #fff; font-weight: 500; }
+        .set-arrow { color: #555; font-size: 18px; font-weight: bold; }
+
+        .ic-prof { background: #0A84FF; } .ic-lang { background: #30D158; } .ic-ai { background: #8E8E93; } .ic-priv { background: #FF9F0A; } .ic-sup { background: #BF5AF2; } .ic-apk { background: #FF453A; }  
+
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .menu-item { background: #11081d; border: 1px solid #2d164d; border-radius: 12px; height: 65px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: bold; font-size: 10px; color: #fff; cursor: pointer; text-align: center; }
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
+        /* ОПУСТИЛИ ВСЕ ВСПЛЫВАЮЩИЕ ОКНА НА 85px */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 85px 20px 20px 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
@@ -49,17 +61,6 @@
         
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 20px; }
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
-
-        /* ====== АЙФОНОВСКИЕ НАСТРОЙКИ (iOS STYLE) ====== */
-        .ios-list { background: #1c1c1e; border-radius: 12px; width: 100%; margin-bottom: 20px; overflow: hidden; }
-        .ios-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 0.5px solid #38383a; cursor: pointer; transition: background 0.1s; }
-        .ios-item:active { background: #2c2c2e; }
-        .ios-item:last-child { border-bottom: none; }
-        .ios-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-right: 15px; color: #fff; }
-        .ios-text { flex: 1; font-size: 16px; color: #fff; font-weight: 400; letter-spacing: 0.3px; }
-        .ios-arrow { color: #555; font-size: 20px; font-weight: 300; }
-        .ic-prof { background: #0A84FF; } .ic-lang { background: #30D158; } .ic-ai { background: #8E8E93; } .ic-priv { background: #FF9F0A; } .ic-sup { background: #BF5AF2; } .ic-apk { background: #FF453A; }  
-        /* =============================================================== */
 
         .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a0b2e; font-size: 14px; align-items: center; }
         .p-label { color: #888; } .p-val { color: #fff; font-weight: bold; }
@@ -95,6 +96,7 @@
         .char-card-tags { font-size: 10px; color: #00bcd4; }
         .dossier-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; border: 1px solid #bc42f5; margin-bottom: 15px; }
 
+        /* === ДИЗАЙН ЧАТА === */
         .chat-container { flex: 1; width: 100%; background: #05010a; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; }
         
@@ -146,6 +148,7 @@
         .news-text { font-size: 12px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
         .news-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #2d164d; display: none; }
 
+        /* ================= РЕСПОНСИВНОСТЬ ================= */
         @media (min-width: 768px) {
             .menu-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
             .char-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
@@ -168,6 +171,7 @@
             #p-chat > div:first-child { padding-top: 20px !important; }
         }
 
+        /* --- ДОБАВЛЕНО ТОЛЬКО ДЛЯ НОВЫХ ФИЧ (ВКЛАДКИ И СТАТУСЫ) --- */
         .tabs-wrap { display: flex; background: #0d041a; border: 1px solid #2d164d; border-radius: 8px; margin-bottom: 15px; padding: 3px; width: 100%; }
         .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 11px; font-weight: bold; color: #888; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
         .tab-btn.active { background: #bc42f5; color: #fff; }
@@ -181,7 +185,7 @@
     <div id="loading">
         <div class="moon-logo"></div>
         <div class="legal-text">All characters are 18+.<br>Content is AI-generated and does not reflect real people.</div>
-        <div class="app-version">v. 1.2.1.0</div>
+        <div class="app-version">v. 1.2.1.0(beta)</div>
     </div>
 
     <div id="app">
@@ -209,7 +213,7 @@
             <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')" data-i18n="m_adm">Админка</div>
             <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')" data-i18n="m_con">Консоль</div>
         </div>
-        <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0</div>
+        <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
 
         <div id="main-news-feed" class="news-container"></div>
     </div>
@@ -288,7 +292,6 @@
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
-    
     <div id="p-user-tasks" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 20px;" data-i18n="h_tasks">ЗАДАНИЯ</h2>
         <div class="info-card" style="text-align: center; border-color: #bc42f5;">
@@ -373,19 +376,15 @@
     
     <div id="p-settings" class="overlay">
         <h2 style="color:#bc42f5" data-i18n="h_set">НАСТРОЙКИ</h2>
-        <div class="ios-list">
-            <div class="ios-item" onclick="openMyCharsPanel()">
-                <div class="ios-icon" style="background:#f39c12;">🎭</div>
-                <div class="ios-text">Мои персонажи</div>
-                <div class="ios-arrow">›</div>
-            </div>
-            
-            <div class="ios-item" onclick="openPanel('p-set-prof')"><div class="ios-icon ic-prof">👤</div><div class="ios-text" data-i18n="s_menu_prof">Настроить профиль</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-set-lang')"><div class="ios-icon ic-lang">🌐</div><div class="ios-text" data-i18n="s_menu_lang">Сменить язык</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-set-ai')"><div class="ios-icon ic-ai">🤖</div><div class="ios-text" data-i18n="s_menu_ai">Настройка ИИ</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="tg.openLink('https://telegra.ph/Privacy-Policy-03-03-61')"><div class="ios-icon ic-priv">🔒</div><div class="ios-text" data-i18n="s_menu_priv">Политика конфиденциальности</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="tg.openTelegramLink('https://t.me/suppurtmoders_bot')"><div class="ios-icon ic-sup">💬</div><div class="ios-text" data-i18n="s_menu_sup">Техническая поддержка</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="devApk()"><div class="ios-icon ic-apk">📱</div><div class="ios-text" data-i18n="s_menu_apk">Приложение .apk</div><div class="ios-arrow">›</div></div>
+        <div class="set-list">
+            <div class="set-item" onclick="openMyCharsPanel()"><div class="set-icon" style="background:#f39c12;">🎭</div><div class="set-text">Мои персонажи</div><div class="set-arrow">›</div></div>
+
+            <div class="set-item" onclick="openPanel('p-set-prof')"><div class="set-icon ic-prof">👤</div><div class="set-text" data-i18n="s_menu_prof">Настроить профиль</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-set-lang')"><div class="set-icon ic-lang">🌐</div><div class="set-text" data-i18n="s_menu_lang">Сменить язык</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-set-ai')"><div class="set-icon ic-ai">🤖</div><div class="set-text" data-i18n="s_menu_ai">Настройка ИИ</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="tg.openLink('https://telegra.ph/Privacy-Policy-03-03-61')"><div class="set-icon ic-priv">🔒</div><div class="set-text" data-i18n="s_menu_priv">Политика конфиденциальности</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="tg.openTelegramLink('https://t.me/suppurtmoders_bot')"><div class="set-icon ic-sup">💬</div><div class="set-text" data-i18n="s_menu_sup">Техническая поддержка</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="devApk()"><div class="set-icon ic-apk">📱</div><div class="set-text" data-i18n="s_menu_apk">Приложение .apk</div><div class="set-arrow">›</div></div>
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
@@ -441,31 +440,31 @@
     </div>
     <div id="p-con" class="overlay">
         <h2 style="color:#e91e63">КОНСОЛЬ (OWNER)</h2>
-        <div class="ios-list">
-            <div class="ios-item" onclick="openPanel('p-m-news')"><div class="ios-icon" style="background:#ffaa00;">📰</div><div class="ios-text">НОВОСТИ</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-shards')"><div class="ios-icon" style="background:#e91e63;">💎</div><div class="ios-text">ОСКОЛКИ</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-subs')"><div class="ios-icon" style="background:#e91e63;">👑</div><div class="ios-text">ПОДПИСКИ</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-char')"><div class="ios-icon" style="background:#e91e63;">🎭</div><div class="ios-text">ПЕРСОНАЖИ</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-prices')"><div class="ios-icon" style="background:#e91e63;">💲</div><div class="ios-text">ЦЕНЫ</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-admins')"><div class="ios-icon" style="background:#e91e63;">🛡️</div><div class="ios-text">АДМИНЫ</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-promos')"><div class="ios-icon" style="background:#e91e63;">🎫</div><div class="ios-text">ПРОМОКОДЫ</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-tasks')"><div class="ios-icon" style="background:#bc42f5;">🎯</div><div class="ios-text">ЗАДАНИЯ</div><div class="ios-arrow">›</div></div>
+        <div class="set-list">
+            <div class="set-item" onclick="openPanel('p-m-news')"><div class="set-icon" style="background:#ffaa00;">📰</div><div class="set-text">НОВОСТИ</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-shards')"><div class="set-icon" style="background:#e91e63;">💎</div><div class="set-text">ОСКОЛКИ</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-subs')"><div class="set-icon" style="background:#e91e63;">👑</div><div class="set-text">ПОДПИСКИ</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-char')"><div class="set-icon" style="background:#e91e63;">🎭</div><div class="set-text">ПЕРСОНАЖИ</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-prices')"><div class="set-icon" style="background:#e91e63;">💲</div><div class="set-text">ЦЕНЫ</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-admins')"><div class="set-icon" style="background:#e91e63;">🛡️</div><div class="set-text">АДМИНЫ</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-promos')"><div class="set-icon" style="background:#e91e63;">🎫</div><div class="set-text">ПРОМОКОДЫ</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-tasks')"><div class="set-icon" style="background:#bc42f5;">🎯</div><div class="set-text">ЗАДАНИЯ</div><div class="set-arrow">›</div></div>
             
-            <div class="ios-item" onclick="openModPanel()"><div class="ios-icon" style="background:#f39c12;">🔴</div><div class="ios-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="ios-arrow">›</div></div>
+            <div class="set-item" onclick="openModPanel()"><div class="set-icon" style="background:#f39c12;">🔴</div><div class="set-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="set-arrow">›</div></div>
         </div>
         <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
     </div>
     
     <div id="p-adm" class="overlay">
         <h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2>
-        <div class="ios-list">
-            <div class="ios-item" onclick="openPanel('p-m-shards')"><div class="ios-icon" style="background:#00bcd4;">💎</div><div class="ios-text">ВЫДАТЬ ОСКОЛКИ</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-subs')"><div class="ios-icon" style="background:#00bcd4;">👑</div><div class="ios-text">ВЫДАТЬ SUB</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-char')"><div class="ios-icon" style="background:#00bcd4;">🎭</div><div class="ios-text">ДОБАВИТЬ ПЕРСА</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-promos')"><div class="ios-icon" style="background:#00bcd4;">🎫</div><div class="ios-text">СОЗДАТЬ ПРОМО</div><div class="ios-arrow">›</div></div>
-            <div class="ios-item" onclick="openPanel('p-m-tasks')"><div class="ios-icon" style="background:#00bcd4;">🎯</div><div class="ios-text">ДОБАВИТЬ ЗАДАНИЕ</div><div class="ios-arrow">›</div></div>
+        <div class="set-list">
+            <div class="set-item" onclick="openPanel('p-m-shards')"><div class="set-icon" style="background:#00bcd4;">💎</div><div class="set-text">ВЫДАТЬ ОСКОЛКИ</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-subs')"><div class="set-icon" style="background:#00bcd4;">👑</div><div class="set-text">ВЫДАТЬ SUB</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-char')"><div class="set-icon" style="background:#00bcd4;">🎭</div><div class="set-text">ДОБАВИТЬ ПЕРСА</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-promos')"><div class="set-icon" style="background:#00bcd4;">🎫</div><div class="set-text">СОЗДАТЬ ПРОМО</div><div class="set-arrow">›</div></div>
+            <div class="set-item" onclick="openPanel('p-m-tasks')"><div class="set-icon" style="background:#00bcd4;">🎯</div><div class="set-text">ДОБАВИТЬ ЗАДАНИЕ</div><div class="set-arrow">›</div></div>
             
-            <div class="ios-item" onclick="openModPanel()"><div class="ios-icon" style="background:#f39c12;">🔴</div><div class="ios-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="ios-arrow">›</div></div>
+            <div class="set-item" onclick="openModPanel()"><div class="set-icon" style="background:#f39c12;">🔴</div><div class="set-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="set-arrow">›</div></div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
     </div>
@@ -593,7 +592,7 @@
     <div id="p-create-my-char" class="overlay">
         <h2 style="color:#f39c12" id="my-char-title">СОЗДАТЬ ПЕРСОНАЖА</h2>
         <div class="info-card" style="text-align: center;">
-            <div id="my-char-cost-info" style="color:#00ff00; font-size:12px; margin-bottom:15px; font-weight:bold;">Стоимость: 100 🌙</div>
+            <div id="my-char-cost-info" style="color:#00ff00; font-size:12px; margin-bottom:15px; font-weight:bold;">Стоимость: 100 🌙 (Для платников скидки!)</div>
             
             <input type="hidden" id="imy-id">
             <img id="my-char-preview" src="#" style="width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #f39c12;">
@@ -610,9 +609,7 @@
             <input type="file" id="my-char-file" accept="image/*" style="display:none;" onchange="if(this.files && this.files[0]){ const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('my-char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }">
             <div class="term-btn" style="border-color:#f39c12" onclick="document.getElementById('my-char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
             
-            <div id="my-char-upload-status" style="color:#ffaa00; font-size:12px; margin-bottom:10px; display:none; font-weight:bold;">⏳ Загрузка фото в облако...</div>
-
-            <div class="term-btn" id="my-char-save-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00;" onclick="saveMyChar()">СОХРАНИТЬ</div>
+            <div class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00;" onclick="saveMyChar()">СОХРАНИТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">ОТМЕНА</div>
     </div>
@@ -644,409 +641,139 @@
         let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
         let allChars = []; let allNews = []; 
         
-        // --- ПЕРЕМЕННЫЕ ДЛЯ ПОЛЬЗОВАТЕЛЬСКИХ ПЕРСОНАЖЕЙ ---
         let currentCharsTab = 'official'; 
         let myCharGender = 'm';
         let myCharsList = [];
+        let currentCustomCost = 100; // Глобальная переменная для случайной цены
 
         const translations = {
-            ru: { m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль", h_chats: "МОИ ЧАТЫ", h_chars: "ПЕРСОНАЖИ", h_daily: "ЕЖЕДНЕВНАЯ НАГРАДА", h_tasks: "ЗАДАНИЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФИЛЬ", h_set: "НАСТРОЙКИ", b_back: "НАЗАД", b_start_chat: "НАЧАТЬ ЧАТ", b_del_char: "УДАЛИТЬ ПЕРСОНАЖА", b_claim: "ЗАБРАТЬ", b_share: "ПОДЕЛИТЬСЯ ССЫЛКОЙ", b_activate: "АКТИВИРОВАТЬ", pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:", set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей", d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по", s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код", dos_age: "Возраст:", dos_gender: "Пол:", s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk" }
+            ru: { m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль", h_chats: "МОИ ЧАТЫ", h_chars: "ПЕРСОНАЖИ", h_daily: "ЕЖЕДНЕВНАЯ НАГРАДА", h_tasks: "ЗАДАНИЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФИЛЬ", h_set: "НАСТРОЙКИ", b_back: "НАЗАД", b_start_chat: "НАЧАТЬ ЧАТ", b_del_char: "УДАЛИТЬ ПЕРСОНАЖА", b_claim: "ЗАБРАТЬ", b_share: "ПОДЕЛИТЬСЯ ССЫЛКОЙ", b_activate: "АКТИВИРОВАТЬ", pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:", set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей", d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по", s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код", dos_age: "Возраст:", dos_gender: "Пол:", s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk", c_love: "Влюбленность", c_trust: "Доверие", c_inf: "Влияние", c_horny: "Возбуждение" }
         };
-        
         let currentLang = 'ru'; const transCache = {}; 
-        
         function getUid() { return String(tg.initDataUnsafe?.user?.id || OID); }
         function getAuthHeaders() { return { 'Content-Type': 'application/json', 'x-tg-data': tg.initData || "dev_mode" }; }
 
         async function neuroTranslate(text, targetLang) {
             if (!text || targetLang === 'ru') return text; 
-            const cacheKey = text + '_' + targetLang; 
-            if (transCache[cacheKey]) return transCache[cacheKey];
-            try { 
-                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`; 
-                const res = await fetch(url); 
-                const data = await res.json(); 
-                let translatedText = ''; 
-                data[0].forEach(item => { translatedText += item[0]; }); 
-                transCache[cacheKey] = translatedText; 
-                return translatedText; 
-            } catch (e) { return text; }
+            const cacheKey = text + '_' + targetLang; if (transCache[cacheKey]) return transCache[cacheKey];
+            try { const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`; const res = await fetch(url); const data = await res.json(); let translatedText = ''; data[0].forEach(item => { translatedText += item[0]; }); transCache[cacheKey] = translatedText; return translatedText; } catch (e) { return text; }
         }
 
         async function setLang(lang) {
-            currentLang = lang; 
-            localStorage.setItem('m_lang_' + getUid(), lang); 
-            document.querySelectorAll('.lang-btn').forEach(btn => { 
-                btn.style.borderColor = '#2d164d'; btn.style.opacity = '1'; 
-            }); 
-            const activeBtn = document.getElementById('lang-' + lang); 
-            if (activeBtn) activeBtn.style.borderColor = '#bc42f5';
-            
-            document.querySelector('[onclick="devLang(\'Deutsch\')"]').style.opacity = '0.4'; 
-            applyTranslations();
-            
-            if(document.getElementById('p-user-chars').style.display === 'flex') await renderUserChars(false); 
-            if(document.getElementById('p-char-dossier').style.display === 'flex') await openDossier(activeCharId); 
-            if(document.getElementById('p-user-tasks').style.display === 'flex') await renderUserTasks(); 
-            if(document.getElementById('p-user-chatlist').style.display === 'flex') openChatList();
+            currentLang = lang; localStorage.setItem('m_lang_' + getUid(), lang); document.querySelectorAll('.lang-btn').forEach(btn => { btn.style.borderColor = '#2d164d'; btn.style.opacity = '1'; }); const activeBtn = document.getElementById('lang-' + lang); if (activeBtn) activeBtn.style.borderColor = '#bc42f5';
+            document.querySelector('[onclick="devLang(\'Deutsch\')"]').style.opacity = '0.4'; applyTranslations();
+            if(document.getElementById('p-user-chars').style.display === 'flex') await renderUserChars(); if(document.getElementById('p-char-dossier').style.display === 'flex') await openDossier(activeCharId); if(document.getElementById('p-user-tasks').style.display === 'flex') await renderUserTasks(); if(document.getElementById('p-user-chatlist').style.display === 'flex') openChatList();
         }
 
         function applyTranslations() {
             const t = translations[currentLang] || translations['ru'];
-            document.querySelectorAll('[data-i18n]').forEach(el => { 
-                const key = el.getAttribute('data-i18n'); 
-                if (t[key]) { 
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key]; 
-                    else el.innerHTML = t[key]; 
-                } 
-            });
-            updateLen(document.getElementById('len-slider').value, true); 
-            updateSex(document.getElementById('sex-slider').value, true);
-            let lS = document.getElementById('len-slider'); 
-            if(lS) { 
-                let maxLen = parseInt(lS.max); let minLen = parseInt(lS.min); 
-                if(minLen === maxLen) { document.getElementById('len-info').innerText = `Лимит (${userData.subscription}): ${maxLen} слов`; } 
-                else { document.getElementById('len-info').innerText = `Лимит (${userData.subscription}): от ${minLen} до ${maxLen} слов`; } 
-            }
+            document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) { if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key]; else el.innerHTML = t[key]; } });
+            updateLen(document.getElementById('len-slider').value, true); updateSex(document.getElementById('sex-slider').value, true);
+            let lS = document.getElementById('len-slider'); if(lS) { let maxLen = parseInt(lS.max); let minLen = parseInt(lS.min); if(minLen === maxLen) { document.getElementById('len-info').innerText = `Лимит (${userData.subscription}): ${maxLen} слов`; } else { document.getElementById('len-info').innerText = `Лимит (${userData.subscription}): от ${minLen} до ${maxLen} слов`; } }
         }
 
         function devLang(langName) { tg.showAlert(`Язык ${langName} в разработке! 🛠`); }
         function devApk() { tg.showAlert(`Приложение APK еще в разработке! 🛠`); }
 
         function updateBalanceUI(val) {
-            if(getUid() === OID) { 
-                document.getElementById('shards-balance').innerText = "∞"; 
-                document.getElementById('prof-shards').innerText = "∞"; 
-                let cb = document.getElementById('chat-shards-balance'); 
-                if(cb) cb.innerText = "∞"; 
-                return; 
-            }
-            document.getElementById('shards-balance').innerText = val; 
-            document.getElementById('prof-shards').innerText = val; 
-            let cb = document.getElementById('chat-shards-balance'); 
-            if(cb) cb.innerText = val; 
-            userData.shards = val;
+            if(getUid() === OID) { document.getElementById('shards-balance').innerText = "∞"; document.getElementById('prof-shards').innerText = "∞"; let cb = document.getElementById('chat-shards-balance'); if(cb) cb.innerText = "∞"; return; }
+            document.getElementById('shards-balance').innerText = val; document.getElementById('prof-shards').innerText = val; let cb = document.getElementById('chat-shards-balance'); if(cb) cb.innerText = val; userData.shards = val;
         }
 
         function applyNickStyle(sub) {
-            const nameEl = document.getElementById('u-name'); 
-            nameEl.className = 'nick-base'; 
-            let s = (sub || "FREE").trim().toLowerCase();
-            if (s === 'ultra') nameEl.classList.add('nick-ultra'); 
-            else if (s === 'vip') nameEl.classList.add('nick-vip'); 
-            else if (s === 'pro') nameEl.classList.add('nick-pro'); 
-            else if (s === 'premium') nameEl.classList.add('nick-premium'); 
-            else nameEl.classList.add('nick-free');
+            const nameEl = document.getElementById('u-name'); nameEl.className = 'nick-base'; let s = (sub || "FREE").trim().toLowerCase();
+            if (s === 'ultra') nameEl.classList.add('nick-ultra'); else if (s === 'vip') nameEl.classList.add('nick-vip'); else if (s === 'pro') nameEl.classList.add('nick-pro'); else if (s === 'premium') nameEl.classList.add('nick-premium'); else nameEl.classList.add('nick-free');
         }
 
-        document.addEventListener('click', () => { 
-            if(openDropdownId !== null) { 
-                let el = document.getElementById('chat-dd-' + openDropdownId); 
-                if(el) el.style.display = 'none'; 
-                let chatItem = document.getElementById('chat-item-' + openDropdownId); 
-                if(chatItem) chatItem.style.zIndex = 1; 
-                openDropdownId = null; 
-            } 
-        });
+        document.addEventListener('click', () => { if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; let chatItem = document.getElementById('chat-item-' + openDropdownId); if(chatItem) chatItem.style.zIndex = 1; openDropdownId = null; } });
 
-        // --- УМНАЯ СИНХРОНИЗАЦИЯ БЕЗ ТАЙМЕРА ---
+        // --- УМНАЯ СИНХРОНИЗАЦИЯ (ВЗАМЕН ТАЙМЕРУ) ---
         async function syncUser() {
-            const uid = getUid(); 
-            if(!uid) return;
+            const uid = getUid(); if(!uid) return;
             try {
                 const res = await fetch('/api/user/sync', { method: 'POST', headers: getAuthHeaders() });
-                if(res.ok) { 
-                    const data = await res.json(); 
-                    if(uid !== OID) updateBalanceUI(data.shards); 
-                    if(document.getElementById('prof-sub').innerText !== data.subscription) { 
-                        document.getElementById('prof-sub').innerText = data.subscription; 
-                        userData.subscription = data.subscription; 
-                        applyNickStyle(data.subscription); 
-                    } 
-                }
+                if(res.ok) { const data = await res.json(); if(uid !== OID) updateBalanceUI(data.shards); if(document.getElementById('prof-sub').innerText !== data.subscription) { document.getElementById('prof-sub').innerText = data.subscription; userData.subscription = data.subscription; applyNickStyle(data.subscription); } }
             } catch(e) {}
         }
 
-        // Обновляем данные, когда пользователь сворачивал и снова открыл Telegram
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) syncUser();
         });
 
-        // --- СЕКРЕТНАЯ ФУНКЦИЯ ЗАГРУЗКИ В TELEGRA.PH (BYPASS SERVERA) ---
+        // --- ЗАГРУЗЧИК TELEGRA.PH ---
         async function uploadToCloud(file) {
             const formData = new FormData();
             formData.append('file', file);
             try {
                 const res = await fetch('https://telegra.ph/upload', { method: 'POST', body: formData });
                 const data = await res.json();
-                if(data && data[0] && data[0].src) {
-                    return 'https://telegra.ph' + data[0].src;
-                }
+                if(data && data[0] && data[0].src) return 'https://telegra.ph' + data[0].src;
                 return null;
-            } catch(e) {
-                return null;
-            }
-        }
-
-        // --- РАСЧЕТ СТОИМОСТИ ПЕРСОНАЖА СО СКИДКОЙ ---
-        function getCharCost() {
-            if (getUid() === OID) return 0;
-            let sub = (userData.subscription || "FREE").trim().toUpperCase();
-            if (sub === 'ULTRA') return 45; // Скидка 55%
-            if (sub === 'VIP') return 55;   // Скидка 45%
-            if (sub === 'PRO') return 70;   // Скидка 30%
-            if (sub === 'PREMIUM') return 85; // Скидка 15%
-            return 100; // Free
+            } catch(e) { return null; }
         }
 
         function updateUserAvatar(input) {
-            if (input.files && input.files[0]) { 
-                const r = new FileReader(); 
-                r.onload = (e) => { 
-                    const res = e.target.result; 
-                    document.getElementById('set-u-avatar-preview').src = res; 
-                    document.getElementById('main-u-avatar').src = res; 
-                    document.getElementById('prof-u-avatar').src = res; 
-                    localStorage.setItem('m_avatar_' + getUid(), res); 
-                }; 
-                r.readAsDataURL(input.files[0]); 
-            }
+            if (input.files && input.files[0]) { const r = new FileReader(); r.onload = (e) => { const res = e.target.result; document.getElementById('set-u-avatar-preview').src = res; document.getElementById('main-u-avatar').src = res; document.getElementById('prof-u-avatar').src = res; localStorage.setItem('m_avatar_' + getUid(), res); }; r.readAsDataURL(input.files[0]); }
         }
 
         async function init() {
-            setTimeout(() => { 
-                const loader = document.getElementById('loading'); 
-                if (loader) { 
-                    loader.style.opacity = '0'; 
-                    setTimeout(() => { 
-                        loader.style.display = 'none'; 
-                        document.getElementById('app').style.display = 'flex'; 
-                    }, 500); 
-                } 
-            }, 1500);
-            
-            const uid = getUid(); 
-            const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
-            currentLang = localStorage.getItem('m_lang_' + uid) || 'ru'; 
-            setLang(currentLang);
-            
-            document.getElementById('u-id-head').innerText = uid; 
-            document.getElementById('prof-id').innerText = uid;
-            
-            const savedNick = localStorage.getItem('m_nick_' + uid) || u.first_name || "User"; 
-            document.getElementById('u-name').innerText = savedNick; 
-            document.getElementById('prof-nick').innerText = savedNick; 
-            document.getElementById('set-nick').value = savedNick;
-            
-            let savedAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png"; 
-            document.getElementById('main-u-avatar').src = savedAvatar; 
-            document.getElementById('prof-u-avatar').src = savedAvatar; 
-            document.getElementById('set-u-avatar-preview').src = savedAvatar;
-            
-            let uGender = localStorage.getItem('m_gender_' + uid) || 'm'; 
-            document.getElementById('g-m').classList.toggle('active', uGender === 'm'); 
-            document.getElementById('g-f').classList.toggle('active', uGender === 'f');
+            setTimeout(() => { const loader = document.getElementById('loading'); if (loader) { loader.style.opacity = '0'; setTimeout(() => { loader.style.display = 'none'; document.getElementById('app').style.display = 'flex'; }, 500); } }, 1500);
+            const uid = getUid(); const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
+            currentLang = localStorage.getItem('m_lang_' + uid) || 'ru'; setLang(currentLang);
+            document.getElementById('u-id-head').innerText = uid; document.getElementById('prof-id').innerText = uid;
+            const savedNick = localStorage.getItem('m_nick_' + uid) || u.first_name || "User"; document.getElementById('u-name').innerText = savedNick; document.getElementById('prof-nick').innerText = savedNick; document.getElementById('set-nick').value = savedNick;
+            let savedAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png"; document.getElementById('main-u-avatar').src = savedAvatar; document.getElementById('prof-u-avatar').src = savedAvatar; document.getElementById('set-u-avatar-preview').src = savedAvatar;
+            let uGender = localStorage.getItem('m_gender_' + uid) || 'm'; document.getElementById('g-m').classList.toggle('active', uGender === 'm'); document.getElementById('g-f').classList.toggle('active', uGender === 'f');
 
-            try { 
-                const startParam = tg.initDataUnsafe?.start_param || null; 
-                const res = await fetch('/api/user/get-data', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ start_param: startParam }) }); 
-                if(res.ok) userData = await res.json(); 
-            } catch (e) {}
+            try { const startParam = tg.initDataUnsafe?.start_param || null; const res = await fetch('/api/user/get-data', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ start_param: startParam }) }); if(res.ok) userData = await res.json(); } catch (e) {}
 
             const badgeEl = document.getElementById('u-badge');
-            if(uid === OID) { 
-                updateBalanceUI("∞"); 
-                document.getElementById('prof-sub').innerText = "ULTRA"; 
-                document.getElementById('prof-exp').innerText = "Без ограничений"; 
-                document.getElementById('prof-status').innerText = "Овнер"; 
-                userData.subscription = "ULTRA"; 
-                document.getElementById('nav-adm').style.display = 'flex'; 
-                document.getElementById('nav-con').style.display = 'flex'; 
-                document.getElementById('own-sh-rem').style.display = 'block'; 
-                document.getElementById('own-su-rem').style.display = 'block'; 
-                document.getElementById('own-adm-rem').style.display = 'block'; 
-                badgeEl.style.display = 'inline-block'; 
-                badgeEl.className = 'badge-base badge-owner'; 
-                badgeEl.innerText = 'OWNER'; 
-            } else { 
-                updateBalanceUI(userData.shards); 
-                document.getElementById('prof-sub').innerText = userData.subscription; 
-                if(userData.subscription !== "FREE" && userData.sub_exp > 0) { 
-                    let expDate = new Date(userData.sub_exp); 
-                    document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU'); 
-                } else { 
-                    document.getElementById('prof-exp').innerText = "-"; 
-                } 
-                if(userData.is_admin) { 
-                    document.getElementById('prof-status').innerText = "Админ"; 
-                    document.getElementById('nav-adm').style.display = 'flex'; 
-                    badgeEl.style.display = 'inline-block'; 
-                    badgeEl.className = 'badge-base badge-admin'; 
-                    badgeEl.innerText = 'ADMIN'; 
-                } else { 
-                    document.getElementById('prof-status').innerText = "Юзер"; 
-                    badgeEl.style.display = 'none'; 
-                } 
-            }
+            if(uid === OID) { updateBalanceUI("∞"); document.getElementById('prof-sub').innerText = "ULTRA"; document.getElementById('prof-exp').innerText = "Без ограничений"; document.getElementById('prof-status').innerText = "Овнер"; userData.subscription = "ULTRA"; document.getElementById('nav-adm').style.display = 'flex'; document.getElementById('nav-con').style.display = 'flex'; document.getElementById('own-sh-rem').style.display = 'block'; document.getElementById('own-su-rem').style.display = 'block'; document.getElementById('own-adm-rem').style.display = 'block'; badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-owner'; badgeEl.innerText = 'OWNER'; } 
+            else { updateBalanceUI(userData.shards); document.getElementById('prof-sub').innerText = userData.subscription; if(userData.subscription !== "FREE" && userData.sub_exp > 0) { let expDate = new Date(userData.sub_exp); document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU'); } else { document.getElementById('prof-exp').innerText = "-"; } if(userData.is_admin) { document.getElementById('prof-status').innerText = "Админ"; document.getElementById('nav-adm').style.display = 'flex'; badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-admin'; badgeEl.innerText = 'ADMIN'; } else { document.getElementById('prof-status').innerText = "Юзер"; badgeEl.style.display = 'none'; } }
 
             applyNickStyle(userData.subscription);
-            let currentSub = (userData.subscription || "FREE").trim().toLowerCase(); 
-            let minLen = 25; let maxLen = 25; let maxSex = 0;
-            if(currentSub === "premium") { maxLen = 30; } 
-            else if(currentSub === "pro") { maxLen = 35; maxSex = 3; } 
-            else if(currentSub === "vip") { maxLen = 40; maxSex = 5; } 
-            else if(currentSub === "ultra") { maxLen = 50; maxSex = 6; } 
+            let currentSub = (userData.subscription || "FREE").trim().toLowerCase(); let minLen = 25; let maxLen = 25; let maxSex = 0;
+            if(currentSub === "premium") { maxLen = 30; } else if(currentSub === "pro") { maxLen = 35; maxSex = 3; } else if(currentSub === "vip") { maxLen = 40; maxSex = 5; } else if(currentSub === "ultra") { maxLen = 50; maxSex = 6; } 
 
-            const lS = document.getElementById('len-slider'); 
-            const sS = document.getElementById('sex-slider');
+            const lS = document.getElementById('len-slider'); const sS = document.getElementById('sex-slider');
             if(lS && sS) {
-                lS.min = minLen; lS.max = maxLen; sS.max = maxSex; 
-                document.getElementById('sex-info').innerText = maxSex === 0 ? "Недоступно" : `Уровней: ${maxSex}`;
-                let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 25); 
-                if(savedLen > maxLen) savedLen = maxLen; 
-                if(savedLen < minLen) savedLen = minLen; 
-                lS.value = savedLen; updateLen(savedLen, true);
-                
-                let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0); 
-                if(savedSex > maxSex) savedSex = maxSex; 
-                sS.value = savedSex; updateSex(savedSex, true);
+                lS.min = minLen; lS.max = maxLen; sS.max = maxSex; document.getElementById('sex-info').innerText = maxSex === 0 ? "Недоступно" : `Уровней: ${maxSex}`;
+                let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 25); if(savedLen > maxLen) savedLen = maxLen; if(savedLen < minLen) savedLen = minLen; lS.value = savedLen; updateLen(savedLen, true);
+                let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0); if(savedSex > maxSex) savedSex = maxSex; sS.value = savedSex; updateSex(savedSex, true);
             }
-            
-            updateDailyUI();
-            fetchNews().catch(e => {});
-            renderUserChars(true).catch(e => {});
-            renderUserTasks().catch(e => {});
-            if (uid === OID || userData.is_admin) {
-                renderAdminPromos().catch(e => {});
-                renderTasks().catch(e => {});
-            }
+            updateDailyUI(); try { await fetchNews(); } catch(e) {} try { await renderUserChars(); } catch(e) {} try { await renderUserTasks(); } catch(e) {} if (uid === OID || userData.is_admin) { try { await renderAdminPromos(); } catch(e) {} try { await renderTasks(); } catch(e) {} }
         }
 
         let baseZ = 15000; let isBotTyping = false; 
-        
-        function openPanel(id) { 
-            if(stack.includes(id)) return; 
-            stack.push(id); 
-            let el = document.getElementById(id); 
-            if(el) { el.style.zIndex = baseZ + stack.length; el.style.display = 'flex'; } 
-            BackButton.show(); 
-            // При открытии профиля тоже обновим баланс на всякий случай
-            if(id === 'p-profile') syncUser();
-        }
-        
-        function back() { 
-            if(isBotTyping) { tg.showAlert("Бот пишет ответ, подождите! ⏳"); return; } 
-            if(stack.length > 0) { 
-                let id = stack.pop(); 
-                let el = document.getElementById(id); 
-                if(el) el.style.display = 'none'; 
-            } 
-            if(stack.length === 0) { BackButton.hide(); } 
-        }
-        
-        BackButton.onClick(() => back()); 
-        function closeChat() { back(); }
+        function openPanel(id) { if(stack.includes(id)) return; stack.push(id); let el = document.getElementById(id); if(el) { el.style.zIndex = baseZ + stack.length; el.style.display = 'flex'; } BackButton.show(); }
+        function back() { if(isBotTyping) { tg.showAlert("Бот пишет ответ, подождите! ⏳"); return; } if(stack.length > 0) { let id = stack.pop(); let el = document.getElementById(id); if(el) el.style.display = 'none'; } if(stack.length === 0) { BackButton.hide(); } }
+        BackButton.onClick(() => back()); function closeChat() { back(); }
 
         async function openChatList() {
-            if (allChars.length === 0) await renderUserChars(true); 
-            const uid = getUid(); 
-            const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
-            const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); 
-            let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); 
-            const list = document.getElementById('chatlist-container');
-            
-            let chatObjects = []; 
-            for (let charId in allChats) { 
-                const char = allChars.find(c => c.id == charId); 
-                if(!char) continue; 
-                const msgs = allChats[charId]; 
-                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : "Нет сообщений"; 
-                chatObjects.push({ 
-                    id: char.id, char: char, lastMsg: lastMsg, 
-                    isPinned: pinned.includes(char.id), 
-                    orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 
-                }); 
-            }
-            
-            chatObjects.sort((a, b) => { 
-                if (a.isPinned && !b.isPinned) return -1; 
-                if (!a.isPinned && b.isPinned) return 1; 
-                return a.orderIndex - b.orderIndex; 
-            });
-            
-            if(chatObjects.length === 0) { 
-                list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>У вас пока нет активных диалогов. Перейдите в Персонажи!</div>`; 
-            } else { 
-                const chatCards = await Promise.all(chatObjects.map(async (obj) => { 
-                    let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : ""; 
-                    let pinText = obj.isPinned ? "Открепить" : "Закрепить"; 
-                    let tName = await neuroTranslate(obj.char.name, currentLang); 
-                    return `<div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})" style="z-index:1;"><img src="${obj.char.photo}" class="chatlist-img"><div class="chatlist-info"><div class="chatlist-name">${pinMark}${tName}</div><div class="chatlist-last">${obj.lastMsg.replace(/<[^>]*>?/gm, '')}</div></div><button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button><div class="chat-dropdown" id="chat-dd-${obj.id}"><div class="chat-dropdown-item" onclick="pinChatAction(${obj.id}, event)">📌 ${pinText}</div><div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 Очистить</div><div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 Удалить</div></div></div>`; 
-                })); 
-                list.innerHTML = chatCards.join(''); 
-            } 
-            openPanel('p-user-chatlist');
+            if (allChars.length === 0) await renderUserChars(); const uid = getUid(); const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); const list = document.getElementById('chatlist-container');
+            let chatObjects = []; for (let charId in allChats) { const char = allChars.find(c => c.id == charId); if(!char) continue; const msgs = allChats[charId]; const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : "Нет сообщений"; chatObjects.push({ id: char.id, char: char, lastMsg: lastMsg, isPinned: pinned.includes(char.id), orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 }); }
+            chatObjects.sort((a, b) => { if (a.isPinned && !b.isPinned) return -1; if (!a.isPinned && b.isPinned) return 1; return a.orderIndex - b.orderIndex; });
+            if(chatObjects.length === 0) { list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>У вас пока нет активных диалогов. Перейдите в Персонажи!</div>`; } 
+            else { const chatCards = await Promise.all(chatObjects.map(async (obj) => { let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : ""; let pinText = obj.isPinned ? "Открепить" : "Закрепить"; let tName = await neuroTranslate(obj.char.name, currentLang); return `<div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})" style="z-index:1;"><img src="${obj.char.photo}" class="chatlist-img"><div class="chatlist-info"><div class="chatlist-name">${pinMark}${tName}</div><div class="chatlist-last">${obj.lastMsg.replace(/<[^>]*>?/gm, '')}</div></div><button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button><div class="chat-dropdown" id="chat-dd-${obj.id}"><div class="chat-dropdown-item" onclick="pinChatAction(${obj.id}, event)">📌 ${pinText}</div><div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 Очистить</div><div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 Удалить</div></div></div>`; })); list.innerHTML = chatCards.join(''); } openPanel('p-user-chatlist');
         }
 
-        async function resumeChat(charId) { 
-            if(isBotTyping) return; 
-            activeCharId = charId; 
-            const c = allChars.find(x => x.id == charId); 
-            if(!c) return; 
-            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang); 
-            document.getElementById('chat-header-avatar').src = c.photo; 
-            renderChatMessages(); 
-            openPanel('p-chat'); 
-        }
-
-        async function openChatFromDossier() { 
-            if(isBotTyping) return; 
-            const c = allChars.find(x => x.id === activeCharId); 
-            if(!c) return; 
-            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang); 
-            document.getElementById('chat-header-avatar').src = c.photo; 
-            const uid = getUid(); 
-            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
-            if(!allChats[activeCharId]) { 
-                allChats[activeCharId] = []; 
-                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                updateChatOrder(activeCharId); 
-            } 
-            renderChatMessages(); 
-            openPanel('p-chat'); 
-        }
+        async function resumeChat(charId) { if(isBotTyping) return; activeCharId = charId; const c = allChars.find(x => x.id == charId); if(!c) return; document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang); document.getElementById('chat-header-avatar').src = c.photo; renderChatMessages(); openPanel('p-chat'); }
+        async function openChatFromDossier() { if(isBotTyping) return; const c = allChars.find(x => x.id === activeCharId); if(!c) return; document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang); document.getElementById('chat-header-avatar').src = c.photo; const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); if(!allChats[activeCharId]) { allChats[activeCharId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); updateChatOrder(activeCharId); } renderChatMessages(); openPanel('p-chat'); }
 
         function renderChatMessages() {
-            const uid = getUid(); 
-            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
-            let msgs = allChats[activeCharId] || []; 
-            const chatBox = document.getElementById('chat-messages-box');
-            let uAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png"; 
-            const char = allChars.find(c => c.id == activeCharId); 
-            let cAvatar = char ? char.photo : "";
-            let lastCharIdx = -1; 
-            
-            for(let i = msgs.length - 1; i >= 0; i--) { 
-                if(msgs[i].sender === 'char') { lastCharIdx = i; break; } 
-            }
-            
-            if(msgs.length === 0) { 
-                chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>`; 
-            } else { 
-                chatBox.innerHTML = msgs.map((m, index) => {
-                    if (m.sender === 'user') { 
-                        return `<div class="chat-msg-row user-row"><div class="msg-user-wrapper"><div class="msg-box msg-user">${m.text}</div></div><img src="${uAvatar}" class="msg-avatar"></div>`; 
-                    } else {
-                        let stats = m.stats || {love: 10, trust: 15, inf: 5, horny: 0}; 
-                        let actionBar = '';
-                        if (index === lastCharIdx) { 
-                            actionBar = `<div class="msg-bottom-bar"><div class="msg-stats">💖 ${stats.love}% 🛡️ ${stats.trust}% ✨ ${stats.inf}% 💦 ${stats.horny}%</div><div class="msg-actions"><span onclick="actionReroll(${index})">🔄</span><span onclick="actionNext()">⏭️</span><span onclick="actionPhoto(${index})">🖼️</span><span onclick="actionCircle(${index})">⭕</span></div></div>`; 
-                        }
+            const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); let msgs = allChats[activeCharId] || []; const chatBox = document.getElementById('chat-messages-box');
+            let uAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png"; const char = allChars.find(c => c.id == activeCharId); let cAvatar = char ? char.photo : "";
+            let lastCharIdx = -1; for(let i = msgs.length - 1; i >= 0; i--) { if(msgs[i].sender === 'char') { lastCharIdx = i; break; } }
+            if(msgs.length === 0) { chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>`; } 
+            else { chatBox.innerHTML = msgs.map((m, index) => {
+                    if (m.sender === 'user') { return `<div class="chat-msg-row user-row"><div class="msg-user-wrapper"><div class="msg-box msg-user">${m.text}</div></div><img src="${uAvatar}" class="msg-avatar"></div>`; } 
+                    else {
+                        let stats = m.stats || {love: 10, trust: 15, inf: 5, horny: 0}; let actionBar = '';
+                        if (index === lastCharIdx) { actionBar = `<div class="msg-bottom-bar"><div class="msg-stats">💖 ${stats.love}% 🛡️ ${stats.trust}% ✨ ${stats.inf}% 💦 ${stats.horny}%</div><div class="msg-actions"><span onclick="actionReroll(${index})">🔄</span><span onclick="actionNext()">⏭️</span><span onclick="actionPhoto(${index})">🖼️</span><span onclick="actionCircle(${index})">⭕</span></div></div>`; }
                         return `<div class="chat-msg-row char-row"><img src="${cAvatar}" class="msg-avatar"><div class="msg-bot-wrapper" style="width: 100%;"><div class="msg-box msg-char">${m.text}</div>${actionBar}</div></div>`;
                     }
                 }).join(''); 
-            } 
-            setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
+            } setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         }
 
         async function actionPhoto(index) {
@@ -1055,9 +782,7 @@
             let cost = (sub === 'FREE') ? 5 : 2;
             
             if(uid !== OID && userData.shards < cost) return tg.showAlert(`❌ Нужно ${cost} 🌙!`);
-            
-            // Локальное снятие осколков
-            if(uid !== OID) { userData.shards -= cost; updateBalanceUI(userData.shards); }
+            if(uid !== OID) updateBalanceUI(userData.shards - cost);
             
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, ''); 
@@ -1083,14 +808,14 @@
                     renderChatMessages();
                 } else { 
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
-                    if(uid !== OID) { userData.shards += cost; updateBalanceUI(userData.shards); }
+                    if(uid !== OID) updateBalanceUI(userData.shards + cost);
                     tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
                 }
             } catch(e) { 
                 allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
                 allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ рисует фото...</div>`, '');
                 localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
-                if(uid !== OID) { userData.shards += cost; updateBalanceUI(userData.shards); }
+                if(uid !== OID) updateBalanceUI(userData.shards + cost);
                 tg.showAlert("❌ Ошибка связи с сервером!"); 
             }
         }
@@ -1102,7 +827,7 @@
             if(sub === 'FREE' && uid !== OID) return tg.showAlert("❌ Кружок доступен только платникам!");
             if(uid !== OID && userData.shards < 5) return tg.showAlert(`❌ Нужно 5 🌙!`);
             
-            if(uid !== OID) { userData.shards -= 5; updateBalanceUI(userData.shards); }
+            if(uid !== OID) updateBalanceUI(userData.shards - 5);
             
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
             let msgText = allChats[activeCharId][index].text.replace(/<[^>]*>?/gm, '');
@@ -1128,474 +853,143 @@
                     renderChatMessages();
                 } else { 
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
-                    if(uid !== OID) { userData.shards += 5; updateBalanceUI(userData.shards); }
+                    if(uid !== OID) updateBalanceUI(userData.shards + 5);
                     tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
                 }
             } catch(e) { 
                 allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
                 allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ создает кружок...</div>`, '');
                 localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
-                if(uid !== OID) { userData.shards += 5; updateBalanceUI(userData.shards); }
+                if(uid !== OID) updateBalanceUI(userData.shards + 5);
                 tg.showAlert("❌ Ошибка связи с сервером!"); 
             }
         }
 
         async function actionReroll(index) {
             if(isBotTyping) return;
-            const uid = getUid(); 
-            if(uid !== OID && userData.shards < 1) return tg.showAlert("Нужен 1 🌙!");
-            
-            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
-            let msgs = allChats[activeCharId]; 
-            if(!msgs || !msgs[index]) return;
-            
-            if(uid !== OID) { userData.shards -= 1; updateBalanceUI(userData.shards); }
-            msgs.splice(index); 
-            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-            renderChatMessages(); 
-            triggerBotResponse(uid, allChats, "(Перепиши свой последний ответ по-другому)");
+            const uid = getUid(); if(uid !== OID && userData.shards < 1) return tg.showAlert("Нужен 1 🌙!");
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); let msgs = allChats[activeCharId]; if(!msgs || !msgs[index]) return;
+            if(uid !== OID) updateBalanceUI(userData.shards - 1);
+            msgs.splice(index); localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages(); triggerBotResponse(uid, allChats, "(Перепиши свой последний ответ по-другому)");
         }
 
         async function actionNext() {
             if(isBotTyping) return;
-            const uid = getUid(); 
-            if(uid !== OID && userData.shards < 1) return tg.showAlert("Нужен 1 🌙!");
-            
-            if(uid !== OID) { userData.shards -= 1; updateBalanceUI(userData.shards); }
-            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
-            if(!allChats[activeCharId]) allChats[activeCharId] = []; 
-            triggerBotResponse(uid, allChats, "(Продолжай свой рассказ дальше)");
+            const uid = getUid(); if(uid !== OID && userData.shards < 1) return tg.showAlert("Нужен 1 🌙!");
+            if(uid !== OID) updateBalanceUI(userData.shards - 1);
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); if(!allChats[activeCharId]) allChats[activeCharId] = []; triggerBotResponse(uid, allChats, "(Продолжай свой рассказ дальше)");
         }
 
         async function triggerBotResponse(uid, allChats, forcedText = null) {
-            isBotTyping = true; 
-            const input = document.getElementById('chat-input-text'); 
-            const sendBtn = document.getElementById('chat-send-btn');
-            
+            isBotTyping = true; const input = document.getElementById('chat-input-text'); const sendBtn = document.getElementById('chat-send-btn');
             if(input) { input.disabled = true; sendBtn.disabled = true; input.value = ''; input.style.height = '40px'; }
-            
-            let minTimePassed = false; 
-            setTimeout(() => { minTimePassed = true; }, 4000); 
-            
-            const chatBox = document.getElementById('chat-messages-box'); 
-            const char = allChars.find(c => c.id == activeCharId); 
-            let cAvatar = char ? char.photo : ""; 
-            const typeId = "typing-" + Date.now();
-            
+            let minTimePassed = false; setTimeout(() => { minTimePassed = true; }, 4000); 
+            const chatBox = document.getElementById('chat-messages-box'); const char = allChars.find(c => c.id == activeCharId); let cAvatar = char ? char.photo : ""; const typeId = "typing-" + Date.now();
             chatBox.innerHTML += `<div class="chat-msg-row char-row" id="${typeId}" style="opacity:0.5;"><img src="${cAvatar}" class="msg-avatar"><div class="msg-bot-wrapper" style="width: 100%;"><div class="msg-box msg-char">Персонаж печатает...</div></div></div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
-            
             try {
-                const uName = document.getElementById('u-name').innerText; 
-                const rawGender = localStorage.getItem('m_gender_' + uid) || 'm'; 
-                let uGender = rawGender === 'f' ? (currentLang === 'en' ? "Female" : "Женский") : (currentLang === 'en' ? "Male" : "Мужской"); 
-                const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 25); 
-                const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
-                
-                const res = await fetch('/api/chat', { 
-                    method: 'POST', 
-                    headers: getAuthHeaders(), 
-                    body: JSON.stringify({ 
-                        char_id: activeCharId, 
-                        message: forcedText || "", 
-                        chat_history: allChats[activeCharId], 
-                        len: lenSet, 
-                        sex: sexSet, 
-                        user_name: uName, 
-                        user_gender: uGender, 
-                        lang: currentLang 
-                    }) 
-                });
+                const uName = document.getElementById('u-name').innerText; const rawGender = localStorage.getItem('m_gender_' + uid) || 'm'; let uGender = rawGender === 'f' ? (currentLang === 'en' ? "Female" : "Женский") : (currentLang === 'en' ? "Male" : "Мужской"); const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 25); const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
+                const res = await fetch('/api/chat', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message: forcedText || "", chat_history: allChats[activeCharId], len: lenSet, sex: sexSet, user_name: uName, user_gender: uGender, lang: currentLang }) });
                 const data = await res.json(); 
-                
                 if (data.reply) { 
-                    const replyRow = document.getElementById(typeId); 
-                    replyRow.style.opacity = "1"; 
-                    const replyBox = replyRow.querySelector('.msg-box'); 
-                    replyBox.innerText = ""; 
-                    
-                    let replyText = data.reply; 
-                    let i = 0;
-                    
-                    function typeChar() { 
-                        if (i < replyText.length) { 
-                            replyBox.appendChild(document.createTextNode(replyText.charAt(i))); 
-                            i++; 
-                            chatBox.scrollTop = chatBox.scrollHeight; 
-                            setTimeout(typeChar, 20); 
-                        } else { 
-                            finishMessage(replyText, data.new_balance); 
-                        } 
-                    }
+                    const replyRow = document.getElementById(typeId); replyRow.style.opacity = "1"; const replyBox = replyRow.querySelector('.msg-box'); replyBox.innerText = ""; 
+                    let replyText = data.reply; let i = 0;
+                    function typeChar() { if (i < replyText.length) { replyBox.appendChild(document.createTextNode(replyText.charAt(i))); i++; chatBox.scrollTop = chatBox.scrollHeight; setTimeout(typeChar, 20); } else { finishMessage(replyText, data.new_balance); } }
                     typeChar();
-                    
-                    function finishMessage(finalText, newBal) { 
-                        let waitTimer = setInterval(() => { 
-                            if (minTimePassed) { 
-                                clearInterval(waitTimer); 
-                                let stats = { love: Math.floor(Math.random() * 40) + 10, trust: Math.floor(Math.random() * 40) + 10, inf: Math.floor(Math.random() * 30) + 5, horny: sexSet > 0 ? Math.floor(Math.random() * 50) + (sexSet * 5) : 0 }; 
-                                allChats[activeCharId].push({sender: 'char', text: finalText, stats: stats}); 
-                                localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                                
-                                // Синхронизируем баланс с тем, что вернул сервер (если вдруг были расхождения)
-                                if (uid !== OID && newBal !== undefined) { 
-                                    userData.shards = newBal; 
-                                    updateBalanceUI(newBal); 
-                                } 
-                                renderChatMessages(); 
-                                unlockChat(); 
-                            } 
-                        }, 500); 
-                    }
-                } else { 
-                    document.getElementById(typeId)?.remove(); 
-                    if (data.error) tg.showAlert(data.error); 
-                    unlockChat(); 
-                }
-            } catch (e) { 
-                document.getElementById(typeId)?.remove(); 
-                tg.showAlert("Ошибка сервера"); 
-                unlockChat(); 
-            }
-            
-            function unlockChat() { 
-                isBotTyping = false; 
-                if(input) { 
-                    input.disabled = false; sendBtn.disabled = false; 
-                    setTimeout(() => { input.focus(); }, 100); 
-                } 
-            }
+                    function finishMessage(finalText, newBal) { let waitTimer = setInterval(() => { if (minTimePassed) { clearInterval(waitTimer); let stats = { love: Math.floor(Math.random() * 40) + 10, trust: Math.floor(Math.random() * 40) + 10, inf: Math.floor(Math.random() * 30) + 5, horny: sexSet > 0 ? Math.floor(Math.random() * 50) + (sexSet * 5) : 0 }; allChats[activeCharId].push({sender: 'char', text: finalText, stats: stats}); localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if (uid !== OID && newBal !== undefined) updateBalanceUI(newBal); renderChatMessages(); unlockChat(); } }, 500); }
+                } else { document.getElementById(typeId)?.remove(); if (data.error) tg.showAlert(data.error); unlockChat(); }
+            } catch (e) { document.getElementById(typeId)?.remove(); tg.showAlert("Ошибка сервера"); unlockChat(); }
+            function unlockChat() { isBotTyping = false; if(input) { input.disabled = false; sendBtn.disabled = false; setTimeout(() => { input.focus(); }, 100); } }
         }
 
         async function sendMessage() {
-            if(isBotTyping) return; 
-            const input = document.getElementById('chat-input-text'); 
-            const text = input.value.trim(); 
-            if(!text) return;
-            
-            const uid = getUid(); 
-            if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков!");
-            
-            // ЛОКАЛЬНОЕ СПИСАНИЕ ОСКОЛКА (МОМЕНТАЛЬНО)
-            if(uid !== OID) { 
-                userData.shards -= 1; 
-                updateBalanceUI(userData.shards); 
-            }
-            
-            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
-            if(!allChats[activeCharId]) allChats[activeCharId] = [];
-            
-            allChats[activeCharId].push({sender: 'user', text: text}); 
-            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-            
-            updateChatOrder(activeCharId); 
-            renderChatMessages(); 
-            triggerBotResponse(uid, allChats, text);
+            if(isBotTyping) return; const input = document.getElementById('chat-input-text'); const text = input.value.trim(); if(!text) return;
+            const uid = getUid(); if(uid !== OID && userData.shards < 1) return tg.showAlert("Недостаточно осколков!");
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); if(!allChats[activeCharId]) allChats[activeCharId] = [];
+            allChats[activeCharId].push({sender: 'user', text: text}); localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
+            updateChatOrder(activeCharId); renderChatMessages(); triggerBotResponse(uid, allChats, text);
         }
 
-        function updateChatOrder(charId) { 
-            const uid = getUid(); 
-            let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); 
-            order = order.filter(id => id != charId); 
-            order.unshift(charId); 
-            localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); 
-        }
+        function updateChatOrder(charId) { const uid = getUid(); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); order.unshift(charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); }
 
-        function toggleChatMenu(charId, e) { 
-            if(e) e.stopPropagation(); 
-            if(openDropdownId !== null && openDropdownId !== charId) { 
-                let old = document.getElementById('chat-dd-' + openDropdownId); 
-                if(old) old.style.display = 'none'; 
-                let oldItem = document.getElementById('chat-item-' + openDropdownId); 
-                if(oldItem) oldItem.style.zIndex = 1; 
-            } 
-            let el = document.getElementById('chat-dd-' + charId); 
-            let chatItem = document.getElementById('chat-item-' + charId); 
-            if(el.style.display === 'flex') { 
-                el.style.display = 'none'; 
-                if(chatItem) chatItem.style.zIndex = 1; 
-                openDropdownId = null; 
-            } else { 
-                el.style.display = 'flex'; 
-                if(chatItem) chatItem.style.zIndex = 1000; 
-                openDropdownId = charId; 
-            } 
-        }
+        function toggleChatMenu(charId, e) { if(e) e.stopPropagation(); if(openDropdownId !== null && openDropdownId !== charId) { let old = document.getElementById('chat-dd-' + openDropdownId); if(old) old.style.display = 'none'; let oldItem = document.getElementById('chat-item-' + openDropdownId); if(oldItem) oldItem.style.zIndex = 1; } let el = document.getElementById('chat-dd-' + charId); let chatItem = document.getElementById('chat-item-' + charId); if(el.style.display === 'flex') { el.style.display = 'none'; if(chatItem) chatItem.style.zIndex = 1; openDropdownId = null; } else { el.style.display = 'flex'; if(chatItem) chatItem.style.zIndex = 1000; openDropdownId = charId; } }
+        function pinChatAction(charId, e) { if(e) e.stopPropagation(); const uid = getUid(); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); if(pinned.includes(charId)) { pinned = pinned.filter(id => id != charId); tg.showAlert("Откреплено"); } else { pinned.push(charId); tg.showAlert("Закреплено 📌"); } localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); }
+        function clearChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Очистить память?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); tg.showAlert("Очищено 🧹"); } }); }
+        function deleteChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Удалить чат?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); } }); }
         
-        function pinChatAction(charId, e) { 
-            if(e) e.stopPropagation(); 
-            const uid = getUid(); 
-            let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); 
-            if(pinned.includes(charId)) { 
-                pinned = pinned.filter(id => id != charId); 
-                tg.showAlert("Откреплено"); 
-            } else { 
-                pinned.push(charId); 
-                tg.showAlert("Закреплено 📌"); 
-            } 
-            localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); 
-            if(openDropdownId !== null) { 
-                let el = document.getElementById('chat-dd-' + openDropdownId); 
-                if(el) el.style.display = 'none'; 
-                openDropdownId = null; 
-            } 
-            openChatList(); 
-        }
-        
-        function clearChatAction(charId, e) { 
-            if(e) e.stopPropagation(); 
-            tg.showConfirm("Очистить память?", (yes) => { 
-                if(yes) { 
-                    const uid = getUid(); 
-                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
-                    allChats[charId] = []; 
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                    if(openDropdownId !== null) { 
-                        let el = document.getElementById('chat-dd-' + openDropdownId); 
-                        if(el) el.style.display = 'none'; 
-                        openDropdownId = null; 
-                    } 
-                    openChatList(); tg.showAlert("Очищено 🧹"); 
-                } 
-            }); 
-        }
-        
-        function deleteChatAction(charId, e) { 
-            if(e) e.stopPropagation(); 
-            tg.showConfirm("Удалить чат?", (yes) => { 
-                if(yes) { 
-                    const uid = getUid(); 
-                    let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
-                    delete allChats[charId]; 
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); 
-                    let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); 
-                    pinned = pinned.filter(id => id != charId); 
-                    localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); 
-                    let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); 
-                    order = order.filter(id => id != charId); 
-                    localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); 
-                    if(openDropdownId !== null) { 
-                        let el = document.getElementById('chat-dd-' + openDropdownId); 
-                        if(el) el.style.display = 'none'; 
-                        openDropdownId = null; 
-                    } 
-                    openChatList(); 
-                } 
-            }); 
-        }
-        
-        // --- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ПЕРСОНАЖЕЙ (МОМЕНТАЛЬНО ИЗ ПАМЯТИ) ---
         function switchCharTab(tab) {
             currentCharsTab = tab;
             document.getElementById('tab-char-off').classList.toggle('active', tab === 'official');
             document.getElementById('tab-char-cus').classList.toggle('active', tab === 'custom');
-            
-            // Если включили Пользовательские - показываем кнопку "Создать"
-            if (tab === 'custom') {
-                document.getElementById('btn-create-my-char').style.display = 'block';
-            } else {
-                document.getElementById('btn-create-my-char').style.display = 'none';
-            }
-            
-            renderUserChars(false);
+            renderUserChars();
         }
 
-        let isFetchingChars = false;
-        async function renderUserChars(forceFetch = true) { 
+        async function renderUserChars() { 
             try { 
+                const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
+                allChars = await res.json(); 
+                allChars.sort((a, b) => b.id - a.id); 
                 const list = document.getElementById('user-char-list'); 
                 
-                if (forceFetch && !isFetchingChars) {
-                    isFetchingChars = true;
-                    const res = await fetch('/api/get-characters?_t=' + Date.now(), { headers: getAuthHeaders() }); 
-                    allChars = await res.json(); 
-                    allChars.sort((a, b) => b.id - a.id); 
-                    isFetchingChars = false;
-                }
-                
                 let filteredChars = allChars.filter(c => { 
-                    let type = c.char_type || 'official'; 
-                    if (currentCharsTab === 'official') return type === 'official';
-                    else return type === 'custom' && c.status === 'public';
+                    let isOwnerChar = c.creator_id == OID; 
+                    let isOfficial = c.char_type === 'official' || !c.char_type || isOwnerChar; 
+                    let isCustom = c.char_type === 'custom' && c.status === 'public' && !isOwnerChar; 
+                    return currentCharsTab === 'official' ? isOfficial : isCustom; 
                 }); 
                 
-                if(filteredChars.length === 0) { 
-                    list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888; padding: 20px;'>Нет персонажей в этой категории</div>`; 
-                    return; 
-                } 
-                
+                if(filteredChars.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; } 
                 const charCards = await Promise.all(filteredChars.map(async (c) => { 
                     let tName = await neuroTranslate(c.name, currentLang); 
                     return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
                 })); 
                 list.innerHTML = charCards.join(''); 
-            } catch (e) { isFetchingChars = false; } 
+            } catch (e) {} 
         }
 
         async function fetchNews() { try { const res = await fetch('/api/get-news', { headers: getAuthHeaders() }); if(res.ok) { allNews = await res.json(); renderNews(); } } catch(e) {} }
+        function renderNews() { const container = document.getElementById('main-news-feed'); if(!container) return; if(allNews.length === 0) { container.innerHTML = ''; return; } const sortedNews = [...allNews].sort((a, b) => b.id - a.id); container.innerHTML = sortedNews.map(n => { let imgTag = n.photo && n.photo.length > 10 ? `<img src="${n.photo}" class="news-img" style="display:block;">` : ''; let delBtn = getUid() === OID ? `<span style="color:#ff4444; cursor:pointer; font-size:14px; padding-left:10px;" onclick="deleteNews(${n.id})">✖ Удалить</span>` : ''; let d = new Date(n.id).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}); return `<div class="news-card"><div class="news-date"><span>${d}</span> ${delBtn}</div><div class="news-text">${n.text}</div>${imgTag}</div>`; }).join(''); }
         
-        function renderNews() { 
-            const container = document.getElementById('main-news-feed'); 
-            if(!container) return; 
-            if(allNews.length === 0) { container.innerHTML = ''; return; } 
-            const sortedNews = [...allNews].sort((a, b) => b.id - a.id); 
-            container.innerHTML = sortedNews.map(n => { 
-                let imgTag = n.photo && n.photo.length > 10 ? `<img src="${n.photo}" class="news-img" style="display:block;">` : ''; 
-                let delBtn = getUid() === OID ? `<span style="color:#ff4444; cursor:pointer; font-size:14px; padding-left:10px;" onclick="deleteNews(${n.id})">✖ Удалить</span>` : ''; 
-                let d = new Date(n.id).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}); 
-                return `<div class="news-card"><div class="news-date"><span>${d}</span> ${delBtn}</div><div class="news-text">${n.text}</div>${imgTag}</div>`; 
-            }).join(''); 
-        }
-        
-        // --- ОБЛАЧНАЯ ЗАГРУЗКА НОВОСТЕЙ (ОВНЕР) ---
         async function publishNews() { 
             const text = document.getElementById('inews-text').value.trim(); 
-            let imgUrl = document.getElementById('news-preview').src; 
+            let img = document.getElementById('news-preview').src; 
             const fileInput = document.getElementById('news-file');
             
-            if(!text && (!imgUrl || imgUrl.includes('#'))) return tg.showAlert("Введите текст или выберите фото!"); 
+            if(!text && (!img || img.includes('#'))) return tg.showAlert("Введите текст или фото!"); 
             
             if(fileInput.files && fileInput.files[0]) {
-                tg.showAlert("Загрузка фото в облако...");
+                const btn = document.querySelector('[onclick="publishNews()"]');
+                let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
                 const cloudUrl = await uploadToCloud(fileInput.files[0]);
-                if(cloudUrl) imgUrl = cloudUrl; else return tg.showAlert("Ошибка облака!");
+                btn.innerText = oldTxt;
+                if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
             }
 
-            await fetch('/api/admin/create-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ newsData: { id: Date.now(), text: text, photo: imgUrl.includes('#') ? '' : imgUrl } }) }); 
-            document.getElementById('inews-text').value = ''; 
-            document.getElementById('news-preview').src = '#'; 
-            document.getElementById('news-preview').style.display = 'none'; 
-            document.getElementById('news-limit').innerText = '0/3500'; 
-            tg.showAlert("Опубликовано!"); 
-            back(); fetchNews(); 
+            await fetch('/api/admin/create-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ newsData: { id: Date.now(), text: text, photo: img.includes('#') ? '' : img } }) }); 
+            document.getElementById('inews-text').value = ''; document.getElementById('news-preview').src = '#'; document.getElementById('news-preview').style.display = 'none'; document.getElementById('news-limit').innerText = '0/3500'; tg.showAlert("Опубликовано!"); back(); fetchNews(); 
         }
 
-        async function deleteNews(id) { 
-            tg.showConfirm("Удалить новость?", async (yes) => { 
-                if(yes) { 
-                    await fetch('/api/admin/delete-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ news_id: id }) }); 
-                    fetchNews(); 
-                } 
-            }); 
-        }
-        
+        async function deleteNews(id) { tg.showConfirm("Удалить новость?", async (yes) => { if(yes) { await fetch('/api/admin/delete-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ news_id: id }) }); fetchNews(); } }); }
         async function renderTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); document.getElementById('task-list').innerHTML = tasks.map(x => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : ''; return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
-        
-        async function renderUserTasks() { 
-            try { 
-                const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-                const tasks = await res.json(); 
-                const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]"); 
-                const list = document.getElementById('user-task-list'); 
-                if (tasks.length === 0) { 
-                    list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>Нет заданий</div>`; return; 
-                } 
-                const taskCards = await Promise.all(tasks.map(async (t) => { 
-                    let tName = await neuroTranslate(t.name, currentLang); 
-                    if(completed.includes(t.id)) { 
-                        return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`; 
-                    } 
-                    return `<div class="task-item" id="utask-${t.id}"><span>${tName}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`; 
-                })); 
-                list.innerHTML = taskCards.join(''); 
-            } catch(e) {} 
-        }
-        
+        async function renderUserTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]"); const list = document.getElementById('user-task-list'); if (tasks.length === 0) { list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>Нет заданий</div>`; return; } const taskCards = await Promise.all(tasks.map(async (t) => { let tName = await neuroTranslate(t.name, currentLang); if(completed.includes(t.id)) { return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`; } return `<div class="task-item" id="utask-${t.id}"><span>${tName}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`; })); list.innerHTML = taskCards.join(''); } catch(e) {} }
         async function renderAdminPromos() { try { const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json(); document.getElementById('promo-list').innerHTML = promos.map(p => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : ''; return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
-        
-        async function buyItem(type, item, currency, price) { 
-            if (currency === 'ton') { 
-                tg.showAlert("Генерация счета CryptoBot..."); 
-                try { 
-                    const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) }); 
-                    const data = await res.json(); 
-                    if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); } 
-                } catch (e) { tg.showAlert("Error"); } 
-            } else if (currency === 'stars') { 
-                tg.showAlert("Подготовка оплаты Stars..."); 
-                try { 
-                    const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) }); 
-                    const data = await res.json(); 
-                    if(data.invoice_url) { 
-                        tg.openInvoice(data.invoice_url, function(status) { 
-                            if (status === 'paid') { tg.showAlert("Оплата успешна!"); syncUser(); } 
-                        }); 
-                    } else { tg.showAlert("API Error"); } 
-                } catch (e) { tg.showAlert("Error"); } 
-            } 
-        }
-
-        function updateDailyUI() { 
-            const ONE_DAY = 24 * 60 * 60 * 1000; 
-            let timePassed = Date.now() - userData.last_daily; 
-            let nextStreak = userData.daily_streak + 1; 
-            let is7thDay = (nextStreak % 7 === 0); 
-            let baseRew = userData.daily_reward || 10; 
-            let actualRew = is7thDay ? baseRew * 2 : baseRew; 
-            
-            document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`; 
-            document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (БОНУС x2!)` : ""); 
-            
-            clearInterval(dailyTimerInterval); 
-            
-            if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) { 
-                document.getElementById('daily-btn').style.display = 'none'; 
-                document.getElementById('daily-wait').style.display = 'block'; 
-                dailyTimerInterval = setInterval(() => { 
-                    let timeLeft = ONE_DAY - (Date.now() - userData.last_daily); 
-                    if (timeLeft <= 0) { 
-                        clearInterval(dailyTimerInterval); location.reload(); 
-                    } else { 
-                        let h = Math.floor(timeLeft / (1000 * 60 * 60)); 
-                        let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); 
-                        let s = Math.floor((timeLeft % (1000 * 60)) / 1000); 
-                        h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s; 
-                        document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`; 
-                    } 
-                }, 1000); 
-            } else { 
-                document.getElementById('daily-btn').style.display = 'block'; 
-                document.getElementById('daily-wait').style.display = 'none'; 
-            } 
-        }
-
-        async function claimDaily() { 
-            try { 
-                const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) }); 
-                const data = await res.json(); 
-                if (data.error) { tg.showAlert(data.error); } 
-                else { 
-                    tg.showAlert(`Получено: ${data.reward} 🌙!`); 
-                    userData.shards = data.new_balance; 
-                    userData.daily_streak = data.streak; 
-                    userData.last_daily = Date.now(); 
-                    updateBalanceUI(userData.shards); 
-                    updateDailyUI(); 
-                } 
-            } catch (e) { tg.showAlert("Error"); } 
-        }
+        async function buyItem(type, item, currency, price) { if (currency === 'ton') { tg.showAlert("Генерация счета CryptoBot..."); try { const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) }); const data = await res.json(); if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); } } catch (e) { tg.showAlert("Error"); } } else if (currency === 'stars') { tg.showAlert("Подготовка оплаты Stars..."); try { const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) }); const data = await res.json(); if(data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата успешна!"); } }); } else { tg.showAlert("API Error"); } } catch (e) { tg.showAlert("Error"); } } }
+        function updateDailyUI() { const ONE_DAY = 24 * 60 * 60 * 1000; let timePassed = Date.now() - userData.last_daily; let nextStreak = userData.daily_streak + 1; let is7thDay = (nextStreak % 7 === 0); let baseRew = userData.daily_reward || 10; let actualRew = is7thDay ? baseRew * 2 : baseRew; document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`; document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (БОНУС x2!)` : ""); clearInterval(dailyTimerInterval); if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) { document.getElementById('daily-btn').style.display = 'none'; document.getElementById('daily-wait').style.display = 'block'; dailyTimerInterval = setInterval(() => { let timeLeft = ONE_DAY - (Date.now() - userData.last_daily); if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } else { let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000); h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s; document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`; } }, 1000); } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; } }
+        async function claimDaily() { try { const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) }); const data = await res.json(); if (data.error) { tg.showAlert(data.error); } else { tg.showAlert(`Получено: ${data.reward} 🌙!`); userData.shards = data.new_balance; userData.daily_streak = data.streak; userData.last_daily = Date.now(); updateBalanceUI(userData.shards); updateDailyUI(); } } catch (e) { tg.showAlert("Error"); } }
         
         async function openDossier(id) { 
-            const c = allChars.find(x => x.id === id); 
-            if(!c) return; 
+            const c = allChars.find(x => x.id === id); if(!c) return; 
             activeCharId = id; 
-            
             document.getElementById('dos-name').innerText = await neuroTranslate(c.name, currentLang); 
             document.getElementById('dos-img').src = c.photo; 
             document.getElementById('dos-age').innerText = c.age; 
             document.getElementById('dos-gender').innerText = c.gender === 'm' ? "Мужской" : "Женский"; 
             document.getElementById('dos-desc').innerText = await neuroTranslate(c.desc, currentLang); 
-            
             if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } 
             
             let isMine = c.creator_id == getUid() && c.char_type === 'custom'; 
-            
             let pubBtn = document.getElementById('dos-pub-btn'); 
-            let editBtn = document.getElementById('dos-edit-btn');
-            
             if (pubBtn) pubBtn.style.display = (isMine && c.status === 'private') ? 'block' : 'none'; 
-            if (editBtn) editBtn.style.display = isMine ? 'block' : 'none';
-
             let badge = document.getElementById('dos-badge'); 
             if (badge) { 
                 if (isMine) { 
@@ -1609,151 +1003,54 @@
 
         function setCharGender(g) { currentCharGender = g; document.getElementById('cg-m').classList.toggle('active', g === 'm'); document.getElementById('cg-f').classList.toggle('active', g === 'f'); }
         
-        // --- ОБЛАЧНАЯ ЗАГРУЗКА ПЕРСОНАЖЕЙ (ОВНЕР) ---
         async function saveCharDB() { 
             const n = document.getElementById('ich-name').value; 
-            let imgUrl = document.getElementById('char-preview').src; 
+            let img = document.getElementById('char-preview').src; 
             const fileInput = document.getElementById('char-file');
-
-            if(!n || imgUrl.includes('#')) return tg.showAlert("Имя и фото обязательны!"); 
+            if(!n || img.includes('#')) return tg.showAlert("Name and photo required!"); 
             
             if(fileInput.files && fileInput.files[0]) {
-                tg.showAlert("Загрузка фото в облако...");
+                const btn = document.querySelector('[onclick="saveCharDB()"]');
+                let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
                 const cloudUrl = await uploadToCloud(fileInput.files[0]);
-                if(cloudUrl) imgUrl = cloudUrl; else return tg.showAlert("Ошибка загрузки в облако!");
+                btn.innerText = oldTxt;
+                if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
             }
 
-            const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: imgUrl }; 
+            const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img }; 
             await fetch('/api/admin/create-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData: charData }) }); 
-            tg.showAlert("Создано!"); renderUserChars(); 
+            tg.showAlert("Created!"); renderUserChars(); 
         }
 
-        async function deleteChar() { await fetch('/api/admin/delete-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) }); tg.showAlert("Удалено!"); renderUserChars(); back(); }
+        async function deleteChar() { await fetch('/api/admin/delete-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) }); tg.showAlert("Deleted!"); renderUserChars(); back(); }
         async function modFunds(t, a) { let idField = t === 'shards' ? 'ish-id' : 'isu-id'; let valField = t === 'shards' ? 'ish-val' : 'isu-type'; const target_id = document.getElementById(idField).value; const v = document.getElementById(valField).value; if(!target_id) return tg.showAlert("Enter ID!"); const body = { target_id: target_id, action: a }; if(t === 'shards') body.amount = v; else body.sub_type = v; const res = await fetch(t === 'shards' ? '/api/admin/manage-shards' : '/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(body) }); const data = await res.json(); tg.showAlert(data.message || "Error"); }
         async function createPromo() { const code = document.getElementById('ip-code').value.toUpperCase().trim(); const rew = parseInt(document.getElementById('ip-rew').value); const hours = parseInt(document.getElementById('ip-hours').value); if(!code || !rew) return; await fetch('/api/admin/create-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ promoData: {code, reward: rew, hours: hours} }) }); document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = ''; renderAdminPromos(); tg.showAlert(`Создано на ${hours} ч.!`); }
         async function deletePromo(code) { tg.showConfirm("Delete " + code + "?", async (yes) => { if(yes) { await fetch('/api/admin/delete-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ code: code }) }); renderAdminPromos(); tg.showAlert("Deleted!"); } }); }
-        
-        async function usePromo() { 
-            if (promoLock) return; 
-            promoLock = true; 
-            const btn = document.getElementById('promo-btn'); 
-            const oldText = btn.innerText; btn.innerText = "ПРОВЕРКА..."; btn.style.opacity = "0.5"; 
-            try { 
-                const uid = getUid(); 
-                const inputField = document.getElementById('user-promo-input'); 
-                const input = inputField.value.toUpperCase().trim(); 
-                if(!input) { promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; return; } 
-                
-                const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); 
-                const promos = await res.json(); 
-                const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]"); 
-                const found = promos.find(p => p.code === input); 
-                
-                if(!found) { 
-                    tg.showAlert("Неверный код"); 
-                } else if(used.includes(input)) { 
-                    tg.showAlert("Уже активирован"); 
-                } else { 
-                    await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: found.reward }) }); 
-                    used.push(input); 
-                    localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used)); 
-                    if(uid !== OID) { userData.shards += found.reward; updateBalanceUI(userData.shards); } 
-                    inputField.value = ''; tg.showAlert(`Получено ${found.reward} 🌙!`); 
-                } 
-            } catch(e) {} 
-            promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; 
-        }
-        
+        async function usePromo() { if (promoLock) return; promoLock = true; const btn = document.getElementById('promo-btn'); const oldText = btn.innerText; btn.innerText = "ПРОВЕРКА..."; btn.style.opacity = "0.5"; try { const uid = getUid(); const inputField = document.getElementById('user-promo-input'); const input = inputField.value.toUpperCase().trim(); if(!input) { promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; return; } const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json(); const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]"); const found = promos.find(p => p.code === input); if(!found) { tg.showAlert("Неверный код"); } else if(used.includes(input)) { tg.showAlert("Уже активирован"); } else { await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: found.reward }) }); used.push(input); localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used)); if(uid !== OID) updateBalanceUI(userData.shards + found.reward); inputField.value = ''; tg.showAlert(`Получено ${found.reward} 🌙!`); } } catch(e) {} promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; }
         async function modTask(act, tid=null) { if(act==='add') { const n = document.getElementById('it-name').value; const rType = document.getElementById('it-rtype').value; if(!n) return; const taskData = { id: Date.now(), name: n, link: document.getElementById('it-link').value, rType: rType, rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value }; await fetch('/api/admin/create-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ taskData: taskData }) }); } renderTasks(); renderUserTasks(); }
         async function deleteTask(id) { tg.showConfirm("Delete task?", async (yes) => { if(yes) { await fetch('/api/admin/delete-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) }); renderTasks(); renderUserTasks(); tg.showAlert("Deleted!"); } }); }
-        
-        function startTask(id, link) { 
-            tg.openLink(link); 
-            if(!clickedTasks.includes(id)) clickedTasks.push(id); 
-            const taskDiv = document.getElementById(`utask-${id}`); 
-            if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } 
-        }
-        
-        async function checkTask(id) { 
-            if(!clickedTasks.includes(id)) return; 
-            tg.showAlert("Проверка..."); 
-            try { 
-                const res = await fetch('/api/check-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) }); 
-                const data = await res.json(); 
-                if(data.success) { completeTaskAction(id); } 
-                else { tg.showAlert(data.error || "Не выполнено!"); } 
-            } catch(e) { tg.showAlert("Error"); } 
-        }
-        
-        async function completeTaskAction(id) { 
-            const uid = getUid(); 
-            const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); 
-            const tasks = await res.json(); 
-            const t = tasks.find(x => x.id === id); 
-            if(!t) return; 
-            let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); 
-            if(completed.includes(id)) return; 
-            
-            if(t.rType === 'shards') { 
-                await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: t.rVal }) }); 
-                if(uid !== OID) { userData.shards += parseInt(t.rVal); updateBalanceUI(userData.shards); } 
-            } else if(t.rType === 'sub7') { 
-                await fetch('/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', sub_type: "Premium" }) }); 
-                syncUser(); 
-            } 
-            completed.push(id); 
-            localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); 
-            tg.showAlert("Получено!"); renderUserTasks(); 
-        }
-        
+        function startTask(id, link) { tg.openLink(link); if(!clickedTasks.includes(id)) clickedTasks.push(id); const taskDiv = document.getElementById(`utask-${id}`); if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } }
+        async function checkTask(id) { if(!clickedTasks.includes(id)) return; tg.showAlert("Проверка..."); try { const res = await fetch('/api/check-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) }); const data = await res.json(); if(data.success) { completeTaskAction(id); } else { tg.showAlert(data.error || "Не выполнено!"); } } catch(e) { tg.showAlert("Error"); } }
+        async function completeTaskAction(id) { const uid = getUid(); const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); const t = tasks.find(x => x.id === id); if(!t) return; let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); if(completed.includes(id)) return; if(t.rType === 'shards') { await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: t.rVal }) }); if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal)); } else if(t.rType === 'sub7') { await fetch('/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', sub_type: "Premium" }) }); } completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); tg.showAlert("Получено!"); renderUserTasks(); }
         function shareRef() { const uid = getUid(); const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`; const text = `Залетай в Anime AI! Переходи по моей ссылке и мы оба получим по 100 🌙!`; const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`; tg.openTelegramLink(shareUrl); }
         function updateLiveNick(v) { let n = v || "User"; document.getElementById('u-name').innerText = n; document.getElementById('prof-nick').innerText = n; localStorage.setItem('m_nick_' + getUid(), n); }
         function setGender(g, s=false) { document.getElementById('g-m')?.classList.toggle('active', g === 'm'); document.getElementById('g-f')?.classList.toggle('active', g === 'f'); if(!s) localStorage.setItem('m_gender_' + getUid(), g); }
         function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
-        
-        function updateSex(v, s=false) { 
-            const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; 
-            document.getElementById('sex-val').innerText = v; 
-            let sliderMax = document.getElementById('sex-slider').max; 
-            document.getElementById('sex-info').innerText = sliderMax == 0 ? "Недоступно для вашей подписки" : `Уровень ${v}: ${m_ru[v]}`; 
-            document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; 
-            if(!s) localStorage.setItem('m_sex_' + getUid(), v); 
-        }
-        
+        function updateSex(v, s=false) { const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; document.getElementById('sex-val').innerText = v; let sliderMax = document.getElementById('sex-slider').max; document.getElementById('sex-info').innerText = sliderMax == 0 ? "Недоступно для вашей подписки" : `Уровень ${v}: ${m_ru[v]}`; document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; if(!s) localStorage.setItem('m_sex_' + getUid(), v); }
         function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
-        
-        function previewImg(i) { 
-            if (i.files && i.files[0]) { 
-                const r = new FileReader(); 
-                r.onload = (e) => { 
-                    const p = document.getElementById('char-preview'); 
-                    if(p) { p.src = e.target.result; p.style.display = 'block'; }
-                    const p2 = document.getElementById('my-char-preview'); 
-                    if(p2) { p2.src = e.target.result; p2.style.display = 'block'; } 
-                }; 
-                r.readAsDataURL(i.files[0]); 
-            } 
-        }
-        
+        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); if(p) { p.src = e.target.result; p.style.display = 'block'; } const p2 = document.getElementById('my-char-preview'); if(p2) { p2.src = e.target.result; p2.style.display = 'block'; } }; r.readAsDataURL(i.files[0]); } }
         async function modAdmin(a) { const id = document.getElementById('ia-id').value; if(!id) return; await fetch('/api/owner/set-admin', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: id, status: a === 'add' }) }); tg.showAlert("Updated!"); }
         async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Saved!"); }
         function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
         
-        // ================= ПОЛЬЗОВАТЕЛЬСКИЕ ПЕРСЫ (СО СКИДКАМИ И ОБЛАКОМ) =================
-        async function openMyCharsPanel() { 
-            openPanel('p-my-chars'); 
-            loadMyChars(); 
-        }
-        
+        async function openMyCharsPanel() { openPanel('p-my-chars'); loadMyChars(); }
         async function loadMyChars() {
             const list = document.getElementById('my-chars-list');
             list.innerHTML = '<div class="loader"></div>';
             try {
                 const res = await fetch('/api/user/my-chars', { headers: getAuthHeaders() });
                 myCharsList = await res.json();
-                if(myCharsList.length === 0) { 
-                    list.innerHTML = "<div style='grid-column:span 2;text-align:center;color:#888;'>У вас еще нет своих персонажей.</div>"; return; 
-                }
+                if(myCharsList.length === 0) { list.innerHTML = "<div style='grid-column:span 2;text-align:center;color:#888;'>У вас еще нет своих персонажей.</div>"; return; }
                 const cards = await Promise.all(myCharsList.map(async c => {
                     let tName = await neuroTranslate(c.name, currentLang);
                     let bClass = c.status === 'private' ? 'bg-private' : c.status === 'pending' ? 'bg-pending' : 'bg-public';
@@ -1771,10 +1068,6 @@
             openDossier(id);
         }
         
-        function editMyCharFromDossier() {
-            openCreateMyChar(activeCharId);
-        }
-        
         function openCreateMyChar(id = null) {
             if(id) {
                 const c = myCharsList.find(x => x.id === id);
@@ -1787,6 +1080,7 @@
                 setMyCharGender(c.gender);
                 document.getElementById('my-char-title').innerText = "РЕДАКТИРОВАТЬ";
                 document.getElementById('my-char-cost-info').style.display = 'none';
+                currentCustomCost = 0;
             } else {
                 document.getElementById('imy-id').value = "";
                 document.getElementById('imy-name').value = "";
@@ -1797,78 +1091,59 @@
                 setMyCharGender('m');
                 document.getElementById('my-char-title').innerText = "СОЗДАТЬ ПЕРСОНАЖА";
                 
-                let cost = getCharCost();
-                let subName = userData.subscription || "FREE";
+                let sub = (userData.subscription || "FREE").trim().toUpperCase();
+                let costInfo = document.getElementById('my-char-cost-info');
+                
                 if(getUid() === OID) {
-                    document.getElementById('my-char-cost-info').innerText = "Стоимость: 0 🌙 (Вы Овнер)";
-                } else if(cost < 100) {
-                    document.getElementById('my-char-cost-info').innerText = `Стоимость: ${cost} 🌙 (Скидка за ${subName}!)`;
+                    currentCustomCost = 0;
+                    costInfo.innerText = "Стоимость: 0 🌙 (Вы Овнер)";
+                    costInfo.style.color = "#00ff00";
+                } else if(sub !== "FREE") {
+                    let discount = Math.floor(Math.random() * 41) + 15; 
+                    currentCustomCost = 100 - discount;
+                    costInfo.innerHTML = `ВАША СКИДКА: <b style="color:yellow;">${discount}%</b>! Стоимость: <b style="color:yellow;">${currentCustomCost} 🌙</b>`;
+                    costInfo.style.color = "#00ff00";
                 } else {
-                    document.getElementById('my-char-cost-info').innerText = "Стоимость: 100 🌙 (Для платников скидки до 55%!)";
+                    currentCustomCost = 100;
+                    costInfo.innerText = "Стоимость: 100 🌙 (Купите подписку для скидки!)";
+                    costInfo.style.color = "#ffaa00";
                 }
-                document.getElementById('my-char-cost-info').style.display = 'block';
+                costInfo.style.display = 'block';
             }
             openPanel('p-create-my-char');
         }
         
-        function setMyCharGender(g) { 
-            myCharGender = g; 
-            document.getElementById('my-cg-m').classList.toggle('active', g === 'm'); 
-            document.getElementById('my-cg-f').classList.toggle('active', g === 'f'); 
-        }
+        function setMyCharGender(g) { myCharGender = g; document.getElementById('my-cg-m').classList.toggle('active', g === 'm'); document.getElementById('my-cg-f').classList.toggle('active', g === 'f'); }
         
         async function saveMyChar() {
             const id = document.getElementById('imy-id').value;
             const n = document.getElementById('imy-name').value; 
             const a = document.getElementById('imy-age').value;
             const d = document.getElementById('imy-desc').value;
-            let imgUrl = document.getElementById('my-char-preview').src;
+            let img = document.getElementById('my-char-preview').src;
             const fileInput = document.getElementById('my-char-file');
 
-            if(!n || imgUrl.includes('#')) return tg.showAlert("Заполните Имя и добавьте фото!");
+            if(!n || img.includes('#')) return tg.showAlert("Заполните Имя и добавьте фото!");
+            if(!id && getUid() !== OID && userData.shards < currentCustomCost) return tg.showAlert(`Недостаточно осколков! Нужно: ${currentCustomCost} 🌙`);
             
-            let currentCost = getCharCost();
-            if(!id && getUid() !== OID && userData.shards < currentCost) {
-                return tg.showAlert(`Недостаточно осколков! Нужно: ${currentCost} 🌙`);
-            }
-
-            // Облачный байпас
             if(fileInput.files && fileInput.files[0]) {
-                document.getElementById('my-char-upload-status').style.display = 'block';
-                document.getElementById('my-char-save-btn').style.display = 'none';
-                
+                const btn = document.querySelector('[onclick="saveMyChar()"]');
+                let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
                 const cloudUrl = await uploadToCloud(fileInput.files[0]);
-                
-                document.getElementById('my-char-upload-status').style.display = 'none';
-                document.getElementById('my-char-save-btn').style.display = 'block';
-
-                if(cloudUrl) {
-                    imgUrl = cloudUrl;
-                } else {
-                    return tg.showAlert("Ошибка облачной загрузки! Попробуйте другое фото.");
-                }
+                btn.innerText = oldTxt;
+                if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
             }
 
-            const charData = { name: n, age: a, gender: myCharGender, desc: d, photo: imgUrl };
+            const charData = { name: n, age: a, gender: myCharGender, desc: d, photo: img };
             if(id) {
                 await fetch('/api/user/edit-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: parseInt(id), charData }) });
                 tg.showAlert("Обновлено!");
             } else {
-                // Локальное списывание до ответа сервера
-                if (getUid() !== OID) {
-                    userData.shards -= currentCost;
-                    updateBalanceUI(userData.shards);
-                }
-                const res = await fetch('/api/user/create-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData, cost: currentCost }) });
+                if(getUid() !== OID) updateBalanceUI(userData.shards - currentCustomCost);
+                const res = await fetch('/api/user/create-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData, cost: currentCustomCost }) });
                 const data = await res.json();
-                if(res.ok) { 
-                    tg.showAlert(data.message); 
-                    if(getUid()!==OID) { userData.shards = data.new_balance; updateBalanceUI(userData.shards); } 
-                }
-                else {
-                    if (getUid() !== OID) { userData.shards += currentCost; updateBalanceUI(userData.shards); }
-                    return tg.showAlert(data.error);
-                }
+                if(res.ok) { tg.showAlert(data.message); if(getUid()!==OID) updateBalanceUI(data.new_balance); }
+                else { if(getUid() !== OID) updateBalanceUI(userData.shards + currentCustomCost); return tg.showAlert(data.error); }
             }
             back(); loadMyChars();
         }
