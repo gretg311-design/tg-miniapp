@@ -292,6 +292,7 @@
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
+    
     <div id="p-user-tasks" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 20px;" data-i18n="h_tasks">ЗАДАНИЯ</h2>
         <div class="info-card" style="text-align: center; border-color: #bc42f5;">
@@ -724,7 +725,16 @@
                 let savedLen = parseInt(localStorage.getItem('m_len_' + uid) || 25); if(savedLen > maxLen) savedLen = maxLen; if(savedLen < minLen) savedLen = minLen; lS.value = savedLen; updateLen(savedLen, true);
                 let savedSex = parseInt(localStorage.getItem('m_sex_' + uid) || 0); if(savedSex > maxSex) savedSex = maxSex; sS.value = savedSex; updateSex(savedSex, true);
             }
-            updateDailyUI(); try { await fetchNews(); } catch(e) {} try { await renderUserChars(); } catch(e) {} try { await renderUserTasks(); } catch(e) {} if (uid === OID || userData.is_admin) { try { await renderAdminPromos(); } catch(e) {} try { await renderTasks(); } catch(e) {} }
+            
+            // --- СКОРОСТНАЯ ПАРАЛЛЕЛЬНАЯ ЗАГРУЗКА ---
+            updateDailyUI(); 
+            fetchNews().catch(e => {}); 
+            renderUserChars().catch(e => {}); 
+            renderUserTasks().catch(e => {}); 
+            if (uid === OID || userData.is_admin) { 
+                renderAdminPromos().catch(e => {}); 
+                renderTasks().catch(e => {}); 
+            }
         }
 
         let baseZ = 15000; let isBotTyping = false; 
