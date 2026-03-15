@@ -900,7 +900,7 @@
         function clearChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Очистить память?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); tg.showAlert("Очищено 🧹"); } }); }
         function deleteChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Удалить чат?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); } }); }
         
-        // --- ХИРУРГИЧЕСКИ ДОБАВЛЕН ФИЛЬТР ВКЛАДОК ---
+        // --- ИСПРАВЛЕННЫЙ ЖЕСТКИЙ ФИЛЬТР ВКЛАДОК ---
         function switchCharTab(tab) {
             currentCharsTab = tab;
             document.getElementById('tab-char-off').classList.toggle('active', tab === 'official');
@@ -910,19 +910,23 @@
 
         async function renderUserChars() { 
             try { 
-                const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
+                const res = await fetch('/api/get-characters?_t=' + Date.now(), { headers: getAuthHeaders() }); 
                 allChars = await res.json(); 
                 allChars.sort((a, b) => b.id - a.id); 
                 const list = document.getElementById('user-char-list'); 
                 
+                // ЖЕЛЕЗОБЕТОННЫЙ ФИЛЬТР
                 let filteredChars = allChars.filter(c => { 
-                    let isOwnerChar = c.creator_id == OID; 
-                    let isOfficial = c.char_type === 'official' || !c.char_type || isOwnerChar; 
-                    let isCustom = c.char_type === 'custom' && c.status === 'public' && !isOwnerChar; 
-                    return currentCharsTab === 'official' ? isOfficial : isCustom; 
+                    let type = c.char_type || 'official'; 
+                    
+                    if (currentCharsTab === 'official') {
+                        return type === 'official';
+                    } else {
+                        return type === 'custom' && c.status === 'public';
+                    }
                 }); 
                 
-                if(filteredChars.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; } 
+                if(filteredChars.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей в этой категории</div>`; return; } 
                 const charCards = await Promise.all(filteredChars.map(async (c) => { 
                     let tName = await neuroTranslate(c.name, currentLang); 
                     return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
@@ -942,7 +946,6 @@
         function updateDailyUI() { const ONE_DAY = 24 * 60 * 60 * 1000; let timePassed = Date.now() - userData.last_daily; let nextStreak = userData.daily_streak + 1; let is7thDay = (nextStreak % 7 === 0); let baseRew = userData.daily_reward || 10; let actualRew = is7thDay ? baseRew * 2 : baseRew; document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`; document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (БОНУС x2!)` : ""); clearInterval(dailyTimerInterval); if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) { document.getElementById('daily-btn').style.display = 'none'; document.getElementById('daily-wait').style.display = 'block'; dailyTimerInterval = setInterval(() => { let timeLeft = ONE_DAY - (Date.now() - userData.last_daily); if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } else { let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000); h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s; document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`; } }, 1000); } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; } }
         async function claimDaily() { try { const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) }); const data = await res.json(); if (data.error) { tg.showAlert(data.error); } else { tg.showAlert(`Получено: ${data.reward} 🌙!`); userData.shards = data.new_balance; userData.daily_streak = data.streak; userData.last_daily = Date.now(); updateBalanceUI(userData.shards); updateDailyUI(); } } catch (e) { tg.showAlert("Error"); } }
         
-        // --- ХИРУРГИЧЕСКИ ДОБАВЛЕНА КНОПКА ПУБЛИКАЦИИ В ДОСЬЕ ---
         async function openDossier(id) { 
             const c = allChars.find(x => x.id === id); if(!c) return; 
             activeCharId = id; 
@@ -1081,7 +1084,6 @@
             const list = document.getElementById('mod-list-container');
             list.innerHTML = '<div class="loader"></div>';
             try {
-                // АНТИ-КЭШ VERCEL: GET запрос с параметром времени
                 const res = await fetch('/api/admin/get-pending-chars?_t=' + Date.now(), { headers: getAuthHeaders() });
                 const chars = await res.json();
                 if (chars.error) { list.innerHTML = `<div style='color:red;'>${chars.error}</div>`; return; }
