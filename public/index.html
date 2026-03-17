@@ -52,7 +52,6 @@
         .btn-adm { border-color: #00bcd4; color: #00bcd4; }
         .btn-con { border-color: #e91e63; color: #e91e63; }
 
-        /* ОПУСТИЛИ ВСЕ ВСПЛЫВАЮЩИЕ ОКНА НА 85px */
         .overlay { display: none; position: fixed; inset: 0; background: #05010a; z-index: 15000; flex-direction: column; align-items: center; padding: 85px 20px 20px 20px; overflow-y: auto; animation: smoothOpen 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
         .info-card { width: 100%; background: #0d041a; border: 1px solid #2d164d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
@@ -76,7 +75,7 @@
         .gender-btn { flex: 1; padding: 10px; border: 1px solid #2d164d; border-radius: 8px; text-align: center; font-size: 12px; color: #555; cursor: pointer; }
         .gender-btn.active { border-color: #bc42f5; color: #bc42f5; background: rgba(188, 66, 245, 0.1); }
 
-        #char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
+        #char-preview, #exc-char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
         .char-counter { font-size: 10px; color: #bc42f5; text-align: right; margin-top: -8px; margin-bottom: 10px; }
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
 
@@ -96,7 +95,6 @@
         .char-card-tags { font-size: 10px; color: #00bcd4; }
         .dossier-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; border: 1px solid #bc42f5; margin-bottom: 15px; }
 
-        /* === ДИЗАЙН ЧАТА === */
         .chat-container { flex: 1; width: 100%; background: #05010a; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; }
         
@@ -148,7 +146,6 @@
         .news-text { font-size: 12px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
         .news-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #2d164d; display: none; }
 
-        /* ================= РЕСПОНСИВНОСТЬ ================= */
         @media (min-width: 768px) {
             .menu-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
             .char-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
@@ -171,7 +168,6 @@
             #p-chat > div:first-child { padding-top: 20px !important; }
         }
 
-        /* --- ДОБАВЛЕНО ТОЛЬКО ДЛЯ НОВЫХ ФИЧ (ВКЛАДКИ И СТАТУСЫ) --- */
         .tabs-wrap { display: flex; background: #0d041a; border: 1px solid #2d164d; border-radius: 8px; margin-bottom: 15px; padding: 3px; width: 100%; }
         .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 11px; font-weight: bold; color: #888; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
         .tab-btn.active { background: #bc42f5; color: #fff; }
@@ -179,6 +175,7 @@
         .bg-pending { background: #f39c12; color: #fff; }
         .bg-private { background: #555; color: #fff; }
         .bg-public { background: #00ff00; color: #000; }
+        .bg-exclusive { background: linear-gradient(90deg, #ff7eb3, #bc42f5); color: #fff; box-shadow: 0 0 10px #bc42f5; font-weight: 900; }
     </style>
 </head>
 <body>
@@ -217,7 +214,6 @@
 
         <div id="main-news-feed" class="news-container"></div>
     </div>
-
     <div id="p-user-chatlist" class="overlay">
         <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chats">МОИ ЧАТЫ</h2>
         <div id="chatlist-container" style="width:100%"></div>
@@ -247,13 +243,56 @@
             </div>
         </div>
     </div>
-
+    
     <div id="p-user-chars" class="overlay">
         <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chars">ПЕРСОНАЖИ</h2>
         
         <div class="tabs-wrap">
             <div class="tab-btn active" id="tab-char-off" onclick="switchCharTab('official')">Официальные</div>
             <div class="tab-btn" id="tab-char-cus" onclick="switchCharTab('custom')">Пользовательские</div>
+            <div class="tab-btn" id="tab-char-exc" onclick="switchCharTab('exclusive')">Эксклюзивные</div>
+        </div>
+
+        <div id="official-tools" style="width:100%; margin-bottom:15px; display:block;">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <input type="text" id="char-search" class="term-in" placeholder="Поиск по имени..." style="margin-bottom:0; flex:1;" oninput="renderUserChars(false)">
+            </div>
+            <div class="info-card" style="padding:10px; margin-bottom:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:10px; color:#888; font-weight:bold;">ПОЛ:</span>
+                    <div style="display:flex; gap:10px;">
+                        <span id="f-g-all" style="font-size:10px; color:#bc42f5; font-weight:bold; cursor:pointer;" onclick="setOffFilter('gender','all')">ВСЕ</span>
+                        <span id="f-g-m" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('gender','m')">МУЖ</span>
+                        <span id="f-g-f" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('gender','f')">ЖЕН</span>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:10px; color:#888; font-weight:bold;">КАТЕГОРИЯ:</span>
+                    <div style="display:flex; gap:10px;">
+                        <span id="f-c-all" style="font-size:10px; color:#bc42f5; font-weight:bold; cursor:pointer;" onclick="setOffFilter('cat','all')">ВСЕ</span>
+                        <span id="f-c-anime" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('cat','anime')">АНИМЕ</span>
+                        <span id="f-c-games" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('cat','games')">ИГРЫ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="custom-filters" style="display:none; background:#11081d; border:1px solid #2d164d; border-radius:8px; padding:12px; margin-bottom:15px; width:100%;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+                <span style="font-size:11px; color:#888; text-transform:uppercase; font-weight:bold;">Пол:</span>
+                <div style="display:flex; gap:10px;">
+                    <span id="filt-g-all" style="font-size:11px; color:#bc42f5; cursor:pointer; font-weight:bold; transition:0.2s;" onclick="setCustomFilter('gender', 'all')">Все</span>
+                    <span id="filt-g-m" style="font-size:11px; color:#555; cursor:pointer; transition:0.2s;" onclick="setCustomFilter('gender', 'm')">Мужские</span>
+                    <span id="filt-g-f" style="font-size:11px; color:#555; cursor:pointer; transition:0.2s;" onclick="setCustomFilter('gender', 'f')">Женские</span>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; color:#888; text-transform:uppercase; font-weight:bold;">Сортировка:</span>
+                <div style="display:flex; gap:10px;">
+                    <span id="filt-s-new" style="font-size:11px; color:#bc42f5; cursor:pointer; font-weight:bold; transition:0.2s;" onclick="setCustomFilter('sort', 'new')">Новые</span>
+                    <span id="filt-s-pop" style="font-size:11px; color:#555; cursor:pointer; transition:0.2s;" onclick="setCustomFilter('sort', 'pop')">Популярные</span>
+                </div>
+            </div>
         </div>
 
         <div id="user-char-list" class="char-grid"></div>
@@ -270,13 +309,17 @@
             <div class="p-row"><span class="p-label" data-i18n="dos_gender">Пол:</span> <span class="p-val" id="dos-gender">М</span></div>
             <div style="margin-top:15px; font-size:12px; color:#ccc; line-height:1.4;" id="dos-desc">Описание...</div>
         </div>
-        <div class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()" data-i18n="b_start_chat">НАЧАТЬ ЧАТ</div>
         
+        <div id="dos-chat-btn" class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()" data-i18n="b_start_chat">НАЧАТЬ ЧАТ</div>
+        
+        <div id="dos-unlock-btn" class="term-btn" style="border-color:gold; background:rgba(255,215,0,0.1); color:gold; display:none;">🔓 ОТКРЫТЬ ДОСТУП ЗА 10 ⭐️</div>
+
         <div id="dos-pub-btn" class="term-btn" style="border-color:#f39c12; display:none;" onclick="publishMyChar()">ДОБАВИТЬ К ГЛАВНЫМ</div>
 
         <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()" data-i18n="b_del_char">УДАЛИТЬ ПЕРСОНАЖА</div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
+    
     <div id="p-daily" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 5px;" data-i18n="h_daily">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
         <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;" data-i18n="d_sub">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
@@ -292,6 +335,7 @@
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
+    
     <div id="p-user-tasks" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 20px;" data-i18n="h_tasks">ЗАДАНИЯ</h2>
         <div class="info-card" style="text-align: center; border-color: #bc42f5;">
@@ -305,49 +349,59 @@
     
     <div id="p-shop" class="overlay">
         <h2 style="color:#00bcd4; margin-bottom: 5px;" data-i18n="h_shop">МАГАЗИН</h2>
-        <div style="font-size: 11px; color: #888; margin-bottom: 20px;" data-i18n="s_pay_info">Оплата через Telegram Stars или CryptoBot (TON)</div>
+        <div style="font-size: 11px; color: #888; margin-bottom: 15px; text-align:center;" data-i18n="s_pay_info">Оплата через Telegram Stars или CryptoBot (TON)</div>
         
-        <div class="shop-header" data-i18n="sh_subs">ПОДПИСКИ (30 ДНЕЙ)</div>
-        <div class="shop-item">
-            <div class="shop-title" style="color: #a8b8c8;">PREMIUM</div>
-            <div class="shop-desc" data-i18n="sd_prem">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div>
-            </div>
+        <div class="tabs-wrap">
+            <div class="tab-btn active" id="tab-shop-sub" onclick="switchShopTab('sub')">ПОДПИСКИ</div>
+            <div class="tab-btn" id="tab-shop-shards" onclick="switchShopTab('shards')">ОСКОЛКИ</div>
         </div>
-        <div class="shop-item">
-            <div class="shop-title" style="color: #ffd700;">PRO</div>
-            <div class="shop-desc" data-i18n="sd_pro">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div>
+
+        <div id="shop-list-sub" style="width: 100%;">
+            <div class="shop-header" data-i18n="sh_subs">ПОДПИСКИ (30 ДНЕЙ)</div>
+            <div class="shop-item">
+                <div class="shop-title" style="color: #a8b8c8;">PREMIUM</div>
+                <div class="shop-desc" data-i18n="sd_prem">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+                <div class="buy-btns">
+                    <div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div>
+                    <div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div>
+                </div>
             </div>
-        </div>
-        <div class="shop-item">
-            <div class="shop-title" style="color: #ff00ff;">VIP</div>
-            <div class="shop-desc" data-i18n="sd_vip">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div>
+            <div class="shop-item">
+                <div class="shop-title" style="color: #ffd700;">PRO</div>
+                <div class="shop-desc" data-i18n="sd_pro">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+                <div class="buy-btns">
+                    <div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div>
+                    <div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div>
+                </div>
             </div>
-        </div>
-        <div class="shop-item">
-            <div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div>
-            <div class="shop-desc" data-i18n="sd_ultra">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div>
+            <div class="shop-item">
+                <div class="shop-title" style="color: #ff00ff;">VIP</div>
+                <div class="shop-desc" data-i18n="sd_vip">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+                <div class="buy-btns">
+                    <div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div>
+                    <div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div>
+                </div>
+            </div>
+            <div class="shop-item">
+                <div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div>
+                <div class="shop-desc" data-i18n="sd_ultra">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+                <div class="buy-btns">
+                    <div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div>
+                    <div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div>
+                </div>
             </div>
         </div>
 
-        <div class="shop-header" data-i18n="sh_shards">ОСКОЛКИ ЛУНЫ</div>
-        <div class="shop-item"><div class="shop-title">10 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div>
-        <div class="shop-item"><div class="shop-title">50 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div>
-        <div class="shop-item"><div class="shop-title">100 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div>
-        <div class="shop-item"><div class="shop-title">500 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div>
-        <div class="shop-item"><div class="shop-title">1000 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+        <div id="shop-list-shards" style="width: 100%; display: none;">
+            <div class="shop-header" data-i18n="sh_shards">ОСКОЛКИ ЛУНЫ</div>
+            <div class="shop-item"><div class="shop-title">10 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div>
+            <div class="shop-item"><div class="shop-title">50 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div>
+            <div class="shop-item"><div class="shop-title">100 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div>
+            <div class="shop-item"><div class="shop-title">500 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div>
+            <div class="shop-item"><div class="shop-title">1000 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div>
+        </div>
+
+        <div class="term-btn" style="margin-top: 15px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
     
     <div id="p-user-promos" class="overlay">
@@ -438,6 +492,7 @@
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
+    
     <div id="p-con" class="overlay">
         <h2 style="color:#e91e63">КОНСОЛЬ (OWNER)</h2>
         <div class="set-list">
@@ -449,7 +504,6 @@
             <div class="set-item" onclick="openPanel('p-m-admins')"><div class="set-icon" style="background:#e91e63;">🛡️</div><div class="set-text">АДМИНЫ</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-promos')"><div class="set-icon" style="background:#e91e63;">🎫</div><div class="set-text">ПРОМОКОДЫ</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-tasks')"><div class="set-icon" style="background:#bc42f5;">🎯</div><div class="set-text">ЗАДАНИЯ</div><div class="set-arrow">›</div></div>
-            
             <div class="set-item" onclick="openModPanel()"><div class="set-icon" style="background:#f39c12;">🔴</div><div class="set-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="set-arrow">›</div></div>
         </div>
         <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
@@ -463,7 +517,6 @@
             <div class="set-item" onclick="openPanel('p-m-char')"><div class="set-icon" style="background:#00bcd4;">🎭</div><div class="set-text">ДОБАВИТЬ ПЕРСА</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-promos')"><div class="set-icon" style="background:#00bcd4;">🎫</div><div class="set-text">СОЗДАТЬ ПРОМО</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-tasks')"><div class="set-icon" style="background:#00bcd4;">🎯</div><div class="set-text">ДОБАВИТЬ ЗАДАНИЕ</div><div class="set-arrow">›</div></div>
-            
             <div class="set-item" onclick="openModPanel()"><div class="set-icon" style="background:#f39c12;">🔴</div><div class="set-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="set-arrow">›</div></div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
@@ -529,7 +582,15 @@
             <img id="char-preview" src="#">
             <input type="text" id="ich-name" class="term-in" placeholder="Имя">
             <input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18">
-            <span class="s-label">Пол персонажа</span>
+            
+            <span class="s-label" style="text-align: center;">Категория</span>
+            <select id="ich-category" class="term-in" style="text-align: center;">
+                <option value="anime">Аниме</option>
+                <option value="games">Игры</option>
+                <option value="other">Другое</option>
+            </select>
+
+            <span class="s-label" style="text-align: center;">Пол персонажа</span>
             <div class="gender-box">
                 <div class="gender-btn active" id="cg-m" onclick="setCharGender('m')">Мужской</div>
                 <div class="gender-btn" id="cg-f" onclick="setCharGender('f')">Женский</div>
@@ -584,7 +645,10 @@
 
     <div id="p-my-chars" class="overlay">
         <h2 style="color:#f39c12">МОИ ПЕРСОНАЖИ</h2>
-        <div class="term-btn" style="border-color:#f39c12; margin-bottom:15px;" onclick="openCreateMyChar()">➕ СОЗДАТЬ ПЕРСОНАЖА</div>
+        <div style="display: flex; gap:10px; width: 100%; margin-bottom:15px;">
+            <div class="term-btn" style="border-color:#f39c12; flex:1; margin-bottom:0;" onclick="openCreateMyChar()">➕ СОЗДАТЬ</div>
+            <div class="term-btn" style="border-color:#bc42f5; flex:1; margin-bottom:0;" onclick="openCreateExclusiveChar()">✨ ЭКСКЛЮЗИВ</div>
+        </div>
         <div id="my-chars-list" class="char-grid"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
     </div>
@@ -593,7 +657,6 @@
         <h2 style="color:#f39c12" id="my-char-title">СОЗДАТЬ ПЕРСОНАЖА</h2>
         <div class="info-card" style="text-align: center;">
             <div id="my-char-cost-info" style="color:#00ff00; font-size:12px; margin-bottom:15px; font-weight:bold;">Стоимость: 100 🌙 (Для платников скидки!)</div>
-            
             <input type="hidden" id="imy-id">
             <img id="my-char-preview" src="#" style="width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #f39c12;">
             <input type="text" id="imy-name" class="term-in" placeholder="Имя">
@@ -605,11 +668,31 @@
             </div>
             <textarea id="imy-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание (характер, стиль общения)..." maxlength="2000" oninput="document.getElementById('my-char-limit').innerText = this.value.length + '/2000'"></textarea>
             <div id="my-char-limit" class="char-counter" style="color:#f39c12;">0/2000</div>
-            
             <input type="file" id="my-char-file" accept="image/*" style="display:none;" onchange="if(this.files && this.files[0]){ const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('my-char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }">
             <div class="term-btn" style="border-color:#f39c12" onclick="document.getElementById('my-char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
-            
             <div class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00;" onclick="saveMyChar()">СОХРАНИТЬ</div>
+        </div>
+        <div class="term-btn" onclick="back()">ОТМЕНА</div>
+    </div>
+
+    <div id="p-create-exclusive-char" class="overlay">
+        <h2 style="color:#bc42f5">ЭКСКЛЮЗИВНЫЙ ПЕРС</h2>
+        <div class="info-card" style="text-align: center; border-color: #bc42f5;">
+            <div id="exc-char-cost-info" style="color:gold; font-size:12px; margin-bottom:10px; font-weight:bold;">Загрузка цены...</div>
+            <div style="font-size:10px; color:#888; margin-bottom:15px;">Создается раз в 30 дней. Публикуется мгновенно (без модерации). Заработок на открытии чата другими юзерами.</div>
+            <img id="exc-char-preview" src="#">
+            <input type="text" id="iexc-name" class="term-in" placeholder="Имя">
+            <input type="number" id="iexc-age" class="term-in" placeholder="Возраст (18+)" min="18">
+            <span class="s-label">Пол персонажа</span>
+            <div class="gender-box">
+                <div class="gender-btn active" id="exc-cg-m" onclick="setExcCharGender('m')">Мужской</div>
+                <div class="gender-btn" id="exc-cg-f" onclick="setExcCharGender('f')">Женский</div>
+            </div>
+            <textarea id="iexc-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Глубокое описание (характер, лор)..." maxlength="2000" oninput="document.getElementById('exc-char-limit').innerText = this.value.length + '/2000'"></textarea>
+            <div id="exc-char-limit" class="char-counter" style="color:#bc42f5;">0/2000</div>
+            <input type="file" id="exc-char-file" accept="image/*" style="display:none;" onchange="if(this.files && this.files[0]){ const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('exc-char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }">
+            <div class="term-btn" style="border-color:#bc42f5" onclick="document.getElementById('exc-char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
+            <div class="term-btn" style="border-color:gold; background:rgba(255,215,0,0.1); color:gold;" onclick="saveExclusiveChar()">ОПЛАТИТЬ И СОЗДАТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">ОТМЕНА</div>
     </div>
@@ -620,7 +703,6 @@
         <div id="mod-list-container" style="width:100%;"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
     </div>
-    
     <script>
         const tg = window.Telegram.WebApp;
         const BackButton = tg.BackButton;
@@ -639,18 +721,24 @@
         let promoLock = false; 
         let openDropdownId = null; 
         
-        let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0 };
+        let userData = { shards: 0, subscription: "FREE", sub_exp: 0, is_admin: false, last_daily: 0, daily_streak: 0, unlocked_chars: [] };
         let allChars = []; let allNews = []; 
         
         let currentCharsTab = 'official'; 
+        let charFilterGender = 'all'; let charFilterSort = 'new';
+        let offFilterGender = 'all'; let offFilterCat = 'all';
+        
         let myCharGender = 'm';
+        let excCharGender = 'm';
         let myCharsList = [];
-        let currentCustomCost = 100; // Глобальная переменная для случайной цены
+        let currentCustomCost = 100;
+        let currentExcStarCost = 50;
 
         const translations = {
-            ru: { m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль", h_chats: "МОИ ЧАТЫ", h_chars: "ПЕРСОНАЖИ", h_daily: "ЕЖЕДНЕВНАЯ НАГРАДА", h_tasks: "ЗАДАНИЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФИЛЬ", h_set: "НАСТРОЙКИ", b_back: "НАЗАД", b_start_chat: "НАЧАТЬ ЧАТ", b_del_char: "УДАЛИТЬ ПЕРСОНАЖА", b_claim: "ЗАБРАТЬ", b_share: "ПОДЕЛИТЬСЯ ССЫЛКОЙ", b_activate: "АКТИВИРОВАТЬ", pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:", set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей", d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по", s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код", dos_age: "Возраст:", dos_gender: "Пол:", s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk", c_love: "Влюбленность", c_trust: "Доверие", c_inf: "Влияние", c_horny: "Возбуждение" }
+            ru: { m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль", h_chats: "МОИ ЧАТЫ", h_chars: "ПЕРСОНАЖИ", h_daily: "ЕЖЕДНЕВНАЯ НАГРАДА", h_tasks: "ЗАДАНИЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФИЛЬ", h_set: "НАСТРОЙКИ", b_back: "НАЗАД", b_start_chat: "НАЧАТЬ ЧАТ", b_del_char: "УДАЛИТЬ ПЕРСОНАЖА", b_claim: "ЗАБРАТЬ", b_share: "ПОДЕЛИТЬСЯ ССЫЛКОЙ", b_activate: "АКТИВИРОВАТЬ", pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:", set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей", d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по", s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код", dos_age: "Возраст:", dos_gender: "Пол:", s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk" }
         };
         let currentLang = 'ru'; const transCache = {}; 
+
         function getUid() { return String(tg.initDataUnsafe?.user?.id || OID); }
         function getAuthHeaders() { return { 'Content-Type': 'application/json', 'x-tg-data': tg.initData || "dev_mode" }; }
 
@@ -688,12 +776,20 @@
 
         document.addEventListener('click', () => { if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; let chatItem = document.getElementById('chat-item-' + openDropdownId); if(chatItem) chatItem.style.zIndex = 1; openDropdownId = null; } });
 
-        // --- УМНАЯ СИНХРОНИЗАЦИЯ (ВЗАМЕН ТАЙМЕРУ) ---
         async function syncUser() {
             const uid = getUid(); if(!uid) return;
             try {
                 const res = await fetch('/api/user/sync', { method: 'POST', headers: getAuthHeaders() });
-                if(res.ok) { const data = await res.json(); if(uid !== OID) updateBalanceUI(data.shards); if(document.getElementById('prof-sub').innerText !== data.subscription) { document.getElementById('prof-sub').innerText = data.subscription; userData.subscription = data.subscription; applyNickStyle(data.subscription); } }
+                if(res.ok) { 
+                    const data = await res.json(); 
+                    if(uid !== OID) updateBalanceUI(data.shards); 
+                    if(document.getElementById('prof-sub').innerText !== data.subscription) { 
+                        document.getElementById('prof-sub').innerText = data.subscription; 
+                        userData.subscription = data.subscription; 
+                        applyNickStyle(data.subscription); 
+                    }
+                    userData.unlocked_chars = data.unlocked_chars || [];
+                }
             } catch(e) {}
         }
 
@@ -701,16 +797,45 @@
             if (!document.hidden) syncUser();
         });
 
-        // --- ЗАГРУЗЧИК TELEGRA.PH ---
+        // --- УМНОЕ СЖАТИЕ ФОТО ПЕРЕД ОТПРАВКОЙ НА СЕРВЕР ---
         async function uploadToCloud(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            try {
-                const res = await fetch('https://telegra.ph/upload', { method: 'POST', body: formData });
-                const data = await res.json();
-                if(data && data[0] && data[0].src) return 'https://telegra.ph' + data[0].src;
-                return null;
-            } catch(e) { return null; }
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = async function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_SIZE = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                        } else {
+                            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                        }
+                        
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                        
+                        try {
+                            const res = await fetch('/api/upload', {
+                                method: 'POST', headers: getAuthHeaders(),
+                                body: JSON.stringify({ image: compressedBase64 })
+                            });
+                            const data = await res.json();
+                            if (data.url) resolve(data.url);
+                            else resolve(null);
+                        } catch (err) { resolve(null); }
+                    };
+                    img.onerror = () => resolve(null);
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         function updateUserAvatar(input) {
@@ -722,15 +847,40 @@
             const uid = getUid(); const u = tg.initDataUnsafe?.user || { first_name: "Owner" };
             currentLang = localStorage.getItem('m_lang_' + uid) || 'ru'; setLang(currentLang);
             document.getElementById('u-id-head').innerText = uid; document.getElementById('prof-id').innerText = uid;
-            const savedNick = localStorage.getItem('m_nick_' + uid) || u.first_name || "User"; document.getElementById('u-name').innerText = savedNick; document.getElementById('prof-nick').innerText = savedNick; document.getElementById('set-nick').value = savedNick;
-            let savedAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png"; document.getElementById('main-u-avatar').src = savedAvatar; document.getElementById('prof-u-avatar').src = savedAvatar; document.getElementById('set-u-avatar-preview').src = savedAvatar;
-            let uGender = localStorage.getItem('m_gender_' + uid) || 'm'; document.getElementById('g-m').classList.toggle('active', uGender === 'm'); document.getElementById('g-f').classList.toggle('active', uGender === 'f');
+            
+            const savedNick = localStorage.getItem('m_nick_' + uid) || u.first_name || "User"; 
+            document.getElementById('u-name').innerText = savedNick; document.getElementById('prof-nick').innerText = savedNick; document.getElementById('set-nick').value = savedNick;
+            
+            let savedAvatar = localStorage.getItem('m_avatar_' + uid) || "https://i.ibb.co/4pDNDk1/avatar.png"; 
+            document.getElementById('main-u-avatar').src = savedAvatar; document.getElementById('prof-u-avatar').src = savedAvatar; document.getElementById('set-u-avatar-preview').src = savedAvatar;
+            
+            let uGender = localStorage.getItem('m_gender_' + uid) || 'm'; 
+            document.getElementById('g-m').classList.toggle('active', uGender === 'm'); document.getElementById('g-f').classList.toggle('active', uGender === 'f');
 
-            try { const startParam = tg.initDataUnsafe?.start_param || null; const res = await fetch('/api/user/get-data', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ start_param: startParam }) }); if(res.ok) userData = await res.json(); } catch (e) {}
+            try { 
+                const startParam = tg.initDataUnsafe?.start_param || null; 
+                const res = await fetch('/api/user/get-data', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ start_param: startParam }) }); 
+                if(res.ok) userData = await res.json(); 
+            } catch (e) {}
 
             const badgeEl = document.getElementById('u-badge');
-            if(uid === OID) { updateBalanceUI("∞"); document.getElementById('prof-sub').innerText = "ULTRA"; document.getElementById('prof-exp').innerText = "Без ограничений"; document.getElementById('prof-status').innerText = "Овнер"; userData.subscription = "ULTRA"; document.getElementById('nav-adm').style.display = 'flex'; document.getElementById('nav-con').style.display = 'flex'; document.getElementById('own-sh-rem').style.display = 'block'; document.getElementById('own-su-rem').style.display = 'block'; document.getElementById('own-adm-rem').style.display = 'block'; badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-owner'; badgeEl.innerText = 'OWNER'; } 
-            else { updateBalanceUI(userData.shards); document.getElementById('prof-sub').innerText = userData.subscription; if(userData.subscription !== "FREE" && userData.sub_exp > 0) { let expDate = new Date(userData.sub_exp); document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU'); } else { document.getElementById('prof-exp').innerText = "-"; } if(userData.is_admin) { document.getElementById('prof-status').innerText = "Админ"; document.getElementById('nav-adm').style.display = 'flex'; badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-admin'; badgeEl.innerText = 'ADMIN'; } else { document.getElementById('prof-status').innerText = "Юзер"; badgeEl.style.display = 'none'; } }
+            if(uid === OID) { 
+                updateBalanceUI("∞"); document.getElementById('prof-sub').innerText = "ULTRA"; document.getElementById('prof-exp').innerText = "Без ограничений"; document.getElementById('prof-status').innerText = "Овнер"; 
+                userData.subscription = "ULTRA"; document.getElementById('nav-adm').style.display = 'flex'; document.getElementById('nav-con').style.display = 'flex'; 
+                document.getElementById('own-sh-rem').style.display = 'block'; document.getElementById('own-su-rem').style.display = 'block'; document.getElementById('own-adm-rem').style.display = 'block'; 
+                badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-owner'; badgeEl.innerText = 'OWNER'; 
+            } else { 
+                updateBalanceUI(userData.shards); document.getElementById('prof-sub').innerText = userData.subscription; 
+                if(userData.subscription !== "FREE" && userData.sub_exp > 0) { 
+                    let expDate = new Date(userData.sub_exp); document.getElementById('prof-exp').innerText = expDate.toLocaleDateString('ru-RU'); 
+                } else { document.getElementById('prof-exp').innerText = "-"; } 
+                if(userData.is_admin) { 
+                    document.getElementById('prof-status').innerText = "Админ"; document.getElementById('nav-adm').style.display = 'flex'; 
+                    badgeEl.style.display = 'inline-block'; badgeEl.className = 'badge-base badge-admin'; badgeEl.innerText = 'ADMIN'; 
+                } else { 
+                    document.getElementById('prof-status').innerText = "Юзер"; badgeEl.style.display = 'none'; 
+                } 
+            }
 
             applyNickStyle(userData.subscription);
             let currentSub = (userData.subscription || "FREE").trim().toLowerCase(); let minLen = 25; let maxLen = 25; let maxSex = 0;
@@ -744,32 +894,66 @@
             }
             
             updateDailyUI(); 
-            
-            // ПАРАЛЛЕЛЬНАЯ ЗАГРУЗКА БЕЗ AWAIT (БЫСТРЫЙ ВХОД)
             fetchNews().catch(e => {}); 
             renderUserChars().catch(e => {}); 
             renderUserTasks().catch(e => {}); 
-            if (uid === OID || userData.is_admin) { 
-                renderAdminPromos().catch(e => {}); 
-                renderTasks().catch(e => {}); 
-            }
+            if (uid === OID || userData.is_admin) { renderAdminPromos().catch(e => {}); renderTasks().catch(e => {}); }
         }
 
         let baseZ = 15000; let isBotTyping = false; 
         function openPanel(id) { if(stack.includes(id)) return; stack.push(id); let el = document.getElementById(id); if(el) { el.style.zIndex = baseZ + stack.length; el.style.display = 'flex'; } BackButton.show(); }
         function back() { if(isBotTyping) { tg.showAlert("Бот пишет ответ, подождите! ⏳"); return; } if(stack.length > 0) { let id = stack.pop(); let el = document.getElementById(id); if(el) el.style.display = 'none'; } if(stack.length === 0) { BackButton.hide(); } }
         BackButton.onClick(() => back()); function closeChat() { back(); }
-
         async function openChatList() {
-            if (allChars.length === 0) await renderUserChars(); const uid = getUid(); const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); const list = document.getElementById('chatlist-container');
-            let chatObjects = []; for (let charId in allChats) { const char = allChars.find(c => c.id == charId); if(!char) continue; const msgs = allChats[charId]; const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : "Нет сообщений"; chatObjects.push({ id: char.id, char: char, lastMsg: lastMsg, isPinned: pinned.includes(char.id), orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 }); }
+            if (allChars.length === 0) await renderUserChars(); 
+            const uid = getUid(); 
+            const allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
+            const pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); 
+            let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); 
+            const list = document.getElementById('chatlist-container');
+            
+            let chatObjects = []; 
+            for (let charId in allChats) { 
+                const char = allChars.find(c => c.id == charId); if(!char) continue; 
+                const msgs = allChats[charId]; 
+                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : "Нет сообщений"; 
+                chatObjects.push({ id: char.id, char: char, lastMsg: lastMsg, isPinned: pinned.includes(char.id), orderIndex: order.indexOf(char.id) !== -1 ? order.indexOf(char.id) : 999999 }); 
+            }
             chatObjects.sort((a, b) => { if (a.isPinned && !b.isPinned) return -1; if (!a.isPinned && b.isPinned) return 1; return a.orderIndex - b.orderIndex; });
+            
             if(chatObjects.length === 0) { list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>У вас пока нет активных диалогов. Перейдите в Персонажи!</div>`; } 
-            else { const chatCards = await Promise.all(chatObjects.map(async (obj) => { let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : ""; let pinText = obj.isPinned ? "Открепить" : "Закрепить"; let tName = await neuroTranslate(obj.char.name, currentLang); return `<div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})" style="z-index:1;"><img src="${obj.char.photo}" class="chatlist-img"><div class="chatlist-info"><div class="chatlist-name">${pinMark}${tName}</div><div class="chatlist-last">${obj.lastMsg.replace(/<[^>]*>?/gm, '')}</div></div><button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button><div class="chat-dropdown" id="chat-dd-${obj.id}"><div class="chat-dropdown-item" onclick="pinChatAction(${obj.id}, event)">📌 ${pinText}</div><div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 Очистить</div><div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 Удалить</div></div></div>`; })); list.innerHTML = chatCards.join(''); } openPanel('p-user-chatlist');
+            else { 
+                const chatCards = await Promise.all(chatObjects.map(async (obj) => { 
+                    let pinMark = obj.isPinned ? `<span class="pin-icon">📌</span>` : ""; 
+                    let pinText = obj.isPinned ? "Открепить" : "Закрепить"; 
+                    let tName = await neuroTranslate(obj.char.name, currentLang); 
+                    return `<div class="chatlist-item" id="chat-item-${obj.id}" onclick="resumeChat(${obj.id})" style="z-index:1;"><img src="${obj.char.photo}" class="chatlist-img"><div class="chatlist-info"><div class="chatlist-name">${pinMark}${tName}</div><div class="chatlist-last">${obj.lastMsg.replace(/<[^>]*>?/gm, '')}</div></div><button class="chat-menu-btn" onclick="toggleChatMenu(${obj.id}, event)">⋮</button><div class="chat-dropdown" id="chat-dd-${obj.id}"><div class="chat-dropdown-item" onclick="pinChatAction(${obj.id}, event)">📌 ${pinText}</div><div class="chat-dropdown-item" style="color:orange;" onclick="clearChatAction(${obj.id}, event)">🧹 Очистить</div><div class="chat-dropdown-item" style="color:#ff4444;" onclick="deleteChatAction(${obj.id}, event)">🗑 Удалить</div></div></div>`; 
+                })); 
+                list.innerHTML = chatCards.join(''); 
+            } 
+            openPanel('p-user-chatlist');
         }
 
         async function resumeChat(charId) { if(isBotTyping) return; activeCharId = charId; const c = allChars.find(x => x.id == charId); if(!c) return; document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang); document.getElementById('chat-header-avatar').src = c.photo; renderChatMessages(); openPanel('p-chat'); }
-        async function openChatFromDossier() { if(isBotTyping) return; const c = allChars.find(x => x.id === activeCharId); if(!c) return; document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang); document.getElementById('chat-header-avatar').src = c.photo; const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); if(!allChats[activeCharId]) { allChats[activeCharId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); updateChatOrder(activeCharId); } renderChatMessages(); openPanel('p-chat'); }
+        
+        async function openChatFromDossier() { 
+            if(isBotTyping) return; 
+            const c = allChars.find(x => x.id === activeCharId); if(!c) return; 
+            
+            if (c.char_type === 'exclusive' && getUid() !== OID && c.creator_id != getUid()) {
+                if (!userData.unlocked_chars || !userData.unlocked_chars.includes(c.id)) {
+                    return tg.showAlert("Сначала разблокируйте доступ за 10 Stars!");
+                }
+            }
+
+            document.getElementById('chat-char-name').innerText = await neuroTranslate(c.name, currentLang); 
+            document.getElementById('chat-header-avatar').src = c.photo; 
+            const uid = getUid(); 
+            let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); 
+            if(!allChats[activeCharId]) { allChats[activeCharId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); updateChatOrder(activeCharId); } 
+            renderChatMessages(); 
+            openPanel('p-chat'); 
+        }
 
         function renderChatMessages() {
             const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); let msgs = allChats[activeCharId] || []; const chatBox = document.getElementById('chat-messages-box');
@@ -804,10 +988,7 @@
             renderChatMessages();
             
             try {
-                const res = await fetch('/api/generate-media', {
-                    method: 'POST', headers: getAuthHeaders(),
-                    body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'photo' })
-                });
+                const res = await fetch('/api/generate-media', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'photo' }) });
                 const data = await res.json();
                 
                 allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
@@ -815,29 +996,23 @@
 
                 if(data.url) {
                     allChats[activeCharId][index].text += `<br><br><img src="${data.url}" style="width:100%; border-radius:10px; margin-top:5px; border:1px solid #bc42f5;">`;
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                    renderChatMessages();
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
                 } else { 
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
-                    if(uid !== OID) updateBalanceUI(userData.shards + cost);
-                    tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
+                    if(uid !== OID) updateBalanceUI(userData.shards + cost); tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
                 }
             } catch(e) { 
                 allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
                 allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ рисует фото...</div>`, '');
                 localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
-                if(uid !== OID) updateBalanceUI(userData.shards + cost);
-                tg.showAlert("❌ Ошибка связи с сервером!"); 
+                if(uid !== OID) updateBalanceUI(userData.shards + cost); tg.showAlert("❌ Ошибка связи с сервером!"); 
             }
         }
 
         async function actionCircle(index) {
-            const uid = getUid(); 
-            let sub = (userData.subscription || "FREE").trim().toUpperCase();
-            
+            const uid = getUid(); let sub = (userData.subscription || "FREE").trim().toUpperCase();
             if(sub === 'FREE' && uid !== OID) return tg.showAlert("❌ Кружок доступен только платникам!");
             if(uid !== OID && userData.shards < 5) return tg.showAlert(`❌ Нужно 5 🌙!`);
-            
             if(uid !== OID) updateBalanceUI(userData.shards - 5);
             
             let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
@@ -845,14 +1020,10 @@
 
             const loadId = "load-cr-" + Date.now();
             allChats[activeCharId][index].text += `<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ создает кружок...</div>`;
-            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-            renderChatMessages();
+            localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
             
             try {
-                const res = await fetch('/api/generate-media', {
-                    method: 'POST', headers: getAuthHeaders(),
-                    body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'circle' })
-                });
+                const res = await fetch('/api/generate-media', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'circle' }) });
                 const data = await res.json();
                 
                 allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
@@ -860,19 +1031,16 @@
 
                 if(data.url) {
                     allChats[activeCharId][index].text += `<br><br><div style="width:120px; height:120px; border-radius:50%; background:#bc42f5 url('${data.url}') center/cover; border:3px solid #bc42f5; margin:10px auto; box-shadow: 0 0 10px #bc42f5; animation: pulseMoon 2s infinite;"></div>`;
-                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats));
-                    renderChatMessages();
+                    localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
                 } else { 
                     localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
-                    if(uid !== OID) updateBalanceUI(userData.shards + 5);
-                    tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
+                    if(uid !== OID) updateBalanceUI(userData.shards + 5); tg.showAlert("❌ Ошибка: " + (data.error || "Не удалось сгенерировать")); 
                 }
             } catch(e) { 
                 allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
                 allChats[activeCharId][index].text = allChats[activeCharId][index].text.replace(`<div id="${loadId}" style="color:#ffaa00; font-size:12px; margin-top:10px; font-weight:bold;">⏳ ИИ создает кружок...</div>`, '');
                 localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
-                if(uid !== OID) updateBalanceUI(userData.shards + 5);
-                tg.showAlert("❌ Ошибка связи с сервером!"); 
+                if(uid !== OID) updateBalanceUI(userData.shards + 5); tg.showAlert("❌ Ошибка связи с сервером!"); 
             }
         }
 
@@ -908,7 +1076,7 @@
                     function typeChar() { if (i < replyText.length) { replyBox.appendChild(document.createTextNode(replyText.charAt(i))); i++; chatBox.scrollTop = chatBox.scrollHeight; setTimeout(typeChar, 20); } else { finishMessage(replyText, data.new_balance); } }
                     typeChar();
                     function finishMessage(finalText, newBal) { let waitTimer = setInterval(() => { if (minTimePassed) { clearInterval(waitTimer); let stats = { love: Math.floor(Math.random() * 40) + 10, trust: Math.floor(Math.random() * 40) + 10, inf: Math.floor(Math.random() * 30) + 5, horny: sexSet > 0 ? Math.floor(Math.random() * 50) + (sexSet * 5) : 0 }; allChats[activeCharId].push({sender: 'char', text: finalText, stats: stats}); localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if (uid !== OID && newBal !== undefined) updateBalanceUI(newBal); renderChatMessages(); unlockChat(); } }, 500); }
-                } else { document.getElementById(typeId)?.remove(); if (data.error) tg.showAlert(data.error); unlockChat(); }
+                } else { document.getElementById(typeId)?.remove(); if (data.error) { tg.showAlert(data.error); if(data.error === "locked_exclusive") back(); } unlockChat(); }
             } catch (e) { document.getElementById(typeId)?.remove(); tg.showAlert("Ошибка сервера"); unlockChat(); }
             function unlockChat() { isBotTyping = false; if(input) { input.disabled = false; sendBtn.disabled = false; setTimeout(() => { input.focus(); }, 100); } }
         }
@@ -922,50 +1090,57 @@
         }
 
         function updateChatOrder(charId) { const uid = getUid(); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); order.unshift(charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); }
-
         function toggleChatMenu(charId, e) { if(e) e.stopPropagation(); if(openDropdownId !== null && openDropdownId !== charId) { let old = document.getElementById('chat-dd-' + openDropdownId); if(old) old.style.display = 'none'; let oldItem = document.getElementById('chat-item-' + openDropdownId); if(oldItem) oldItem.style.zIndex = 1; } let el = document.getElementById('chat-dd-' + charId); let chatItem = document.getElementById('chat-item-' + charId); if(el.style.display === 'flex') { el.style.display = 'none'; if(chatItem) chatItem.style.zIndex = 1; openDropdownId = null; } else { el.style.display = 'flex'; if(chatItem) chatItem.style.zIndex = 1000; openDropdownId = charId; } }
         function pinChatAction(charId, e) { if(e) e.stopPropagation(); const uid = getUid(); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); if(pinned.includes(charId)) { pinned = pinned.filter(id => id != charId); tg.showAlert("Откреплено"); } else { pinned.push(charId); tg.showAlert("Закреплено 📌"); } localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); }
         function clearChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Очистить память?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); tg.showAlert("Очищено 🧹"); } }); }
         function deleteChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Удалить чат?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); } }); }
         
-        // --- СКОРОСТНОЕ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ПЕРСОНАЖЕЙ ---
+        function setCustomFilter(type, val) {
+            if (type === 'gender') { charFilterGender = val; document.getElementById('filt-g-all').style.color = val === 'all' ? '#bc42f5' : '#555'; document.getElementById('filt-g-m').style.color = val === 'm' ? '#bc42f5' : '#555'; document.getElementById('filt-g-f').style.color = val === 'f' ? '#bc42f5' : '#555';
+            } else if (type === 'sort') { charFilterSort = val; document.getElementById('filt-s-new').style.color = val === 'new' ? '#bc42f5' : '#555'; document.getElementById('filt-s-pop').style.color = val === 'pop' ? '#bc42f5' : '#555'; }
+            renderUserChars(false);
+        }
+
+        function setOffFilter(type, val) {
+            if (type === 'gender') { offFilterGender = val; document.getElementById('f-g-all').style.color = val === 'all' ? '#bc42f5' : '#555'; document.getElementById('f-g-m').style.color = val === 'm' ? '#bc42f5' : '#555'; document.getElementById('f-g-f').style.color = val === 'f' ? '#bc42f5' : '#555'; document.getElementById('f-g-all').style.fontWeight = val === 'all' ? 'bold' : 'normal'; document.getElementById('f-g-m').style.fontWeight = val === 'm' ? 'bold' : 'normal'; document.getElementById('f-g-f').style.fontWeight = val === 'f' ? 'bold' : 'normal';
+            } else if (type === 'cat') { offFilterCat = val; document.getElementById('f-c-all').style.color = val === 'all' ? '#bc42f5' : '#555'; document.getElementById('f-c-anime').style.color = val === 'anime' ? '#bc42f5' : '#555'; document.getElementById('f-c-games').style.color = val === 'games' ? '#bc42f5' : '#555'; document.getElementById('f-c-all').style.fontWeight = val === 'all' ? 'bold' : 'normal'; document.getElementById('f-c-anime').style.fontWeight = val === 'anime' ? 'bold' : 'normal'; document.getElementById('f-c-games').style.fontWeight = val === 'games' ? 'bold' : 'normal'; }
+            renderUserChars(false);
+        }
+
         function switchCharTab(tab) {
-            if (currentCharsTab === tab) return; // Блокируем лишние клики
+            if (currentCharsTab === tab) return; 
             currentCharsTab = tab;
-            document.getElementById('tab-char-off').classList.toggle('active', tab === 'official');
-            document.getElementById('tab-char-cus').classList.toggle('active', tab === 'custom');
-            
-            // Передаем false — берем из кэша памяти, сервер не трогаем!
+            document.getElementById('tab-char-off').classList.toggle('active', tab === 'official'); document.getElementById('tab-char-cus').classList.toggle('active', tab === 'custom'); let excTab = document.getElementById('tab-char-exc'); if(excTab) excTab.classList.toggle('active', tab === 'exclusive');
+            let cusFilters = document.getElementById('custom-filters'); if(cusFilters) cusFilters.style.display = tab === 'custom' ? 'block' : 'none';
+            let offFilters = document.getElementById('official-tools'); if(offFilters) offFilters.style.display = tab === 'official' ? 'block' : 'none';
             renderUserChars(false);
         }
 
         async function renderUserChars(forceFetch = true) { 
             try { 
                 const list = document.getElementById('user-char-list'); 
-                
-                // Стучимся на сервер ТОЛЬКО при первом входе или если попросили обновить
                 if (forceFetch || allChars.length === 0) {
                     if (allChars.length === 0) list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#bc42f5; font-size:12px;'>Загрузка персонажей...</div>`;
-                    const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
-                    allChars = await res.json(); 
-                    allChars.sort((a, b) => b.id - a.id); 
+                    const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); allChars = await res.json(); 
                 }
                 
+                let searchInput = document.getElementById('char-search'); let searchText = searchInput ? searchInput.value.toLowerCase() : '';
+
                 let filteredChars = allChars.filter(c => { 
-                    let isOwnerChar = c.creator_id == OID; 
-                    let isOfficial = c.char_type === 'official' || !c.char_type || isOwnerChar; 
-                    let isCustom = c.char_type === 'custom' && c.status === 'public' && !isOwnerChar; 
-                    return currentCharsTab === 'official' ? isOfficial : isCustom; 
+                    let isOwnerChar = c.creator_id == OID; let isOfficial = c.char_type === 'official' || !c.char_type || isOwnerChar; let isCustom = c.char_type === 'custom' && c.status === 'public' && !isOwnerChar; let isExclusive = c.char_type === 'exclusive';
+                    if (currentCharsTab === 'official') { if (!isOfficial && !isOwnerChar) return false; if (offFilterGender !== 'all' && c.gender !== offFilterGender) return false; if (offFilterCat !== 'all' && c.category !== offFilterCat) return false; if (searchText) { let cName = c.name ? c.name.toLowerCase() : ''; if (!cName.includes(searchText)) return false; } return true; }
+                    if (currentCharsTab === 'custom') { if (!isCustom) return false; if (charFilterGender !== 'all' && c.gender !== charFilterGender) return false; return true; }
+                    return isExclusive; 
                 }); 
                 
+                if (currentCharsTab === 'custom' && charFilterSort === 'pop') { filteredChars.sort((a, b) => a.id - b.id); } else { filteredChars.sort((a, b) => b.id - a.id); }
                 if(filteredChars.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; } 
                 
                 const charCards = await Promise.all(filteredChars.map(async (c) => { 
-                    let tName = await neuroTranslate(c.name, currentLang); 
-                    // loading="lazy" для мгновенной отрисовки интерфейса
-                    return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}" loading="lazy"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
+                    let tName = await neuroTranslate(c.name, currentLang); let badgeHTML = "";
+                    if (c.char_type === 'exclusive') { badgeHTML = `<div class="status-badge bg-exclusive">EXCLUSIVE ✨</div>`; }
+                    return `<div class="char-card" onclick="openDossier(${c.id})">${badgeHTML}<img src="${c.photo}" loading="lazy"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
                 })); 
-                
                 list.innerHTML = charCards.join(''); 
             } catch (e) {} 
         }
@@ -974,32 +1149,29 @@
         function renderNews() { const container = document.getElementById('main-news-feed'); if(!container) return; if(allNews.length === 0) { container.innerHTML = ''; return; } const sortedNews = [...allNews].sort((a, b) => b.id - a.id); container.innerHTML = sortedNews.map(n => { let imgTag = n.photo && n.photo.length > 10 ? `<img src="${n.photo}" class="news-img" style="display:block;">` : ''; let delBtn = getUid() === OID ? `<span style="color:#ff4444; cursor:pointer; font-size:14px; padding-left:10px;" onclick="deleteNews(${n.id})">✖ Удалить</span>` : ''; let d = new Date(n.id).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}); return `<div class="news-card"><div class="news-date"><span>${d}</span> ${delBtn}</div><div class="news-text">${n.text}</div>${imgTag}</div>`; }).join(''); }
         
         async function publishNews() { 
-            const text = document.getElementById('inews-text').value.trim(); 
-            let img = document.getElementById('news-preview').src; 
-            const fileInput = document.getElementById('news-file');
-            
+            const text = document.getElementById('inews-text').value.trim(); let img = document.getElementById('news-preview').src; const fileInput = document.getElementById('news-file');
             if(!text && (!img || img.includes('#'))) return tg.showAlert("Введите текст или фото!"); 
-            
-            if(fileInput.files && fileInput.files[0]) {
-                const btn = document.querySelector('[onclick="publishNews()"]');
-                let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
-                const cloudUrl = await uploadToCloud(fileInput.files[0]);
-                btn.innerText = oldTxt;
-                if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
-            }
-
-            await fetch('/api/admin/create-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ newsData: { id: Date.now(), text: text, photo: img.includes('#') ? '' : img } }) }); 
-            document.getElementById('inews-text').value = ''; document.getElementById('news-preview').src = '#'; document.getElementById('news-preview').style.display = 'none'; document.getElementById('news-limit').innerText = '0/3500'; tg.showAlert("Опубликовано!"); back(); fetchNews(); 
+            if(fileInput.files && fileInput.files[0]) { const btn = document.querySelector('[onclick="publishNews()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА..."; const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt; if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!"); }
+            await fetch('/api/admin/create-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ newsData: { id: Date.now(), text: text, photo: img.includes('#') ? '' : img } }) }); document.getElementById('inews-text').value = ''; document.getElementById('news-preview').src = '#'; document.getElementById('news-preview').style.display = 'none'; document.getElementById('news-limit').innerText = '0/3500'; tg.showAlert("Опубликовано!"); back(); fetchNews(); 
         }
 
         async function deleteNews(id) { tg.showConfirm("Удалить новость?", async (yes) => { if(yes) { await fetch('/api/admin/delete-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ news_id: id }) }); fetchNews(); } }); }
+        
         async function renderTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); document.getElementById('task-list').innerHTML = tasks.map(x => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : ''; return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
+        
         async function renderUserTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]"); const list = document.getElementById('user-task-list'); if (tasks.length === 0) { list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>Нет заданий</div>`; return; } const taskCards = await Promise.all(tasks.map(async (t) => { let tName = await neuroTranslate(t.name, currentLang); if(completed.includes(t.id)) { return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`; } return `<div class="task-item" id="utask-${t.id}"><span>${tName}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`; })); list.innerHTML = taskCards.join(''); } catch(e) {} }
+        
         async function renderAdminPromos() { try { const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json(); document.getElementById('promo-list').innerHTML = promos.map(p => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : ''; return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
+        
         async function buyItem(type, item, currency, price) { if (currency === 'ton') { tg.showAlert("Генерация счета CryptoBot..."); try { const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) }); const data = await res.json(); if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); } } catch (e) { tg.showAlert("Error"); } } else if (currency === 'stars') { tg.showAlert("Подготовка оплаты Stars..."); try { const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) }); const data = await res.json(); if(data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата успешна!"); } }); } else { tg.showAlert("API Error"); } } catch (e) { tg.showAlert("Error"); } } }
+        
+        function switchShopTab(tab) { const btnSub = document.getElementById('tab-shop-sub'); const btnShards = document.getElementById('tab-shop-shards'); const listSub = document.getElementById('shop-list-sub'); const listShards = document.getElementById('shop-list-shards'); if(btnSub) btnSub.classList.toggle('active', tab === 'sub'); if(btnShards) btnShards.classList.toggle('active', tab === 'shards'); if(listSub) listSub.style.display = tab === 'sub' ? 'block' : 'none'; if(listShards) listShards.style.display = tab === 'shards' ? 'block' : 'none'; }
+
         function updateDailyUI() { const ONE_DAY = 24 * 60 * 60 * 1000; let timePassed = Date.now() - userData.last_daily; let nextStreak = userData.daily_streak + 1; let is7thDay = (nextStreak % 7 === 0); let baseRew = userData.daily_reward || 10; let actualRew = is7thDay ? baseRew * 2 : baseRew; document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`; document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (БОНУС x2!)` : ""); clearInterval(dailyTimerInterval); if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) { document.getElementById('daily-btn').style.display = 'none'; document.getElementById('daily-wait').style.display = 'block'; dailyTimerInterval = setInterval(() => { let timeLeft = ONE_DAY - (Date.now() - userData.last_daily); if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } else { let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000); h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s; document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`; } }, 1000); } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; } }
+        
         async function claimDaily() { try { const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) }); const data = await res.json(); if (data.error) { tg.showAlert(data.error); } else { tg.showAlert(`Получено: ${data.reward} 🌙!`); userData.shards = data.new_balance; userData.daily_streak = data.streak; userData.last_daily = Date.now(); updateBalanceUI(userData.shards); updateDailyUI(); } } catch (e) { tg.showAlert("Error"); } }
         
+        // === МАГИЯ ДОСЬЕ ===
         async function openDossier(id) { 
             const c = allChars.find(x => x.id === id); if(!c) return; 
             activeCharId = id; 
@@ -1008,43 +1180,38 @@
             document.getElementById('dos-age').innerText = c.age; 
             document.getElementById('dos-gender').innerText = c.gender === 'm' ? "Мужской" : "Женский"; 
             document.getElementById('dos-desc').innerText = await neuroTranslate(c.desc, currentLang); 
-            if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } 
             
-            let isMine = c.creator_id == getUid() && c.char_type === 'custom'; 
-            let pubBtn = document.getElementById('dos-pub-btn'); 
-            if (pubBtn) pubBtn.style.display = (isMine && c.status === 'private') ? 'block' : 'none'; 
+            if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } else { document.getElementById('dos-del-btn').style.display = 'none'; }
+            
+            let isMine = c.creator_id == getUid() && (c.char_type === 'custom' || c.char_type === 'exclusive'); 
+            let pubBtn = document.getElementById('dos-pub-btn'); if (pubBtn) pubBtn.style.display = (isMine && c.char_type === 'custom' && c.status === 'private') ? 'block' : 'none'; 
+            
             let badge = document.getElementById('dos-badge'); 
             if (badge) { 
-                if (isMine) { 
-                    badge.style.display = 'block'; 
-                    badge.className = 'status-badge ' + (c.status === 'private' ? 'bg-private' : c.status === 'pending' ? 'bg-pending' : 'bg-public'); 
-                    badge.innerText = c.status === 'private' ? 'ПРИВАТНЫЙ' : c.status === 'pending' ? 'НА МОДЕРАЦИИ' : 'ОПУБЛИКОВАН'; 
-                } else { badge.style.display = 'none'; } 
+                if (c.char_type === 'exclusive') { badge.style.display = 'block'; badge.className = 'status-badge bg-exclusive'; badge.innerText = 'EXCLUSIVE ✨'; } 
+                else if (isMine) { badge.style.display = 'block'; badge.className = 'status-badge ' + (c.status === 'private' ? 'bg-private' : c.status === 'pending' ? 'bg-pending' : 'bg-public'); badge.innerText = c.status === 'private' ? 'ПРИВАТНЫЙ' : c.status === 'pending' ? 'НА МОДЕРАЦИИ' : 'ОПУБЛИКОВАН'; } 
+                else { badge.style.display = 'none'; } 
             } 
+
+            let chatBtn = document.getElementById('dos-chat-btn'); let unlockBtn = document.getElementById('dos-unlock-btn');
+            if (c.char_type === 'exclusive' && getUid() !== OID && c.creator_id != getUid() && (!userData.unlocked_chars || !userData.unlocked_chars.includes(c.id))) { chatBtn.style.display = 'none'; unlockBtn.style.display = 'block'; unlockBtn.onclick = () => unlockExclusiveChar(c.id); } 
+            else { chatBtn.style.display = 'block'; unlockBtn.style.display = 'none'; }
             openPanel('p-char-dossier'); 
         }
 
-        function setCharGender(g) { currentCharGender = g; document.getElementById('cg-m').classList.toggle('active', g === 'm'); document.getElementById('cg-f').classList.toggle('active', g === 'f'); }
-        
-        async function saveCharDB() { 
-            const n = document.getElementById('ich-name').value; 
-            let img = document.getElementById('char-preview').src; 
-            const fileInput = document.getElementById('char-file');
-            if(!n || img.includes('#')) return tg.showAlert("Name and photo required!"); 
-            
-            if(fileInput.files && fileInput.files[0]) {
-                const btn = document.querySelector('[onclick="saveCharDB()"]');
-                let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
-                const cloudUrl = await uploadToCloud(fileInput.files[0]);
-                btn.innerText = oldTxt;
-                if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
-            }
-
-            const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img }; 
-            await fetch('/api/admin/create-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData: charData }) }); 
-            tg.showAlert("Created!"); renderUserChars(); 
+        async function unlockExclusiveChar(id) {
+            tg.showAlert("Формируем счет...");
+            try {
+                const res = await fetch('/api/user/unlock-char-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id }) });
+                const data = await res.json();
+                if (data.success && getUid() === OID) { if(!userData.unlocked_chars) userData.unlocked_chars = []; userData.unlocked_chars.push(id); tg.showAlert(data.message); openDossier(id); } 
+                else if(data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Успешно! Доступ открыт."); syncUser(); } }); } 
+                else { tg.showAlert(data.error || "Ошибка Telegram API"); }
+            } catch(e) { tg.showAlert("Ошибка сервера"); }
         }
 
+        function setCharGender(g) { currentCharGender = g; document.getElementById('cg-m').classList.toggle('active', g === 'm'); document.getElementById('cg-f').classList.toggle('active', g === 'f'); }
+        async function saveCharDB() { const n = document.getElementById('ich-name').value; const cat = document.getElementById('ich-category').value; let img = document.getElementById('char-preview').src; const fileInput = document.getElementById('char-file'); if(!n || img.includes('#')) return tg.showAlert("Name and photo required!"); if(fileInput.files && fileInput.files[0]) { const btn = document.querySelector('[onclick="saveCharDB()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА..."; const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt; if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!"); } const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img, category: cat }; await fetch('/api/admin/create-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData: charData }) }); tg.showAlert("Created!"); renderUserChars(); }
         async function deleteChar() { await fetch('/api/admin/delete-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) }); tg.showAlert("Deleted!"); renderUserChars(); back(); }
         async function modFunds(t, a) { let idField = t === 'shards' ? 'ish-id' : 'isu-id'; let valField = t === 'shards' ? 'ish-val' : 'isu-type'; const target_id = document.getElementById(idField).value; const v = document.getElementById(valField).value; if(!target_id) return tg.showAlert("Enter ID!"); const body = { target_id: target_id, action: a }; if(t === 'shards') body.amount = v; else body.sub_type = v; const res = await fetch(t === 'shards' ? '/api/admin/manage-shards' : '/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(body) }); const data = await res.json(); tg.showAlert(data.message || "Error"); }
         async function createPromo() { const code = document.getElementById('ip-code').value.toUpperCase().trim(); const rew = parseInt(document.getElementById('ip-rew').value); const hours = parseInt(document.getElementById('ip-hours').value); if(!code || !rew) return; await fetch('/api/admin/create-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ promoData: {code, reward: rew, hours: hours} }) }); document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = ''; renderAdminPromos(); tg.showAlert(`Создано на ${hours} ч.!`); }
@@ -1061,76 +1228,38 @@
         function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
         function updateSex(v, s=false) { const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; document.getElementById('sex-val').innerText = v; let sliderMax = document.getElementById('sex-slider').max; document.getElementById('sex-info').innerText = sliderMax == 0 ? "Недоступно для вашей подписки" : `Уровень ${v}: ${m_ru[v]}`; document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; if(!s) localStorage.setItem('m_sex_' + getUid(), v); }
         function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
-        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); if(p) { p.src = e.target.result; p.style.display = 'block'; } const p2 = document.getElementById('my-char-preview'); if(p2) { p2.src = e.target.result; p2.style.display = 'block'; } }; r.readAsDataURL(i.files[0]); } }
+        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); if(p) { p.src = e.target.result; p.style.display = 'block'; } const p2 = document.getElementById('my-char-preview'); if(p2) { p2.src = e.target.result; p2.style.display = 'block'; } const p3 = document.getElementById('exc-char-preview'); if(p3) { p3.src = e.target.result; p3.style.display = 'block'; } }; r.readAsDataURL(i.files[0]); } }
         async function modAdmin(a) { const id = document.getElementById('ia-id').value; if(!id) return; await fetch('/api/owner/set-admin', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: id, status: a === 'add' }) }); tg.showAlert("Updated!"); }
         async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Saved!"); }
         function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
         
         async function openMyCharsPanel() { openPanel('p-my-chars'); loadMyChars(); }
         async function loadMyChars() {
-            const list = document.getElementById('my-chars-list');
-            list.innerHTML = '<div class="loader"></div>';
+            const list = document.getElementById('my-chars-list'); list.innerHTML = '<div class="loader"></div>';
             try {
-                const res = await fetch('/api/user/my-chars', { headers: getAuthHeaders() });
-                myCharsList = await res.json();
+                const res = await fetch('/api/user/my-chars', { headers: getAuthHeaders() }); myCharsList = await res.json();
                 if(myCharsList.length === 0) { list.innerHTML = "<div style='grid-column:span 2;text-align:center;color:#888;'>У вас еще нет своих персонажей.</div>"; return; }
                 const cards = await Promise.all(myCharsList.map(async c => {
-                    let tName = await neuroTranslate(c.name, currentLang);
-                    let bClass = c.status === 'private' ? 'bg-private' : c.status === 'pending' ? 'bg-pending' : 'bg-public';
-                    let bText = c.status === 'private' ? 'ПРИВАТНЫЙ' : c.status === 'pending' ? 'МОДЕРАЦИЯ' : 'ОПУБЛИКОВАН';
-                    return `<div class="char-card" onclick="openMyCharOpts(${c.id})"><div class="status-badge ${bClass}">${bText}</div><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`;
+                    let tName = await neuroTranslate(c.name, currentLang); let badgeHTML = "";
+                    if (c.char_type === 'exclusive') { badgeHTML = `<div class="status-badge bg-exclusive">EXCLUSIVE ✨</div>`; } 
+                    else { let bClass = c.status === 'private' ? 'bg-private' : c.status === 'pending' ? 'bg-pending' : 'bg-public'; let bText = c.status === 'private' ? 'ПРИВАТНЫЙ' : c.status === 'pending' ? 'МОДЕРАЦИЯ' : 'ОПУБЛИКОВАН'; badgeHTML = `<div class="status-badge ${bClass}">${bText}</div>`; }
+                    return `<div class="char-card" onclick="openMyCharOpts(${c.id})">${badgeHTML}<img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`;
                 }));
                 list.innerHTML = cards.join('');
             } catch(e) { list.innerHTML = "Ошибка"; }
         }
         
-        function openMyCharOpts(id) {
-            const c = myCharsList.find(x => x.id === id);
-            if(!c) return;
-            if(!allChars.find(x => x.id === id)) allChars.push(c);
-            openDossier(id);
-        }
+        function openMyCharOpts(id) { const c = myCharsList.find(x => x.id === id); if(!c) return; if(!allChars.find(x => x.id === id)) allChars.push(c); openDossier(id); }
         
         function openCreateMyChar(id = null) {
             if(id) {
-                const c = myCharsList.find(x => x.id === id);
-                document.getElementById('imy-id').value = c.id;
-                document.getElementById('imy-name').value = c.name;
-                document.getElementById('imy-age').value = c.age;
-                document.getElementById('imy-desc').value = c.desc;
-                document.getElementById('my-char-preview').src = c.photo;
-                document.getElementById('my-char-preview').style.display = 'block';
-                setMyCharGender(c.gender);
-                document.getElementById('my-char-title').innerText = "РЕДАКТИРОВАТЬ";
-                document.getElementById('my-char-cost-info').style.display = 'none';
-                currentCustomCost = 0;
+                const c = myCharsList.find(x => x.id === id); document.getElementById('imy-id').value = c.id; document.getElementById('imy-name').value = c.name; document.getElementById('imy-age').value = c.age; document.getElementById('imy-desc').value = c.desc; document.getElementById('my-char-preview').src = c.photo; document.getElementById('my-char-preview').style.display = 'block'; setMyCharGender(c.gender); document.getElementById('my-char-title').innerText = "РЕДАКТИРОВАТЬ"; document.getElementById('my-char-cost-info').style.display = 'none'; currentCustomCost = 0;
             } else {
-                document.getElementById('imy-id').value = "";
-                document.getElementById('imy-name').value = "";
-                document.getElementById('imy-age').value = "";
-                document.getElementById('imy-desc').value = "";
-                document.getElementById('my-char-preview').src = "#";
-                document.getElementById('my-char-preview').style.display = 'none';
-                setMyCharGender('m');
-                document.getElementById('my-char-title').innerText = "СОЗДАТЬ ПЕРСОНАЖА";
-                
-                let sub = (userData.subscription || "FREE").trim().toUpperCase();
-                let costInfo = document.getElementById('my-char-cost-info');
-                
-                if(getUid() === OID) {
-                    currentCustomCost = 0;
-                    costInfo.innerText = "Стоимость: 0 🌙 (Вы Овнер)";
-                    costInfo.style.color = "#00ff00";
-                } else if(sub !== "FREE") {
-                    let discount = Math.floor(Math.random() * 41) + 15; 
-                    currentCustomCost = 100 - discount;
-                    costInfo.innerHTML = `ВАША СКИДКА: <b style="color:yellow;">${discount}%</b>! Стоимость: <b style="color:yellow;">${currentCustomCost} 🌙</b>`;
-                    costInfo.style.color = "#00ff00";
-                } else {
-                    currentCustomCost = 100;
-                    costInfo.innerText = "Стоимость: 100 🌙 (Купите подписку для скидки!)";
-                    costInfo.style.color = "#ffaa00";
-                }
+                document.getElementById('imy-id').value = ""; document.getElementById('imy-name').value = ""; document.getElementById('imy-age').value = ""; document.getElementById('imy-desc').value = ""; document.getElementById('my-char-preview').src = "#"; document.getElementById('my-char-preview').style.display = 'none'; setMyCharGender('m'); document.getElementById('my-char-title').innerText = "СОЗДАТЬ ПЕРСОНАЖА";
+                let sub = (userData.subscription || "FREE").trim().toUpperCase(); let costInfo = document.getElementById('my-char-cost-info');
+                if(getUid() === OID) { currentCustomCost = 0; costInfo.innerText = "Стоимость: 0 🌙 (Вы Овнер)"; costInfo.style.color = "#00ff00"; } 
+                else if(sub !== "FREE") { let discount = Math.floor(Math.random() * 41) + 15; currentCustomCost = 100 - discount; costInfo.innerHTML = `ВАША СКИДКА: <b style="color:yellow;">${discount}%</b>! Стоимость: <b style="color:yellow;">${currentCustomCost} 🌙</b>`; costInfo.style.color = "#00ff00"; } 
+                else { currentCustomCost = 100; costInfo.innerText = "Стоимость: 100 🌙 (Купите подписку для скидки!)"; costInfo.style.color = "#ffaa00"; }
                 costInfo.style.display = 'block';
             }
             openPanel('p-create-my-char');
@@ -1139,83 +1268,66 @@
         function setMyCharGender(g) { myCharGender = g; document.getElementById('my-cg-m').classList.toggle('active', g === 'm'); document.getElementById('my-cg-f').classList.toggle('active', g === 'f'); }
         
         async function saveMyChar() {
-            const id = document.getElementById('imy-id').value;
-            const n = document.getElementById('imy-name').value; 
-            const a = document.getElementById('imy-age').value;
-            const d = document.getElementById('imy-desc').value;
-            let img = document.getElementById('my-char-preview').src;
-            const fileInput = document.getElementById('my-char-file');
-
+            const id = document.getElementById('imy-id').value; const n = document.getElementById('imy-name').value; const a = document.getElementById('imy-age').value; const d = document.getElementById('imy-desc').value; let img = document.getElementById('my-char-preview').src; const fileInput = document.getElementById('my-char-file');
             if(!n || img.includes('#')) return tg.showAlert("Заполните Имя и добавьте фото!");
             if(!id && getUid() !== OID && userData.shards < currentCustomCost) return tg.showAlert(`Недостаточно осколков! Нужно: ${currentCustomCost} 🌙`);
-            
-            if(fileInput.files && fileInput.files[0]) {
-                const btn = document.querySelector('[onclick="saveMyChar()"]');
-                let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
-                const cloudUrl = await uploadToCloud(fileInput.files[0]);
-                btn.innerText = oldTxt;
-                if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
-            }
-
+            if(fileInput.files && fileInput.files[0]) { const btn = document.querySelector('[onclick="saveMyChar()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА..."; const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt; if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!"); }
             const charData = { name: n, age: a, gender: myCharGender, desc: d, photo: img };
-            if(id) {
-                await fetch('/api/user/edit-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: parseInt(id), charData }) });
-                tg.showAlert("Обновлено!");
-            } else {
+            if(id) { await fetch('/api/user/edit-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: parseInt(id), charData }) }); tg.showAlert("Обновлено!"); } 
+            else {
                 if(getUid() !== OID) updateBalanceUI(userData.shards - currentCustomCost);
-                const res = await fetch('/api/user/create-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData, cost: currentCustomCost }) });
-                const data = await res.json();
-                if(res.ok) { tg.showAlert(data.message); if(getUid()!==OID) updateBalanceUI(data.new_balance); }
-                else { if(getUid() !== OID) updateBalanceUI(userData.shards + currentCustomCost); return tg.showAlert(data.error); }
+                const res = await fetch('/api/user/create-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData, cost: currentCustomCost }) }); const data = await res.json();
+                if(res.ok) { tg.showAlert(data.message); if(getUid()!==OID) updateBalanceUI(data.new_balance); } else { if(getUid() !== OID) updateBalanceUI(userData.shards + currentCustomCost); return tg.showAlert(data.error); }
             }
             back(); loadMyChars();
         }
-        
-        async function publishMyChar() {
-            tg.showConfirm("Отправить на модерацию? (Админы проверят)", async (yes) => {
-                if(yes) {
-                    const res = await fetch('/api/user/submit-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) });
-                    const data = await res.json();
-                    if(res.ok) { tg.showAlert(data.message); back(); loadMyChars(); } else tg.showAlert(data.error);
-                }
-            });
+
+        // === МАГИЯ СОЗДАНИЯ ЭКСКЛЮЗИВА ===
+        function openCreateExclusiveChar() {
+            document.getElementById('iexc-name').value = ""; document.getElementById('iexc-age').value = ""; document.getElementById('iexc-desc').value = ""; document.getElementById('exc-char-preview').src = "#"; document.getElementById('exc-char-preview').style.display = 'none'; setExcCharGender('m');
+            let sub = (userData.subscription || "FREE").trim().toUpperCase(); let costInfo = document.getElementById('exc-char-cost-info');
+            if(getUid() === OID) { currentExcStarCost = 0; costInfo.innerText = "Стоимость: 0 Stars (Вы Овнер)"; } 
+            else if(sub === 'ULTRA') { currentExcStarCost = 5; costInfo.innerText = "Стоимость: 5 ⭐️ (Ultra Скидка!)"; } 
+            else if(sub === 'VIP') { currentExcStarCost = 15; costInfo.innerText = "Стоимость: 15 ⭐️ (VIP Скидка!)"; } 
+            else if(sub === 'PRO') { currentExcStarCost = 25; costInfo.innerText = "Стоимость: 25 ⭐️ (PRO Скидка!)"; } 
+            else if(sub === 'PREMIUM') { currentExcStarCost = 35; costInfo.innerText = "Стоимость: 35 ⭐️ (Premium Скидка!)"; } 
+            else { currentExcStarCost = 50; costInfo.innerText = "Стоимость: 50 ⭐️ (Без подписки)"; }
+            openPanel('p-create-exclusive-char');
         }
+
+        function setExcCharGender(g) { excCharGender = g; document.getElementById('exc-cg-m').classList.toggle('active', g === 'm'); document.getElementById('exc-cg-f').classList.toggle('active', g === 'f'); }
+
+        async function saveExclusiveChar() {
+            const n = document.getElementById('iexc-name').value; const a = document.getElementById('iexc-age').value; const d = document.getElementById('iexc-desc').value; let img = document.getElementById('exc-char-preview').src; const fileInput = document.getElementById('exc-char-file');
+            if(!n || img.includes('#')) return tg.showAlert("Заполните Имя и добавьте фото!");
+            if(fileInput.files && fileInput.files[0]) { const btn = document.querySelector('[onclick="saveExclusiveChar()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА..."; const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt; if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!"); }
+            const charData = { name: n, age: a, gender: excCharGender, desc: d, photo: img };
+            tg.showAlert("Формируем счет...");
+            try {
+                const res = await fetch('/api/user/prepare-exclusive-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData }) }); const data = await res.json();
+                if(res.ok) {
+                    if (data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата прошла! Эксклюзив опубликован!"); back(); loadMyChars(); } }); } 
+                    else if (data.success) { tg.showAlert(data.message); back(); loadMyChars(); }
+                } else { tg.showAlert(data.error); }
+            } catch(e) { tg.showAlert("Ошибка сервера"); }
+        }
+        
+        async function publishMyChar() { tg.showConfirm("Отправить на модерацию? (Админы проверят)", async (yes) => { if(yes) { const res = await fetch('/api/user/submit-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) }); const data = await res.json(); if(res.ok) { tg.showAlert(data.message); back(); loadMyChars(); } else tg.showAlert(data.error); } }); }
 
         function openModPanel() { openPanel('p-m-mod'); loadPendingChars(); }
         
         async function loadPendingChars() {
-            const list = document.getElementById('mod-list-container');
-            list.innerHTML = '<div class="loader"></div>';
+            const list = document.getElementById('mod-list-container'); list.innerHTML = '<div class="loader"></div>';
             try {
-                const res = await fetch('/api/admin/get-pending-chars?_t=' + Date.now(), { headers: getAuthHeaders() });
-                const chars = await res.json();
+                const res = await fetch('/api/admin/get-pending-chars?_t=' + Date.now(), { headers: getAuthHeaders() }); const chars = await res.json();
                 if (chars.error) { list.innerHTML = `<div style='color:red;'>${chars.error}</div>`; return; }
                 if(!chars || chars.length === 0) { list.innerHTML = "<div style='text-align:center;color:#888;'>Нет заявок на модерацию.</div>"; return; }
-                list.innerHTML = chars.map(c => `
-                    <div class="info-card">
-                        <div style="font-weight:bold; color:#f39c12; margin-bottom:5px;">${c.name} (${c.age}, ${c.gender})</div>
-                        <div style="font-size:12px; color:#aaa; margin-bottom:10px;">${c.desc}</div>
-                        <img src="${c.photo}" style="width:100%; max-height:150px; object-fit:contain; margin-bottom:10px;">
-                        <div style="display:flex; gap:10px;">
-                            <div class="term-btn" style="flex:1; border-color:#00ff00; padding:10px;" onclick="modApprove(${c.id})">ОДОБРИТЬ</div>
-                            <div class="term-btn" style="flex:1; border-color:#ff4444; padding:10px;" onclick="modReject(${c.id})">ОТКЛОНИТЬ</div>
-                        </div>
-                    </div>
-                `).join('');
+                list.innerHTML = chars.map(c => `<div class="info-card"><div style="font-weight:bold; color:#f39c12; margin-bottom:5px;">${c.name} (${c.age}, ${c.gender})</div><div style="font-size:12px; color:#aaa; margin-bottom:10px;">${c.desc}</div><img src="${c.photo}" style="width:100%; max-height:150px; object-fit:contain; margin-bottom:10px;"><div style="display:flex; gap:10px;"><div class="term-btn" style="flex:1; border-color:#00ff00; padding:10px;" onclick="modApprove(${c.id})">ОДОБРИТЬ</div><div class="term-btn" style="flex:1; border-color:#ff4444; padding:10px;" onclick="modReject(${c.id})">ОТКЛОНИТЬ</div></div></div>`).join('');
             } catch(e) { list.innerHTML = "Ошибка связи с сервером"; }
         }
         
-        async function modApprove(id) {
-            await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'approve', reason: 'Одобрено' }) });
-            tg.showAlert("Одобрено!"); loadPendingChars();
-        }
-        
-        async function modReject(id) {
-            const reason = prompt("Причина отказа (пойдет в ЛС юзеру):", "Не соответствует правилам.");
-            if(reason === null) return;
-            await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'reject', reason: reason }) });
-            tg.showAlert("Отклонено!"); loadPendingChars();
-        }
+        async function modApprove(id) { await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'approve', reason: 'Одобрено' }) }); tg.showAlert("Одобрено!"); loadPendingChars(); }
+        async function modReject(id) { const reason = prompt("Причина отказа (пойдет в ЛС юзеру):", "Не соответствует правилам."); if(reason === null) return; await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'reject', reason: reason }) }); tg.showAlert("Отклонено!"); loadPendingChars(); }
 
         window.onload = init;
     </script>
