@@ -12,6 +12,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // === ЖЕЛЕЗОБЕТОННЫЕ НАСТРОЙКИ И АРХИТЕКТУРА ===
 const OWNER_ID = 8287041036;
 const DB_CHANNEL_ID = "-1003643359969"; 
+const PROMO_CHANNEL = "@Anime_ai_18"; // Канал для промокодов
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; 
@@ -38,7 +39,7 @@ const backupToTelegramChannel = async (dataType, data) => {
     } catch (e) { console.error("BACKUP ERROR:", e.message); }
 };
 
-// ================= ПОДКЛЮЧЕНИЕ БАЗЫ (ОПЕРАТИВКА) =================
+// ================= ПОДКЛЮЧЕНИЕ БАЗЫ =================
 const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
@@ -58,7 +59,8 @@ const userSchema = new mongoose.Schema({
 });
 const charSchema = new mongoose.Schema({ 
     id: Number, name: String, age: Number, gender: String, desc: String, photo: String,
-    creator_id: { type: Number, default: 0 }, status: { type: String, default: "public" }, char_type: { type: String, default: "official" } 
+    creator_id: { type: Number, default: 0 }, status: { type: String, default: "public" }, 
+    char_type: { type: String, default: "official" }, category: { type: String, default: "other" }
 });
 const promoSchema = new mongoose.Schema({ code: { type: String, unique: true }, reward: Number, expiresAt: Number, messageId: Number, emoji: String });
 const taskSchema = new mongoose.Schema({ id: Number, name: String, link: String, rType: String, rVal: Number });
@@ -78,14 +80,13 @@ const checkAdmin = async (sender_id) => {
     return sender && sender.is_admin;
 };
 
-// ================= ЗАЩИТНАЯ ТАМОЖНЯ (УПРОЩЕНА ДЛЯ ФИКСА) =================
+// ================= ЗАЩИТНАЯ ТАМОЖНЯ (ДЛЯ VERCEL И LOCAL) =================
 const checkTgAuth = (req, res, next) => {
     try {
         const initData = req.headers['x-tg-data'];
         if (!initData) return res.status(401).json({ error: "Нет подписи Telegram" });
         if (initData === "dev_mode") { req.tg_user_id = OWNER_ID; return next(); } 
         
-        // Мы пропускаем хэш-проверку, чтобы Vercel 100% пускал тебя внутрь
         const urlParams = new URLSearchParams(initData);
         const userStr = urlParams.get('user');
         if (!userStr) return res.status(403).json({ error: "Фальшивый запрос!" });
@@ -131,6 +132,7 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
                 user.invited_by = inviterId; user.shards += 100; isModified = true;
                 inviter.shards += 100; await inviter.save();
                 await sendTgMessage(inviterId, `🎉 По вашей ссылке зарегистрировался новый пользователь! Вы получили 100 🌙.`);
+                await sendTgMessage(uid, `🎉 Вы зарегистрировались по пригласительной ссылке и получили бонус 100 🌙!`);
             }
         }
 
@@ -157,15 +159,16 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
 
 app.post('/api/user/sync', checkTgAuth, async (req, res) => {
     try {
+        // Логика зачеркивания промокода в канале, когда он истекает!
         const expiredPromos = await Promo.find({ expiresAt: { $lte: Date.now() } });
         if (expiredPromos.length > 0) {
             for (let promo of expiredPromos) {
                 await Promo.deleteOne({ _id: promo._id });
                 if (promo.messageId) {
-                    const text = `${promo.emoji}\nПромокод «<s>${promo.code}</s>» даёт ${promo.reward} осколков\nUPD: закончился`;
+                    const text = `${promo.emoji}\nПромокод <s>«${promo.code}»</s> даёт ${promo.reward} осколков\nUPD: промокод закончился`;
                     await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chat_id: "@Anime_ai_18", message_id: promo.messageId, text: text, parse_mode: 'HTML' })
+                        body: JSON.stringify({ chat_id: PROMO_CHANNEL, message_id: promo.messageId, text: text, parse_mode: 'HTML' })
                     }).catch(()=>{}); 
                 }
             }
@@ -202,7 +205,7 @@ app.post('/api/user/claim-daily', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: СИСТЕМА ПЕРСОНАЖЕЙ =================
+// ================= API: СИСТЕМА ПЕРСОНАЖЕЙ (ВКЛЮЧАЯ КАСТОМ) =================
 app.get('/api/user/my-chars', checkTgAuth, async (req, res) => {
     try { res.json(await Character.find({ creator_id: req.tg_user_id, char_type: 'custom' })); } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -251,7 +254,7 @@ app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= API: ЧАТ С ИИ =================
+// ================= API: ЧАТ С ИИ (OPENROUTER) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
@@ -298,37 +301,88 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         } else throw new Error("API Error");
     } catch (e) { res.status(500).json({ error: "Ошибка ИИ." }); }
 });
-
-// ================= API: ОПЛАТА =================
-app.post('/api/payment/stars-invoice', checkTgAuth, async (req, res) => {
+// ================= API: ОБРАБОТКА ВЕБХУКОВ (ОПЛАТА И КОМАНДЫ БОТА) =================
+app.post('/api/payment/webhook', async (req, res) => {
     try {
-        const { type, item, amount_stars } = req.body;
-        const response = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/createInvoiceLink`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: `Покупка ${item}`, description: "Moon Shards/Sub", payload: JSON.stringify({ tg_id: req.tg_user_id, type, item }), provider_token: "", currency: "XTR", prices: [{ label: "Цена", amount: Number(amount_stars) }] })
-        });
-        const data = await response.json();
-        if (data.ok) res.json({ invoice_url: data.result }); else res.status(400).json({ error: "TG Error" });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        const update = req.body;
+        if (update.update_type === 'invoice_paid') {
+            const customData = JSON.parse(update.payload.payload); const uid = Number(customData.tg_id);
+            if (customData.type === 'shards') { 
+                await User.findOneAndUpdate({ tg_id: uid }, { $inc: { shards: Number(customData.item) } }, { upsert: true }); 
+                await sendTgMessage(uid, `💎 TON Оплата прошла! Вам начислено ${customData.item} 🌙.`); 
+            } else if (customData.type === 'sub') { 
+                const expDate = new Date(); expDate.setDate(expDate.getDate() + 30); 
+                await User.findOneAndUpdate({ tg_id: uid }, { subscription: customData.item, sub_exp: expDate.getTime() }, { upsert: true }); 
+                await sendTgMessage(uid, `💎 TON Оплата прошла! Ваша подписка ${customData.item} активирована!`); 
+            }
+        }
+        res.sendStatus(200); 
+    } catch (e) { res.sendStatus(500); }
 });
-app.post('/api/payment/create', checkTgAuth, async (req, res) => {
+
+app.post('/api/tg-webhook', async (req, res) => {
     try {
-        const response = await fetch("https://pay.crypt.bot/api/createInvoice", {
-            method: "POST", headers: { "Crypto-Pay-API-Token": CRYPTOBOT_TOKEN, "Content-Type": "application/json" },
-            body: JSON.stringify({ asset: "TON", amount: req.body.amount_ton, payload: JSON.stringify({ tg_id: req.tg_user_id, type: req.body.type, item: req.body.item }), expires_in: 3600 })
-        });
-        const data = await response.json();
-        if(data.ok) res.json({ pay_url: data.result.pay_url }); else res.status(400).json({ error: "Ошибка CryptoBot" });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        const update = req.body;
+        
+        // Обработка команды /start
+        if (update.message && update.message.text && update.message.text.startsWith('/start')) {
+            const chatId = update.message.chat.id;
+            const textParts = update.message.text.split(' ');
+            const startParam = textParts.length > 1 ? textParts[1] : '';
+            const appUrl = startParam ? `https://t.me/anime_ai_18_bot/PlayApp?startapp=${startParam}` : `https://t.me/anime_ai_18_bot/PlayApp`;
+
+            const welcomeText = `🎮 *Добро пожаловать!*\n\nВ мир *AI-персонажей* — общайся с любыми персонажами или теми, которые тебе нравятся.`;
+            
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    chat_id: chatId, text: welcomeText, parse_mode: 'Markdown',
+                    reply_markup: {
+                        inline_keyboard: [
+                            [ { text: "📱 Открыть", url: appUrl }, { text: "📝 Создать перса", url: "https://t.me/anime_ai_charactersbot" } ],
+                            [ { text: "📰 Наш канал", url: "https://t.me/Anime_ai_18" }, { text: "❓ Поддержка", url: "https://t.me/suppurtmoders_bot" } ]
+                        ]
+                    }
+                })
+            });
+            return res.sendStatus(200);
+        }
+
+        // Обработка оплаты Stars
+        if (update.pre_checkout_query) {
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/answerPreCheckoutQuery`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pre_checkout_query_id: update.pre_checkout_query.id, ok: true }) });
+            return res.sendStatus(200);
+        }
+        if (update.message && update.message.successful_payment) {
+            const customData = JSON.parse(update.message.successful_payment.invoice_payload); const uid = Number(customData.tg_id);
+            if (customData.type === 'shards') { 
+                await User.findOneAndUpdate({ tg_id: uid }, { $inc: { shards: Number(customData.item) } }, { upsert: true }); 
+                await sendTgMessage(uid, `⭐️ Оплата Stars успешна! Начислено ${customData.item} 🌙.`); 
+            } else if (customData.type === 'sub') { 
+                const expDate = new Date(); expDate.setDate(expDate.getDate() + 30); 
+                await User.findOneAndUpdate({ tg_id: uid }, { subscription: customData.item, sub_exp: expDate.getTime() }, { upsert: true }); 
+                await sendTgMessage(uid, `⭐️ Оплата Stars успешна! Подписка ${customData.item} активирована.`); 
+            }
+        }
+        res.sendStatus(200);
+    } catch (e) { res.sendStatus(500); }
 });
 
 // ================= АДМИНКА =================
 app.get('/api/get-news', checkTgAuth, async (req, res) => res.json(await News.find()));
+
 app.post('/api/admin/create-news', checkTgAuth, async (req, res) => { 
     if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер!" }); 
-    await new News(req.body.newsData).save(); await backupToTelegramChannel("NEWS", req.body.newsData); res.json({ message: "Опубликовано" }); 
+    await new News(req.body.newsData).save(); 
+    await backupToTelegramChannel("NEWS", req.body.newsData); 
+    res.json({ message: "Опубликовано" }); 
 });
-app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер!" }); await News.findOneAndDelete({ id: req.body.news_id }); res.json({ message: "Удалено" }); });
+
+app.post('/api/admin/delete-news', checkTgAuth, async (req, res) => { 
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер!" }); 
+    await News.findOneAndDelete({ id: req.body.news_id }); 
+    res.json({ message: "Удалено" }); 
+});
 
 app.get('/api/get-characters', checkTgAuth, async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -343,54 +397,166 @@ app.get('/api/admin/get-pending-chars', checkTgAuth, async (req, res) => {
 
 app.post('/api/admin/create-char', checkTgAuth, async (req, res) => { 
     if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); 
-    const charData = req.body.charData; charData.creator_id = req.tg_user_id; charData.char_type = "official"; charData.status = "public";
+    const charData = req.body.charData; 
+    charData.creator_id = req.tg_user_id; 
+    charData.char_type = "official"; 
+    charData.status = "public";
+    
     await new Character(charData).save(); 
-    await backupToTelegramChannel("NEW_OFFICIAL_CHAR", charData); res.json({ message: "Добавлен!" }); 
+    await backupToTelegramChannel("NEW_OFFICIAL_CHAR", charData); 
+    res.json({ message: "Добавлен!" }); 
 });
 
-app.post('/api/admin/delete-char', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Овнер онли" }); await Character.findOneAndDelete({ id: req.body.char_id }); res.json({ message: "Удален" }); });
+app.post('/api/admin/delete-char', checkTgAuth, async (req, res) => { 
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Овнер онли" }); 
+    await Character.findOneAndDelete({ id: req.body.char_id }); 
+    res.json({ message: "Удален" }); 
+});
 
 app.post('/api/admin/moderate-char', checkTgAuth, async (req, res) => {
     if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" });
-    const { char_id, action, reason } = req.body; let char = await Character.findOne({ id: char_id });
+    const { char_id, action, reason } = req.body; 
+    let char = await Character.findOne({ id: char_id });
     if (!char) return res.status(404).json({ error: "Не найден" });
-    if (action === 'approve') { char.status = 'public'; await char.save(); await sendTgMessage(char.creator_id, `🎉 Ваш персонаж прошел модерацию!`); await backupToTelegramChannel("APPROVED_CHAR", char); res.json({ message: "Одобрено" }); } 
-    else { char.status = 'private'; await char.save(); await sendTgMessage(char.creator_id, `😔 Персонаж отклонен.\nПричина: ${reason}`); res.json({ message: "Отклонено" }); }
+    
+    if (action === 'approve') { 
+        char.status = 'public'; 
+        await char.save(); 
+        await sendTgMessage(char.creator_id, `🎉 Ваш персонаж прошел модерацию!`); 
+        await backupToTelegramChannel("APPROVED_CHAR", char); 
+        res.json({ message: "Одобрено" }); 
+    } else { 
+        char.status = 'private'; 
+        await char.save(); 
+        await sendTgMessage(char.creator_id, `😔 Персонаж отклонен.\nПричина: ${reason}`); 
+        res.json({ message: "Отклонено" }); 
+    }
 });
 
 app.get('/api/get-tasks', checkTgAuth, async (req, res) => res.json(await Task.find()));
 app.get('/api/get-promos', checkTgAuth, async (req, res) => res.json(await Promo.find()));
-app.post('/api/admin/create-task', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await new Task(req.body.taskData).save(); res.json({ message: "Добавлено" }); });
-app.post('/api/admin/delete-task', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Овнер онли" }); await Task.findOneAndDelete({ id: req.body.task_id }); res.json({ message: "Удалено" }); });
+
+app.post('/api/check-task', checkTgAuth, async (req, res) => {
+    try {
+        const { task_id } = req.body;
+        const uid = req.tg_user_id;
+        const task = await Task.findOne({ id: task_id });
+        if (!task) return res.json({ success: false, error: "Задание не найдено" });
+
+        const match = task.link.match(/t\.me\/(?!\+)([a-zA-Z0-9_]+)/);
+        if (match && match[1]) {
+            const channel = "@" + match[1];
+            const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/getChatMember?chat_id=${channel}&user_id=${uid}`);
+            const tgData = await tgRes.json();
+            
+            if (tgData.ok && ['member', 'administrator', 'creator'].includes(tgData.result.status)) { return res.json({ success: true }); } 
+            else { return res.json({ success: false, error: "Сначала подпишись на канал! ❌" }); }
+        } else { return res.json({ success: true }); }
+    } catch (e) { res.json({ success: false, error: "Ошибка сервера при проверке подписки" }); }
+});
+
+app.post('/api/admin/create-task', checkTgAuth, async (req, res) => { 
+    if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); 
+    await new Task(req.body.taskData).save(); 
+    res.json({ message: "Добавлено" }); 
+});
+
+app.post('/api/admin/delete-task', checkTgAuth, async (req, res) => { 
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Овнер онли" }); 
+    await Task.findOneAndDelete({ id: req.body.task_id }); 
+    res.json({ message: "Удалено" }); 
+});
+
 app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => { 
     if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); 
-    let { code, reward, hours } = req.body.promoData; hours = Number(hours) || 1;
-    await new Promo({ code, reward, expiresAt: Date.now() + (hours * 60 * 60 * 1000), emoji: "🎁" }).save(); res.json({ message: "Создан" }); 
+    
+    let { code, reward, hours } = req.body.promoData;
+    hours = Number(hours) || 1;
+    if (hours < 1) hours = 1;
+    if (hours > 3) hours = 3;
+
+    const emojis = ["🎁", "🔥", "💎", "🚀", "⚡️", "🌙", "✨", "🎉"];
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    const expiresAt = Date.now() + (hours * 60 * 60 * 1000); 
+    
+    let hourText = hours === 1 ? "1 Час" : (hours === 3 ? "3 Часа" : "2 Часа");
+    const text = `${randomEmoji}\nПромокод <code>«${code}»</code> даёт ${reward} осколков\nUPD: ${hourText}`;
+
+    try {
+        // Отправка в канал
+        const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: PROMO_CHANNEL, text: text, parse_mode: 'HTML' })
+        });
+        const tgData = await tgRes.json();
+        
+        let messageId = 0;
+        if (tgData.ok) { messageId = tgData.result.message_id; }
+
+        await new Promo({ code, reward, expiresAt, messageId, emoji: randomEmoji }).save(); 
+        res.json({ message: "Промо создан и отправлен в канал!" });
+    } catch(e) {
+        res.status(500).json({ error: "Ошибка при отправке в канал" });
+    }
 });
-app.post('/api/admin/delete-promo', checkTgAuth, async (req, res) => { if (!(await checkAdmin(req.tg_user_id))) return res.status(403).json({ error: "Нет доступа" }); await Promo.findOneAndDelete({ code: req.body.code }); res.json({ message: "Удален" }); });
+
+app.post('/api/admin/delete-promo', checkTgAuth, async (req, res) => { 
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер может удалять!" }); 
+    await Promo.findOneAndDelete({ code: req.body.code }); 
+    res.json({ message: "Промо удален" }); 
+});
 
 app.post('/api/admin/manage-shards', checkTgAuth, async (req, res) => {
     const sender_id = req.tg_user_id; const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
-    const action = req.body.action; let amount = Math.abs(Number(req.body.amount)); 
-    if (action !== 'add') { if (!isOwner) return res.status(403).json({ error: "Овнер онли" }); await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: -amount } }, { upsert: true }); res.json({ message: `Снято` }); } 
-    else { await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: amount } }, { upsert: true }); res.json({ message: `Выдано` }); }
+    const action = (req.body.action || '').toLowerCase().trim(); let amount = Math.abs(Number(req.body.amount)); 
+    
+    if (action !== 'add') {
+        if (!isOwner) return res.status(403).json({ error: "Только Овнер может забирать осколки!" });
+        let user = await User.findOne({ tg_id: target_id }); if (user && user.shards < amount) amount = user.shards; 
+        await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: -amount } }, { upsert: true }); 
+        await sendTgMessage(target_id, `Администратор забрал у вас ${amount} токенов`); 
+        res.json({ message: `Снято ${amount} осколков` });
+    } else { 
+        await User.findOneAndUpdate({ tg_id: target_id }, { $inc: { shards: amount } }, { upsert: true }); 
+        await sendTgMessage(target_id, `Администратор выдал вам ${amount} токенов`); 
+        res.json({ message: `Выдано ${amount} осколков` }); 
+    }
 });
 
 app.post('/api/admin/manage-sub', checkTgAuth, async (req, res) => {
     const sender_id = req.tg_user_id; const target_id = Number(req.body.target_id); const isOwner = sender_id === OWNER_ID;
     if (!isOwner && !(await checkAdmin(sender_id))) return res.status(403).json({ error: "Нет доступа" });
+    
     if (req.body.action === 'add') {
         let days = 30; if (isOwner && req.body.days) days = Number(req.body.days); 
         let user = await User.findOne({ tg_id: target_id }); let expDate = user && user.sub_exp > Date.now() ? new Date(user.sub_exp) : new Date(); expDate.setDate(expDate.getDate() + days);
-        await User.findOneAndUpdate({ tg_id: target_id }, { subscription: req.body.sub_type, sub_exp: expDate.getTime() }, { upsert: true }); res.json({ message: `Выдано` });
+        let cleanSub = (req.body.sub_type || "FREE").trim(); if (/^ultra$/i.test(cleanSub)) cleanSub = "Ultra"; else if (/^vip$/i.test(cleanSub)) cleanSub = "VIP"; else if (/^pro$/i.test(cleanSub)) cleanSub = "Pro"; else if (/^premium$/i.test(cleanSub)) cleanSub = "Premium";
+        await User.findOneAndUpdate({ tg_id: target_id }, { subscription: cleanSub, sub_exp: expDate.getTime() }, { upsert: true }); 
+        await sendTgMessage(target_id, `Администратор выдал вам подписку ${cleanSub}`); 
+        res.json({ message: `Подписка выдана на ${days} дней` });
     } else {
-        if (!isOwner) return res.status(403).json({ error: "Овнер онли" });
-        await User.findOneAndUpdate({ tg_id: target_id }, { subscription: "FREE", sub_exp: 0 }, { upsert: true }); res.json({ message: "Аннулировано" });
+        if (!isOwner) return res.status(403).json({ error: "Только Овнер может снимать подписку!" });
+        await User.findOneAndUpdate({ tg_id: target_id }, { subscription: "FREE", sub_exp: 0 }, { upsert: true }); 
+        await sendTgMessage(target_id, `Администратор забрал вашу подписку`); 
+        res.json({ message: "Подписка аннулирована" });
     }
 });
 
-app.post('/api/owner/set-admin', checkTgAuth, async (req, res) => { if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Только Овнер" }); await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true }); res.json({ message: "Обновлено" }); });
+app.post('/api/owner/set-admin', checkTgAuth, async (req, res) => {
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
+    await User.findOneAndUpdate({ tg_id: Number(req.body.target_id) }, { is_admin: req.body.status }, { upsert: true });
+    if (req.body.status) await sendTgMessage(req.body.target_id, `Администратор сделал вас админом`); 
+    else await sendTgMessage(req.body.target_id, `Администратор забрал у вас права админа`);
+    res.json({ message: "Статус обновлен" });
+});
+
+app.post('/api/owner/set-price', checkTgAuth, async (req, res) => {
+    if (req.tg_user_id !== OWNER_ID) return res.status(403).json({ error: "Доступно только Овнеру" });
+    const { item_id, stars, ton } = req.body;
+    await Price.findOneAndUpdate({ item_id }, { stars: Number(stars), ton: Number(ton) }, { upsert: true });
+    res.json({ message: "Прайс-лист успешно обновлен!" });
+});
 
 module.exports = app;
 if (!process.env.VERCEL) { const PORT = process.env.PORT || 3000; app.listen(PORT, () => console.log(`[LOCAL] Port ${PORT}`)); }
