@@ -9,6 +9,17 @@ app.use(express.json({ limit: '50mb' }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// === УМНЫЙ РУБИЛЬНИК (ТЕСТ ИЛИ ОСНОВА) ===
+// Поставь true, когда заливаешь на тестовый Vercel. 
+// Поставь false, когда заливаешь на основной боевой Vercel.
+const IS_TEST_SERVER = true; 
+
+const TEST_BOT_TOKEN = "8544765316:AAHibenW8PpUOb2MjeoNjkW8pZ8XpJ1ST9M"; // Твой новый тестовый токен
+const PROD_BOT_TOKEN = process.env.TG_BOT_TOKEN || "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU"; // Основной токен
+
+// Железобетонная логика: если тест, берем тестовый (плевать на Vercel), если основа - берем основной
+const TG_BOT_TOKEN = IS_TEST_SERVER ? TEST_BOT_TOKEN : PROD_BOT_TOKEN;
+
 // === ЖЕЛЕЗОБЕТОННЫЕ НАСТРОЙКИ И АРХИТЕКТУРА ===
 const OWNER_ID = 8287041036;
 const DB_CHANNEL_ID = "-1003643359969"; 
@@ -17,7 +28,6 @@ const PROMO_CHANNEL = "@Anime_ai_18"; // Канал для промокодов
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; 
 const CRYPTOBOT_TOKEN = process.env.CRYPTOBOT_TOKEN || "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
-const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN || "8544765316:AAHibenW8PpUOb2MjeoNjkW8pZ8XpJ1ST9M";
 
 // ================= ФУНКЦИИ ТЕЛЕГРАМА И БЭКАПА =================
 const sendTgMessage = async (tg_id, text) => {
@@ -44,7 +54,7 @@ const connectDB = async () => {
     if (mongoose.connection.readyState >= 1) return;
     try {
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-        console.log('--- [SYSTEM] MOON ENGINE & DB ACTIVE ---');
+        console.log(`--- [SYSTEM] MOON ENGINE & DB ACTIVE (${IS_TEST_SERVER ? 'TEST MODE' : 'PROD MODE'}) ---`);
     } catch (err) { console.error('DB ERROR:', err.message); }
 };
 
@@ -159,7 +169,6 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
 
 app.post('/api/user/sync', checkTgAuth, async (req, res) => {
     try {
-        // Логика зачеркивания промокода в канале, когда он истекает!
         const expiredPromos = await Promo.find({ expiresAt: { $lte: Date.now() } });
         if (expiredPromos.length > 0) {
             for (let promo of expiredPromos) {
@@ -483,7 +492,7 @@ app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => {
     const text = `${randomEmoji}\nПромокод <code>«${code}»</code> даёт ${reward} осколков\nUPD: ${hourText}`;
 
     try {
-        // Отправка в канал
+        // Отправка в канал (Берем из настроек PROMO_CHANNEL)
         const tgRes = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: PROMO_CHANNEL, text: text, parse_mode: 'HTML' })
