@@ -254,6 +254,25 @@
         <div class="tabs-wrap">
             <div class="tab-btn active" id="tab-char-off" onclick="switchCharTab('official')">Официальные</div>
             <div class="tab-btn" id="tab-char-cus" onclick="switchCharTab('custom')">Пользовательские</div>
+            <div class="tab-btn" id="tab-char-exc" onclick="switchCharTab('exclusive')">Эксклюзивные</div>
+        </div>
+
+        <div id="custom-filters" style="display:none; background:#11081d; border:1px solid #2d164d; border-radius:8px; padding:12px; margin-bottom:15px; width:100%;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+                <span style="font-size:11px; color:#888; text-transform:uppercase; font-weight:bold;">Пол:</span>
+                <div style="display:flex; gap:10px;">
+                    <span id="filt-g-all" style="font-size:11px; color:#bc42f5; cursor:pointer; font-weight:bold; transition:0.2s;" onclick="setCustomFilter('gender', 'all')">Все</span>
+                    <span id="filt-g-m" style="font-size:11px; color:#555; cursor:pointer; transition:0.2s;" onclick="setCustomFilter('gender', 'm')">Мужские</span>
+                    <span id="filt-g-f" style="font-size:11px; color:#555; cursor:pointer; transition:0.2s;" onclick="setCustomFilter('gender', 'f')">Женские</span>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; color:#888; text-transform:uppercase; font-weight:bold;">Сортировка:</span>
+                <div style="display:flex; gap:10px;">
+                    <span id="filt-s-new" style="font-size:11px; color:#bc42f5; cursor:pointer; font-weight:bold; transition:0.2s;" onclick="setCustomFilter('sort', 'new')">Новые</span>
+                    <span id="filt-s-pop" style="font-size:11px; color:#555; cursor:pointer; transition:0.2s;" onclick="setCustomFilter('sort', 'pop')">Популярные</span>
+                </div>
+            </div>
         </div>
 
         <div id="user-char-list" class="char-grid"></div>
@@ -539,7 +558,15 @@
             <img id="char-preview" src="#">
             <input type="text" id="ich-name" class="term-in" placeholder="Имя">
             <input type="number" id="ich-age" class="term-in" placeholder="Возраст (18+)" min="18">
-            <span class="s-label">Пол персонажа</span>
+            
+            <span class="s-label" style="text-align: center;">Категория</span>
+            <select id="ich-category" class="term-in" style="text-align: center;">
+                <option value="anime">Аниме</option>
+                <option value="games">Игры</option>
+                <option value="other">Другое</option>
+            </select>
+
+            <span class="s-label" style="text-align: center;">Пол персонажа</span>
             <div class="gender-box">
                 <div class="gender-btn active" id="cg-m" onclick="setCharGender('m')">Мужской</div>
                 <div class="gender-btn" id="cg-f" onclick="setCharGender('f')">Женский</div>
@@ -652,6 +679,9 @@
         let allChars = []; let allNews = []; 
         
         let currentCharsTab = 'official'; 
+        let charFilterGender = 'all';
+        let charFilterSort = 'new';
+        
         let myCharGender = 'm';
         let myCharsList = [];
         let currentCustomCost = 100;
@@ -936,12 +966,33 @@
         function clearChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Очистить память?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); tg.showAlert("Очищено 🧹"); } }); }
         function deleteChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Удалить чат?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); } }); }
         
-        // --- СКОРОСТНОЕ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ПЕРСОНАЖЕЙ ---
+        // --- ФИЛЬТРЫ И ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ПЕРСОНАЖЕЙ ---
+        function setCustomFilter(type, val) {
+            if (type === 'gender') {
+                charFilterGender = val;
+                document.getElementById('filt-g-all').style.color = val === 'all' ? '#bc42f5' : '#555';
+                document.getElementById('filt-g-m').style.color = val === 'm' ? '#bc42f5' : '#555';
+                document.getElementById('filt-g-f').style.color = val === 'f' ? '#bc42f5' : '#555';
+            } else if (type === 'sort') {
+                charFilterSort = val;
+                document.getElementById('filt-s-new').style.color = val === 'new' ? '#bc42f5' : '#555';
+                document.getElementById('filt-s-pop').style.color = val === 'pop' ? '#bc42f5' : '#555';
+            }
+            renderUserChars(false);
+        }
+
         function switchCharTab(tab) {
             if (currentCharsTab === tab) return; 
             currentCharsTab = tab;
             document.getElementById('tab-char-off').classList.toggle('active', tab === 'official');
             document.getElementById('tab-char-cus').classList.toggle('active', tab === 'custom');
+            
+            let excTab = document.getElementById('tab-char-exc');
+            if(excTab) excTab.classList.toggle('active', tab === 'exclusive');
+            
+            let filters = document.getElementById('custom-filters');
+            if(filters) filters.style.display = tab === 'custom' ? 'block' : 'none';
+
             renderUserChars(false);
         }
 
@@ -952,16 +1003,29 @@
                     if (allChars.length === 0) list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#bc42f5; font-size:12px;'>Загрузка персонажей...</div>`;
                     const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
                     allChars = await res.json(); 
-                    allChars.sort((a, b) => b.id - a.id); 
                 }
                 
                 let filteredChars = allChars.filter(c => { 
                     let isOwnerChar = c.creator_id == OID; 
                     let isOfficial = c.char_type === 'official' || !c.char_type || isOwnerChar; 
                     let isCustom = c.char_type === 'custom' && c.status === 'public' && !isOwnerChar; 
-                    return currentCharsTab === 'official' ? isOfficial : isCustom; 
+                    let isExclusive = c.char_type === 'exclusive';
+                    
+                    if (currentCharsTab === 'official') return isOfficial;
+                    if (currentCharsTab === 'custom') {
+                        if (!isCustom) return false;
+                        if (charFilterGender !== 'all' && c.gender !== charFilterGender) return false;
+                        return true;
+                    }
+                    return isExclusive; 
                 }); 
                 
+                if (currentCharsTab === 'custom' && charFilterSort === 'pop') {
+                    filteredChars.sort((a, b) => a.id - b.id); // Временно сортируем популярные по старым ID
+                } else {
+                    filteredChars.sort((a, b) => b.id - a.id); // По умолчанию - Новые
+                }
+
                 if(filteredChars.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; } 
                 
                 const charCards = await Promise.all(filteredChars.map(async (c) => { 
@@ -1045,6 +1109,7 @@
         
         async function saveCharDB() { 
             const n = document.getElementById('ich-name').value; 
+            const cat = document.getElementById('ich-category').value; // Категория из консоли
             let img = document.getElementById('char-preview').src; 
             const fileInput = document.getElementById('char-file');
             if(!n || img.includes('#')) return tg.showAlert("Name and photo required!"); 
@@ -1057,7 +1122,7 @@
                 if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
             }
 
-            const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img }; 
+            const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img, category: cat }; 
             await fetch('/api/admin/create-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData: charData }) }); 
             tg.showAlert("Created!"); renderUserChars(); 
         }
