@@ -247,7 +247,6 @@
             </div>
         </div>
     </div>
-
     <div id="p-user-chars" class="overlay">
         <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chars">ПЕРСОНАЖИ</h2>
         
@@ -257,7 +256,31 @@
             <div class="tab-btn" id="tab-char-exc" onclick="switchCharTab('exclusive')">Эксклюзивные</div>
         </div>
 
-        <div id="custom-filters" style="display:block; background:#11081d; border:1px solid #2d164d; border-radius:8px; padding:12px; margin-bottom:15px; width:100%;">
+        <div id="official-tools" style="width:100%; margin-bottom:15px; display:block;">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <input type="text" id="char-search" class="term-in" placeholder="Поиск по имени..." style="margin-bottom:0; flex:1;" oninput="renderUserChars(false)">
+            </div>
+            <div class="info-card" style="padding:10px; margin-bottom:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:10px; color:#888; font-weight:bold;">ПОЛ:</span>
+                    <div style="display:flex; gap:10px;">
+                        <span id="f-g-all" style="font-size:10px; color:#bc42f5; font-weight:bold; cursor:pointer;" onclick="setOffFilter('gender','all')">ВСЕ</span>
+                        <span id="f-g-m" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('gender','m')">МУЖ</span>
+                        <span id="f-g-f" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('gender','f')">ЖЕН</span>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:10px; color:#888; font-weight:bold;">КАТЕГОРИЯ:</span>
+                    <div style="display:flex; gap:10px;">
+                        <span id="f-c-all" style="font-size:10px; color:#bc42f5; font-weight:bold; cursor:pointer;" onclick="setOffFilter('cat','all')">ВСЕ</span>
+                        <span id="f-c-anime" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('cat','anime')">АНИМЕ</span>
+                        <span id="f-c-games" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('cat','games')">ИГРЫ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="custom-filters" style="display:none; background:#11081d; border:1px solid #2d164d; border-radius:8px; padding:12px; margin-bottom:15px; width:100%;">
             <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
                 <span style="font-size:11px; color:#888; text-transform:uppercase; font-weight:bold;">Пол:</span>
                 <div style="display:flex; gap:10px;">
@@ -307,48 +330,10 @@
                 <b id="daily-reward-text" style="color: #00ff00; font-size: 24px;">...</b>
             </div>
             <div id="daily-btn" class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00; width:80%;" onclick="claimDaily()" data-i18n="b_claim">ЗАБРАТЬ</div>
-            <div id="daily-wait" style="display:none; color:#888; font-size: 12px; margin-top: 10px;">Следующая награда будет завтра.</div>
+            <div id="daily-wait" style="display:none; color:#888; font-size: 12px; margin-top: 10px;">Следующая награда будет доступна завтра.</div>
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
-
-    <div id="p-user-chars" class="overlay">
-        <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chars">ПЕРСОНАЖИ</h2>
-        
-        <div class="tabs-wrap">
-            <div class="tab-btn active" id="tab-char-off" onclick="switchCharTab('official')">Официальные</div>
-            <div class="tab-btn" id="tab-char-cus" onclick="switchCharTab('custom')">Пользовательские</div>
-            <div class="tab-btn" id="tab-char-exc" onclick="switchCharTab('exclusive')">Эксклюзивные</div>
-        </div>
-
-        <div id="official-tools" style="width:100%; margin-bottom:15px;">
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <input type="text" id="char-search" class="term-in" placeholder="Поиск по имени..." style="margin-bottom:0; flex:1;" oninput="renderUserChars(false)">
-            </div>
-            <div class="info-card" style="padding:10px; margin-bottom:0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="font-size:10px; color:#888;">ПОЛ:</span>
-                    <div style="display:flex; gap:8px;">
-                        <span id="f-g-all" style="font-size:10px; color:#bc42f5; font-weight:bold;" onclick="setOffFilter('gender','all')">ВСЕ</span>
-                        <span id="f-g-m" style="font-size:10px; color:#555;" onclick="setOffFilter('gender','m')">МУЖ</span>
-                        <span id="f-g-f" style="font-size:10px; color:#555;" onclick="setOffFilter('gender','f')">ЖЕН</span>
-                    </div>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:10px; color:#888;">КАТЕГОРИЯ:</span>
-                    <div style="display:flex; gap:8px;">
-                        <span id="f-c-all" style="font-size:10px; color:#bc42f5; font-weight:bold;" onclick="setOffFilter('cat','all')">ВСЕ</span>
-                        <span id="f-c-anime" style="font-size:10px; color:#555;" onclick="setOffFilter('cat','anime')">АНИМЕ</span>
-                        <span id="f-c-games" style="font-size:10px; color:#555;" onclick="setOffFilter('cat','games')">ИГРЫ</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="user-char-list" class="char-grid"></div>
-        <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-
     <div id="p-user-tasks" class="overlay">
         <h2 style="color:#00ff00; margin-bottom: 20px;" data-i18n="h_tasks">ЗАДАНИЯ</h2>
         <div class="info-card" style="text-align: center; border-color: #bc42f5;">
@@ -359,6 +344,7 @@
         <div id="user-task-list" style="width:100%"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
+    
     <div id="p-shop" class="overlay">
         <h2 style="color:#00bcd4; margin-bottom: 5px;" data-i18n="h_shop">МАГАЗИН</h2>
         <div style="font-size: 11px; color: #888; margin-bottom: 15px; text-align:center;" data-i18n="s_pay_info">Оплата через Telegram Stars или CryptoBot (TON)</div>
@@ -504,7 +490,6 @@
         </div>
         <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
-
     <div id="p-con" class="overlay">
         <h2 style="color:#e91e63">КОНСОЛЬ (OWNER)</h2>
         <div class="set-list">
