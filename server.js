@@ -17,7 +17,7 @@ const PROMO_CHANNEL = "@Anime_ai_18"; // Канал для промокодов
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://Owner:owner@tg-miniapp.hkflpcb.mongodb.net/?appName=tg-miniapp";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; 
 const CRYPTOBOT_TOKEN = process.env.CRYPTOBOT_TOKEN || "515785:AAHbRPgnZvc0m0gSsfRpdUJY2UAakj0DceS";
-const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN || "8028858195:AAFZ8YJoZKZY0Lf3cnCH3uLp6cECTNEcwOU";
+const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN || "8544765316:AAHibenW8PpUOb2MjeoNjkW8pZ8XpJ1ST9M";
 
 // ================= ФУНКЦИИ ТЕЛЕГРАМА И БЭКАПА =================
 const sendTgMessage = async (tg_id, text) => {
