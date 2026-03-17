@@ -305,49 +305,59 @@
     
     <div id="p-shop" class="overlay">
         <h2 style="color:#00bcd4; margin-bottom: 5px;" data-i18n="h_shop">МАГАЗИН</h2>
-        <div style="font-size: 11px; color: #888; margin-bottom: 20px;" data-i18n="s_pay_info">Оплата через Telegram Stars или CryptoBot (TON)</div>
+        <div style="font-size: 11px; color: #888; margin-bottom: 15px; text-align:center;" data-i18n="s_pay_info">Оплата через Telegram Stars или CryptoBot (TON)</div>
         
-        <div class="shop-header" data-i18n="sh_subs">ПОДПИСКИ (30 ДНЕЙ)</div>
-        <div class="shop-item">
-            <div class="shop-title" style="color: #a8b8c8;">PREMIUM</div>
-            <div class="shop-desc" data-i18n="sd_prem">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div>
-            </div>
+        <div class="tabs-wrap">
+            <div class="tab-btn active" id="tab-shop-sub" onclick="switchShopTab('sub')">ПОДПИСКИ</div>
+            <div class="tab-btn" id="tab-shop-shards" onclick="switchShopTab('shards')">ОСКОЛКИ</div>
         </div>
-        <div class="shop-item">
-            <div class="shop-title" style="color: #ffd700;">PRO</div>
-            <div class="shop-desc" data-i18n="sd_pro">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div>
+
+        <div id="shop-list-sub" style="width: 100%;">
+            <div class="shop-header" data-i18n="sh_subs">ПОДПИСКИ (30 ДНЕЙ)</div>
+            <div class="shop-item">
+                <div class="shop-title" style="color: #a8b8c8;">PREMIUM</div>
+                <div class="shop-desc" data-i18n="sd_prem">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+                <div class="buy-btns">
+                    <div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div>
+                    <div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div>
+                </div>
             </div>
-        </div>
-        <div class="shop-item">
-            <div class="shop-title" style="color: #ff00ff;">VIP</div>
-            <div class="shop-desc" data-i18n="sd_vip">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div>
+            <div class="shop-item">
+                <div class="shop-title" style="color: #ffd700;">PRO</div>
+                <div class="shop-desc" data-i18n="sd_pro">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+                <div class="buy-btns">
+                    <div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div>
+                    <div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div>
+                </div>
             </div>
-        </div>
-        <div class="shop-item">
-            <div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div>
-            <div class="shop-desc" data-i18n="sd_ultra">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-            <div class="buy-btns">
-                <div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div>
-                <div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div>
+            <div class="shop-item">
+                <div class="shop-title" style="color: #ff00ff;">VIP</div>
+                <div class="shop-desc" data-i18n="sd_vip">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+                <div class="buy-btns">
+                    <div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div>
+                    <div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div>
+                </div>
+            </div>
+            <div class="shop-item">
+                <div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div>
+                <div class="shop-desc" data-i18n="sd_ultra">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
+                <div class="buy-btns">
+                    <div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div>
+                    <div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div>
+                </div>
             </div>
         </div>
 
-        <div class="shop-header" data-i18n="sh_shards">ОСКОЛКИ ЛУНЫ</div>
-        <div class="shop-item"><div class="shop-title">10 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div>
-        <div class="shop-item"><div class="shop-title">50 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div>
-        <div class="shop-item"><div class="shop-title">100 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div>
-        <div class="shop-item"><div class="shop-title">500 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div>
-        <div class="shop-item"><div class="shop-title">1000 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+        <div id="shop-list-shards" style="width: 100%; display: none;">
+            <div class="shop-header" data-i18n="sh_shards">ОСКОЛКИ ЛУНЫ</div>
+            <div class="shop-item"><div class="shop-title">10 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div>
+            <div class="shop-item"><div class="shop-title">50 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div>
+            <div class="shop-item"><div class="shop-title">100 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div>
+            <div class="shop-item"><div class="shop-title">500 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div>
+            <div class="shop-item"><div class="shop-title">1000 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div>
+        </div>
+
+        <div class="term-btn" style="margin-top: 15px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
     
     <div id="p-user-promos" class="overlay">
@@ -620,7 +630,6 @@
         <div id="mod-list-container" style="width:100%;"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
     </div>
-    
     <script>
         const tg = window.Telegram.WebApp;
         const BackButton = tg.BackButton;
@@ -645,7 +654,7 @@
         let currentCharsTab = 'official'; 
         let myCharGender = 'm';
         let myCharsList = [];
-        let currentCustomCost = 100; // Глобальная переменная для случайной цены
+        let currentCustomCost = 100;
 
         const translations = {
             ru: { m_chats: "Чаты", m_chars: "Персонажи", m_daily: "Ежедневка", m_tasks: "Задания", m_shop: "Магазин", m_promos: "Промокоды", m_prof: "Профиль", m_set: "Настройка", m_adm: "Админка", m_con: "Консоль", h_chats: "МОИ ЧАТЫ", h_chars: "ПЕРСОНАЖИ", h_daily: "ЕЖЕДНЕВНАЯ НАГРАДА", h_tasks: "ЗАДАНИЯ", h_shop: "МАГАЗИН", h_promos: "ПРОМОКОД", h_prof: "ПРОФИЛЬ", h_set: "НАСТРОЙКИ", b_back: "НАЗАД", b_start_chat: "НАЧАТЬ ЧАТ", b_del_char: "УДАЛИТЬ ПЕРСОНАЖА", b_claim: "ЗАБРАТЬ", b_share: "ПОДЕЛИТЬСЯ ССЫЛКОЙ", b_activate: "АКТИВИРОВАТЬ", pr_nick: "Ник:", pr_id: "Айди юз:", pr_sub: "Подписка:", pr_exp: "Срок:", pr_shards: "Кол-во осколков:", pr_status: "Статус:", set_nick: "Ник в приложении", set_gender: "Ваш пол", g_m: "Мужчина", g_f: "Женщина", set_lang: "Язык интерфейса", set_len: "Длина сообщений", set_sex: "Пошлость персонажей", d_sub: "Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!", d_today: "Ваша награда сегодня:", t_invite: "ПРИГЛАСИ ДРУГА", t_invite_desc: "Ты и твой друг получите по", s_pay_info: "Оплата через Telegram Stars или CryptoBot (TON)", sh_subs: "ПОДПИСКИ (30 ДНЕЙ)", sd_prem: "50 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_pro: "150 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_vip: "250 осколков ежедневно<br>x2 бонус за стрик 7 дней", sd_ultra: "500 осколков ежедневно<br>x2 бонус за стрик 7 дней", sh_shards: "ОСКОЛКИ ЛУНЫ", s_shards: "Осколков", p_enter: "Введите секретный код", dos_age: "Возраст:", dos_gender: "Пол:", s_menu_prof: "Настроить профиль", s_menu_lang: "Сменить язык", s_menu_ai: "Настройка ИИ", s_menu_priv: "Политика конфиденциальности", s_menu_sup: "Техническая поддержка", s_menu_apk: "Приложение .apk", c_love: "Влюбленность", c_trust: "Доверие", c_inf: "Влияние", c_horny: "Возбуждение" }
@@ -688,7 +697,7 @@
 
         document.addEventListener('click', () => { if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; let chatItem = document.getElementById('chat-item-' + openDropdownId); if(chatItem) chatItem.style.zIndex = 1; openDropdownId = null; } });
 
-        // --- УМНАЯ СИНХРОНИЗАЦИЯ (ВЗАМЕН ТАЙМЕРУ) ---
+        // --- УМНАЯ СИНХРОНИЗАЦИЯ ---
         async function syncUser() {
             const uid = getUid(); if(!uid) return;
             try {
@@ -745,7 +754,6 @@
             
             updateDailyUI(); 
             
-            // ПАРАЛЛЕЛЬНАЯ ЗАГРУЗКА БЕЗ AWAIT (БЫСТРЫЙ ВХОД)
             fetchNews().catch(e => {}); 
             renderUserChars().catch(e => {}); 
             renderUserTasks().catch(e => {}); 
@@ -930,20 +938,16 @@
         
         // --- СКОРОСТНОЕ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ПЕРСОНАЖЕЙ ---
         function switchCharTab(tab) {
-            if (currentCharsTab === tab) return; // Блокируем лишние клики
+            if (currentCharsTab === tab) return; 
             currentCharsTab = tab;
             document.getElementById('tab-char-off').classList.toggle('active', tab === 'official');
             document.getElementById('tab-char-cus').classList.toggle('active', tab === 'custom');
-            
-            // Передаем false — берем из кэша памяти, сервер не трогаем!
             renderUserChars(false);
         }
 
         async function renderUserChars(forceFetch = true) { 
             try { 
                 const list = document.getElementById('user-char-list'); 
-                
-                // Стучимся на сервер ТОЛЬКО при первом входе или если попросили обновить
                 if (forceFetch || allChars.length === 0) {
                     if (allChars.length === 0) list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#bc42f5; font-size:12px;'>Загрузка персонажей...</div>`;
                     const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
@@ -962,7 +966,6 @@
                 
                 const charCards = await Promise.all(filteredChars.map(async (c) => { 
                     let tName = await neuroTranslate(c.name, currentLang); 
-                    // loading="lazy" для мгновенной отрисовки интерфейса
                     return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}" loading="lazy"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
                 })); 
                 
@@ -997,6 +1000,20 @@
         async function renderUserTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]"); const list = document.getElementById('user-task-list'); if (tasks.length === 0) { list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>Нет заданий</div>`; return; } const taskCards = await Promise.all(tasks.map(async (t) => { let tName = await neuroTranslate(t.name, currentLang); if(completed.includes(t.id)) { return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`; } return `<div class="task-item" id="utask-${t.id}"><span>${tName}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`; })); list.innerHTML = taskCards.join(''); } catch(e) {} }
         async function renderAdminPromos() { try { const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json(); document.getElementById('promo-list').innerHTML = promos.map(p => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : ''; return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
         async function buyItem(type, item, currency, price) { if (currency === 'ton') { tg.showAlert("Генерация счета CryptoBot..."); try { const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) }); const data = await res.json(); if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); } } catch (e) { tg.showAlert("Error"); } } else if (currency === 'stars') { tg.showAlert("Подготовка оплаты Stars..."); try { const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) }); const data = await res.json(); if(data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата успешна!"); } }); } else { tg.showAlert("API Error"); } } catch (e) { tg.showAlert("Error"); } } }
+        
+        // --- ПЕРЕКЛЮЧАТЕЛЬ ВКЛАДОК МАГАЗИНА ---
+        function switchShopTab(tab) {
+            const btnSub = document.getElementById('tab-shop-sub');
+            const btnShards = document.getElementById('tab-shop-shards');
+            const listSub = document.getElementById('shop-list-sub');
+            const listShards = document.getElementById('shop-list-shards');
+            
+            if(btnSub) btnSub.classList.toggle('active', tab === 'sub');
+            if(btnShards) btnShards.classList.toggle('active', tab === 'shards');
+            if(listSub) listSub.style.display = tab === 'sub' ? 'block' : 'none';
+            if(listShards) listShards.style.display = tab === 'shards' ? 'block' : 'none';
+        }
+
         function updateDailyUI() { const ONE_DAY = 24 * 60 * 60 * 1000; let timePassed = Date.now() - userData.last_daily; let nextStreak = userData.daily_streak + 1; let is7thDay = (nextStreak % 7 === 0); let baseRew = userData.daily_reward || 10; let actualRew = is7thDay ? baseRew * 2 : baseRew; document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`; document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (БОНУС x2!)` : ""); clearInterval(dailyTimerInterval); if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) { document.getElementById('daily-btn').style.display = 'none'; document.getElementById('daily-wait').style.display = 'block'; dailyTimerInterval = setInterval(() => { let timeLeft = ONE_DAY - (Date.now() - userData.last_daily); if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } else { let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000); h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s; document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`; } }, 1000); } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; } }
         async function claimDaily() { try { const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) }); const data = await res.json(); if (data.error) { tg.showAlert(data.error); } else { tg.showAlert(`Получено: ${data.reward} 🌙!`); userData.shards = data.new_balance; userData.daily_streak = data.streak; userData.last_daily = Date.now(); updateBalanceUI(userData.shards); updateDailyUI(); } } catch (e) { tg.showAlert("Error"); } }
         
