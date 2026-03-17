@@ -175,7 +175,6 @@
         .bg-pending { background: #f39c12; color: #fff; }
         .bg-private { background: #555; color: #fff; }
         .bg-public { background: #00ff00; color: #000; }
-        /* ЭКСТРА СТИЛЬ ДЛЯ ЭКСКЛЮЗИВА */
         .bg-exclusive { background: linear-gradient(90deg, #ff7eb3, #bc42f5); color: #fff; box-shadow: 0 0 10px #bc42f5; font-weight: 900; }
     </style>
 </head>
@@ -506,7 +505,6 @@
             <div class="set-item" onclick="openPanel('p-m-admins')"><div class="set-icon" style="background:#e91e63;">🛡️</div><div class="set-text">АДМИНЫ</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-promos')"><div class="set-icon" style="background:#e91e63;">🎫</div><div class="set-text">ПРОМОКОДЫ</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-tasks')"><div class="set-icon" style="background:#bc42f5;">🎯</div><div class="set-text">ЗАДАНИЯ</div><div class="set-arrow">›</div></div>
-            
             <div class="set-item" onclick="openModPanel()"><div class="set-icon" style="background:#f39c12;">🔴</div><div class="set-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="set-arrow">›</div></div>
         </div>
         <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
@@ -520,7 +518,6 @@
             <div class="set-item" onclick="openPanel('p-m-char')"><div class="set-icon" style="background:#00bcd4;">🎭</div><div class="set-text">ДОБАВИТЬ ПЕРСА</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-promos')"><div class="set-icon" style="background:#00bcd4;">🎫</div><div class="set-text">СОЗДАТЬ ПРОМО</div><div class="set-arrow">›</div></div>
             <div class="set-item" onclick="openPanel('p-m-tasks')"><div class="set-icon" style="background:#00bcd4;">🎯</div><div class="set-text">ДОБАВИТЬ ЗАДАНИЕ</div><div class="set-arrow">›</div></div>
-            
             <div class="set-item" onclick="openModPanel()"><div class="set-icon" style="background:#f39c12;">🔴</div><div class="set-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="set-arrow">›</div></div>
         </div>
         <div class="term-btn" onclick="back()">НАЗАД</div>
@@ -661,7 +658,6 @@
         <h2 style="color:#f39c12" id="my-char-title">СОЗДАТЬ ПЕРСОНАЖА</h2>
         <div class="info-card" style="text-align: center;">
             <div id="my-char-cost-info" style="color:#00ff00; font-size:12px; margin-bottom:15px; font-weight:bold;">Стоимость: 100 🌙 (Для платников скидки!)</div>
-            
             <input type="hidden" id="imy-id">
             <img id="my-char-preview" src="#" style="width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #f39c12;">
             <input type="text" id="imy-name" class="term-in" placeholder="Имя">
@@ -673,10 +669,8 @@
             </div>
             <textarea id="imy-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Описание (характер, стиль общения)..." maxlength="2000" oninput="document.getElementById('my-char-limit').innerText = this.value.length + '/2000'"></textarea>
             <div id="my-char-limit" class="char-counter" style="color:#f39c12;">0/2000</div>
-            
             <input type="file" id="my-char-file" accept="image/*" style="display:none;" onchange="if(this.files && this.files[0]){ const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('my-char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }">
             <div class="term-btn" style="border-color:#f39c12" onclick="document.getElementById('my-char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
-            
             <div class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00;" onclick="saveMyChar()">СОХРАНИТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">ОТМЕНА</div>
@@ -687,7 +681,6 @@
         <div class="info-card" style="text-align: center; border-color: #bc42f5;">
             <div id="exc-char-cost-info" style="color:gold; font-size:12px; margin-bottom:10px; font-weight:bold;">Загрузка цены...</div>
             <div style="font-size:10px; color:#888; margin-bottom:15px;">Создается раз в 30 дней. Публикуется мгновенно (без модерации). Заработок на открытии чата другими юзерами.</div>
-            
             <img id="exc-char-preview" src="#">
             <input type="text" id="iexc-name" class="term-in" placeholder="Имя">
             <input type="number" id="iexc-age" class="term-in" placeholder="Возраст (18+)" min="18">
@@ -698,10 +691,8 @@
             </div>
             <textarea id="iexc-desc" class="term-in char-desc" style="height: 120px; resize: none;" placeholder="Глубокое описание (характер, лор)..." maxlength="2000" oninput="document.getElementById('exc-char-limit').innerText = this.value.length + '/2000'"></textarea>
             <div id="exc-char-limit" class="char-counter" style="color:#bc42f5;">0/2000</div>
-            
             <input type="file" id="exc-char-file" accept="image/*" style="display:none;" onchange="if(this.files && this.files[0]){ const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('exc-char-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }">
             <div class="term-btn" style="border-color:#bc42f5" onclick="document.getElementById('exc-char-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
-            
             <div class="term-btn" style="border-color:gold; background:rgba(255,215,0,0.1); color:gold;" onclick="saveExclusiveChar()">ОПЛАТИТЬ И СОЗДАТЬ</div>
         </div>
         <div class="term-btn" onclick="back()">ОТМЕНА</div>
@@ -739,7 +730,7 @@
         let offFilterGender = 'all'; let offFilterCat = 'all';
         
         let myCharGender = 'm';
-        let excCharGender = 'm'; // Для эксклюзива
+        let excCharGender = 'm';
         let myCharsList = [];
         let currentCustomCost = 100;
         let currentExcStarCost = 50;
@@ -807,15 +798,26 @@
             if (!document.hidden) syncUser();
         });
 
+        // --- ИСПРАВЛЕННЫЙ ЗАГРУЗЧИК ФОТОК В ОБЛАКО (ЧЕРЕЗ БЭКЕНД) ---
         async function uploadToCloud(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            try {
-                const res = await fetch('https://telegra.ph/upload', { method: 'POST', body: formData });
-                const data = await res.json();
-                if(data && data[0] && data[0].src) return 'https://telegra.ph' + data[0].src;
-                return null;
-            } catch(e) { return null; }
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const base64Image = e.target.result;
+                        const res = await fetch('/api/upload', {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({ image: base64Image })
+                        });
+                        const data = await res.json();
+                        if (data.url) resolve(data.url);
+                        else resolve(null);
+                    } catch (err) { resolve(null); }
+                };
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(file);
+            });
         }
 
         function updateUserAvatar(input) {
@@ -921,7 +923,6 @@
             if(isBotTyping) return; 
             const c = allChars.find(x => x.id === activeCharId); if(!c) return; 
             
-            // Проверка на эксклюзив (на всякий случай, если кнопка сработала ошибочно)
             if (c.char_type === 'exclusive' && getUid() !== OID && c.creator_id != getUid()) {
                 if (!userData.unlocked_chars || !userData.unlocked_chars.includes(c.id)) {
                     return tg.showAlert("Сначала разблокируйте доступ за 10 Stars!");
@@ -1217,15 +1218,9 @@
         async function buyItem(type, item, currency, price) { if (currency === 'ton') { tg.showAlert("Генерация счета CryptoBot..."); try { const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) }); const data = await res.json(); if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); } } catch (e) { tg.showAlert("Error"); } } else if (currency === 'stars') { tg.showAlert("Подготовка оплаты Stars..."); try { const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) }); const data = await res.json(); if(data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата успешна!"); } }); } else { tg.showAlert("API Error"); } } catch (e) { tg.showAlert("Error"); } } }
         
         function switchShopTab(tab) {
-            const btnSub = document.getElementById('tab-shop-sub');
-            const btnShards = document.getElementById('tab-shop-shards');
-            const listSub = document.getElementById('shop-list-sub');
-            const listShards = document.getElementById('shop-list-shards');
-            
-            if(btnSub) btnSub.classList.toggle('active', tab === 'sub');
-            if(btnShards) btnShards.classList.toggle('active', tab === 'shards');
-            if(listSub) listSub.style.display = tab === 'sub' ? 'block' : 'none';
-            if(listShards) listShards.style.display = tab === 'shards' ? 'block' : 'none';
+            const btnSub = document.getElementById('tab-shop-sub'); const btnShards = document.getElementById('tab-shop-shards'); const listSub = document.getElementById('shop-list-sub'); const listShards = document.getElementById('shop-list-shards');
+            if(btnSub) btnSub.classList.toggle('active', tab === 'sub'); if(btnShards) btnShards.classList.toggle('active', tab === 'shards');
+            if(listSub) listSub.style.display = tab === 'sub' ? 'block' : 'none'; if(listShards) listShards.style.display = tab === 'shards' ? 'block' : 'none';
         }
 
         function updateDailyUI() { const ONE_DAY = 24 * 60 * 60 * 1000; let timePassed = Date.now() - userData.last_daily; let nextStreak = userData.daily_streak + 1; let is7thDay = (nextStreak % 7 === 0); let baseRew = userData.daily_reward || 10; let actualRew = is7thDay ? baseRew * 2 : baseRew; document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`; document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (БОНУС x2!)` : ""); clearInterval(dailyTimerInterval); if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) { document.getElementById('daily-btn').style.display = 'none'; document.getElementById('daily-wait').style.display = 'block'; dailyTimerInterval = setInterval(() => { let timeLeft = ONE_DAY - (Date.now() - userData.last_daily); if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } else { let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000); h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s; document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`; } }, 1000); } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; } }
@@ -1264,7 +1259,6 @@
             let chatBtn = document.getElementById('dos-chat-btn');
             let unlockBtn = document.getElementById('dos-unlock-btn');
 
-            // Блокируем кнопку чата и показываем кнопку Оплаты, если это чужой эксклюзив
             if (c.char_type === 'exclusive' && getUid() !== OID && c.creator_id != getUid() && (!userData.unlocked_chars || !userData.unlocked_chars.includes(c.id))) {
                 chatBtn.style.display = 'none';
                 unlockBtn.style.display = 'block';
@@ -1283,7 +1277,7 @@
                 const res = await fetch('/api/user/unlock-char-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id }) });
                 const data = await res.json();
                 
-                if (data.success && getUid() === OID) { // Заглушка для Овнера
+                if (data.success && getUid() === OID) { 
                     if(!userData.unlocked_chars) userData.unlocked_chars = [];
                     userData.unlocked_chars.push(id);
                     tg.showAlert(data.message);
@@ -1299,20 +1293,13 @@
         function setCharGender(g) { currentCharGender = g; document.getElementById('cg-m').classList.toggle('active', g === 'm'); document.getElementById('cg-f').classList.toggle('active', g === 'f'); }
         
         async function saveCharDB() { 
-            const n = document.getElementById('ich-name').value; 
-            const cat = document.getElementById('ich-category').value; 
-            let img = document.getElementById('char-preview').src; 
-            const fileInput = document.getElementById('char-file');
+            const n = document.getElementById('ich-name').value; const cat = document.getElementById('ich-category').value; let img = document.getElementById('char-preview').src; const fileInput = document.getElementById('char-file');
             if(!n || img.includes('#')) return tg.showAlert("Name and photo required!"); 
-            
             if(fileInput.files && fileInput.files[0]) {
-                const btn = document.querySelector('[onclick="saveCharDB()"]');
-                let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
-                const cloudUrl = await uploadToCloud(fileInput.files[0]);
-                btn.innerText = oldTxt;
+                const btn = document.querySelector('[onclick="saveCharDB()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
+                const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt;
                 if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
             }
-
             const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img, category: cat }; 
             await fetch('/api/admin/create-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData: charData }) }); 
             tg.showAlert("Created!"); renderUserChars(); 
@@ -1334,7 +1321,7 @@
         function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
         function updateSex(v, s=false) { const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; document.getElementById('sex-val').innerText = v; let sliderMax = document.getElementById('sex-slider').max; document.getElementById('sex-info').innerText = sliderMax == 0 ? "Недоступно для вашей подписки" : `Уровень ${v}: ${m_ru[v]}`; document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; if(!s) localStorage.setItem('m_sex_' + getUid(), v); }
         function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
-        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); if(p) { p.src = e.target.result; p.style.display = 'block'; } const p2 = document.getElementById('my-char-preview'); if(p2) { p2.src = e.target.result; p2.style.display = 'block'; } }; r.readAsDataURL(i.files[0]); } }
+        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); if(p) { p.src = e.target.result; p.style.display = 'block'; } const p2 = document.getElementById('my-char-preview'); if(p2) { p2.src = e.target.result; p2.style.display = 'block'; } const p3 = document.getElementById('exc-char-preview'); if(p3) { p3.src = e.target.result; p3.style.display = 'block'; } }; r.readAsDataURL(i.files[0]); } }
         async function modAdmin(a) { const id = document.getElementById('ia-id').value; if(!id) return; await fetch('/api/owner/set-admin', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: id, status: a === 'add' }) }); tg.showAlert("Updated!"); }
         async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Saved!"); }
         function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
@@ -1363,53 +1350,16 @@
             } catch(e) { list.innerHTML = "Ошибка"; }
         }
         
-        function openMyCharOpts(id) {
-            const c = myCharsList.find(x => x.id === id);
-            if(!c) return;
-            if(!allChars.find(x => x.id === id)) allChars.push(c);
-            openDossier(id);
-        }
+        function openMyCharOpts(id) { const c = myCharsList.find(x => x.id === id); if(!c) return; if(!allChars.find(x => x.id === id)) allChars.push(c); openDossier(id); }
         
         function openCreateMyChar(id = null) {
             if(id) {
                 const c = myCharsList.find(x => x.id === id);
-                document.getElementById('imy-id').value = c.id;
-                document.getElementById('imy-name').value = c.name;
-                document.getElementById('imy-age').value = c.age;
-                document.getElementById('imy-desc').value = c.desc;
-                document.getElementById('my-char-preview').src = c.photo;
-                document.getElementById('my-char-preview').style.display = 'block';
-                setMyCharGender(c.gender);
-                document.getElementById('my-char-title').innerText = "РЕДАКТИРОВАТЬ";
-                document.getElementById('my-char-cost-info').style.display = 'none';
-                currentCustomCost = 0;
+                document.getElementById('imy-id').value = c.id; document.getElementById('imy-name').value = c.name; document.getElementById('imy-age').value = c.age; document.getElementById('imy-desc').value = c.desc; document.getElementById('my-char-preview').src = c.photo; document.getElementById('my-char-preview').style.display = 'block'; setMyCharGender(c.gender); document.getElementById('my-char-title').innerText = "РЕДАКТИРОВАТЬ"; document.getElementById('my-char-cost-info').style.display = 'none'; currentCustomCost = 0;
             } else {
-                document.getElementById('imy-id').value = "";
-                document.getElementById('imy-name').value = "";
-                document.getElementById('imy-age').value = "";
-                document.getElementById('imy-desc').value = "";
-                document.getElementById('my-char-preview').src = "#";
-                document.getElementById('my-char-preview').style.display = 'none';
-                setMyCharGender('m');
-                document.getElementById('my-char-title').innerText = "СОЗДАТЬ ПЕРСОНАЖА";
-                
-                let sub = (userData.subscription || "FREE").trim().toUpperCase();
-                let costInfo = document.getElementById('my-char-cost-info');
-                
-                if(getUid() === OID) {
-                    currentCustomCost = 0;
-                    costInfo.innerText = "Стоимость: 0 🌙 (Вы Овнер)";
-                    costInfo.style.color = "#00ff00";
-                } else if(sub !== "FREE") {
-                    let discount = Math.floor(Math.random() * 41) + 15; 
-                    currentCustomCost = 100 - discount;
-                    costInfo.innerHTML = `ВАША СКИДКА: <b style="color:yellow;">${discount}%</b>! Стоимость: <b style="color:yellow;">${currentCustomCost} 🌙</b>`;
-                    costInfo.style.color = "#00ff00";
-                } else {
-                    currentCustomCost = 100;
-                    costInfo.innerText = "Стоимость: 100 🌙 (Купите подписку для скидки!)";
-                    costInfo.style.color = "#ffaa00";
-                }
+                document.getElementById('imy-id').value = ""; document.getElementById('imy-name').value = ""; document.getElementById('imy-age').value = ""; document.getElementById('imy-desc').value = ""; document.getElementById('my-char-preview').src = "#"; document.getElementById('my-char-preview').style.display = 'none'; setMyCharGender('m'); document.getElementById('my-char-title').innerText = "СОЗДАТЬ ПЕРСОНАЖА";
+                let sub = (userData.subscription || "FREE").trim().toUpperCase(); let costInfo = document.getElementById('my-char-cost-info');
+                if(getUid() === OID) { currentCustomCost = 0; costInfo.innerText = "Стоимость: 0 🌙 (Вы Овнер)"; costInfo.style.color = "#00ff00"; } else if(sub !== "FREE") { let discount = Math.floor(Math.random() * 41) + 15; currentCustomCost = 100 - discount; costInfo.innerHTML = `ВАША СКИДКА: <b style="color:yellow;">${discount}%</b>! Стоимость: <b style="color:yellow;">${currentCustomCost} 🌙</b>`; costInfo.style.color = "#00ff00"; } else { currentCustomCost = 100; costInfo.innerText = "Стоимость: 100 🌙 (Купите подписку для скидки!)"; costInfo.style.color = "#ffaa00"; }
                 costInfo.style.display = 'block';
             }
             openPanel('p-create-my-char');
@@ -1418,96 +1368,49 @@
         function setMyCharGender(g) { myCharGender = g; document.getElementById('my-cg-m').classList.toggle('active', g === 'm'); document.getElementById('my-cg-f').classList.toggle('active', g === 'f'); }
         
         async function saveMyChar() {
-            const id = document.getElementById('imy-id').value;
-            const n = document.getElementById('imy-name').value; 
-            const a = document.getElementById('imy-age').value;
-            const d = document.getElementById('imy-desc').value;
-            let img = document.getElementById('my-char-preview').src;
-            const fileInput = document.getElementById('my-char-file');
-
+            const id = document.getElementById('imy-id').value; const n = document.getElementById('imy-name').value; const a = document.getElementById('imy-age').value; const d = document.getElementById('imy-desc').value; let img = document.getElementById('my-char-preview').src; const fileInput = document.getElementById('my-char-file');
             if(!n || img.includes('#')) return tg.showAlert("Заполните Имя и добавьте фото!");
             if(!id && getUid() !== OID && userData.shards < currentCustomCost) return tg.showAlert(`Недостаточно осколков! Нужно: ${currentCustomCost} 🌙`);
-            
             if(fileInput.files && fileInput.files[0]) {
-                const btn = document.querySelector('[onclick="saveMyChar()"]');
-                let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
-                const cloudUrl = await uploadToCloud(fileInput.files[0]);
-                btn.innerText = oldTxt;
+                const btn = document.querySelector('[onclick="saveMyChar()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
+                const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt;
                 if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
             }
-
             const charData = { name: n, age: a, gender: myCharGender, desc: d, photo: img };
-            if(id) {
-                await fetch('/api/user/edit-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: parseInt(id), charData }) });
-                tg.showAlert("Обновлено!");
-            } else {
+            if(id) { await fetch('/api/user/edit-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: parseInt(id), charData }) }); tg.showAlert("Обновлено!"); } else {
                 if(getUid() !== OID) updateBalanceUI(userData.shards - currentCustomCost);
-                const res = await fetch('/api/user/create-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData, cost: currentCustomCost }) });
-                const data = await res.json();
-                if(res.ok) { tg.showAlert(data.message); if(getUid()!==OID) updateBalanceUI(data.new_balance); }
-                else { if(getUid() !== OID) updateBalanceUI(userData.shards + currentCustomCost); return tg.showAlert(data.error); }
+                const res = await fetch('/api/user/create-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData, cost: currentCustomCost }) }); const data = await res.json();
+                if(res.ok) { tg.showAlert(data.message); if(getUid()!==OID) updateBalanceUI(data.new_balance); } else { if(getUid() !== OID) updateBalanceUI(userData.shards + currentCustomCost); return tg.showAlert(data.error); }
             }
             back(); loadMyChars();
         }
 
         // === МАГИЯ СОЗДАНИЯ ЭКСКЛЮЗИВА ===
         function openCreateExclusiveChar() {
-            document.getElementById('iexc-name').value = "";
-            document.getElementById('iexc-age').value = "";
-            document.getElementById('iexc-desc').value = "";
-            document.getElementById('exc-char-preview').src = "#";
-            document.getElementById('exc-char-preview').style.display = 'none';
-            setExcCharGender('m');
-            
-            let sub = (userData.subscription || "FREE").trim().toUpperCase();
-            let costInfo = document.getElementById('exc-char-cost-info');
-            
-            if(getUid() === OID) {
-                currentExcStarCost = 0;
-                costInfo.innerText = "Стоимость: 0 Stars (Вы Овнер)";
-            } else if(sub === 'ULTRA') { currentExcStarCost = 5; costInfo.innerText = "Стоимость: 5 ⭐️ (Ultra Скидка!)"; }
-            else if(sub === 'VIP') { currentExcStarCost = 15; costInfo.innerText = "Стоимость: 15 ⭐️ (VIP Скидка!)"; }
-            else if(sub === 'PRO') { currentExcStarCost = 25; costInfo.innerText = "Стоимость: 25 ⭐️ (PRO Скидка!)"; }
-            else if(sub === 'PREMIUM') { currentExcStarCost = 35; costInfo.innerText = "Стоимость: 35 ⭐️ (Premium Скидка!)"; }
-            else { currentExcStarCost = 50; costInfo.innerText = "Стоимость: 50 ⭐️ (Без подписки)"; }
-            
+            document.getElementById('iexc-name').value = ""; document.getElementById('iexc-age').value = ""; document.getElementById('iexc-desc').value = ""; document.getElementById('exc-char-preview').src = "#"; document.getElementById('exc-char-preview').style.display = 'none'; setExcCharGender('m');
+            let sub = (userData.subscription || "FREE").trim().toUpperCase(); let costInfo = document.getElementById('exc-char-cost-info');
+            if(getUid() === OID) { currentExcStarCost = 0; costInfo.innerText = "Стоимость: 0 Stars (Вы Овнер)"; } else if(sub === 'ULTRA') { currentExcStarCost = 5; costInfo.innerText = "Стоимость: 5 ⭐️ (Ultra Скидка!)"; } else if(sub === 'VIP') { currentExcStarCost = 15; costInfo.innerText = "Стоимость: 15 ⭐️ (VIP Скидка!)"; } else if(sub === 'PRO') { currentExcStarCost = 25; costInfo.innerText = "Стоимость: 25 ⭐️ (PRO Скидка!)"; } else if(sub === 'PREMIUM') { currentExcStarCost = 35; costInfo.innerText = "Стоимость: 35 ⭐️ (Premium Скидка!)"; } else { currentExcStarCost = 50; costInfo.innerText = "Стоимость: 50 ⭐️ (Без подписки)"; }
             openPanel('p-create-exclusive-char');
         }
 
         function setExcCharGender(g) { excCharGender = g; document.getElementById('exc-cg-m').classList.toggle('active', g === 'm'); document.getElementById('exc-cg-f').classList.toggle('active', g === 'f'); }
 
         async function saveExclusiveChar() {
-            const n = document.getElementById('iexc-name').value;
-            const a = document.getElementById('iexc-age').value;
-            const d = document.getElementById('iexc-desc').value;
-            let img = document.getElementById('exc-char-preview').src;
-            const fileInput = document.getElementById('exc-char-file');
-
+            const n = document.getElementById('iexc-name').value; const a = document.getElementById('iexc-age').value; const d = document.getElementById('iexc-desc').value; let img = document.getElementById('exc-char-preview').src; const fileInput = document.getElementById('exc-char-file');
             if(!n || img.includes('#')) return tg.showAlert("Заполните Имя и добавьте фото!");
-            
             if(fileInput.files && fileInput.files[0]) {
-                const btn = document.querySelector('[onclick="saveExclusiveChar()"]');
-                let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
-                const cloudUrl = await uploadToCloud(fileInput.files[0]);
-                btn.innerText = oldTxt;
+                const btn = document.querySelector('[onclick="saveExclusiveChar()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА...";
+                const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt;
                 if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!");
             }
-
             const charData = { name: n, age: a, gender: excCharGender, desc: d, photo: img };
-
             tg.showAlert("Формируем счет...");
             try {
-                const res = await fetch('/api/user/prepare-exclusive-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData }) });
-                const data = await res.json();
-                
+                const res = await fetch('/api/user/prepare-exclusive-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData }) }); const data = await res.json();
                 if(res.ok) {
                     if (data.invoice_url) {
-                        tg.openInvoice(data.invoice_url, function(status) {
-                            if (status === 'paid') { tg.showAlert("Оплата прошла! Эксклюзив опубликован!"); back(); loadMyChars(); }
-                        });
-                    } else if (data.success) { // Для Овнера
-                        tg.showAlert(data.message); back(); loadMyChars();
-                    }
+                        tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата прошла! Эксклюзив опубликован!"); back(); loadMyChars(); } });
+                    } else if (data.success) { tg.showAlert(data.message); back(); loadMyChars(); }
                 } else { tg.showAlert(data.error); }
             } catch(e) { tg.showAlert("Ошибка сервера"); }
         }
@@ -1525,38 +1428,17 @@
         function openModPanel() { openPanel('p-m-mod'); loadPendingChars(); }
         
         async function loadPendingChars() {
-            const list = document.getElementById('mod-list-container');
-            list.innerHTML = '<div class="loader"></div>';
+            const list = document.getElementById('mod-list-container'); list.innerHTML = '<div class="loader"></div>';
             try {
-                const res = await fetch('/api/admin/get-pending-chars?_t=' + Date.now(), { headers: getAuthHeaders() });
-                const chars = await res.json();
+                const res = await fetch('/api/admin/get-pending-chars?_t=' + Date.now(), { headers: getAuthHeaders() }); const chars = await res.json();
                 if (chars.error) { list.innerHTML = `<div style='color:red;'>${chars.error}</div>`; return; }
                 if(!chars || chars.length === 0) { list.innerHTML = "<div style='text-align:center;color:#888;'>Нет заявок на модерацию.</div>"; return; }
-                list.innerHTML = chars.map(c => `
-                    <div class="info-card">
-                        <div style="font-weight:bold; color:#f39c12; margin-bottom:5px;">${c.name} (${c.age}, ${c.gender})</div>
-                        <div style="font-size:12px; color:#aaa; margin-bottom:10px;">${c.desc}</div>
-                        <img src="${c.photo}" style="width:100%; max-height:150px; object-fit:contain; margin-bottom:10px;">
-                        <div style="display:flex; gap:10px;">
-                            <div class="term-btn" style="flex:1; border-color:#00ff00; padding:10px;" onclick="modApprove(${c.id})">ОДОБРИТЬ</div>
-                            <div class="term-btn" style="flex:1; border-color:#ff4444; padding:10px;" onclick="modReject(${c.id})">ОТКЛОНИТЬ</div>
-                        </div>
-                    </div>
-                `).join('');
+                list.innerHTML = chars.map(c => `<div class="info-card"><div style="font-weight:bold; color:#f39c12; margin-bottom:5px;">${c.name} (${c.age}, ${c.gender})</div><div style="font-size:12px; color:#aaa; margin-bottom:10px;">${c.desc}</div><img src="${c.photo}" style="width:100%; max-height:150px; object-fit:contain; margin-bottom:10px;"><div style="display:flex; gap:10px;"><div class="term-btn" style="flex:1; border-color:#00ff00; padding:10px;" onclick="modApprove(${c.id})">ОДОБРИТЬ</div><div class="term-btn" style="flex:1; border-color:#ff4444; padding:10px;" onclick="modReject(${c.id})">ОТКЛОНИТЬ</div></div></div>`).join('');
             } catch(e) { list.innerHTML = "Ошибка связи с сервером"; }
         }
         
-        async function modApprove(id) {
-            await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'approve', reason: 'Одобрено' }) });
-            tg.showAlert("Одобрено!"); loadPendingChars();
-        }
-        
-        async function modReject(id) {
-            const reason = prompt("Причина отказа (пойдет в ЛС юзеру):", "Не соответствует правилам.");
-            if(reason === null) return;
-            await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'reject', reason: reason }) });
-            tg.showAlert("Отклонено!"); loadPendingChars();
-        }
+        async function modApprove(id) { await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'approve', reason: 'Одобрено' }) }); tg.showAlert("Одобрено!"); loadPendingChars(); }
+        async function modReject(id) { const reason = prompt("Причина отказа (пойдет в ЛС юзеру):", "Не соответствует правилам."); if(reason === null) return; await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'reject', reason: reason }) }); tg.showAlert("Отклонено!"); loadPendingChars(); }
 
         window.onload = init;
     </script>
