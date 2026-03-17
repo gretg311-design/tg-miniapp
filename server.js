@@ -62,8 +62,8 @@ const userSchema = new mongoose.Schema({
     subscription: { type: String, default: "FREE" }, sub_exp: { type: Number, default: 0 },
     is_admin: { type: Boolean, default: false }, last_daily: { type: Number, default: 0 }, daily_streak: { type: Number, default: 0 },
     invited_by: { type: Number, default: null },
-    unlocked_chars: { type: [Number], default: [] }, // Купленные эксклюзивы
-    last_exclusive_date: { type: Number, default: 0 } // Таймер для создания эксклюзивов
+    unlocked_chars: { type: [Number], default: [] },
+    last_exclusive_date: { type: Number, default: 0 } 
 });
 const charSchema = new mongoose.Schema({ 
     id: Number, name: String, age: Number, gender: String, desc: String, photo: String,
@@ -105,20 +105,31 @@ const checkTgAuth = (req, res, next) => {
     } catch (e) { return res.status(403).json({ error: "Ошибка авторизации" }); }
 };
 
-// ================= API: ЗАГРУЗКА ФОТО =================
+// ================= API: ЗАГРУЗКА ФОТО (ФИКС VERCEL БАГА) =================
 app.post('/api/upload', checkTgAuth, async (req, res) => {
     try {
         const { image } = req.body;
         if (!image) return res.status(400).json({ error: "Нет картинки" });
+
         const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
         const buffer = Buffer.from(base64Data, 'base64');
-        const blob = new Blob([buffer], { type: 'image/jpeg' });
-        const formData = new FormData();
-        formData.append('file', blob, 'upload.jpg');
-        
-        const response = await fetch('https://telegra.ph/upload', { method: 'POST', body: formData });
+
+        const boundary = '----MoonProjectBoundary' + Date.now().toString(16);
+        let body = Buffer.concat([
+            Buffer.from('--' + boundary + '\r\n'),
+            Buffer.from('Content-Disposition: form-data; name="file"; filename="upload.jpg"\r\n'),
+            Buffer.from('Content-Type: image/jpeg\r\n\r\n'),
+            buffer,
+            Buffer.from('\r\n--' + boundary + '--\r\n')
+        ]);
+
+        const response = await fetch('https://telegra.ph/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'multipart/form-data; boundary=' + boundary },
+            body: body
+        });
+
         const data = await response.json();
-        
         if (data && data[0] && data[0].src) { res.json({ url: 'https://telegra.ph' + data[0].src }); } 
         else { res.status(500).json({ error: "Ошибка Telegra.ph" }); }
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -613,12 +624,20 @@ app.post('/api/admin/create-promo', checkTgAuth, async (req, res) => {
         const tgData = await tgRes.json();
         
         let messageId = 0;
-        if (tgData.ok) { messageId = tgData.result.message_id; }
+        if (tgData.ok) { 
+            messageId = tgData.result.message_id; 
+        } else {
+            // КОСТЫЛЬ: Если бот не админ в канале, шлем Овнеру в ЛС
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: req.tg_user_id, text: "⚠️ Ошибка отправки в канал (тестовый бот не админ?). Промокод сохранен в базу:\n\n" + text, parse_mode: 'HTML' })
+            });
+        }
 
         await new Promo({ code, reward, expiresAt, messageId, emoji: randomEmoji }).save(); 
-        res.json({ message: "Промо создан и отправлен в канал!" });
+        res.json({ message: "Промокод успешно создан!" });
     } catch(e) {
-        res.status(500).json({ error: "Ошибка при отправке в канал" });
+        res.status(500).json({ error: "Критическая ошибка создания промокода" });
     }
 });
 
