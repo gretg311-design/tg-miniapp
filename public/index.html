@@ -620,6 +620,7 @@
         <div id="mod-list-container" style="width:100%;"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()">НАЗАД</div>
     </div>
+    
     <script>
         const tg = window.Telegram.WebApp;
         const BackButton = tg.BackButton;
@@ -927,19 +928,28 @@
         function clearChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Очистить память?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); tg.showAlert("Очищено 🧹"); } }); }
         function deleteChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Удалить чат?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); } }); }
         
+        // --- СКОРОСТНОЕ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ПЕРСОНАЖЕЙ ---
         function switchCharTab(tab) {
+            if (currentCharsTab === tab) return; // Блокируем лишние клики
             currentCharsTab = tab;
             document.getElementById('tab-char-off').classList.toggle('active', tab === 'official');
             document.getElementById('tab-char-cus').classList.toggle('active', tab === 'custom');
-            renderUserChars();
+            
+            // Передаем false — берем из кэша памяти, сервер не трогаем!
+            renderUserChars(false);
         }
 
-        async function renderUserChars() { 
+        async function renderUserChars(forceFetch = true) { 
             try { 
-                const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
-                allChars = await res.json(); 
-                allChars.sort((a, b) => b.id - a.id); 
                 const list = document.getElementById('user-char-list'); 
+                
+                // Стучимся на сервер ТОЛЬКО при первом входе или если попросили обновить
+                if (forceFetch || allChars.length === 0) {
+                    if (allChars.length === 0) list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#bc42f5; font-size:12px;'>Загрузка персонажей...</div>`;
+                    const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); 
+                    allChars = await res.json(); 
+                    allChars.sort((a, b) => b.id - a.id); 
+                }
                 
                 let filteredChars = allChars.filter(c => { 
                     let isOwnerChar = c.creator_id == OID; 
@@ -949,10 +959,13 @@
                 }); 
                 
                 if(filteredChars.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; } 
+                
                 const charCards = await Promise.all(filteredChars.map(async (c) => { 
                     let tName = await neuroTranslate(c.name, currentLang); 
-                    return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
+                    // loading="lazy" для мгновенной отрисовки интерфейса
+                    return `<div class="char-card" onclick="openDossier(${c.id})"><img src="${c.photo}" loading="lazy"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
                 })); 
+                
                 list.innerHTML = charCards.join(''); 
             } catch (e) {} 
         }
