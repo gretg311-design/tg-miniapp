@@ -112,11 +112,9 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
         res.json(responseObj);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= ФОНОВАЯ ПРОВЕРКА ПРОМОКОДОВ (БЕЗ НАГРУЗКИ НА ЛИМИТЫ) =================
-let isCheckingPromos = false;
+// ================= ПРОВЕРКА ПРОМОКОДОВ (ЖЕЛЕЗОБЕТОННАЯ) =================
+// Теперь стоит await в нужных местах, Vercel дождется зачеркивания!
 const checkExpiredPromos = async () => {
-    if (isCheckingPromos) return; 
-    isCheckingPromos = true;
     try {
         const expiredPromos = await Promo.find({ expiresAt: { $lte: Date.now() } });
         if (expiredPromos.length > 0) {
@@ -132,12 +130,11 @@ const checkExpiredPromos = async () => {
             }
         }
     } catch (e) { console.error("Promo Check Error", e); }
-    isCheckingPromos = false;
 };
 
 // ================= СИНХРОНИЗАЦИЯ =================
 app.post('/api/user/sync', checkTgAuth, async (req, res) => {
-    checkExpiredPromos(); // Фоновая проверка при синхронизации
+    await checkExpiredPromos(); // Ждем завершения проверки перед ответом!
     try {
         const uid = req.tg_user_id; let user = await User.findOne({ tg_id: uid });
         if (!user) return res.json({ shards: 0, subscription: "FREE", unlocked_chars: [] });
@@ -230,8 +227,9 @@ app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ================= ЧАТ С ИИ (БЫСТРАЯ МОДЕЛЬ + ФИКС ОШИБОК) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
-    checkExpiredPromos(); // Фоновая проверка при общении в чате
+    await checkExpiredPromos(); // Тоже проверяем при отправке сообщения
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
         const uid = req.tg_user_id; let user = await User.findOne({ tg_id: uid });
@@ -242,6 +240,7 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
             if (!user.unlocked_chars || !user.unlocked_chars.includes(char.id)) { return res.status(403).json({ error: "locked_exclusive" }); }
         }
 
+        // Списываем осколок заранее
         if (uid !== OWNER_ID) { if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" }); user.shards -= 1; await user.save(); }
 
         const sexLevels = ["Strictly SFW. Polite, friendly tone. No NSFW.", "Light romance, gentle flirting. Hugs and blushes.", "Romantic Roleplay. Kisses, deep affection, heavy petting.", "Spicy Roleplay. Intense flirting, sexual tension, hot make-out sessions.", "Passionate NSFW. Foreplay, undressing, erotic touch.", "Explicit NSFW. Vivid and detailed descriptions of intimate sexual acts. Uncensored.", "Extreme Hardcore NSFW. No boundaries, absolutely explicit, dirty talk."];
@@ -252,10 +251,33 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         if (chat_history) chat_history.slice(-10).forEach(m => messages.push({ role: m.sender === 'user' ? "user" : "assistant", content: m.text }));
         messages.push({ role: "user", content: message });
 
-        const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", { method: "POST", headers: { "Authorization": `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: "sophosympatheia/midnight-miqu-70b-v1.5", messages: messages, temperature: 0.9, max_tokens: parseInt(len || 25) * 5 }) });
+        const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", { 
+            method: "POST", 
+            headers: { "Authorization": `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json", "HTTP-Referer": "https://t.me/anime_ai_18_bot" }, 
+            body: JSON.stringify({ 
+                model: "gryphe/mythomax-l2-13b", // БЫСТРАЯ И НАДЕЖНАЯ МОДЕЛЬ ДЛЯ VERCEL
+                messages: messages, 
+                temperature: 0.85, 
+                max_tokens: parseInt(len || 25) * 5 
+            }) 
+        });
+        
         const data = await aiResponse.json();
-        if (data.choices && data.choices[0]) { res.json({ reply: data.choices[0].message.content, new_balance: user.shards }); } else throw new Error("API Error");
-    } catch (e) { res.status(500).json({ error: "Ошибка ИИ." }); }
+        
+        if (data.error) {
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } // Возвращаем осколок
+            return res.status(500).json({ error: "OpenRouter: " + (data.error.message || "Ошибка ИИ") });
+        }
+
+        if (data.choices && data.choices[0]) { 
+            res.json({ reply: data.choices[0].message.content, new_balance: user.shards }); 
+        } else { 
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } // Возвращаем осколок
+            res.status(500).json({ error: "ИИ не смог сгенерировать ответ." });
+        }
+    } catch (e) { 
+        res.status(500).json({ error: "Таймаут. Vercel прервал запрос." }); 
+    }
 });
 
 // ================= ПЛАТЕЖИ И ВЕБХУКИ =================
