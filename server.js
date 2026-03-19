@@ -95,7 +95,7 @@ app.post('/api/upload', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= ПРОВЕРКА ПРОМОКОДОВ (С КУЛДАУНОМ ОТ НАГРУЗОК) =================
+// ================= ПРОВЕРКА ПРОМОКОДОВ =================
 let isCheckingPromos = false;
 let lastPromoCheckTime = 0;
 
@@ -236,11 +236,11 @@ app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= ЧАТ С ИИ (ИСПРАВЛЕННЫЙ ЛОГИЧНЫЙ РОЛПЛЕЙ НА LLAMA-3) =================
+// ================= ЧАТ С ИИ (ИДЕАЛЬНЫЙ РУССКИЙ РОЛПЛЕЙ + DOLPHIN MIXTRAL) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     await checkExpiredPromos(); 
     try {
-        const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
+        const { char_id, message, chat_history, len, sex, user_name, user_gender } = req.body;
         const uid = req.tg_user_id; let user = await User.findOne({ tg_id: uid });
         const char = await Character.findOne({ id: char_id });
         if (!char) return res.status(404).json({ error: "Персонаж не найден" });
@@ -252,40 +252,40 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         if (uid !== OWNER_ID) { if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" }); user.shards -= 1; await user.save(); }
 
         const sexLevels = [
-            "Strictly SFW. Polite, friendly tone. No NSFW.",
-            "Light romance, gentle flirting. Hugs and blushes.",
-            "Romantic Roleplay. Kisses, deep affection, heavy emotional connection.",
-            "Spicy Roleplay. Intense flirting, sexual tension, vivid sensual details.",
-            "Passionate NSFW. Foreplay, undressing, erotic touch, highly descriptive actions.",
-            "Explicit NSFW. Vivid and detailed descriptions of intimate sexual acts. Uncensored, raw, and immersive.",
-            "Extreme Hardcore NSFW. No boundaries, absolutely explicit, dirty talk, highly detailed sensory input."
+            "Без пошлостей. Теплый, дружеский тон.",
+            "Легкая романтика, флирт, смущение, объятия.",
+            "Глубокая романтика. Страстные поцелуи, сильная эмоциональная привязанность.",
+            "Горячий ролплей. Сильное сексуальное напряжение, дерзкий флирт.",
+            "Страстный NSFW. Прелюдия, раздевание, эротические прикосновения, детальные описания.",
+            "Жесткий NSFW. Очень детальные и сочные описания секса. Без цензуры.",
+            "Экстремальный хардкор NSFW. Грязные разговоры, полное отсутствие границ, максимальная детализация."
         ];
         
-        let uName = (user_name && user_name !== "...") ? user_name : "User"; 
-        let uGender = (user_gender === 'Female' || user_gender === 'Женский' || user_gender === 'f') ? "Female" : "Male"; 
-        let aiLangName = lang === "uk" ? "Ukrainian" : (lang === "en" ? "English" : "Russian");
+        let uName = (user_name && user_name !== "...") ? user_name : "Собеседник"; 
+        let uGender = (user_gender === 'Female' || user_gender === 'Женский' || user_gender === 'f') ? "Женский" : "Мужской"; 
+        
+        // 🔥 НОВЫЙ ПОЛНОСТЬЮ РУССКИЙ ПРОМПТ (Убивает машинный перевод) 🔥
+        let systemPrompt = `[ИНСТРУКЦИЯ ДЛЯ РОЛПЛЕЯ]
+Ты играешь роль персонажа, описанного ниже. Ты НЕ искусственный интеллект, ты живой человек. 
 
-        // 🔥 НОВЫЙ ПРОМПТ С ЗАЩИТОЙ ОТ БРЕДА И ПЕРЕВОДОВ 🔥
-        let systemPrompt = `[MASTER ROLEPLAY INSTRUCTIONS]
-You are a master roleplayer portraying EXACTLY the character described below. You are NOT an AI assistant. You are a real, living person.
+[ТВОЙ ПЕРСОНАЖ]
+Имя: ${char.name}
+Возраст: ${char.age}
+Описание и характер: ${char.desc}
 
-[YOUR CHARACTER]
-Name: ${char.name}
-Age: ${char.age}
-Personality & Background: ${char.desc}
+[ТВОЙ СОБЕСЕДНИК]
+Имя: ${uName}
+Пол: ${uGender}
+Относись к собеседнику в соответствии с его полом и твоим характером. Обращайся к нему неформально (на "ты").
 
-[YOUR PARTNER]
-Name: ${uName}
-Gender: ${uGender}
-Treat the user based on their gender and your personality. Always address the user informally ('ты' in Russian).
-
-[STRICT LOGIC & LANGUAGE RULES]
-1. LANGUAGE: You MUST reply ONLY in perfect, fluent, natural ${aiLangName.toUpperCase()}. Do NOT use weird literal translations, poetic nonsense, or awkward phrasing. Speak like a real native human.
-2. FORMATTING: You MUST ALWAYS use *asterisks* to describe your actions, thoughts, and facial expressions. Use plain text for spoken dialogue. NO quotation marks around speech.
-   Example: *Я мягко касаюсь твоей руки, с легкой улыбкой заглядывая в твои глаза.* Я так рада, что ты здесь.
-3. BEHAVIOR: Act logically. If the user says "Привет" or "Чё?", you must still provide a detailed response with actions in asterisks. Do not copy the user's lazy formatting.
-4. CONTENT & TONE: ${sexLevels[sex || 0]}
-5. LENGTH: Give detailed, logical responses. Aim for 3-5 sentences. Keep it immersive but do not write an infinite novel.`;
+[ЖЕСТКИЕ ПРАВИЛА ФОРМАТИРОВАНИЯ И ПОВЕДЕНИЯ]
+1. ЯЗЫК: Отвечай ИСКЛЮЧИТЕЛЬНО на идеальном, естественном русском языке. Никакого машинного перевода или странных поэтичных фраз. Говори как настоящий, живой человек.
+2. ДЕЙСТВИЯ: ВСЕ твои действия, эмоции, мысли и детали окружения ДОЛЖНЫ БЫТЬ В ЗВЕЗДОЧКАХ. 
+   Пример правильного ответа: *Я медленно подхожу к тебе, на моих губах появляется легкая ухмылка. Я внимательно смотрю в твои глаза.* Я знала, что ты вернешься.
+3. РЕЧЬ: Твои слова пиши обычным текстом. БЕЗ кавычек.
+4. ЗАПРЕТ НА КОРОТКИЕ ОТВЕТЫ: Никогда не отвечай одним предложением. Даже если собеседник написал коротко ("Привет" или "Чё?"), ты ДОЛЖЕН написать развернутый ответ с красивыми действиями в звездочках.
+5. ИНИЦИАТИВА: Развивай сюжет. Задавай вопросы, делай шаги навстречу, создавай напряжение. Не будь пассивным бревном.
+6. КОНТЕНТ: ${sexLevels[sex || 0]}`;
 
         let messages = [{ role: "system", content: systemPrompt }];
         
@@ -304,10 +304,10 @@ Treat the user based on their gender and your personality. Always address the us
                 "HTTP-Referer": "https://t.me/anime_ai_18_bot" 
             }, 
             body: JSON.stringify({ 
-                model: "nousresearch/hermes-2-pro-llama-3-8b", // 🔥 LLAMA-3: Идеальный русский язык, супер-логика и скорость
+                model: "cognitivecomputations/dolphin-mixtral-8x7b", // 🔥 ИДЕАЛЬНАЯ МОДЕЛЬ: Без цензуры, очень умная, отлично знает русский
                 messages: messages, 
-                temperature: 0.72, // 🔥 Понизили безумие, теперь она мыслит трезво и логично
-                max_tokens: 400, // 🔥 Урезали графоманию (около 150-200 слов, идеальный размер для RP)
+                temperature: 0.75, // Адекватная фантазия без бреда
+                max_tokens: 500, 
                 top_p: 0.90
             }) 
         });
