@@ -95,6 +95,35 @@ app.post('/api/upload', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ================= ПРОВЕРКА ПРОМОКОДОВ (С КУЛДАУНОМ ОТ НАГРУЗОК) =================
+let isCheckingPromos = false;
+let lastPromoCheckTime = 0;
+
+const checkExpiredPromos = async () => {
+    const now = Date.now();
+    if (isCheckingPromos || (now - lastPromoCheckTime < 60000)) return; 
+    
+    isCheckingPromos = true;
+    lastPromoCheckTime = now;
+    
+    try {
+        const expiredPromos = await Promo.find({ expiresAt: { $lte: now } });
+        if (expiredPromos.length > 0) {
+            for (let promo of expiredPromos) {
+                await Promo.deleteOne({ _id: promo._id });
+                if (promo.messageId) {
+                    const text = `${promo.emoji}\nПромокод <s>«${promo.code}»</s> даёт ${promo.reward} осколков\nUPD: промокод закончился`;
+                    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: PROMO_CHANNEL, message_id: promo.messageId, text: text, parse_mode: 'HTML' })
+                    }).catch(()=>{}); 
+                }
+            }
+        }
+    } catch (e) { console.error("Promo Check Error", e); }
+    isCheckingPromos = false;
+};
+
 // ================= ПРОФИЛЬ =================
 app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
     try {
@@ -112,29 +141,9 @@ app.post('/api/user/get-data', checkTgAuth, async (req, res) => {
         res.json(responseObj);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ================= ПРОВЕРКА ПРОМОКОДОВ (ЖЕЛЕЗОБЕТОННАЯ) =================
-// Теперь стоит await в нужных местах, Vercel дождется зачеркивания!
-const checkExpiredPromos = async () => {
-    try {
-        const expiredPromos = await Promo.find({ expiresAt: { $lte: Date.now() } });
-        if (expiredPromos.length > 0) {
-            for (let promo of expiredPromos) {
-                await Promo.deleteOne({ _id: promo._id });
-                if (promo.messageId) {
-                    const text = `${promo.emoji}\nПромокод <s>«${promo.code}»</s> даёт ${promo.reward} осколков\nUPD: промокод закончился`;
-                    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chat_id: PROMO_CHANNEL, message_id: promo.messageId, text: text, parse_mode: 'HTML' })
-                    }).catch(()=>{}); 
-                }
-            }
-        }
-    } catch (e) { console.error("Promo Check Error", e); }
-};
 
-// ================= СИНХРОНИЗАЦИЯ =================
 app.post('/api/user/sync', checkTgAuth, async (req, res) => {
-    await checkExpiredPromos(); // Ждем завершения проверки перед ответом!
+    await checkExpiredPromos(); 
     try {
         const uid = req.tg_user_id; let user = await User.findOne({ tg_id: uid });
         if (!user) return res.json({ shards: 0, subscription: "FREE", unlocked_chars: [] });
@@ -227,9 +236,9 @@ app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= ЧАТ С ИИ (БЫСТРАЯ МОДЕЛЬ + ФИКС ОШИБОК) =================
+// ================= ЧАТ С ИИ (ЖЕЛЕЗОБЕТОННЫЙ ROLEPLAY) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
-    await checkExpiredPromos(); // Тоже проверяем при отправке сообщения
+    await checkExpiredPromos(); 
     try {
         const { char_id, message, chat_history, len, sex, user_name, user_gender, lang } = req.body;
         const uid = req.tg_user_id; let user = await User.findOne({ tg_id: uid });
@@ -240,22 +249,62 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
             if (!user.unlocked_chars || !user.unlocked_chars.includes(char.id)) { return res.status(403).json({ error: "locked_exclusive" }); }
         }
 
-        // Списываем осколок заранее
         if (uid !== OWNER_ID) { if (user.shards < 1) return res.status(402).json({ error: "Недостаточно осколков" }); user.shards -= 1; await user.save(); }
 
-        const sexLevels = ["Strictly SFW. Polite, friendly tone. No NSFW.", "Light romance, gentle flirting. Hugs and blushes.", "Romantic Roleplay. Kisses, deep affection, heavy petting.", "Spicy Roleplay. Intense flirting, sexual tension, hot make-out sessions.", "Passionate NSFW. Foreplay, undressing, erotic touch.", "Explicit NSFW. Vivid and detailed descriptions of intimate sexual acts. Uncensored.", "Extreme Hardcore NSFW. No boundaries, absolutely explicit, dirty talk."];
-        let uName = (user_name && user_name !== "...") ? user_name : "User"; let uGender = (user_gender === 'Female' || user_gender === 'Женский' || user_gender === 'f') ? "Female" : "Male"; let aiLangName = lang === "uk" ? "Ukrainian" : (lang === "en" ? "English" : "Russian");
+        const sexLevels = [
+            "Strictly SFW. Polite, friendly tone. No NSFW.",
+            "Light romance, gentle flirting. Hugs and blushes.",
+            "Romantic Roleplay. Kisses, deep affection.",
+            "Spicy Roleplay. Intense flirting, sexual tension.",
+            "Passionate NSFW. Foreplay, undressing, erotic touch.",
+            "Explicit NSFW. Vivid and detailed descriptions of intimate sexual acts. Uncensored.",
+            "Extreme Hardcore NSFW. No boundaries, absolutely explicit, dirty talk."
+        ];
+        
+        let uName = (user_name && user_name !== "...") ? user_name : "User"; 
+        let uGender = (user_gender === 'Female' || user_gender === 'Женский' || user_gender === 'f') ? "Female" : "Male"; 
+        let aiLangName = lang === "uk" ? "Ukrainian" : (lang === "en" ? "English" : "Russian");
 
-        let systemPrompt = `You are a character in an immersive Text Roleplay.\n[CHARACTER INFO] Name: ${char.name}, Age: ${char.age}, Personality: ${char.desc}\n[USER INFO] Name: ${uName}, Gender: ${uGender}\n[SETTINGS] Lewdness Level: ${sexLevels[sex || 0]}. Target Word Count: ~${len || 25} words.\n[RULES] 1. Speak ONLY in ${aiLangName.toUpperCase()}. 2. Wrap actions in *asterisks*. 3. React to User actions. 4. Never break character.`;
+        let systemPrompt = `[ROLEPLAY INSTRUCTIONS]
+You are EXACTLY the character described below. You are a real, living being chatting in real-time. Do NOT act like an AI or a book narrator.
+
+[YOUR CHARACTER PROFILE]
+Name: ${char.name}
+Age: ${char.age}
+Personality & Background: ${char.desc}
+
+[YOUR CHAT PARTNER (THE USER)]
+Name: ${uName}
+Gender: ${uGender}
+Treat the user based on their gender and your personality.
+
+[STRICT FORMATTING RULES - NEVER IGNORE]
+1. SPOKEN WORDS: Write exactly what you say in plain text. NO quotation marks around speech.
+2. ACTIONS & THOUGHTS: MUST be enclosed in *asterisks*. 
+   Example of correct format: *I step closer and smile warmly* Hey, I really missed you today.
+3. BEHAVIOR: Act like a human. Talk naturally. React directly to ${uName}'s actions and words.
+4. LANGUAGE: You MUST reply ONLY in ${aiLangName.toUpperCase()}.
+5. CONTENT & TONE: ${sexLevels[sex || 0]}
+6. LENGTH: Keep your response around ${len || 25} words.`;
+
         let messages = [{ role: "system", content: systemPrompt }];
-        if (chat_history) chat_history.slice(-10).forEach(m => messages.push({ role: m.sender === 'user' ? "user" : "assistant", content: m.text }));
+        
+        if (chat_history) {
+            chat_history.slice(-10).forEach(m => {
+                messages.push({ role: m.sender === 'user' ? "user" : "assistant", content: m.text });
+            });
+        }
         messages.push({ role: "user", content: message });
 
         const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", { 
             method: "POST", 
-            headers: { "Authorization": `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json", "HTTP-Referer": "https://t.me/anime_ai_18_bot" }, 
+            headers: { 
+                "Authorization": `Bearer ${OPENROUTER_API_KEY}`, 
+                "Content-Type": "application/json", 
+                "HTTP-Referer": "https://t.me/anime_ai_18_bot" 
+            }, 
             body: JSON.stringify({ 
-                model: "gryphe/mythomax-l2-13b", // БЫСТРАЯ И НАДЕЖНАЯ МОДЕЛЬ ДЛЯ VERCEL
+                model: "gryphe/mythomax-l2-13b", 
                 messages: messages, 
                 temperature: 0.85, 
                 max_tokens: parseInt(len || 25) * 5 
@@ -265,17 +314,18 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         const data = await aiResponse.json();
         
         if (data.error) {
-            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } // Возвращаем осколок
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
             return res.status(500).json({ error: "OpenRouter: " + (data.error.message || "Ошибка ИИ") });
         }
 
         if (data.choices && data.choices[0]) { 
             res.json({ reply: data.choices[0].message.content, new_balance: user.shards }); 
         } else { 
-            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } // Возвращаем осколок
+            if (uid !== OWNER_ID) { user.shards += 1; await user.save(); } 
             res.status(500).json({ error: "ИИ не смог сгенерировать ответ." });
         }
     } catch (e) { 
+        console.error("Chat Error:", e.message);
         res.status(500).json({ error: "Таймаут. Vercel прервал запрос." }); 
     }
 });
