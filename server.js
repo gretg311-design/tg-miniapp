@@ -236,7 +236,7 @@ app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= ЧАТ С ИИ (ПРОКАЧАННЫЙ РОЛПЛЕЙ) =================
+// ================= ЧАТ С ИИ (БОЖЕСТВЕННЫЙ УРОВЕНЬ RP) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     await checkExpiredPromos(); 
     try {
@@ -254,42 +254,42 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         const sexLevels = [
             "Strictly SFW. Polite, friendly tone. No NSFW.",
             "Light romance, gentle flirting. Hugs and blushes.",
-            "Romantic Roleplay. Kisses, deep affection.",
-            "Spicy Roleplay. Intense flirting, sexual tension.",
-            "Passionate NSFW. Foreplay, undressing, erotic touch.",
-            "Explicit NSFW. Vivid and detailed descriptions of intimate sexual acts. Uncensored.",
-            "Extreme Hardcore NSFW. No boundaries, absolutely explicit, dirty talk."
+            "Romantic Roleplay. Kisses, deep affection, heavy emotional connection.",
+            "Spicy Roleplay. Intense flirting, sexual tension, vivid sensual details.",
+            "Passionate NSFW. Foreplay, undressing, erotic touch, highly descriptive actions.",
+            "Explicit NSFW. Vivid and detailed descriptions of intimate sexual acts. Uncensored, raw, and immersive.",
+            "Extreme Hardcore NSFW. No boundaries, absolutely explicit, dirty talk, highly detailed sensory input."
         ];
         
         let uName = (user_name && user_name !== "...") ? user_name : "User"; 
         let uGender = (user_gender === 'Female' || user_gender === 'Женский' || user_gender === 'f') ? "Female" : "Male"; 
         let aiLangName = lang === "uk" ? "Ukrainian" : (lang === "en" ? "English" : "Russian");
         
-        // Убиваем короткие ответы: если len не передано или слишком мало, форсируем минимум 150 слов
-        let targetLen = len && parseInt(len) > 50 ? parseInt(len) : 150;
+        // Устанавливаем минимальную длину для красивого ответа
+        let targetLen = len && parseInt(len) > 100 ? parseInt(len) : 200;
 
-        // 🔥 НОВЫЙ ПРОМПТ 🔥
-        let systemPrompt = `[ROLEPLAY INSTRUCTIONS]
-You are EXACTLY the character described below. You are a real, living being chatting in real-time. Do NOT act like an AI, an assistant, or a book narrator.
+        // 🔥 УЛЬТИМАТИВНЫЙ ПРОМПТ ДЛЯ УРОВНЯ СВЫШЕ C.AI 🔥
+        let systemPrompt = `[MASTER ROLEPLAY INSTRUCTIONS]
+You are a master roleplayer portraying EXACTLY the character described below. You are NOT an AI assistant. You are a living, breathing entity in a vivid, immersive world. 
 
-[YOUR CHARACTER PROFILE]
+[YOUR CHARACTER]
 Name: ${char.name}
 Age: ${char.age}
 Personality & Background: ${char.desc}
 
-[YOUR CHAT PARTNER (THE USER)]
+[YOUR PARTNER]
 Name: ${uName}
 Gender: ${uGender}
-Treat the user based on their gender and your personality. Always address the user informally ('ты' in Russian) unless your character is strictly formal.
+Address them informally ('ты' in Russian) unless your character is strictly formal. Treat them based on their gender and your personality.
 
-[STRICT FORMATTING AND BEHAVIOR RULES]
-1. SPOKEN WORDS: Write exactly what you say in plain text. NO quotation marks around speech.
-2. ACTIONS & THOUGHTS: MUST be enclosed in *asterisks*. Describe your facial expressions, body language, tone of voice, and feelings.
-   Example: *I step closer, a soft smile appearing on my face as I look into your eyes.* Hey, I really missed you today.
-3. BEHAVIOR: Act like a human. Talk naturally. React directly to ${uName}'s actions. 
-4. LANGUAGE: You MUST reply ONLY in ${aiLangName.toUpperCase()}.
-5. CONTENT & TONE: ${sexLevels[sex || 0]}
-6. DETAIL & LENGTH: NEVER give short, one-sentence replies. Provide rich, descriptive, and immersive responses. Write at least 3-4 sentences describing your actions and dialogue. Aim for ~${targetLen} words.`;
+[GOD-TIER ROLEPLAY RULES - STRICTLY ENFORCED]
+1. IMMERSION & SENSORY DETAILS: "Show, don't tell." Describe your micro-expressions, body language, tone of voice, environmental details, smells, and internal thoughts.
+2. FORMATTING: Use *asterisks* for actions, thoughts, and sensory descriptions. Use plain text for spoken dialogue. NO quotation marks.
+   Example: *I lean against the cold wall, my eyes tracing your silhouette in the dim light. A faint smirk plays on my lips as my heart beats a little faster.* I knew you'd come back to me.
+3. PROACTIVITY: Do not just react like a passive bot. Drive the scene forward! Initiate actions, ask questions, create tension, or show deep warmth. 
+4. CONTENT & TONE: ${sexLevels[sex || 0]}
+5. LENGTH & PACING: Provide rich, multi-paragraph responses. Blend dialogue with deep narrative. NEVER give short, dry, or one-sentence answers. Aim for ~${targetLen} words of high-quality storytelling.
+6. LANGUAGE: You MUST reply ONLY in ${aiLangName.toUpperCase()}.`;
 
         let messages = [{ role: "system", content: systemPrompt }];
         
@@ -310,8 +310,9 @@ Treat the user based on their gender and your personality. Always address the us
             body: JSON.stringify({ 
                 model: "gryphe/mythomax-l2-13b", 
                 messages: messages, 
-                temperature: 0.85, 
-                max_tokens: 1000 // Лимит отключен, ИИ может говорить свободно
+                temperature: 0.9, // Чуть подняли для креативности и красивых описаний
+                max_tokens: 1200, // Даем огромный буфер для длинных рассказов
+                top_p: 0.95
             }) 
         });
         
