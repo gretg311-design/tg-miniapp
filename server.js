@@ -236,7 +236,7 @@ app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= ЧАТ С ИИ (ЖЕЛЕЗОБЕТОННЫЙ ROLEPLAY) =================
+// ================= ЧАТ С ИИ (ЖЕЛЕЗОБЕТОННЫЙ ROLEPLAY + АНТИ-ОБРЫВ) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     await checkExpiredPromos(); 
     try {
@@ -307,7 +307,7 @@ Treat the user based on their gender and your personality.
                 model: "gryphe/mythomax-l2-13b", 
                 messages: messages, 
                 temperature: 0.85, 
-                max_tokens: parseInt(len || 25) * 5 
+                max_tokens: 1000 // 🔥 УБРАЛИ КЛЯП! Теперь ИИ может договорить мысль до конца
             }) 
         });
         
