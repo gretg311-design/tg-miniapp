@@ -236,7 +236,7 @@ app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= ЧАТ С ИИ (ЖЕЛЕЗОБЕТОННЫЙ ROLEPLAY + АНТИ-ОБРЫВ) =================
+// ================= ЧАТ С ИИ (ПРОКАЧАННЫЙ РОЛПЛЕЙ) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     await checkExpiredPromos(); 
     try {
@@ -264,9 +264,13 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         let uName = (user_name && user_name !== "...") ? user_name : "User"; 
         let uGender = (user_gender === 'Female' || user_gender === 'Женский' || user_gender === 'f') ? "Female" : "Male"; 
         let aiLangName = lang === "uk" ? "Ukrainian" : (lang === "en" ? "English" : "Russian");
+        
+        // Убиваем короткие ответы: если len не передано или слишком мало, форсируем минимум 150 слов
+        let targetLen = len && parseInt(len) > 50 ? parseInt(len) : 150;
 
+        // 🔥 НОВЫЙ ПРОМПТ 🔥
         let systemPrompt = `[ROLEPLAY INSTRUCTIONS]
-You are EXACTLY the character described below. You are a real, living being chatting in real-time. Do NOT act like an AI or a book narrator.
+You are EXACTLY the character described below. You are a real, living being chatting in real-time. Do NOT act like an AI, an assistant, or a book narrator.
 
 [YOUR CHARACTER PROFILE]
 Name: ${char.name}
@@ -276,16 +280,16 @@ Personality & Background: ${char.desc}
 [YOUR CHAT PARTNER (THE USER)]
 Name: ${uName}
 Gender: ${uGender}
-Treat the user based on their gender and your personality.
+Treat the user based on their gender and your personality. Always address the user informally ('ты' in Russian) unless your character is strictly formal.
 
-[STRICT FORMATTING RULES - NEVER IGNORE]
+[STRICT FORMATTING AND BEHAVIOR RULES]
 1. SPOKEN WORDS: Write exactly what you say in plain text. NO quotation marks around speech.
-2. ACTIONS & THOUGHTS: MUST be enclosed in *asterisks*. 
-   Example of correct format: *I step closer and smile warmly* Hey, I really missed you today.
-3. BEHAVIOR: Act like a human. Talk naturally. React directly to ${uName}'s actions and words.
+2. ACTIONS & THOUGHTS: MUST be enclosed in *asterisks*. Describe your facial expressions, body language, tone of voice, and feelings.
+   Example: *I step closer, a soft smile appearing on my face as I look into your eyes.* Hey, I really missed you today.
+3. BEHAVIOR: Act like a human. Talk naturally. React directly to ${uName}'s actions. 
 4. LANGUAGE: You MUST reply ONLY in ${aiLangName.toUpperCase()}.
 5. CONTENT & TONE: ${sexLevels[sex || 0]}
-6. LENGTH: Keep your response around ${len || 25} words.`;
+6. DETAIL & LENGTH: NEVER give short, one-sentence replies. Provide rich, descriptive, and immersive responses. Write at least 3-4 sentences describing your actions and dialogue. Aim for ~${targetLen} words.`;
 
         let messages = [{ role: "system", content: systemPrompt }];
         
@@ -307,7 +311,7 @@ Treat the user based on their gender and your personality.
                 model: "gryphe/mythomax-l2-13b", 
                 messages: messages, 
                 temperature: 0.85, 
-                max_tokens: 1000 // 🔥 УБРАЛИ КЛЯП! Теперь ИИ может договорить мысль до конца
+                max_tokens: 1000 // Лимит отключен, ИИ может говорить свободно
             }) 
         });
         
