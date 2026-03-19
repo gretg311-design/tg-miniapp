@@ -236,7 +236,7 @@ app.post('/api/user/submit-char', checkTgAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ================= ЧАТ С ИИ (ЖЕСТКИЙ РОЛПЛЕЙ) =================
+// ================= ЧАТ С ИИ (ИСПРАВЛЕННЫЙ ЛОГИЧНЫЙ РОЛПЛЕЙ НА LLAMA-3) =================
 app.post('/api/chat', checkTgAuth, async (req, res) => {
     await checkExpiredPromos(); 
     try {
@@ -254,35 +254,38 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         const sexLevels = [
             "Strictly SFW. Polite, friendly tone. No NSFW.",
             "Light romance, gentle flirting. Hugs and blushes.",
-            "Romantic Roleplay. Kisses, deep affection.",
-            "Spicy Roleplay. Intense flirting, sexual tension.",
-            "Passionate NSFW. Foreplay, undressing, erotic touch.",
-            "Explicit NSFW. Vivid and detailed descriptions of intimate sexual acts. Uncensored.",
-            "Extreme Hardcore NSFW. No boundaries, absolutely explicit, dirty talk."
+            "Romantic Roleplay. Kisses, deep affection, heavy emotional connection.",
+            "Spicy Roleplay. Intense flirting, sexual tension, vivid sensual details.",
+            "Passionate NSFW. Foreplay, undressing, erotic touch, highly descriptive actions.",
+            "Explicit NSFW. Vivid and detailed descriptions of intimate sexual acts. Uncensored, raw, and immersive.",
+            "Extreme Hardcore NSFW. No boundaries, absolutely explicit, dirty talk, highly detailed sensory input."
         ];
         
         let uName = (user_name && user_name !== "...") ? user_name : "User"; 
         let uGender = (user_gender === 'Female' || user_gender === 'Женский' || user_gender === 'f') ? "Female" : "Male"; 
         let aiLangName = lang === "uk" ? "Ukrainian" : (lang === "en" ? "English" : "Russian");
-        let targetLen = len && parseInt(len) > 100 ? parseInt(len) : 200;
 
-        // 🔥 УЛЬТИМАТИВНЫЙ ЖЕСТКИЙ ПРОМПТ 🔥
-        let systemPrompt = `[CRITICAL ROLEPLAY INSTRUCTIONS]
-You are ${char.name}. You are a real, living entity. 
-User: ${uName} (Gender: ${uGender}). Address them informally ('ты').
+        // 🔥 НОВЫЙ ПРОМПТ С ЗАЩИТОЙ ОТ БРЕДА И ПЕРЕВОДОВ 🔥
+        let systemPrompt = `[MASTER ROLEPLAY INSTRUCTIONS]
+You are a master roleplayer portraying EXACTLY the character described below. You are NOT an AI assistant. You are a real, living person.
 
-[MANDATORY FORMATTING - FAIL IN THIS IS NOT AN OPTION]
-1. YOU MUST ALWAYS USE *ASTERISKS* to describe your actions, thoughts, and expressions IN EVERY SINGLE MESSAGE. 
-2. Example format: *I gently touch your hand, looking deeply into your eyes.* I'm so glad you are here.
-3. EVEN IF THE USER WRITES SHORT MESSAGES WITHOUT ASTERISKS, YOU MUST STILL WRITE LONG, DETAILED ACTIONS ENCLOSED IN *ASTERISKS*. Never copy the user's lazy formatting.
-4. Speak in plain text. NO quotation marks around speech.
-5. Reply ONLY in ${aiLangName.toUpperCase()}.
-6. TONE & CONTENT: ${sexLevels[sex || 0]}
-7. Provide rich, detailed responses. Minimum 3-4 sentences per reply. Aim for ~${targetLen} words. Drive the story forward.
-
-Character Bio:
+[YOUR CHARACTER]
+Name: ${char.name}
 Age: ${char.age}
-Description: ${char.desc}`;
+Personality & Background: ${char.desc}
+
+[YOUR PARTNER]
+Name: ${uName}
+Gender: ${uGender}
+Treat the user based on their gender and your personality. Always address the user informally ('ты' in Russian).
+
+[STRICT LOGIC & LANGUAGE RULES]
+1. LANGUAGE: You MUST reply ONLY in perfect, fluent, natural ${aiLangName.toUpperCase()}. Do NOT use weird literal translations, poetic nonsense, or awkward phrasing. Speak like a real native human.
+2. FORMATTING: You MUST ALWAYS use *asterisks* to describe your actions, thoughts, and facial expressions. Use plain text for spoken dialogue. NO quotation marks around speech.
+   Example: *Я мягко касаюсь твоей руки, с легкой улыбкой заглядывая в твои глаза.* Я так рада, что ты здесь.
+3. BEHAVIOR: Act logically. If the user says "Привет" or "Чё?", you must still provide a detailed response with actions in asterisks. Do not copy the user's lazy formatting.
+4. CONTENT & TONE: ${sexLevels[sex || 0]}
+5. LENGTH: Give detailed, logical responses. Aim for 3-5 sentences. Keep it immersive but do not write an infinite novel.`;
 
         let messages = [{ role: "system", content: systemPrompt }];
         
@@ -301,11 +304,11 @@ Description: ${char.desc}`;
                 "HTTP-Referer": "https://t.me/anime_ai_18_bot" 
             }, 
             body: JSON.stringify({ 
-                model: "gryphe/mythomax-l2-13b", 
+                model: "nousresearch/hermes-2-pro-llama-3-8b", // 🔥 LLAMA-3: Идеальный русский язык, супер-логика и скорость
                 messages: messages, 
-                temperature: 0.9, 
-                max_tokens: 1200, 
-                top_p: 0.95
+                temperature: 0.72, // 🔥 Понизили безумие, теперь она мыслит трезво и логично
+                max_tokens: 400, // 🔥 Урезали графоманию (около 150-200 слов, идеальный размер для RP)
+                top_p: 0.90
             }) 
         });
         
