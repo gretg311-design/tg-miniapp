@@ -71,130 +71,162 @@
         .md-content strong { color: #fff; font-weight: bold; }
         .md-content ul, .md-content ol { margin: 0; padding-left: 20px; }
         .md-content a { color: #00bcd4; text-decoration: none; }
-    <div id="p-chat" class="overlay" style="padding: 0;">
-        <div style="width: 100%; background: #0d041a; padding: 85px 15px 15px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d164d;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <img id="chat-header-avatar" src="" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid #bc42f5; object-fit: cover;">
-                <div style="font-weight: bold; color: #bc42f5; font-size: 18px;" id="chat-char-name">Имя Персонажа</div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <div style="font-weight: bold; color: #fff; font-size: 16px;">🌙 <span id="chat-shards-balance">0</span></div>
-                <div style="color: #888; font-size: 28px; cursor: pointer; padding: 0 5px; line-height: 1;" onclick="closeChat()">×</div>
-            </div>
-        </div>
-        <div class="chat-container">
-            <div class="chat-messages" id="chat-messages-box"></div>
-            <div class="chat-input-area">
-                <textarea id="chat-input-text" class="chat-input" placeholder="Ваше сообщение..." rows="1" style="height: 40px;" oninput="this.style.height = '40px'; this.style.height = (this.scrollHeight) + 'px';"></textarea>
-                <button id="chat-send-btn" class="chat-send-btn" onclick="sendMessage()">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z" fill="currentColor"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="p-user-chars" class="overlay">
-        <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chars">ПЕРСОНАЖИ</h2>
+        .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a0b2e; font-size: 14px; align-items: center; }
+        .p-label { color: #888; } .p-val { color: #fff; font-weight: bold; }
+        .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
         
-        <div class="tabs-wrap">
-            <div class="tab-btn active" id="tab-char-off" onclick="switchCharTab('official')">Официальные</div>
-            <div class="tab-btn" id="tab-char-cus" onclick="switchCharTab('custom')">Пользовательские</div>
-            <div class="tab-btn" id="tab-char-exc" onclick="switchCharTab('exclusive')">Эксклюзивные</div>
-        </div>
-
-        <div id="official-tools" style="width:100%; margin-bottom:15px; display:block;">
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <input type="text" id="char-search" class="term-in" placeholder="Поиск по имени..." style="margin-bottom:0; flex:1;" oninput="renderUserChars(false)">
-            </div>
-            <div class="info-card" style="padding:10px; margin-bottom:0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="font-size:10px; color:#888; font-weight:bold;">ПОЛ:</span>
-                    <div style="display:flex; gap:10px;">
-                        <span id="f-g-all" style="font-size:10px; color:#bc42f5; font-weight:bold; cursor:pointer;" onclick="setOffFilter('gender','all')">ВСЕ</span>
-                        <span id="f-g-m" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('gender','m')">МУЖ</span>
-                        <span id="f-g-f" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('gender','f')">ЖЕН</span>
-                    </div>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:10px; color:#888; font-weight:bold;">КАТЕГОРИЯ:</span>
-                    <div style="display:flex; gap:10px;">
-                        <span id="f-c-all" style="font-size:10px; color:#bc42f5; font-weight:bold; cursor:pointer;" onclick="setOffFilter('cat','all')">ВСЕ</span>
-                        <span id="f-c-anime" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('cat','anime')">АНИМЕ</span>
-                        <span id="f-c-games" style="font-size:10px; color:#555; cursor:pointer;" onclick="setOffFilter('cat','games')">ИГРЫ</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="custom-filters" style="display:none; background:#11081d; border:1px solid #2d164d; border-radius:8px; padding:12px; margin-bottom:15px; width:100%;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
-                <span style="font-size:11px; color:#888; text-transform:uppercase; font-weight:bold;">Пол:</span>
-                <div style="display:flex; gap:10px;">
-                    <span id="filt-g-all" style="font-size:11px; color:#bc42f5; cursor:pointer; font-weight:bold; transition:0.2s;" onclick="setCustomFilter('gender', 'all')">Все</span>
-                    <span id="filt-g-m" style="font-size:11px; color:#555; cursor:pointer; transition:0.2s;" onclick="setCustomFilter('gender', 'm')">Мужские</span>
-                    <span id="filt-g-f" style="font-size:11px; color:#555; cursor:pointer; transition:0.2s;" onclick="setCustomFilter('gender', 'f')">Женские</span>
-                </div>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:11px; color:#888; text-transform:uppercase; font-weight:bold;">Сортировка:</span>
-                <div style="display:flex; gap:10px;">
-                    <span id="filt-s-new" style="font-size:11px; color:#bc42f5; cursor:pointer; font-weight:bold; transition:0.2s;" onclick="setCustomFilter('sort', 'new')">Новые</span>
-                    <span id="filt-s-pop" style="font-size:11px; color:#555; cursor:pointer; transition:0.2s;" onclick="setCustomFilter('sort', 'pop')">Популярные</span>
-                </div>
-            </div>
-        </div>
-
-        <div id="user-char-list" class="char-grid"></div>
-        <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-
-    <div id="p-char-dossier" class="overlay">
-        <h2 style="color:#bc42f5; margin-bottom: 10px;" id="dos-name">Имя</h2>
-        <div class="info-card">
-            <div id="dos-badge" class="status-badge" style="display:none;"></div>
-
-            <img id="dos-img" src="" class="dossier-img">
-            <div class="p-row"><span class="p-label" data-i18n="dos_age">Возраст:</span> <span class="p-val" id="dos-age">18</span></div>
-            <div class="p-row"><span class="p-label" data-i18n="dos_gender">Пол:</span> <span class="p-val" id="dos-gender">М</span></div>
-            <div class="md-content" style="margin-top:15px; font-size:12px; color:#ccc; line-height:1.4;" id="dos-desc">Описание...</div>
-        </div>
+        input[type="range"] { touch-action: pan-y; }
+        .slider-wrap { width: 100%; margin-top: 5px; }
+        .slider { width: 100%; -webkit-appearance: none; height: 4px; background: #2d164d; border-radius: 2px; outline: none; }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #bc42f5; box-shadow: 0 0 10px #bc42f5; }
+        .slider-val { float: right; color: #bc42f5; font-weight: bold; }
         
-        <div id="dos-chat-btn" class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()" data-i18n="b_start_chat">НАЧАТЬ ЧАТ</div>
+        .gender-box { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
+        .gender-btn { flex: 1; padding: 10px; border: 1px solid #2d164d; border-radius: 8px; text-align: center; font-size: 12px; color: #555; cursor: pointer; }
+        .gender-btn.active { border-color: #bc42f5; color: #bc42f5; background: rgba(188, 66, 245, 0.1); }
+
+        #char-preview, #exc-char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
+        .char-counter { font-size: 10px; color: #bc42f5; text-align: right; margin-top: -8px; margin-bottom: 10px; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
+
+        .shop-item { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; }
+        .shop-title { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 5px; }
+        .shop-desc { font-size: 12px; color: #888; margin-bottom: 15px; text-align: center; }
+        .buy-btns { display: flex; gap: 10px; width: 100%; }
+        .btn-stars { flex: 1; background: rgba(255, 215, 0, 0.1); border: 1px solid gold; color: gold; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-ton { flex: 1; background: rgba(0, 136, 204, 0.1); border: 1px solid #0088cc; color: #0088cc; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .shop-header { color: #e91e63; font-size: 14px; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; width: 100%; text-align: left; border-bottom: 1px solid #2d164d; padding-bottom: 5px;}
+
+        .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .char-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; position: relative;}
+        .char-card img { width: 100%; height: 120px; object-fit: cover; }
+        .char-card-info { padding: 10px; text-align: center; }
+        .char-card-name { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 5px; }
+        .char-card-tags { font-size: 10px; color: #00bcd4; }
+        .dossier-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; border: 1px solid #bc42f5; margin-bottom: 15px; }
+
+        .chat-container { flex: 1; width: 100%; background: #05010a; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; }
         
-        <div id="dos-unlock-btn" class="term-btn" style="border-color:gold; background:rgba(255,215,0,0.1); color:gold; display:none;">🔓 ОТКРЫТЬ ДОСТУП ЗА 10 ⭐️</div>
+        .chat-msg-row { display: flex; align-items: flex-end; width: 100%; }
+        .chat-msg-row.user-row { justify-content: flex-end; }
+        .chat-msg-row.char-row { justify-content: flex-start; }
+        
+        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .user-row .msg-avatar { margin-left: 10px; border: 1px solid #2d164d; }
+        .char-row .msg-avatar { margin-right: 10px; border: 1px solid #bc42f5; }
+        
+        .msg-bot-wrapper { display: flex; flex-direction: column; max-width: 80%; align-items: flex-start; }
+        .msg-user-wrapper { display: flex; flex-direction: column; max-width: 80%; align-items: flex-end; }
 
-        <div id="dos-pub-btn" class="term-btn" style="border-color:#f39c12; display:none;" onclick="publishMyChar()">ДОБАВИТЬ К ГЛАВНЫМ</div>
+        .msg-box { padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .msg-user { background: #2d164d; border-bottom-right-radius: 2px; }
+        .msg-char { background: #1a0b2e; border-bottom-left-radius: 2px; border: 1px solid #bc42f5; width: 100%; }
+        
+        .msg-bottom-bar { display: flex; align-items: center; justify-content: space-between; background: #11081d; padding: 6px 10px; border-radius: 10px; margin-top: 6px; border: 1px solid #2d164d; width: 100%; flex-wrap: wrap; gap: 5px;}
+        .msg-stats { display: flex; gap: 10px; font-size: 11px; color: #aaa; font-weight: bold; }
+        .msg-actions { display: flex; gap: 15px; font-size: 16px; color: #888; }
+        .msg-actions span { cursor: pointer; transition: transform 0.1s, color 0.1s; }
+        .msg-actions span:active { transform: scale(0.8); color: #fff; }
+        
+        .chat-input-area { display: flex; gap: 10px; padding: 10px; background: #0d041a; border-top: 1px solid #2d164d; align-items: flex-end; }
+        .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; resize: none; overflow-y: auto; max-height: 120px; font-family: inherit; line-height: 1.4; word-wrap: break-word; }
+        .chat-input:disabled { opacity: 0.5; }
+        
+        .chat-send-btn { background: linear-gradient(135deg, #bc42f5, #e91e63); color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 12px rgba(188, 66, 245, 0.6); transition: transform 0.1s, box-shadow 0.1s; flex-shrink: 0; }
+        .chat-send-btn:active { transform: scale(0.9); box-shadow: 0 0 5px rgba(188, 66, 245, 0.8); }
+        .chat-send-btn:disabled { background: #2d164d; box-shadow: none; color: #555; cursor: not-allowed; transform: none; }
+        .chat-send-btn svg { width: 20px; height: 20px; margin-right: -2px; margin-top: 2px; }
 
-        <div id="dos-del-btn" class="term-btn" style="border-color:#ff4444; display:none;" onclick="deleteChar()" data-i18n="b_del_char">УДАЛИТЬ ПЕРСОНАЖА</div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+        .chatlist-item { display: flex; align-items: center; background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 10px; margin-bottom: 10px; position: relative; z-index: 1; transition: z-index 0.1s; }
+        .chatlist-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #bc42f5; margin-right: 15px; flex-shrink: 0; cursor: pointer; }
+        .chatlist-info { flex: 1; overflow: hidden; cursor: pointer; }
+        .chatlist-name { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 5px; }
+        .chatlist-last { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .chat-menu-btn { background: none; border: none; color: #888; font-size: 20px; font-weight: bold; cursor: pointer; padding: 0 10px; }
+        .chat-dropdown { display: none; position: absolute; right: 35px; top: 35px; background: #11081d; border: 1px solid #bc42f5; border-radius: 8px; z-index: 1000; flex-direction: column; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        .chat-dropdown-item { padding: 12px 15px; font-size: 12px; color: #fff; cursor: pointer; border-bottom: 1px solid #2d164d; white-space: nowrap; }
+        .chat-dropdown-item:last-child { border-bottom: none; }
+        .pin-icon { color: #bc42f5; margin-right: 5px; font-size: 12px; }
+
+        .news-container { margin-top: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
+        .news-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; position: relative; }
+        .news-date { font-size: 10px; color: #bc42f5; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; }
+        .news-text { font-size: 12px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+        .news-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #2d164d; display: none; }
+
+        @media (min-width: 768px) {
+            .menu-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .char-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .con-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .msg-bot-wrapper, .msg-user-wrapper { max-width: 600px; }
+            .shop-item { flex-direction: row; justify-content: space-between; text-align: left; align-items: center; }
+            .shop-desc { text-align: left; margin-bottom: 0; margin-right: 20px; flex: 1; }
+            .buy-btns { width: auto; flex-shrink: 0; }
+            #app, .overlay { padding-left: 10vw; padding-right: 10vw; }
+        }
+        @media (min-width: 1200px) {
+            .menu-grid { grid-template-columns: repeat(5, 1fr); }
+            .char-grid { grid-template-columns: repeat(6, 1fr); }
+            #app, .overlay { padding-left: 20vw; padding-right: 20vw; }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            #app, .overlay { padding-top: 20px !important; }
+            .u-header { margin-bottom: 10px; }
+            .moon-logo { width: 60px; height: 60px; }
+            #p-chat > div:first-child { padding-top: 20px !important; }
+        }
+
+        .tabs-wrap { display: flex; background: #0d041a; border: 1px solid #2d164d; border-radius: 8px; margin-bottom: 15px; padding: 3px; width: 100%; }
+        .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 11px; font-weight: bold; color: #888; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        .tab-btn.active { background: #bc42f5; color: #fff; }
+        .status-badge { position: absolute; top: 8px; left: 8px; font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .bg-pending { background: #f39c12; color: #fff; }
+        .bg-private { background: #555; color: #fff; }
+        .bg-public { background: #00ff00; color: #000; }
+        .bg-exclusive { background: linear-gradient(90deg, #ff7eb3, #bc42f5); color: #fff; box-shadow: 0 0 10px #bc42f5; font-weight: 900; }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="moon-logo"></div>
+        <div class="legal-text">All characters are 18+.<br>Content is AI-generated and does not reflect real people.</div>
+        <div class="app-version">v. 1.2.1.0(beta)</div>
     </div>
-    
-    <div id="p-daily" class="overlay">
-        <h2 style="color:#00ff00; margin-bottom: 5px;" data-i18n="h_daily">ЕЖЕДНЕВНАЯ НАГРАДА</h2>
-        <div style="font-size: 11px; color: #888; margin-bottom: 20px; text-align:center;" data-i18n="d_sub">Награда зависит от подписки. Заходи 7 дней подряд для бонуса x2!</div>
-        <div class="info-card" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-            <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
-            <h3 id="daily-streak-text" style="color: #bc42f5; margin: 0 0 10px 0;">Стрик: 0 дней</h3>
-            <div style="font-size: 14px; margin-bottom: 15px; color:#aaa;">
-                <span data-i18n="d_today">Ваша награда сегодня:</span><br>
-                <b id="daily-reward-text" style="color: #00ff00; font-size: 24px;">...</b>
+
+    <div id="app">
+        <div class="u-header">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <img id="main-u-avatar" src="https://i.ibb.co/4pDNDk1/avatar.png" style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid #bc42f5; object-fit: cover;">
+                <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                    <div id="u-name" class="nick-base nick-free">...</div>
+                    <div id="u-badge" style="display:none;"></div>
+                    <div style="font-size:12px; color:#555; margin-top: 3px;">ID: <span id="u-id-head">0</span></div>
+                </div>
             </div>
-            <div id="daily-btn" class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00; width:80%;" onclick="claimDaily()" data-i18n="b_claim">ЗАБРАТЬ</div>
-            <div id="daily-wait" style="display:none; color:#888; font-size: 12px; margin-top: 10px;">Следующая награда будет доступна завтра.</div>
+            <div style="font-size: 22px; font-weight: bold;">🌙 <span id="shards-balance">0</span></div>
         </div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
+
+        <div class="menu-grid">
+            <div class="menu-item" onclick="openChatList()" data-i18n="m_chats">Чаты</div>
+            <div class="menu-item" onclick="openPanel('p-user-chars')" data-i18n="m_chars">Персонажи</div>
+            <div class="menu-item" onclick="openPanel('p-daily')" data-i18n="m_daily">Ежедневка</div>
+            <div class="menu-item" onclick="openPanel('p-user-tasks')" data-i18n="m_tasks">Задания</div>
+            <div class="menu-item" onclick="openPanel('p-shop')" data-i18n="m_shop">Магазин</div>
+            <div class="menu-item" onclick="openPanel('p-user-promos')" data-i18n="m_promos">Промокоды</div>
+            <div class="menu-item" onclick="openPanel('p-profile')" data-i18n="m_prof">Профиль</div>
+            <div class="menu-item" onclick="openPanel('p-settings')" data-i18n="m_set">Настройка</div>
+            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')" data-i18n="m_adm">Админка</div>
+            <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')" data-i18n="m_con">Консоль</div>
+        </div>
+        <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
+
+        <div id="main-news-feed" class="news-container"></div>
     </div>
-    
-    <div id="p-user-tasks" class="overlay">
-        <h2 style="color:#00ff00; margin-bottom: 20px;" data-i18n="h_tasks">ЗАДАНИЯ</h2>
-        <div class="info-card" style="text-align: center; border-color: #bc42f5;">
-            <h3 style="color:#bc42f5; margin-top:0; margin-bottom:5px;" data-i18n="t_invite">ПРИГЛАСИ ДРУГА</h3>
-            <div style="font-size:12px; color:#aaa; margin-bottom:10px;"><span data-i18n="t_invite_desc">Ты и твой друг получите по</span> <b style="color:#00ff00">100 🌙</b>!</div>
-            <div class="term-btn" style="border-color:#bc42f5; background:rgba(188,66,245,0.1); color:#fff; font-size:12px; padding:10px;" onclick="shareRef()" data-i18n="b_share">ПОДЕЛИТЬСЯ ССЫЛКОЙ</div>
-        </div>
-        <div id="user-task-list" style="width:100%"></div>
+    <div id="p-user-chatlist" class="overlay">
+        <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chats">МОИ ЧАТЫ</h2>
+        <div id="chatlist-container" style="width:100%"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
     <div id="p-m-subs" class="overlay">
