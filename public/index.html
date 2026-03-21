@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Moon Project - Железобетон 1.2.1.0 FULL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
         html, body { background: #05010a; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; overscroll-behavior: none; }
@@ -61,165 +64,13 @@
         .con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 20px; }
         .con-btn { border: 1px solid #e91e63; background: rgba(233, 30, 99, 0.05); border-radius: 10px; height: 60px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-transform: uppercase; font-weight: bold; cursor: pointer; text-align: center; }
 
-        .p-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a0b2e; font-size: 14px; align-items: center; }
-        .p-label { color: #888; } .p-val { color: #fff; font-weight: bold; }
-        .s-label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; text-align: left; }
-        
-        input[type="range"] { touch-action: pan-y; }
-        .slider-wrap { width: 100%; margin-top: 5px; }
-        .slider { width: 100%; -webkit-appearance: none; height: 4px; background: #2d164d; border-radius: 2px; outline: none; }
-        .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #bc42f5; box-shadow: 0 0 10px #bc42f5; }
-        .slider-val { float: right; color: #bc42f5; font-weight: bold; }
-        
-        .gender-box { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
-        .gender-btn { flex: 1; padding: 10px; border: 1px solid #2d164d; border-radius: 8px; text-align: center; font-size: 12px; color: #555; cursor: pointer; }
-        .gender-btn.active { border-color: #bc42f5; color: #bc42f5; background: rgba(188, 66, 245, 0.1); }
-
-        #char-preview, #exc-char-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; margin-bottom: 10px; display: none; border: 1px solid #bc42f5; }
-        .char-counter { font-size: 10px; color: #bc42f5; text-align: right; margin-top: -8px; margin-bottom: 10px; }
-        .task-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #2d164d; width:100%; font-size: 12px; }
-
-        .shop-item { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; }
-        .shop-title { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 5px; }
-        .shop-desc { font-size: 12px; color: #888; margin-bottom: 15px; text-align: center; }
-        .buy-btns { display: flex; gap: 10px; width: 100%; }
-        .btn-stars { flex: 1; background: rgba(255, 215, 0, 0.1); border: 1px solid gold; color: gold; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
-        .btn-ton { flex: 1; background: rgba(0, 136, 204, 0.1); border: 1px solid #0088cc; color: #0088cc; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 12px; cursor: pointer; }
-        .shop-header { color: #e91e63; font-size: 14px; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; width: 100%; text-align: left; border-bottom: 1px solid #2d164d; padding-bottom: 5px;}
-
-        .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .char-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; position: relative;}
-        .char-card img { width: 100%; height: 120px; object-fit: cover; }
-        .char-card-info { padding: 10px; text-align: center; }
-        .char-card-name { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 5px; }
-        .char-card-tags { font-size: 10px; color: #00bcd4; }
-        .dossier-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; border: 1px solid #bc42f5; margin-bottom: 15px; }
-
-        .chat-container { flex: 1; width: 100%; background: #05010a; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; }
-        
-        .chat-msg-row { display: flex; align-items: flex-end; width: 100%; }
-        .chat-msg-row.user-row { justify-content: flex-end; }
-        .chat-msg-row.char-row { justify-content: flex-start; }
-        
-        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-        .user-row .msg-avatar { margin-left: 10px; border: 1px solid #2d164d; }
-        .char-row .msg-avatar { margin-right: 10px; border: 1px solid #bc42f5; }
-        
-        .msg-bot-wrapper { display: flex; flex-direction: column; max-width: 80%; align-items: flex-start; }
-        .msg-user-wrapper { display: flex; flex-direction: column; max-width: 80%; align-items: flex-end; }
-
-        .msg-box { padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
-        .msg-user { background: #2d164d; border-bottom-right-radius: 2px; }
-        .msg-char { background: #1a0b2e; border-bottom-left-radius: 2px; border: 1px solid #bc42f5; width: 100%; }
-        
-        .msg-bottom-bar { display: flex; align-items: center; justify-content: space-between; background: #11081d; padding: 6px 10px; border-radius: 10px; margin-top: 6px; border: 1px solid #2d164d; width: 100%; flex-wrap: wrap; gap: 5px;}
-        .msg-stats { display: flex; gap: 10px; font-size: 11px; color: #aaa; font-weight: bold; }
-        .msg-actions { display: flex; gap: 15px; font-size: 16px; color: #888; }
-        .msg-actions span { cursor: pointer; transition: transform 0.1s, color 0.1s; }
-        .msg-actions span:active { transform: scale(0.8); color: #fff; }
-        
-        .chat-input-area { display: flex; gap: 10px; padding: 10px; background: #0d041a; border-top: 1px solid #2d164d; align-items: flex-end; }
-        .chat-input { flex: 1; background: #000; border: 1px solid #555; border-radius: 20px; padding: 10px 15px; color: white; outline: none; resize: none; overflow-y: auto; max-height: 120px; font-family: inherit; line-height: 1.4; word-wrap: break-word; }
-        .chat-input:disabled { opacity: 0.5; }
-        
-        .chat-send-btn { background: linear-gradient(135deg, #bc42f5, #e91e63); color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 12px rgba(188, 66, 245, 0.6); transition: transform 0.1s, box-shadow 0.1s; flex-shrink: 0; }
-        .chat-send-btn:active { transform: scale(0.9); box-shadow: 0 0 5px rgba(188, 66, 245, 0.8); }
-        .chat-send-btn:disabled { background: #2d164d; box-shadow: none; color: #555; cursor: not-allowed; transform: none; }
-        .chat-send-btn svg { width: 20px; height: 20px; margin-right: -2px; margin-top: 2px; }
-
-        .chatlist-item { display: flex; align-items: center; background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 10px; margin-bottom: 10px; position: relative; z-index: 1; transition: z-index 0.1s; }
-        .chatlist-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #bc42f5; margin-right: 15px; flex-shrink: 0; cursor: pointer; }
-        .chatlist-info { flex: 1; overflow: hidden; cursor: pointer; }
-        .chatlist-name { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 5px; }
-        .chatlist-last { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .chat-menu-btn { background: none; border: none; color: #888; font-size: 20px; font-weight: bold; cursor: pointer; padding: 0 10px; }
-        .chat-dropdown { display: none; position: absolute; right: 35px; top: 35px; background: #11081d; border: 1px solid #bc42f5; border-radius: 8px; z-index: 1000; flex-direction: column; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
-        .chat-dropdown-item { padding: 12px 15px; font-size: 12px; color: #fff; cursor: pointer; border-bottom: 1px solid #2d164d; white-space: nowrap; }
-        .chat-dropdown-item:last-child { border-bottom: none; }
-        .pin-icon { color: #bc42f5; margin-right: 5px; font-size: 12px; }
-
-        .news-container { margin-top: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
-        .news-card { background: #0d041a; border: 1px solid #2d164d; border-radius: 12px; padding: 15px; position: relative; }
-        .news-date { font-size: 10px; color: #bc42f5; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; }
-        .news-text { font-size: 12px; color: #ccc; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
-        .news-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 10px; border: 1px solid #2d164d; display: none; }
-
-        @media (min-width: 768px) {
-            .menu-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
-            .char-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
-            .con-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
-            .msg-bot-wrapper, .msg-user-wrapper { max-width: 600px; }
-            .shop-item { flex-direction: row; justify-content: space-between; text-align: left; align-items: center; }
-            .shop-desc { text-align: left; margin-bottom: 0; margin-right: 20px; flex: 1; }
-            .buy-btns { width: auto; flex-shrink: 0; }
-            #app, .overlay { padding-left: 10vw; padding-right: 10vw; }
-        }
-        @media (min-width: 1200px) {
-            .menu-grid { grid-template-columns: repeat(5, 1fr); }
-            .char-grid { grid-template-columns: repeat(6, 1fr); }
-            #app, .overlay { padding-left: 20vw; padding-right: 20vw; }
-        }
-        @media (max-height: 500px) and (orientation: landscape) {
-            #app, .overlay { padding-top: 20px !important; }
-            .u-header { margin-bottom: 10px; }
-            .moon-logo { width: 60px; height: 60px; }
-            #p-chat > div:first-child { padding-top: 20px !important; }
-        }
-
-        .tabs-wrap { display: flex; background: #0d041a; border: 1px solid #2d164d; border-radius: 8px; margin-bottom: 15px; padding: 3px; width: 100%; }
-        .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 11px; font-weight: bold; color: #888; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
-        .tab-btn.active { background: #bc42f5; color: #fff; }
-        .status-badge { position: absolute; top: 8px; left: 8px; font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        .bg-pending { background: #f39c12; color: #fff; }
-        .bg-private { background: #555; color: #fff; }
-        .bg-public { background: #00ff00; color: #000; }
-        .bg-exclusive { background: linear-gradient(90deg, #ff7eb3, #bc42f5); color: #fff; box-shadow: 0 0 10px #bc42f5; font-weight: 900; }
-    </style>
-</head>
-<body>
-    <div id="loading">
-        <div class="moon-logo"></div>
-        <div class="legal-text">All characters are 18+.<br>Content is AI-generated and does not reflect real people.</div>
-        <div class="app-version">v. 1.2.1.0(beta)</div>
-    </div>
-
-    <div id="app">
-        <div class="u-header">
-            <div style="display:flex; align-items:center; gap:15px;">
-                <img id="main-u-avatar" src="https://i.ibb.co/4pDNDk1/avatar.png" style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid #bc42f5; object-fit: cover;">
-                <div style="display:flex; flex-direction:column; align-items:flex-start;">
-                    <div id="u-name" class="nick-base nick-free">...</div>
-                    <div id="u-badge" style="display:none;"></div>
-                    <div style="font-size:12px; color:#555; margin-top: 3px;">ID: <span id="u-id-head">0</span></div>
-                </div>
-            </div>
-            <div style="font-size: 22px; font-weight: bold;">🌙 <span id="shards-balance">0</span></div>
-        </div>
-
-        <div class="menu-grid">
-            <div class="menu-item" onclick="openChatList()" data-i18n="m_chats">Чаты</div>
-            <div class="menu-item" onclick="openPanel('p-user-chars')" data-i18n="m_chars">Персонажи</div>
-            <div class="menu-item" onclick="openPanel('p-daily')" data-i18n="m_daily">Ежедневка</div>
-            <div class="menu-item" onclick="openPanel('p-user-tasks')" data-i18n="m_tasks">Задания</div>
-            <div class="menu-item" onclick="openPanel('p-shop')" data-i18n="m_shop">Магазин</div>
-            <div class="menu-item" onclick="openPanel('p-user-promos')" data-i18n="m_promos">Промокоды</div>
-            <div class="menu-item" onclick="openPanel('p-profile')" data-i18n="m_prof">Профиль</div>
-            <div class="menu-item" onclick="openPanel('p-settings')" data-i18n="m_set">Настройка</div>
-            <div class="menu-item btn-adm" id="nav-adm" style="display:none;" onclick="openPanel('p-adm')" data-i18n="m_adm">Админка</div>
-            <div class="menu-item btn-con" id="nav-con" style="display:none;" onclick="openPanel('p-con')" data-i18n="m_con">Консоль</div>
-        </div>
-        <div class="app-version" style="margin-top: 25px;">v. 1.2.1.0(beta)</div>
-
-        <div id="main-news-feed" class="news-container"></div>
-    </div>
-    <div id="p-user-chatlist" class="overlay">
-        <h2 style="color:#bc42f5; margin-bottom: 20px;" data-i18n="h_chats">МОИ ЧАТЫ</h2>
-        <div id="chatlist-container" style="width:100%"></div>
-        <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-
+        /* 🔥 ДОБАВЛЕНО: СТИЛИ ДЛЯ MARKDOWN (ЗВЕЗДОЧКИ, АБЗАЦЫ, ЖИРНЫЙ) */
+        .md-content p { margin: 0 0 5px 0; }
+        .md-content p:last-child { margin: 0; }
+        .md-content em { color: #bc42f5; font-style: italic; opacity: 0.9; } /* Звездочки ролплея станут фиолетовыми */
+        .md-content strong { color: #fff; font-weight: bold; }
+        .md-content ul, .md-content ol { margin: 0; padding-left: 20px; }
+        .md-content a { color: #00bcd4; text-decoration: none; }
     <div id="p-chat" class="overlay" style="padding: 0;">
         <div style="width: 100%; background: #0d041a; padding: 85px 15px 15px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d164d;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -307,7 +158,7 @@
             <img id="dos-img" src="" class="dossier-img">
             <div class="p-row"><span class="p-label" data-i18n="dos_age">Возраст:</span> <span class="p-val" id="dos-age">18</span></div>
             <div class="p-row"><span class="p-label" data-i18n="dos_gender">Пол:</span> <span class="p-val" id="dos-gender">М</span></div>
-            <div style="margin-top:15px; font-size:12px; color:#ccc; line-height:1.4;" id="dos-desc">Описание...</div>
+            <div class="md-content" style="margin-top:15px; font-size:12px; color:#ccc; line-height:1.4;" id="dos-desc">Описание...</div>
         </div>
         
         <div id="dos-chat-btn" class="term-btn" style="border-color:#00ff00" onclick="openChatFromDossier()" data-i18n="b_start_chat">НАЧАТЬ ЧАТ</div>
@@ -346,206 +197,6 @@
         <div id="user-task-list" style="width:100%"></div>
         <div class="term-btn" style="margin-top: 20px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
     </div>
-    
-    <div id="p-shop" class="overlay">
-        <h2 style="color:#00bcd4; margin-bottom: 5px;" data-i18n="h_shop">МАГАЗИН</h2>
-        <div style="font-size: 11px; color: #888; margin-bottom: 15px; text-align:center;" data-i18n="s_pay_info">Оплата через Telegram Stars или CryptoBot (TON)</div>
-        
-        <div class="tabs-wrap">
-            <div class="tab-btn active" id="tab-shop-sub" onclick="switchShopTab('sub')">ПОДПИСКИ</div>
-            <div class="tab-btn" id="tab-shop-shards" onclick="switchShopTab('shards')">ОСКОЛКИ</div>
-        </div>
-
-        <div id="shop-list-sub" style="width: 100%;">
-            <div class="shop-header" data-i18n="sh_subs">ПОДПИСКИ (30 ДНЕЙ)</div>
-            <div class="shop-item">
-                <div class="shop-title" style="color: #a8b8c8;">PREMIUM</div>
-                <div class="shop-desc" data-i18n="sd_prem">50 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-                <div class="buy-btns">
-                    <div class="btn-stars" onclick="buyItem('sub', 'Premium', 'stars', 50)">⭐️ 50 Stars</div>
-                    <div class="btn-ton" onclick="buyItem('sub', 'Premium', 'ton', 5)">💎 5 TON</div>
-                </div>
-            </div>
-            <div class="shop-item">
-                <div class="shop-title" style="color: #ffd700;">PRO</div>
-                <div class="shop-desc" data-i18n="sd_pro">150 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-                <div class="buy-btns">
-                    <div class="btn-stars" onclick="buyItem('sub', 'Pro', 'stars', 100)">⭐️ 100 Stars</div>
-                    <div class="btn-ton" onclick="buyItem('sub', 'Pro', 'ton', 10)">💎 10 TON</div>
-                </div>
-            </div>
-            <div class="shop-item">
-                <div class="shop-title" style="color: #ff00ff;">VIP</div>
-                <div class="shop-desc" data-i18n="sd_vip">250 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-                <div class="buy-btns">
-                    <div class="btn-stars" onclick="buyItem('sub', 'VIP', 'stars', 250)">⭐️ 250 Stars</div>
-                    <div class="btn-ton" onclick="buyItem('sub', 'VIP', 'ton', 25)">💎 25 TON</div>
-                </div>
-            </div>
-            <div class="shop-item">
-                <div class="shop-title" style="color: #bc42f5; text-shadow: 0 0 10px #bc42f5;">ULTRA</div>
-                <div class="shop-desc" data-i18n="sd_ultra">500 осколков ежедневно<br>x2 бонус за стрик 7 дней</div>
-                <div class="buy-btns">
-                    <div class="btn-stars" onclick="buyItem('sub', 'Ultra', 'stars', 500)">⭐️ 500 Stars</div>
-                    <div class="btn-ton" onclick="buyItem('sub', 'Ultra', 'ton', 50)">💎 50 TON</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="shop-list-shards" style="width: 100%; display: none;">
-            <div class="shop-header" data-i18n="sh_shards">ОСКОЛКИ ЛУНЫ</div>
-            <div class="shop-item"><div class="shop-title">10 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 10, 'stars', 5)">⭐️ 5 Stars</div><div class="btn-ton" onclick="buyItem('shards', 10, 'ton', 0.5)">💎 0.5 TON</div></div></div>
-            <div class="shop-item"><div class="shop-title">50 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 50, 'stars', 25)">⭐️ 25 Stars</div><div class="btn-ton" onclick="buyItem('shards', 50, 'ton', 2.5)">💎 2.5 TON</div></div></div>
-            <div class="shop-item"><div class="shop-title">100 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 100, 'stars', 50)">⭐️ 50 Stars</div><div class="btn-ton" onclick="buyItem('shards', 100, 'ton', 5)">💎 5 TON</div></div></div>
-            <div class="shop-item"><div class="shop-title">500 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 500, 'stars', 250)">⭐️ 250 Stars</div><div class="btn-ton" onclick="buyItem('shards', 500, 'ton', 25)">💎 25 TON</div></div></div>
-            <div class="shop-item"><div class="shop-title">1000 <span data-i18n="s_shards">Осколков</span> 🌙</div><div class="buy-btns"><div class="btn-stars" onclick="buyItem('shards', 1000, 'stars', 500)">⭐️ 500 Stars</div><div class="btn-ton" onclick="buyItem('shards', 1000, 'ton', 50)">💎 50 TON</div></div></div>
-        </div>
-
-        <div class="term-btn" style="margin-top: 15px;" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-    
-    <div id="p-user-promos" class="overlay">
-        <h2 style="color:#bc42f5" data-i18n="h_promos">ПРОМОКОД</h2>
-        <div class="info-card">
-            <span class="s-label" data-i18n="p_enter">Введите секретный код</span>
-            <input type="text" id="user-promo-input" class="term-in" placeholder="MOON2026">
-            <div class="term-btn" style="border-color:#bc42f5" id="promo-btn" onclick="usePromo()" data-i18n="b_activate">АКТИВИРОВАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-    
-    <div id="p-profile" class="overlay">
-        <h2 style="color:#bc42f5" data-i18n="h_prof">ПРОФИЛЬ</h2>
-        <div class="info-card" style="text-align: center;">
-            <img id="prof-u-avatar" src="https://i.ibb.co/4pDNDk1/avatar.png" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #bc42f5; object-fit: cover; margin-bottom: 15px;">
-            <div class="p-row"><span class="p-label" data-i18n="pr_nick">Ник:</span> <span class="p-val" id="prof-nick">...</span></div>
-            <div class="p-row"><span class="p-label" data-i18n="pr_id">Айди юз:</span> <span class="p-val" id="prof-id">0</span></div>
-            <div class="p-row"><span class="p-label" data-i18n="pr_sub">Подписка:</span> <span class="p-val" id="prof-sub">FREE</span></div>
-            <div class="p-row"><span class="p-label" data-i18n="pr_exp">Срок:</span> <span class="p-val" id="prof-exp">-</span></div>
-            <div class="p-row"><span class="p-label" data-i18n="pr_shards">Кол-во осколков:</span> <span class="p-val" id="prof-shards">0</span></div>
-            <div class="p-row" style="border:none;"><span class="p-label" data-i18n="pr_status">Статус:</span> <span class="p-val" id="prof-status">Юзер</span></div>
-        </div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-    
-    <div id="p-settings" class="overlay">
-        <h2 style="color:#bc42f5" data-i18n="h_set">НАСТРОЙКИ</h2>
-        <div class="set-list">
-            <div class="set-item" onclick="openMyCharsPanel()"><div class="set-icon" style="background:#f39c12;">🎭</div><div class="set-text">Мои персонажи</div><div class="set-arrow">›</div></div>
-
-            <div class="set-item" onclick="openPanel('p-set-prof')"><div class="set-icon ic-prof">👤</div><div class="set-text" data-i18n="s_menu_prof">Настроить профиль</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-set-lang')"><div class="set-icon ic-lang">🌐</div><div class="set-text" data-i18n="s_menu_lang">Сменить язык</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-set-ai')"><div class="set-icon ic-ai">🤖</div><div class="set-text" data-i18n="s_menu_ai">Настройка ИИ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="tg.openLink('https://telegra.ph/Privacy-Policy-03-03-61')"><div class="set-icon ic-priv">🔒</div><div class="set-text" data-i18n="s_menu_priv">Политика конфиденциальности</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="tg.openTelegramLink('https://t.me/suppurtmoders_bot')"><div class="set-icon ic-sup">💬</div><div class="set-text" data-i18n="s_menu_sup">Техническая поддержка</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="devApk()"><div class="set-icon ic-apk">📱</div><div class="set-text" data-i18n="s_menu_apk">Приложение .apk</div><div class="set-arrow">›</div></div>
-        </div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-
-    <div id="p-set-prof" class="overlay">
-        <h2 style="color:#0A84FF" data-i18n="s_menu_prof">Настроить профиль</h2>
-        <div class="info-card" style="text-align: center;">
-            <img id="set-u-avatar-preview" src="https://i.ibb.co/4pDNDk1/avatar.png" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #0A84FF; object-fit: cover; margin-bottom: 10px;">
-            <input type="file" id="set-u-avatar-file" accept="image/*" style="display:none;" onchange="updateUserAvatar(this)">
-            <div class="term-btn" style="border-color:#0A84FF; font-size:12px; padding:10px; margin-bottom:20px;" onclick="document.getElementById('set-u-avatar-file').click()">ЗАГРУЗИТЬ ФОТО</div>
-            <span class="s-label" data-i18n="set_nick" style="text-align: left;">Ник в приложении</span>
-            <input type="text" id="set-nick" class="term-in" placeholder="..." oninput="updateLiveNick(this.value)">
-            <span class="s-label" data-i18n="set_gender" style="text-align: left;">Ваш пол</span>
-            <div class="gender-box">
-                <div class="gender-btn active" id="g-m" onclick="setGender('m')" data-i18n="g_m">Мужчина</div>
-                <div class="gender-btn" id="g-f" onclick="setGender('f')" data-i18n="g_f">Женщина</div>
-            </div>
-        </div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-
-    <div id="p-set-lang" class="overlay">
-        <h2 style="color:#30D158" data-i18n="s_menu_lang">Сменить язык</h2>
-        <div class="info-card">
-            <div class="con-grid" style="margin-bottom:0;">
-                <div class="con-btn lang-btn" id="lang-ru" style="border-color:#bc42f5;" onclick="setLang('ru')">🇷🇺 Русский</div>
-                <div class="con-btn lang-btn" id="lang-uk" style="border-color:#2d164d;" onclick="setLang('uk')">🇺🇦 Українська</div>
-                <div class="con-btn lang-btn" id="lang-en" style="border-color:#2d164d;" onclick="setLang('en')">🇬🇧 English</div>
-                <div class="con-btn lang-btn" id="lang-be" style="border-color:#2d164d;" onclick="setLang('be')">🇧🇾 Беларуская</div>
-                <div class="con-btn lang-btn" style="opacity:0.4; border-color:#2d164d; grid-column: span 2;" onclick="devLang('Deutsch')">🇩🇪 Deutsch</div>
-            </div>
-        </div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-
-    <div id="p-set-ai" class="overlay">
-        <h2 style="color:#8E8E93" data-i18n="s_menu_ai">Настройка ИИ</h2>
-        <div class="info-card">
-            <span class="s-label"><span data-i18n="set_len">Длина сообщений</span> <span class="slider-val" id="len-val">25</span></span>
-            <div class="slider-wrap">
-                <input type="range" min="25" max="25" value="25" class="slider" id="len-slider" oninput="updateLen(this.value)">
-                <div style="font-size:9px; color:#444; margin-top:5px;" id="len-info">Лимит для Free: 25 слов</div>
-            </div>
-        </div>
-        <div class="info-card">
-            <span class="s-label"><span data-i18n="set_sex">Пошлость персонажей</span> <span class="slider-val" id="sex-val">0</span></span>
-            <div class="slider-wrap">
-                <input type="range" min="0" max="5" value="0" class="slider" id="sex-slider" oninput="updateSex(this.value)">
-                <div style="font-size:9px; color:#444; margin-top:5px;" id="sex-info">Уровень 0: Нет пошлости</div>
-            </div>
-        </div>
-        <div class="term-btn" onclick="back()" data-i18n="b_back">НАЗАД</div>
-    </div>
-    
-    <div id="p-con" class="overlay">
-        <h2 style="color:#e91e63">КОНСОЛЬ (OWNER)</h2>
-        <div class="set-list">
-            <div class="set-item" onclick="openPanel('p-m-news')"><div class="set-icon" style="background:#ffaa00;">📰</div><div class="set-text">НОВОСТИ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-shards')"><div class="set-icon" style="background:#e91e63;">💎</div><div class="set-text">ОСКОЛКИ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-subs')"><div class="set-icon" style="background:#e91e63;">👑</div><div class="set-text">ПОДПИСКИ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-char')"><div class="set-icon" style="background:#e91e63;">🎭</div><div class="set-text">ПЕРСОНАЖИ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-prices')"><div class="set-icon" style="background:#e91e63;">💲</div><div class="set-text">ЦЕНЫ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-admins')"><div class="set-icon" style="background:#e91e63;">🛡️</div><div class="set-text">АДМИНЫ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-promos')"><div class="set-icon" style="background:#e91e63;">🎫</div><div class="set-text">ПРОМОКОДЫ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-tasks')"><div class="set-icon" style="background:#bc42f5;">🎯</div><div class="set-text">ЗАДАНИЯ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openModPanel()"><div class="set-icon" style="background:#f39c12;">🔴</div><div class="set-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="set-arrow">›</div></div>
-        </div>
-        <div class="term-btn" style="border-color: #555;" onclick="back()">ЗАКРЫТЬ</div>
-    </div>
-    
-    <div id="p-adm" class="overlay">
-        <h2 style="color:#00bcd4">АДМИН ПАНЕЛЬ</h2>
-        <div class="set-list">
-            <div class="set-item" onclick="openPanel('p-m-shards')"><div class="set-icon" style="background:#00bcd4;">💎</div><div class="set-text">ВЫДАТЬ ОСКОЛКИ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-subs')"><div class="set-icon" style="background:#00bcd4;">👑</div><div class="set-text">ВЫДАТЬ SUB</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-char')"><div class="set-icon" style="background:#00bcd4;">🎭</div><div class="set-text">ДОБАВИТЬ ПЕРСА</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-promos')"><div class="set-icon" style="background:#00bcd4;">🎫</div><div class="set-text">СОЗДАТЬ ПРОМО</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openPanel('p-m-tasks')"><div class="set-icon" style="background:#00bcd4;">🎯</div><div class="set-text">ДОБАВИТЬ ЗАДАНИЕ</div><div class="set-arrow">›</div></div>
-            <div class="set-item" onclick="openModPanel()"><div class="set-icon" style="background:#f39c12;">🔴</div><div class="set-text">МОДЕРАЦИЯ ПЕРСОВ</div><div class="set-arrow">›</div></div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-m-news" class="overlay">
-        <h2 style="color:#ffaa00">ОПУБЛИКОВАТЬ НОВОСТЬ</h2>
-        <div class="info-card" style="text-align: center;">
-            <img id="news-preview" src="#" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 10px; display: none; border: 1px solid #ffaa00; margin-bottom: 10px;">
-            <textarea id="inews-text" class="term-in" style="height: 150px; resize: none;" placeholder="Что нового в проекте?..." maxlength="3500" oninput="document.getElementById('news-limit').innerText = this.value.length + '/3500'"></textarea>
-            <div id="news-limit" class="char-counter" style="color:#ffaa00;">0/3500</div>
-            <input type="file" id="news-file" accept="image/*" style="display:none;" onchange="if(this.files && this.files[0]){ const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('news-preview'); p.src = e.target.result; p.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }">
-            <div class="term-btn" style="border-color:#ffaa00" onclick="document.getElementById('news-file').click()">ВЫБРАТЬ ИЗ ГАЛЕРЕИ</div>
-            <div class="term-btn" style="border-color:#00ff00; background:rgba(0,255,0,0.1); color:#00ff00;" onclick="publishNews()">ОПУБЛИКОВАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-
-    <div id="p-m-shards" class="overlay">
-        <h2 style="color:#00bcd4">ОСКОЛКИ</h2>
-        <div class="info-card">
-            <input type="number" id="ish-id" class="term-in" placeholder="TG ID">
-            <input type="number" id="ish-val" class="term-in" placeholder="КОЛ-ВО">
-            <div class="term-btn" style="border-color:#00ff00" onclick="modFunds('shards','add')">ВЫДАТЬ</div>
-            <div id="own-sh-rem" class="term-btn" style="border-color:#ff4444; display:none;" onclick="modFunds('shards','rem')">ЗАБРАТЬ</div>
-        </div>
-        <div class="term-btn" onclick="back()">НАЗАД</div>
-    </div>
-    
     <div id="p-m-subs" class="overlay">
         <h2 style="color:#00bcd4">ПОДПИСКИ (30д)</h2>
         <div class="info-card">
@@ -713,6 +364,16 @@
         tg.enableClosingConfirmation();
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
 
+        // 🔥 ДОБАВЛЕНО: ПУТЬ ДО СЕРВЕРА (Впиши ссылку на свой Vercel, если зальешь HTML на GitHub)
+        const API_URL = ""; 
+
+        // 🔥 ДОБАВЛЕНО: ФУНКЦИЯ MARKDOWN
+        function renderMD(text) {
+            if(!text) return "";
+            let safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;"); // Защита от HTML инъекций
+            return marked.parse(safeText, { breaks: true });
+        }
+
         const OID = "8287041036";
         let stack = [], trollCount = 0, clickedTasks = [];
         let currentCharGender = 'm'; 
@@ -779,7 +440,7 @@
         async function syncUser() {
             const uid = getUid(); if(!uid) return;
             try {
-                const res = await fetch('/api/user/sync', { method: 'POST', headers: getAuthHeaders() });
+                const res = await fetch(API_URL + '/api/user/sync', { method: 'POST', headers: getAuthHeaders() });
                 if(res.ok) { 
                     const data = await res.json(); 
                     if(uid !== OID) updateBalanceUI(data.shards); 
@@ -797,7 +458,6 @@
             if (!document.hidden) syncUser();
         });
 
-        // --- УМНОЕ СЖАТИЕ ФОТО ПЕРЕД ОТПРАВКОЙ НА СЕРВЕР ---
         async function uploadToCloud(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -822,7 +482,7 @@
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
                         
                         try {
-                            const res = await fetch('/api/upload', {
+                            const res = await fetch(API_URL + '/api/upload', {
                                 method: 'POST', headers: getAuthHeaders(),
                                 body: JSON.stringify({ image: compressedBase64 })
                             });
@@ -859,7 +519,7 @@
 
             try { 
                 const startParam = tg.initDataUnsafe?.start_param || null; 
-                const res = await fetch('/api/user/get-data', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ start_param: startParam }) }); 
+                const res = await fetch(API_URL + '/api/user/get-data', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ start_param: startParam }) }); 
                 if(res.ok) userData = await res.json(); 
             } catch (e) {}
 
@@ -899,7 +559,6 @@
             renderUserTasks().catch(e => {}); 
             if (uid === OID || userData.is_admin) { renderAdminPromos().catch(e => {}); renderTasks().catch(e => {}); }
         }
-
         let baseZ = 15000; let isBotTyping = false; 
         function openPanel(id) { if(stack.includes(id)) return; stack.push(id); let el = document.getElementById(id); if(el) { el.style.zIndex = baseZ + stack.length; el.style.display = 'flex'; } BackButton.show(); }
         function back() { if(isBotTyping) { tg.showAlert("Бот пишет ответ, подождите! ⏳"); return; } if(stack.length > 0) { let id = stack.pop(); let el = document.getElementById(id); if(el) el.style.display = 'none'; } if(stack.length === 0) { BackButton.hide(); } }
@@ -961,11 +620,11 @@
             let lastCharIdx = -1; for(let i = msgs.length - 1; i >= 0; i--) { if(msgs[i].sender === 'char') { lastCharIdx = i; break; } }
             if(msgs.length === 0) { chatBox.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; margin-top: 20px;">Начните диалог...<br>1 сообщение = 1 🌙</div>`; } 
             else { chatBox.innerHTML = msgs.map((m, index) => {
-                    if (m.sender === 'user') { return `<div class="chat-msg-row user-row"><div class="msg-user-wrapper"><div class="msg-box msg-user">${m.text}</div></div><img src="${uAvatar}" class="msg-avatar"></div>`; } 
+                    if (m.sender === 'user') { return `<div class="chat-msg-row user-row"><div class="msg-user-wrapper"><div class="msg-box msg-user md-content">${renderMD(m.text)}</div></div><img src="${uAvatar}" class="msg-avatar"></div>`; } 
                     else {
                         let stats = m.stats || {love: 10, trust: 15, inf: 5, horny: 0}; let actionBar = '';
                         if (index === lastCharIdx) { actionBar = `<div class="msg-bottom-bar"><div class="msg-stats">💖 ${stats.love}% 🛡️ ${stats.trust}% ✨ ${stats.inf}% 💦 ${stats.horny}%</div><div class="msg-actions"><span onclick="actionReroll(${index})">🔄</span><span onclick="actionNext()">⏭️</span><span onclick="actionPhoto(${index})">🖼️</span><span onclick="actionCircle(${index})">⭕</span></div></div>`; }
-                        return `<div class="chat-msg-row char-row"><img src="${cAvatar}" class="msg-avatar"><div class="msg-bot-wrapper" style="width: 100%;"><div class="msg-box msg-char">${m.text}</div>${actionBar}</div></div>`;
+                        return `<div class="chat-msg-row char-row"><img src="${cAvatar}" class="msg-avatar"><div class="msg-bot-wrapper" style="width: 100%;"><div class="msg-box msg-char md-content">${renderMD(m.text)}</div>${actionBar}</div></div>`;
                     }
                 }).join(''); 
             } setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
@@ -988,7 +647,7 @@
             renderChatMessages();
             
             try {
-                const res = await fetch('/api/generate-media', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'photo' }) });
+                const res = await fetch(API_URL + '/api/generate-media', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'photo' }) });
                 const data = await res.json();
                 
                 allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
@@ -1023,7 +682,7 @@
             localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); renderChatMessages();
             
             try {
-                const res = await fetch('/api/generate-media', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'circle' }) });
+                const res = await fetch(API_URL + '/api/generate-media', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message_text: msgText, type: 'circle' }) });
                 const data = await res.json();
                 
                 allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}");
@@ -1068,13 +727,19 @@
             chatBox.scrollTop = chatBox.scrollHeight;
             try {
                 const uName = document.getElementById('u-name').innerText; const rawGender = localStorage.getItem('m_gender_' + uid) || 'm'; let uGender = rawGender === 'f' ? (currentLang === 'en' ? "Female" : "Женский") : (currentLang === 'en' ? "Male" : "Мужской"); const lenSet = parseInt(localStorage.getItem('m_len_' + uid) || 25); const sexSet = parseInt(localStorage.getItem('m_sex_' + uid) || 0);
-                const res = await fetch('/api/chat', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message: forcedText || "", chat_history: allChats[activeCharId], len: lenSet, sex: sexSet, user_name: uName, user_gender: uGender, lang: currentLang }) });
+                const res = await fetch(API_URL + '/api/chat', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId, message: forcedText || "", chat_history: allChats[activeCharId], len: lenSet, sex: sexSet, user_name: uName, user_gender: uGender, lang: currentLang }) });
                 const data = await res.json(); 
                 if (data.reply) { 
-                    const replyRow = document.getElementById(typeId); replyRow.style.opacity = "1"; const replyBox = replyRow.querySelector('.msg-box'); replyBox.innerText = ""; 
-                    let replyText = data.reply; let i = 0;
-                    function typeChar() { if (i < replyText.length) { replyBox.appendChild(document.createTextNode(replyText.charAt(i))); i++; chatBox.scrollTop = chatBox.scrollHeight; setTimeout(typeChar, 20); } else { finishMessage(replyText, data.new_balance); } }
-                    typeChar();
+                    const replyRow = document.getElementById(typeId); replyRow.style.opacity = "1"; const replyBox = replyRow.querySelector('.msg-box'); 
+                    replyBox.innerHTML = ""; 
+                    let replyText = data.reply; 
+                    
+                    // Выводим отформатированный текст без эффекта печатной машинки, чтобы не сломать теги
+                    replyBox.classList.add('md-content');
+                    replyBox.innerHTML = renderMD(replyText);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    finishMessage(replyText, data.new_balance);
+                    
                     function finishMessage(finalText, newBal) { let waitTimer = setInterval(() => { if (minTimePassed) { clearInterval(waitTimer); let stats = { love: Math.floor(Math.random() * 40) + 10, trust: Math.floor(Math.random() * 40) + 10, inf: Math.floor(Math.random() * 30) + 5, horny: sexSet > 0 ? Math.floor(Math.random() * 50) + (sexSet * 5) : 0 }; allChats[activeCharId].push({sender: 'char', text: finalText, stats: stats}); localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if (uid !== OID && newBal !== undefined) updateBalanceUI(newBal); renderChatMessages(); unlockChat(); } }, 500); }
                 } else { document.getElementById(typeId)?.remove(); if (data.error) { tg.showAlert(data.error); if(data.error === "locked_exclusive") back(); } unlockChat(); }
             } catch (e) { document.getElementById(typeId)?.remove(); tg.showAlert("Ошибка сервера"); unlockChat(); }
@@ -1094,242 +759,68 @@
         function pinChatAction(charId, e) { if(e) e.stopPropagation(); const uid = getUid(); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); if(pinned.includes(charId)) { pinned = pinned.filter(id => id != charId); tg.showAlert("Откреплено"); } else { pinned.push(charId); tg.showAlert("Закреплено 📌"); } localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); }
         function clearChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Очистить память?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); allChats[charId] = []; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); tg.showAlert("Очищено 🧹"); } }); }
         function deleteChatAction(charId, e) { if(e) e.stopPropagation(); tg.showConfirm("Удалить чат?", (yes) => { if(yes) { const uid = getUid(); let allChats = JSON.parse(localStorage.getItem('m_chats_' + uid) || "{}"); delete allChats[charId]; localStorage.setItem('m_chats_' + uid, JSON.stringify(allChats)); let pinned = JSON.parse(localStorage.getItem('m_pinned_chats_' + uid) || "[]"); pinned = pinned.filter(id => id != charId); localStorage.setItem('m_pinned_chats_' + uid, JSON.stringify(pinned)); let order = JSON.parse(localStorage.getItem('m_chat_order_' + uid) || "[]"); order = order.filter(id => id != charId); localStorage.setItem('m_chat_order_' + uid, JSON.stringify(order)); if(openDropdownId !== null) { let el = document.getElementById('chat-dd-' + openDropdownId); if(el) el.style.display = 'none'; openDropdownId = null; } openChatList(); } }); }
-        
-        function setCustomFilter(type, val) {
-            if (type === 'gender') { charFilterGender = val; document.getElementById('filt-g-all').style.color = val === 'all' ? '#bc42f5' : '#555'; document.getElementById('filt-g-m').style.color = val === 'm' ? '#bc42f5' : '#555'; document.getElementById('filt-g-f').style.color = val === 'f' ? '#bc42f5' : '#555';
-            } else if (type === 'sort') { charFilterSort = val; document.getElementById('filt-s-new').style.color = val === 'new' ? '#bc42f5' : '#555'; document.getElementById('filt-s-pop').style.color = val === 'pop' ? '#bc42f5' : '#555'; }
-            renderUserChars(false);
+        // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ФИНАЛ) ---
+
+        function renderMD(text) {
+            if (!text) return "";
+            let html = text
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") // Экранирование
+                .replace(/\*\*\*(.*?)\*\*\*/g, '<b><i>$1</i></b>') // Жирный курсив
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')             // Жирный
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')               // Курсив
+                .replace(/__(.*?)__/g, '<u>$1</u>')               // Подчеркнутый
+                .replace(/`(.*?)`/g, '<code>$1</code>')           // Код
+                .replace(/\n/g, '<br>');                          // Переносы строк
+
+            // Обработка списков (простая)
+            html = html.replace(/^\s*[-*+]\s+(.*)$/gm, '<li>$1</li>');
+            if (html.includes('<li>')) {
+                html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+            }
+            
+            return html;
         }
 
-        function setOffFilter(type, val) {
-            if (type === 'gender') { offFilterGender = val; document.getElementById('f-g-all').style.color = val === 'all' ? '#bc42f5' : '#555'; document.getElementById('f-g-m').style.color = val === 'm' ? '#bc42f5' : '#555'; document.getElementById('f-g-f').style.color = val === 'f' ? '#bc42f5' : '#555'; document.getElementById('f-g-all').style.fontWeight = val === 'all' ? 'bold' : 'normal'; document.getElementById('f-g-m').style.fontWeight = val === 'm' ? 'bold' : 'normal'; document.getElementById('f-g-f').style.fontWeight = val === 'f' ? 'bold' : 'normal';
-            } else if (type === 'cat') { offFilterCat = val; document.getElementById('f-c-all').style.color = val === 'all' ? '#bc42f5' : '#555'; document.getElementById('f-c-anime').style.color = val === 'anime' ? '#bc42f5' : '#555'; document.getElementById('f-c-games').style.color = val === 'games' ? '#bc42f5' : '#555'; document.getElementById('f-c-all').style.fontWeight = val === 'all' ? 'bold' : 'normal'; document.getElementById('f-c-anime').style.fontWeight = val === 'anime' ? 'bold' : 'normal'; document.getElementById('f-c-games').style.fontWeight = val === 'games' ? 'bold' : 'normal'; }
-            renderUserChars(false);
+        function getDeclension(n, forms) {
+            let pr = Math.abs(n) % 100; let n1 = pr % 10;
+            if (pr > 10 && pr < 20) return forms[2];
+            if (n1 > 1 && n1 < 5) return forms[1];
+            if (n1 == 1) return forms[0];
+            return forms[2];
         }
 
-        function switchCharTab(tab) {
-            if (currentCharsTab === tab) return; 
-            currentCharsTab = tab;
-            document.getElementById('tab-char-off').classList.toggle('active', tab === 'official'); document.getElementById('tab-char-cus').classList.toggle('active', tab === 'custom'); let excTab = document.getElementById('tab-char-exc'); if(excTab) excTab.classList.toggle('active', tab === 'exclusive');
-            let cusFilters = document.getElementById('custom-filters'); if(cusFilters) cusFilters.style.display = tab === 'custom' ? 'block' : 'none';
-            let offFilters = document.getElementById('official-tools'); if(offFilters) offFilters.style.display = tab === 'official' ? 'block' : 'none';
-            renderUserChars(false);
-        }
+        // --- ИНИЦИАЛИЗАЦИЯ ИНПУТОВ ---
 
-        async function renderUserChars(forceFetch = true) { 
-            try { 
-                const list = document.getElementById('user-char-list'); 
-                if (forceFetch || allChars.length === 0) {
-                    if (allChars.length === 0) list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#bc42f5; font-size:12px;'>Загрузка персонажей...</div>`;
-                    const res = await fetch('/api/get-characters', { headers: getAuthHeaders() }); allChars = await res.json(); 
+        const chatInput = document.getElementById('chat-input-text');
+        if (chatInput) {
+            chatInput.addEventListener('input', function() {
+                this.style.height = '40px';
+                let newH = Math.min(this.scrollHeight, 120);
+                this.style.height = newH + 'px';
+            });
+
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
                 }
-                
-                let searchInput = document.getElementById('char-search'); let searchText = searchInput ? searchInput.value.toLowerCase() : '';
-
-                let filteredChars = allChars.filter(c => { 
-                    let isOwnerChar = c.creator_id == OID; let isOfficial = c.char_type === 'official' || !c.char_type || isOwnerChar; let isCustom = c.char_type === 'custom' && c.status === 'public' && !isOwnerChar; let isExclusive = c.char_type === 'exclusive';
-                    if (currentCharsTab === 'official') { if (!isOfficial && !isOwnerChar) return false; if (offFilterGender !== 'all' && c.gender !== offFilterGender) return false; if (offFilterCat !== 'all' && c.category !== offFilterCat) return false; if (searchText) { let cName = c.name ? c.name.toLowerCase() : ''; if (!cName.includes(searchText)) return false; } return true; }
-                    if (currentCharsTab === 'custom') { if (!isCustom) return false; if (charFilterGender !== 'all' && c.gender !== charFilterGender) return false; return true; }
-                    return isExclusive; 
-                }); 
-                
-                if (currentCharsTab === 'custom' && charFilterSort === 'pop') { filteredChars.sort((a, b) => a.id - b.id); } else { filteredChars.sort((a, b) => b.id - a.id); }
-                if(filteredChars.length === 0) { list.innerHTML = `<div style='grid-column: span 2; text-align:center; color:#888;'>Нет персонажей</div>`; return; } 
-                
-                const charCards = await Promise.all(filteredChars.map(async (c) => { 
-                    let tName = await neuroTranslate(c.name, currentLang); let badgeHTML = "";
-                    if (c.char_type === 'exclusive') { badgeHTML = `<div class="status-badge bg-exclusive">EXCLUSIVE ✨</div>`; }
-                    return `<div class="char-card" onclick="openDossier(${c.id})">${badgeHTML}<img src="${c.photo}" loading="lazy"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`; 
-                })); 
-                list.innerHTML = charCards.join(''); 
-            } catch (e) {} 
+            });
         }
 
-        async function fetchNews() { try { const res = await fetch('/api/get-news', { headers: getAuthHeaders() }); if(res.ok) { allNews = await res.json(); renderNews(); } } catch(e) {} }
-        function renderNews() { const container = document.getElementById('main-news-feed'); if(!container) return; if(allNews.length === 0) { container.innerHTML = ''; return; } const sortedNews = [...allNews].sort((a, b) => b.id - a.id); container.innerHTML = sortedNews.map(n => { let imgTag = n.photo && n.photo.length > 10 ? `<img src="${n.photo}" class="news-img" style="display:block;">` : ''; let delBtn = getUid() === OID ? `<span style="color:#ff4444; cursor:pointer; font-size:14px; padding-left:10px;" onclick="deleteNews(${n.id})">✖ Удалить</span>` : ''; let d = new Date(n.id).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}); return `<div class="news-card"><div class="news-date"><span>${d}</span> ${delBtn}</div><div class="news-text">${n.text}</div>${imgTag}</div>`; }).join(''); }
-        
-        async function publishNews() { 
-            const text = document.getElementById('inews-text').value.trim(); let img = document.getElementById('news-preview').src; const fileInput = document.getElementById('news-file');
-            if(!text && (!img || img.includes('#'))) return tg.showAlert("Введите текст или фото!"); 
-            if(fileInput.files && fileInput.files[0]) { const btn = document.querySelector('[onclick="publishNews()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА..."; const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt; if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!"); }
-            await fetch('/api/admin/create-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ newsData: { id: Date.now(), text: text, photo: img.includes('#') ? '' : img } }) }); document.getElementById('inews-text').value = ''; document.getElementById('news-preview').src = '#'; document.getElementById('news-preview').style.display = 'none'; document.getElementById('news-limit').innerText = '0/3500'; tg.showAlert("Опубликовано!"); back(); fetchNews(); 
-        }
-
-        async function deleteNews(id) { tg.showConfirm("Удалить новость?", async (yes) => { if(yes) { await fetch('/api/admin/delete-news', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ news_id: id }) }); fetchNews(); } }); }
-        
-        async function renderTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); document.getElementById('task-list').innerHTML = tasks.map(x => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deleteTask(${x.id})">✖</span>` : ''; return `<div class="task-item"><span>${x.name} (${x.rType === 'sub7' ? 'Sub 7d' : x.rVal + ' 🌙'})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
-        
-        async function renderUserTasks() { try { const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); const completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + getUid()) || "[]"); const list = document.getElementById('user-task-list'); if (tasks.length === 0) { list.innerHTML = `<div class='info-card' style='text-align:center; color:#888;'>Нет заданий</div>`; return; } const taskCards = await Promise.all(tasks.map(async (t) => { let tName = await neuroTranslate(t.name, currentLang); if(completed.includes(t.id)) { return `<div class="task-item" style="opacity:0.5;"><span>${tName}<br><span style="font-size:10px;color:#888">Выполнено</span></span><span style="color:#00ff00; font-weight:bold; padding-right:10px;">✔</span></div>`; } return `<div class="task-item" id="utask-${t.id}"><span>${tName}<br><span style="font-size:10px;color:#00ff00">Награда: ${t.rType === 'sub7' ? 'Sub 7d' : t.rVal + ' 🌙'}</span></span><button onclick="startTask(${t.id}, '${t.link}')" style="background:#bc42f5; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ВЫПОЛНИТЬ</button></div>`; })); list.innerHTML = taskCards.join(''); } catch(e) {} }
-        
-        async function renderAdminPromos() { try { const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json(); document.getElementById('promo-list').innerHTML = promos.map(p => { let delBtn = getUid() === OID ? `<span style="color:#ff4444;font-weight:bold;cursor:pointer;font-size:16px;padding:0 10px;" onclick="deletePromo('${p.code}')">✖</span>` : ''; return `<div class="task-item"><span>${p.code} (+${p.reward})</span>${delBtn}</div>`; }).join(''); } catch(e) {} }
-        
-        async function buyItem(type, item, currency, price) { if (currency === 'ton') { tg.showAlert("Генерация счета CryptoBot..."); try { const res = await fetch('/api/payment/create', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_ton: price }) }); const data = await res.json(); if(data.pay_url) { tg.openLink(data.pay_url); } else { tg.showAlert("Ошибка CryptoBot"); } } catch (e) { tg.showAlert("Error"); } } else if (currency === 'stars') { tg.showAlert("Подготовка оплаты Stars..."); try { const res = await fetch('/api/payment/stars-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ type: type, item: item, amount_stars: price }) }); const data = await res.json(); if(data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата успешна!"); } }); } else { tg.showAlert("API Error"); } } catch (e) { tg.showAlert("Error"); } } }
-        
-        function switchShopTab(tab) { const btnSub = document.getElementById('tab-shop-sub'); const btnShards = document.getElementById('tab-shop-shards'); const listSub = document.getElementById('shop-list-sub'); const listShards = document.getElementById('shop-list-shards'); if(btnSub) btnSub.classList.toggle('active', tab === 'sub'); if(btnShards) btnShards.classList.toggle('active', tab === 'shards'); if(listSub) listSub.style.display = tab === 'sub' ? 'block' : 'none'; if(listShards) listShards.style.display = tab === 'shards' ? 'block' : 'none'; }
-
-        function updateDailyUI() { const ONE_DAY = 24 * 60 * 60 * 1000; let timePassed = Date.now() - userData.last_daily; let nextStreak = userData.daily_streak + 1; let is7thDay = (nextStreak % 7 === 0); let baseRew = userData.daily_reward || 10; let actualRew = is7thDay ? baseRew * 2 : baseRew; document.getElementById('daily-streak-text').innerText = `Стрик: ${userData.daily_streak} дней`; document.getElementById('daily-reward-text').innerText = `${actualRew} 🌙` + (is7thDay ? ` (БОНУС x2!)` : ""); clearInterval(dailyTimerInterval); if (timePassed < ONE_DAY && userData.last_daily !== 0 && getUid() !== OID) { document.getElementById('daily-btn').style.display = 'none'; document.getElementById('daily-wait').style.display = 'block'; dailyTimerInterval = setInterval(() => { let timeLeft = ONE_DAY - (Date.now() - userData.last_daily); if (timeLeft <= 0) { clearInterval(dailyTimerInterval); location.reload(); } else { let h = Math.floor(timeLeft / (1000 * 60 * 60)); let m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((timeLeft % (1000 * 60)) / 1000); h = h < 10 ? "0" + h : h; m = m < 10 ? "0" + m : m; s = s < 10 ? "0" + s : s; document.getElementById('daily-wait').innerHTML = `Следующая награда через:<br><span style="color:#bc42f5; font-size:16px; font-weight:bold;">${h}:${m}:${s}</span>`; } }, 1000); } else { document.getElementById('daily-btn').style.display = 'block'; document.getElementById('daily-wait').style.display = 'none'; } }
-        
-        async function claimDaily() { try { const res = await fetch('/api/user/claim-daily', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({}) }); const data = await res.json(); if (data.error) { tg.showAlert(data.error); } else { tg.showAlert(`Получено: ${data.reward} 🌙!`); userData.shards = data.new_balance; userData.daily_streak = data.streak; userData.last_daily = Date.now(); updateBalanceUI(userData.shards); updateDailyUI(); } } catch (e) { tg.showAlert("Error"); } }
-        
-        // === МАГИЯ ДОСЬЕ ===
-        async function openDossier(id) { 
-            const c = allChars.find(x => x.id === id); if(!c) return; 
-            activeCharId = id; 
-            document.getElementById('dos-name').innerText = await neuroTranslate(c.name, currentLang); 
-            document.getElementById('dos-img').src = c.photo; 
-            document.getElementById('dos-age').innerText = c.age; 
-            document.getElementById('dos-gender').innerText = c.gender === 'm' ? "Мужской" : "Женский"; 
-            document.getElementById('dos-desc').innerText = await neuroTranslate(c.desc, currentLang); 
-            
-            if(getUid() === OID) { document.getElementById('dos-del-btn').style.display = 'block'; } else { document.getElementById('dos-del-btn').style.display = 'none'; }
-            
-            let isMine = c.creator_id == getUid() && (c.char_type === 'custom' || c.char_type === 'exclusive'); 
-            let pubBtn = document.getElementById('dos-pub-btn'); if (pubBtn) pubBtn.style.display = (isMine && c.char_type === 'custom' && c.status === 'private') ? 'block' : 'none'; 
-            
-            let badge = document.getElementById('dos-badge'); 
-            if (badge) { 
-                if (c.char_type === 'exclusive') { badge.style.display = 'block'; badge.className = 'status-badge bg-exclusive'; badge.innerText = 'EXCLUSIVE ✨'; } 
-                else if (isMine) { badge.style.display = 'block'; badge.className = 'status-badge ' + (c.status === 'private' ? 'bg-private' : c.status === 'pending' ? 'bg-pending' : 'bg-public'); badge.innerText = c.status === 'private' ? 'ПРИВАТНЫЙ' : c.status === 'pending' ? 'НА МОДЕРАЦИИ' : 'ОПУБЛИКОВАН'; } 
-                else { badge.style.display = 'none'; } 
-            } 
-
-            let chatBtn = document.getElementById('dos-chat-btn'); let unlockBtn = document.getElementById('dos-unlock-btn');
-            if (c.char_type === 'exclusive' && getUid() !== OID && c.creator_id != getUid() && (!userData.unlocked_chars || !userData.unlocked_chars.includes(c.id))) { chatBtn.style.display = 'none'; unlockBtn.style.display = 'block'; unlockBtn.onclick = () => unlockExclusiveChar(c.id); } 
-            else { chatBtn.style.display = 'block'; unlockBtn.style.display = 'none'; }
-            openPanel('p-char-dossier'); 
-        }
-
-        async function unlockExclusiveChar(id) {
-            tg.showAlert("Формируем счет...");
-            try {
-                const res = await fetch('/api/user/unlock-char-invoice', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id }) });
-                const data = await res.json();
-                if (data.success && getUid() === OID) { if(!userData.unlocked_chars) userData.unlocked_chars = []; userData.unlocked_chars.push(id); tg.showAlert(data.message); openDossier(id); } 
-                else if(data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Успешно! Доступ открыт."); syncUser(); } }); } 
-                else { tg.showAlert(data.error || "Ошибка Telegram API"); }
-            } catch(e) { tg.showAlert("Ошибка сервера"); }
-        }
-
-        function setCharGender(g) { currentCharGender = g; document.getElementById('cg-m').classList.toggle('active', g === 'm'); document.getElementById('cg-f').classList.toggle('active', g === 'f'); }
-        async function saveCharDB() { const n = document.getElementById('ich-name').value; const cat = document.getElementById('ich-category').value; let img = document.getElementById('char-preview').src; const fileInput = document.getElementById('char-file'); if(!n || img.includes('#')) return tg.showAlert("Name and photo required!"); if(fileInput.files && fileInput.files[0]) { const btn = document.querySelector('[onclick="saveCharDB()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА..."; const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt; if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!"); } const charData = { id: Date.now(), name: n, age: document.getElementById('ich-age').value, gender: currentCharGender, desc: document.getElementById('ich-desc').value, photo: img, category: cat }; await fetch('/api/admin/create-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData: charData }) }); tg.showAlert("Created!"); renderUserChars(); }
-        async function deleteChar() { await fetch('/api/admin/delete-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) }); tg.showAlert("Deleted!"); renderUserChars(); back(); }
-        async function modFunds(t, a) { let idField = t === 'shards' ? 'ish-id' : 'isu-id'; let valField = t === 'shards' ? 'ish-val' : 'isu-type'; const target_id = document.getElementById(idField).value; const v = document.getElementById(valField).value; if(!target_id) return tg.showAlert("Enter ID!"); const body = { target_id: target_id, action: a }; if(t === 'shards') body.amount = v; else body.sub_type = v; const res = await fetch(t === 'shards' ? '/api/admin/manage-shards' : '/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(body) }); const data = await res.json(); tg.showAlert(data.message || "Error"); }
-        async function createPromo() { const code = document.getElementById('ip-code').value.toUpperCase().trim(); const rew = parseInt(document.getElementById('ip-rew').value); const hours = parseInt(document.getElementById('ip-hours').value); if(!code || !rew) return; await fetch('/api/admin/create-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ promoData: {code, reward: rew, hours: hours} }) }); document.getElementById('ip-code').value = ''; document.getElementById('ip-rew').value = ''; renderAdminPromos(); tg.showAlert(`Создано на ${hours} ч.!`); }
-        async function deletePromo(code) { tg.showConfirm("Delete " + code + "?", async (yes) => { if(yes) { await fetch('/api/admin/delete-promo', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ code: code }) }); renderAdminPromos(); tg.showAlert("Deleted!"); } }); }
-        async function usePromo() { if (promoLock) return; promoLock = true; const btn = document.getElementById('promo-btn'); const oldText = btn.innerText; btn.innerText = "ПРОВЕРКА..."; btn.style.opacity = "0.5"; try { const uid = getUid(); const inputField = document.getElementById('user-promo-input'); const input = inputField.value.toUpperCase().trim(); if(!input) { promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; return; } const res = await fetch('/api/get-promos', { headers: getAuthHeaders() }); const promos = await res.json(); const used = JSON.parse(localStorage.getItem('m_used_promos_' + uid) || "[]"); const found = promos.find(p => p.code === input); if(!found) { tg.showAlert("Неверный код"); } else if(used.includes(input)) { tg.showAlert("Уже активирован"); } else { await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: found.reward }) }); used.push(input); localStorage.setItem('m_used_promos_' + uid, JSON.stringify(used)); if(uid !== OID) updateBalanceUI(userData.shards + found.reward); inputField.value = ''; tg.showAlert(`Получено ${found.reward} 🌙!`); } } catch(e) {} promoLock = false; btn.innerText = oldText; btn.style.opacity = "1"; }
-        async function modTask(act, tid=null) { if(act==='add') { const n = document.getElementById('it-name').value; const rType = document.getElementById('it-rtype').value; if(!n) return; const taskData = { id: Date.now(), name: n, link: document.getElementById('it-link').value, rType: rType, rVal: rType === 'sub7' ? 7 : document.getElementById('it-rew').value }; await fetch('/api/admin/create-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ taskData: taskData }) }); } renderTasks(); renderUserTasks(); }
-        async function deleteTask(id) { tg.showConfirm("Delete task?", async (yes) => { if(yes) { await fetch('/api/admin/delete-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) }); renderTasks(); renderUserTasks(); tg.showAlert("Deleted!"); } }); }
-        function startTask(id, link) { tg.openLink(link); if(!clickedTasks.includes(id)) clickedTasks.push(id); const taskDiv = document.getElementById(`utask-${id}`); if(taskDiv) { taskDiv.innerHTML = `<span><span style="font-size:10px;color:orange">Ожидание...</span></span><button onclick="checkTask(${id})" style="background:#00ff00; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:10px; cursor:pointer;">ПРОВЕРИТЬ</button>`; } }
-        async function checkTask(id) { if(!clickedTasks.includes(id)) return; tg.showAlert("Проверка..."); try { const res = await fetch('/api/check-task', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ task_id: id }) }); const data = await res.json(); if(data.success) { completeTaskAction(id); } else { tg.showAlert(data.error || "Не выполнено!"); } } catch(e) { tg.showAlert("Error"); } }
-        async function completeTaskAction(id) { const uid = getUid(); const res = await fetch('/api/get-tasks', { headers: getAuthHeaders() }); const tasks = await res.json(); const t = tasks.find(x => x.id === id); if(!t) return; let completed = JSON.parse(localStorage.getItem('m_completed_tasks_' + uid) || "[]"); if(completed.includes(id)) return; if(t.rType === 'shards') { await fetch('/api/admin/manage-shards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', amount: t.rVal }) }); if(uid !== OID) updateBalanceUI(userData.shards + parseInt(t.rVal)); } else if(t.rType === 'sub7') { await fetch('/api/admin/manage-sub', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: uid, action: 'add', sub_type: "Premium" }) }); } completed.push(id); localStorage.setItem('m_completed_tasks_' + uid, JSON.stringify(completed)); tg.showAlert("Получено!"); renderUserTasks(); }
-        function shareRef() { const uid = getUid(); const refLink = `https://t.me/Anime_AI_18_bot/PlayApp?startapp=${uid}`; const text = `Залетай в Anime AI! Переходи по моей ссылке и мы оба получим по 100 🌙!`; const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`; tg.openTelegramLink(shareUrl); }
-        function updateLiveNick(v) { let n = v || "User"; document.getElementById('u-name').innerText = n; document.getElementById('prof-nick').innerText = n; localStorage.setItem('m_nick_' + getUid(), n); }
-        function setGender(g, s=false) { document.getElementById('g-m')?.classList.toggle('active', g === 'm'); document.getElementById('g-f')?.classList.toggle('active', g === 'f'); if(!s) localStorage.setItem('m_gender_' + getUid(), g); }
-        function updateLen(v, s=false) { document.getElementById('len-val').innerText = v; if(!s) localStorage.setItem('m_len_' + getUid(), v); }
-        function updateSex(v, s=false) { const m_ru = ["Нет пошлости", "Слабая", "Нормальная", "Сильная", "Высокая", "V-Пошлая", "HOT 🔥"]; document.getElementById('sex-val').innerText = v; let sliderMax = document.getElementById('sex-slider').max; document.getElementById('sex-info').innerText = sliderMax == 0 ? "Недоступно для вашей подписки" : `Уровень ${v}: ${m_ru[v]}`; document.getElementById('sex-val').style.color = (v == 6) ? "#ff00ff" : "#bc42f5"; if(!s) localStorage.setItem('m_sex_' + getUid(), v); }
-        function updateCharCounter() { document.getElementById('char-limit').innerText = document.getElementById('ich-desc').value.length + "/2000"; }
-        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = (e) => { const p = document.getElementById('char-preview'); if(p) { p.src = e.target.result; p.style.display = 'block'; } const p2 = document.getElementById('my-char-preview'); if(p2) { p2.src = e.target.result; p2.style.display = 'block'; } const p3 = document.getElementById('exc-char-preview'); if(p3) { p3.src = e.target.result; p3.style.display = 'block'; } }; r.readAsDataURL(i.files[0]); } }
-        async function modAdmin(a) { const id = document.getElementById('ia-id').value; if(!id) return; await fetch('/api/owner/set-admin', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ target_id: id, status: a === 'add' }) }); tg.showAlert("Updated!"); }
-        async function savePrices(type) { const prefix = type === 'shards' ? 'pr-sh-' : 'pr-sub-'; await fetch('/api/owner/set-price', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ item_id: type, stars: document.getElementById(prefix+'stars').value, ton: document.getElementById(prefix+'ton').value }) }); tg.showAlert("Saved!"); }
-        function toggleTaskInput() { document.getElementById('it-rew').style.display = (document.getElementById('it-rtype').value === 'shards') ? 'block' : 'none'; }
-        
-        async function openMyCharsPanel() { openPanel('p-my-chars'); loadMyChars(); }
-        async function loadMyChars() {
-            const list = document.getElementById('my-chars-list'); list.innerHTML = '<div class="loader"></div>';
-            try {
-                const res = await fetch('/api/user/my-chars', { headers: getAuthHeaders() }); myCharsList = await res.json();
-                if(myCharsList.length === 0) { list.innerHTML = "<div style='grid-column:span 2;text-align:center;color:#888;'>У вас еще нет своих персонажей.</div>"; return; }
-                const cards = await Promise.all(myCharsList.map(async c => {
-                    let tName = await neuroTranslate(c.name, currentLang); let badgeHTML = "";
-                    if (c.char_type === 'exclusive') { badgeHTML = `<div class="status-badge bg-exclusive">EXCLUSIVE ✨</div>`; } 
-                    else { let bClass = c.status === 'private' ? 'bg-private' : c.status === 'pending' ? 'bg-pending' : 'bg-public'; let bText = c.status === 'private' ? 'ПРИВАТНЫЙ' : c.status === 'pending' ? 'МОДЕРАЦИЯ' : 'ОПУБЛИКОВАН'; badgeHTML = `<div class="status-badge ${bClass}">${bText}</div>`; }
-                    return `<div class="char-card" onclick="openMyCharOpts(${c.id})">${badgeHTML}<img src="${c.photo}"><div class="char-card-info"><div class="char-card-name">${tName}</div><div class="char-card-tags">${c.age} лет | ${c.gender === 'm' ? "Муж" : "Жен"}</div></div></div>`;
-                }));
-                list.innerHTML = cards.join('');
-            } catch(e) { list.innerHTML = "Ошибка"; }
-        }
-        
-        function openMyCharOpts(id) { const c = myCharsList.find(x => x.id === id); if(!c) return; if(!allChars.find(x => x.id === id)) allChars.push(c); openDossier(id); }
-        
-        function openCreateMyChar(id = null) {
-            if(id) {
-                const c = myCharsList.find(x => x.id === id); document.getElementById('imy-id').value = c.id; document.getElementById('imy-name').value = c.name; document.getElementById('imy-age').value = c.age; document.getElementById('imy-desc').value = c.desc; document.getElementById('my-char-preview').src = c.photo; document.getElementById('my-char-preview').style.display = 'block'; setMyCharGender(c.gender); document.getElementById('my-char-title').innerText = "РЕДАКТИРОВАТЬ"; document.getElementById('my-char-cost-info').style.display = 'none'; currentCustomCost = 0;
-            } else {
-                document.getElementById('imy-id').value = ""; document.getElementById('imy-name').value = ""; document.getElementById('imy-age').value = ""; document.getElementById('imy-desc').value = ""; document.getElementById('my-char-preview').src = "#"; document.getElementById('my-char-preview').style.display = 'none'; setMyCharGender('m'); document.getElementById('my-char-title').innerText = "СОЗДАТЬ ПЕРСОНАЖА";
-                let sub = (userData.subscription || "FREE").trim().toUpperCase(); let costInfo = document.getElementById('my-char-cost-info');
-                if(getUid() === OID) { currentCustomCost = 0; costInfo.innerText = "Стоимость: 0 🌙 (Вы Овнер)"; costInfo.style.color = "#00ff00"; } 
-                else if(sub !== "FREE") { let discount = Math.floor(Math.random() * 41) + 15; currentCustomCost = 100 - discount; costInfo.innerHTML = `ВАША СКИДКА: <b style="color:yellow;">${discount}%</b>! Стоимость: <b style="color:yellow;">${currentCustomCost} 🌙</b>`; costInfo.style.color = "#00ff00"; } 
-                else { currentCustomCost = 100; costInfo.innerText = "Стоимость: 100 🌙 (Купите подписку для скидки!)"; costInfo.style.color = "#ffaa00"; }
-                costInfo.style.display = 'block';
+        // Закрытие выпадающих меню при клике вне их
+        document.addEventListener('click', () => {
+            if (openDropdownId !== null) {
+                let el = document.getElementById('chat-dd-' + openDropdownId);
+                if (el) el.style.display = 'none';
+                let item = document.getElementById('chat-item-' + openDropdownId);
+                if (item) item.style.zIndex = 1;
+                openDropdownId = null;
             }
-            openPanel('p-create-my-char');
-        }
-        
-        function setMyCharGender(g) { myCharGender = g; document.getElementById('my-cg-m').classList.toggle('active', g === 'm'); document.getElementById('my-cg-f').classList.toggle('active', g === 'f'); }
-        
-        async function saveMyChar() {
-            const id = document.getElementById('imy-id').value; const n = document.getElementById('imy-name').value; const a = document.getElementById('imy-age').value; const d = document.getElementById('imy-desc').value; let img = document.getElementById('my-char-preview').src; const fileInput = document.getElementById('my-char-file');
-            if(!n || img.includes('#')) return tg.showAlert("Заполните Имя и добавьте фото!");
-            if(!id && getUid() !== OID && userData.shards < currentCustomCost) return tg.showAlert(`Недостаточно осколков! Нужно: ${currentCustomCost} 🌙`);
-            if(fileInput.files && fileInput.files[0]) { const btn = document.querySelector('[onclick="saveMyChar()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА..."; const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt; if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!"); }
-            const charData = { name: n, age: a, gender: myCharGender, desc: d, photo: img };
-            if(id) { await fetch('/api/user/edit-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: parseInt(id), charData }) }); tg.showAlert("Обновлено!"); } 
-            else {
-                if(getUid() !== OID) updateBalanceUI(userData.shards - currentCustomCost);
-                const res = await fetch('/api/user/create-custom-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData, cost: currentCustomCost }) }); const data = await res.json();
-                if(res.ok) { tg.showAlert(data.message); if(getUid()!==OID) updateBalanceUI(data.new_balance); } else { if(getUid() !== OID) updateBalanceUI(userData.shards + currentCustomCost); return tg.showAlert(data.error); }
-            }
-            back(); loadMyChars();
-        }
+        });
 
-        // === МАГИЯ СОЗДАНИЯ ЭКСКЛЮЗИВА ===
-        function openCreateExclusiveChar() {
-            document.getElementById('iexc-name').value = ""; document.getElementById('iexc-age').value = ""; document.getElementById('iexc-desc').value = ""; document.getElementById('exc-char-preview').src = "#"; document.getElementById('exc-char-preview').style.display = 'none'; setExcCharGender('m');
-            let sub = (userData.subscription || "FREE").trim().toUpperCase(); let costInfo = document.getElementById('exc-char-cost-info');
-            if(getUid() === OID) { currentExcStarCost = 0; costInfo.innerText = "Стоимость: 0 Stars (Вы Овнер)"; } 
-            else if(sub === 'ULTRA') { currentExcStarCost = 5; costInfo.innerText = "Стоимость: 5 ⭐️ (Ultra Скидка!)"; } 
-            else if(sub === 'VIP') { currentExcStarCost = 15; costInfo.innerText = "Стоимость: 15 ⭐️ (VIP Скидка!)"; } 
-            else if(sub === 'PRO') { currentExcStarCost = 25; costInfo.innerText = "Стоимость: 25 ⭐️ (PRO Скидка!)"; } 
-            else if(sub === 'PREMIUM') { currentExcStarCost = 35; costInfo.innerText = "Стоимость: 35 ⭐️ (Premium Скидка!)"; } 
-            else { currentExcStarCost = 50; costInfo.innerText = "Стоимость: 50 ⭐️ (Без подписки)"; }
-            openPanel('p-create-exclusive-char');
-        }
+        // Запуск приложения
+        initApp();
 
-        function setExcCharGender(g) { excCharGender = g; document.getElementById('exc-cg-m').classList.toggle('active', g === 'm'); document.getElementById('exc-cg-f').classList.toggle('active', g === 'f'); }
-
-        async function saveExclusiveChar() {
-            const n = document.getElementById('iexc-name').value; const a = document.getElementById('iexc-age').value; const d = document.getElementById('iexc-desc').value; let img = document.getElementById('exc-char-preview').src; const fileInput = document.getElementById('exc-char-file');
-            if(!n || img.includes('#')) return tg.showAlert("Заполните Имя и добавьте фото!");
-            if(fileInput.files && fileInput.files[0]) { const btn = document.querySelector('[onclick="saveExclusiveChar()"]'); let oldTxt = btn.innerText; btn.innerText = "ЗАГРУЗКА..."; const cloudUrl = await uploadToCloud(fileInput.files[0]); btn.innerText = oldTxt; if(cloudUrl) img = cloudUrl; else return tg.showAlert("Ошибка облака!"); }
-            const charData = { name: n, age: a, gender: excCharGender, desc: d, photo: img };
-            tg.showAlert("Формируем счет...");
-            try {
-                const res = await fetch('/api/user/prepare-exclusive-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ charData }) }); const data = await res.json();
-                if(res.ok) {
-                    if (data.invoice_url) { tg.openInvoice(data.invoice_url, function(status) { if (status === 'paid') { tg.showAlert("Оплата прошла! Эксклюзив опубликован!"); back(); loadMyChars(); } }); } 
-                    else if (data.success) { tg.showAlert(data.message); back(); loadMyChars(); }
-                } else { tg.showAlert(data.error); }
-            } catch(e) { tg.showAlert("Ошибка сервера"); }
-        }
-        
-        async function publishMyChar() { tg.showConfirm("Отправить на модерацию? (Админы проверят)", async (yes) => { if(yes) { const res = await fetch('/api/user/submit-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: activeCharId }) }); const data = await res.json(); if(res.ok) { tg.showAlert(data.message); back(); loadMyChars(); } else tg.showAlert(data.error); } }); }
-
-        function openModPanel() { openPanel('p-m-mod'); loadPendingChars(); }
-        
-        async function loadPendingChars() {
-            const list = document.getElementById('mod-list-container'); list.innerHTML = '<div class="loader"></div>';
-            try {
-                const res = await fetch('/api/admin/get-pending-chars?_t=' + Date.now(), { headers: getAuthHeaders() }); const chars = await res.json();
-                if (chars.error) { list.innerHTML = `<div style='color:red;'>${chars.error}</div>`; return; }
-                if(!chars || chars.length === 0) { list.innerHTML = "<div style='text-align:center;color:#888;'>Нет заявок на модерацию.</div>"; return; }
-                list.innerHTML = chars.map(c => `<div class="info-card"><div style="font-weight:bold; color:#f39c12; margin-bottom:5px;">${c.name} (${c.age}, ${c.gender})</div><div style="font-size:12px; color:#aaa; margin-bottom:10px;">${c.desc}</div><img src="${c.photo}" style="width:100%; max-height:150px; object-fit:contain; margin-bottom:10px;"><div style="display:flex; gap:10px;"><div class="term-btn" style="flex:1; border-color:#00ff00; padding:10px;" onclick="modApprove(${c.id})">ОДОБРИТЬ</div><div class="term-btn" style="flex:1; border-color:#ff4444; padding:10px;" onclick="modReject(${c.id})">ОТКЛОНИТЬ</div></div></div>`).join('');
-            } catch(e) { list.innerHTML = "Ошибка связи с сервером"; }
-        }
-        
-        async function modApprove(id) { await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'approve', reason: 'Одобрено' }) }); tg.showAlert("Одобрено!"); loadPendingChars(); }
-        async function modReject(id) { const reason = prompt("Причина отказа (пойдет в ЛС юзеру):", "Не соответствует правилам."); if(reason === null) return; await fetch('/api/admin/moderate-char', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ char_id: id, action: 'reject', reason: reason }) }); tg.showAlert("Отклонено!"); loadPendingChars(); }
-
-        window.onload = init;
     </script>
 </body>
 </html>
