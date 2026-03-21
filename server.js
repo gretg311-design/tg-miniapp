@@ -6,7 +6,10 @@ const crypto = require('crypto');
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
-app.use(cors({ origin: '*' })); // Для работы без сервера (с GitHub Pages)
+app.use(cors());
+
+// 🔥 ВОТ ОНА! Я вернул эту строчку. Теперь Vercel снова раздает твой новый index.html из папки public!
+app.use(express.static(path.join(__dirname, 'public')));
 
 // === РУБИЛЬНИК БОТА ===
 const IS_TEST_SERVER = false; // false = пишет в основной канал
@@ -263,7 +266,6 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
         let uName = (user_name && user_name !== "...") ? user_name : "Собеседник"; 
         let uGender = (user_gender === 'Female' || user_gender === 'Женский' || user_gender === 'f') ? "Женский" : "Мужской"; 
         
-        // 🔥 ПРОМПТ С ЖЕСТКИМ ЗАПРЕТОМ НА ЭХО 🔥
         let systemPrompt = `[РОЛЕВАЯ ИГРА]
 Ты играешь роль персонажа, описанного ниже. Ты НЕ искусственный интеллект, ты живая личность со своими мыслями.
 
@@ -306,7 +308,7 @@ app.post('/api/chat', checkTgAuth, async (req, res) => {
                 temperature: 0.85, 
                 max_tokens: 300, 
                 top_p: 0.95,
-                repetition_penalty: 1.15 // 🔥 ВОТ ОН, УДАР ПО ПОПУГАЮ! Эта настройка запрещает нейросети повторять текст
+                repetition_penalty: 1.15
             }) 
         });
         
